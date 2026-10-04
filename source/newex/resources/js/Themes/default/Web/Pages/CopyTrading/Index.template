@@ -1,0 +1,181 @@
+<app-layout>
+    <Head>
+        <title>{{ $t("Copy Trading") }}</title>
+        <meta name="description" content="Copy trading strategies and selected futures orders">
+    </Head>
+
+    <div class="copy-page">
+        <div class="copy-shell">
+
+            <div v-if="unpublishedFollowing.length" class="copy-data-notice">
+                <p>{{ $t('These followed profiles are no longer publicly listed. You can still stop following them.') }}</p>
+                <div v-for="trader in unpublishedFollowing" :key="trader.id" class="flex items-center justify-between py-2">
+                    <span>{{ trader.name }}</span><button type="button" class="copy-card-action" @click="toggleFollow(trader)">{{ $t('取消跟单') }}</button>
+                </div>
+            </div>
+            <div class="copy-topbar">
+                <div class="copy-product-tabs">
+                    <button type="button" class="copy-product-tab copy-product-tab--active">
+                        {{ $t("合约") }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="copy-hero">
+                <div class="copy-balance">
+                    <div class="copy-balance-label">{{ $t("总跟单余额 (USDT)") }}</div>
+                    <div class="copy-balance-value">{{ formatMoney(safePortfolio.total_balance_usdt) }}</div>
+                    <div class="copy-balance-sub">
+                        {{ $t("未实现总盈亏 (USDT)") }}
+                        <span :class="portfolioValueClass(safePortfolio.unrealized_pnl_usdt)">
+                            {{ signedMoney(safePortfolio.unrealized_pnl_usdt) }}
+                        </span>
+                    </div>
+
+                    <div class="copy-balance-stats">
+                        <div class="copy-balance-stat">
+                            <span>{{ $t("已开启订单") }}</span>
+                            <strong>{{ safePortfolio.active_orders_count || 0 }}</strong>
+                        </div>
+                        <div class="copy-balance-stat">
+                            <span>{{ $t("已用保证金") }}</span>
+                            <strong>{{ formatMoney(safePortfolio.used_margin_usdt) }}</strong>
+                        </div>
+                        <div class="copy-balance-stat">
+                            <span>{{ $t("浮动收益率") }}</span>
+                            <strong :class="portfolioValueClass(safePortfolio.unrealized_pnl_percent)">
+                                {{ signedPercent(safePortfolio.unrealized_pnl_percent) }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <button type="button" class="copy-manage-btn" @click="scrollToPortfolio">
+                        {{ $t("跟单管理") }}
+                    </button>
+                </div>
+            </div>
+
+            <section class="copy-portfolio" ref="portfolioPanel">
+                <div class="copy-portfolio-head">
+                    <div>
+                        <h2 class="copy-portfolio-title">{{ $t("已开启跟单订单") }}</h2>
+                        <p class="copy-portfolio-sub">
+                            {{ $t("保证金 / 未实现盈亏") }}
+                        </p>
+                    </div>
+                    <div class="copy-portfolio-count">
+                        {{ safePortfolio.total_orders_count || 0 }} {{ $t("笔") }}
+                    </div>
+                </div>
+
+                <div class="copy-position-table" v-if="hasPortfolioOrders">
+                    <div class="copy-position-row copy-position-head">
+                        <div>{{ $t("交易对") }}</div>
+                        <div>{{ $t("方向") }}</div>
+                        <div>{{ $t("杠杆") }}</div>
+                        <div>{{ $t("已用保证金") }}</div>
+                        <div>{{ $t("未实现盈亏") }}</div>
+                        <div>{{ $t("收益率") }}</div>
+                        <div>{{ $t("开仓时间") }}</div>
+                    </div>
+
+                    <div
+                        v-for="order in portfolioOrders"
+                        :key="'portfolio-order-' + order.id"
+                        class="copy-position-row"
+                    >
+                        <div data-label="交易对">
+                            <strong class="copy-position-market">{{ order.market }}</strong>
+                            <span class="copy-position-trader">{{ order.trader_name || $t("跟单订单") }}</span>
+                        </div>
+                        <div data-label="方向">
+                            <span :class="orderSideClass(order)">
+                                {{ order.status_label }} · {{ order.side_label }}
+                            </span>
+                        </div>
+                        <div data-label="杠杆">{{ order.leverage }}X</div>
+                        <div data-label="已用保证金">{{ formatMoney(order.used_margin_usdt) }} USDT</div>
+                        <div data-label="未实现盈亏" :class="portfolioValueClass(order.unrealized_pnl_usdt)">
+                            {{ signedMoney(order.unrealized_pnl_usdt) }} USDT
+                        </div>
+                        <div data-label="收益率" :class="portfolioValueClass(order.pnl_percent)">
+                            {{ signedPercent(order.pnl_percent) }}
+                        </div>
+                        <div data-label="开仓时间">{{ order.opened_at || '-' }}</div>
+                    </div>
+                </div>
+
+                <div class="copy-empty copy-empty--portfolio" v-else>
+                    {{ $t("暂无已开启跟单订单") }}
+                </div>
+            </section>
+
+            <div class="copy-nav-row">
+                <div class="copy-nav-tabs">
+                    <button
+                        v-for="tab in navTabs"
+                        :key="'copy-tab-' + tab.key"
+                        type="button"
+                        :class="activeTab === tab.key ? 'copy-nav-tab copy-nav-tab--active' : 'copy-nav-tab'"
+                        @click="setActiveTab(tab.key)"
+                    >
+                        {{ tab.label }}
+                    </button>
+                </div>
+
+                <button type="button" class="copy-daily-btn">
+                    {{ $t("每日精选") }}
+                </button>
+            </div>
+
+            <template v-if="traderSections.length > 0">
+                <section
+                    v-for="section in traderSections"
+                    :key="'copy-section-' + section.label"
+                    class="copy-section"
+                >
+                    <div class="copy-section-head">
+                        <h2 class="copy-section-title">{{ section.label }}</h2>
+                        <button type="button" class="copy-more">
+                            {{ $t("更多") }}
+                        </button>
+                    </div>
+
+                    <div class="copy-card-grid">
+                        <article
+                            v-for="trader in section.traders"
+                            :key="'copy-trader-' + trader.id"
+                            class="copy-trader-card"
+                            role="button"
+                            tabindex="0"
+                            @click="openTrader(trader)"
+                            @keydown.enter="openTrader(trader)"
+                        >
+                            <div class="copy-card-head">
+                                <div class="copy-card-name">{{ trader.name }}</div>
+
+                            </div>
+
+
+
+
+
+                            <button
+                                type="button"
+                                :class="followButtonClass(trader)"
+                                :disabled="trader.is_self"
+                                @click.stop="toggleFollow(trader)"
+                            >
+                                {{ followButtonText(trader) }}
+                            </button>
+                        </article>
+                    </div>
+                </section>
+            </template>
+
+            <div class="copy-empty" v-else>
+                {{ $t("暂无跟单策略") }}
+            </div>
+        </div>
+    </div>
+</app-layout>

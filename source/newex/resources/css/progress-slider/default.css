@@ -1,0 +1,7 @@
+.module-orderbook__list .__rail-is-vertical {
+    right: 0!important;
+}
+
+.module-orderbook__list.full-height {
+    height: 360px;
+}

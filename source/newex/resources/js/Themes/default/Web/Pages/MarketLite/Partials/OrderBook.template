@@ -1,0 +1,80 @@
+<!-- MODULE ORDERBOOK START -->
+<div class="module module-orderbook">
+
+    <div class="module-container">
+        <div class="module-container__row">
+
+            <!-- module orderbook sell start -->
+            <div class="module-orderbook__sell module-container__block">
+
+                <!-- module orderbook title start -->
+                <div class="module-orderbook__title">
+                    <div class="module-orderbook__title-price">{{ $t('Price') }}</div>
+                    <div class="module-orderbook__title-amount">{{ $t('Amount') }}</div>
+                    <div class="module-orderbook__title-total">{{ $t('Total') }}</div>
+                </div>
+                <!-- module orderbook title  end -->
+
+                <!-- module orderbook list  start -->
+                <div v-if="asks.length" class="module-orderbook__list">
+                    <div v-for="ask in asks" @click="handleOrder(ask, 'sell')" class="module-orderbook__list-item">
+                        <div class="module-orderbook__list-item__price">
+                            <span class="color-sell">{{ decimal_format(ask.price, market.quote_precision, market.quote_currency_type) }}</span>
+                        </div>
+                        <div class="module-orderbook__list-item__amount">{{ decimal_format(ask.quantity, market.base_precision) }}</div>
+                        <div class="module-orderbook__list-item__total">{{ decimal_format(parseFloat(ask.quantity) * parseFloat(ask.price), market.quote_precision) }}</div>
+                        <div class="module-orderbook__list-item__progressbar" :style="{'width' : calculateAmountBar(ask, 'sell')}"></div>
+                    </div>
+                </div>
+                <!-- module orderbook list  end -->
+                <!-- module orderbook empty  start -->
+                <div v-else class="module-orderbook__empty">
+                    <p>{{ $t('No sell orders yet') }}</p>
+                </div>
+                <!-- module orderbook empty  end -->
+            </div>
+            <!-- module orderbook sell end -->
+
+                <!-- module orderbook title start -->
+
+                <!-- module orderbook buy start -->
+                <div class="module-orderbook__buy module-container__block">
+
+                    <div class="module-orderbook__title">
+                        <div class="module-orderbook__title-price mob-show">{{ $t('Price') }}</div>
+                        <div class="module-orderbook__title-amount mob-show">{{ $t('Amount') }}</div>
+
+                        <div class="module-orderbook__title-price mob-hide">
+                            <span :class="{'color-buy' : market_stats.change > 0, 'color-sell' : market_stats.change < 0}">{{ decimal_format(market_stats.last, market.quote_precision, market.quote_currency_type) }}</span>
+                        </div>
+                    </div>
+                    <!-- module orderbook title  end -->
+
+                    <!-- module orderbook list  start -->
+                    <div v-if="bids.length > 0" class="module-orderbook__list">
+                        <div v-for="bid in bids" @click="handleOrder(bid, 'buy')" class="module-orderbook__list-item">
+                            <div class="module-orderbook__list-item__price">
+                                <span class="color-buy">{{ decimal_format(bid.price, market.quote_precision, market.quote_currency_type) }}</span>
+                            </div>
+                            <div class="module-orderbook__list-item__amount">{{ decimal_format(bid.quantity, market.base_precision) }}</div>
+                            <div class="module-orderbook__list-item__total">{{ decimal_format(parseFloat(bid.quantity) * parseFloat(bid.price), market.quote_precision) }}</div>
+                            <div class="module-orderbook__list-item__progressbar" :style="{'width' : calculateAmountBar(bid, 'buy')}"></div>
+                        </div>
+                    </div>
+                    <!-- module orderbook list  end -->
+
+                    <!-- module orderbook empty buy start -->
+                    <div v-else class="module-orderbook__empty-buy">
+                        <p>{{ $t('No buy orders yet') }}</p>
+                    </div>
+                    <!-- module orderbook empty buy end -->
+                </div>
+                <!-- module orderbook buy end -->
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<!-- MODULE ORDERBOOK END -->

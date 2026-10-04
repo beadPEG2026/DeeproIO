@@ -1,0 +1,26 @@
+
+/** user status start */
+.user-status {
+
+    // &__row {
+    //     outline: 1px solid #F00;
+    // }
+
+    &__item {
+        text-align: center;
+
+        padding: 2rem 0;
+    }
+
+    &__title {
+        margin-bottom: 1rem;
+        font-size: var(--h2-font__size);
+        color: var(--first-text-color);
+    }
+    
+    p {
+        font-size: var(--default-font__size);
+    }
+}
+/** user status end */
+

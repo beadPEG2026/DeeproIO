@@ -1,0 +1,314 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" :section="reportSection"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="'/exchange-control-panel/users/' + filters.referrer + '/edit'" v-if="filters.referrer">{{ $t("返回 -") }} </Link> {{ pageTitle }}
+    </h1>
+
+<div class="mb-6 flex flex-wrap items-center justify-between">
+    <div class="flex items-center flex-1 mr-4 flex-wrap gap-3">
+        <search-filter
+            :filter="false"
+            v-model="form.search"
+            class="w-full max-w-md focus:outline-none"
+            @reset="reset"
+        ></search-filter>
+
+        <div class="min-w-[180px]">
+            <themed-select
+                v-model="form.market"
+                class="w-full border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500"
+            >
+                <option value="">{{ $t("全部交易对") }}</option>
+                <option
+                    v-for="market in markets"
+                    :key="market"
+                    :value="market"
+                >
+                    {{ market }}
+                </option>
+            </themed-select>
+        </div>
+
+        <div v-if="currentStatus === 'history'" class="min-w-[160px]">
+            <themed-select
+                v-model="form.status"
+                class="w-full border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500"
+            >
+                <option value="history">{{ $t("全部历史") }}</option>
+                <option value="closed">{{ $t("已关闭") }}</option>
+                <option value="liquidated">{{ $t("已强平") }}</option>
+            </themed-select>
+        </div>
+
+        <div v-else class="min-w-[120px]">
+            <span class="inline-flex items-center h-10 px-4 rounded bg-green-50 text-green-700 text-sm font-semibold">
+                {{ $t("进行中") }}
+            </span>
+        </div>
+
+        <div class="period-block hidden md:block min-w-md">
+            <t-datepicker
+                :monthsPerView="2"
+                v-model="form.period"
+                :range="true"
+                :timepicker="false"
+                dateFormat="Y-m-d"
+                userFormat="Y-m-d"
+                :weekStart="1"
+            />
+        </div>
+
+        <div class="min-w-[120px]">
+            <themed-select
+                v-model="form.per_page"
+                class="w-full border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500"
+            >
+                <option :value="10">{{ $t("10条") }}</option>
+                <option :value="50">{{ $t("50条") }}</option>
+                <option :value="100">{{ $t("100条") }}</option>
+                <option :value="500">{{ $t("500条") }}</option>
+            </themed-select>
+        </div>
+    </div>
+
+    <button
+        @click="exportCsv"
+        class="btn-blue inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none mt-4 md:mt-0"
+    >
+        {{ $t ? $t('导出') : $t("导出") }}
+    </button>
+</div>
+
+    <div v-if="currentStatus === 'active'" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded shadow px-5 py-4">
+            <div class="text-xs text-gray-500 mb-1">{{ $t("当前开仓人数") }}</div>
+            <div class="text-2xl font-bold text-gray-900">{{ activeUserCount }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ $t("同一用户多笔开仓只算 1 人") }}</div>
+        </div>
+
+        <div class="bg-white rounded shadow px-5 py-4">
+            <div class="text-xs text-gray-500 mb-1">{{ $t("当前开仓订单数") }}</div>
+            <div class="text-2xl font-bold text-gray-900">{{ activeOrderCount }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ $t("按当前筛选条件统计") }}</div>
+        </div>
+
+        <div class="bg-white rounded shadow px-5 py-4">
+            <div class="text-xs text-gray-500 mb-1">{{ $t("当前开仓金额") }}</div>
+            <div class="text-2xl font-bold text-gray-900">{{ math_formatter(activePositionAmountTotal, 8) }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ $t("已排除虚拟账户") }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("账户编号") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("客户邮箱") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("上级") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("仓位") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("开仓价格") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("强平价格") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("盈亏") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("仓位数量") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("杠杆") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("释放金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("开仓时间") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("平仓时间") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr
+                v-for="transaction in transactions.data"
+                :key="transaction.id"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <button
+                        type="button"
+                        class="px-3 py-2 flex items-center text-left text-indigo-600 hover:text-indigo-800 focus:outline-none"
+                        style="max-width: 340px; white-space: normal; word-break: break-all;"
+                        @click="doCopy(transaction.id)"
+                    >
+                        {{ transaction.id }}
+                    </button>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.user && transaction.user.referral_code ? transaction.user.referral_code : 'N/A' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ getCustomerNickname(transaction) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-3 py-2 flex items-center gap-2">
+                        <span>{{ getSuperiorName(transaction) }}</span>
+
+                        <button
+                            v-if="hasSuperiorChain(transaction)"
+                            type="button"
+                            class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 focus:outline-none"
+                            @click="openSuperiorModal(transaction)"
+                        >
+                            {{ $t("查看上级") }}
+                        </button>
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.market.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge class="mr-2" :type="transaction.is_long ? 'green' : 'red'">
+                            {{ transaction.is_long ? $t("多头") : $t("空头") }}
+                            <font-awesome-icon :icon="transaction.is_long ? 'arrow-up' : 'arrow-down'" class="ml-1" />
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.price }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(transaction.liquidation_price, 2) }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <badge class="mr-2" :type="livePnlType(transaction)">
+                        {{ math_formatter(calculateLivePnl(transaction), 3) }}%
+                    </badge>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.balance }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(transaction.leverage, 2) }}X
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.released_amount }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="transaction.status == 'closed'">
+                            <badge class="mr-2" :type="'orange'">
+                                {{ $t("已关闭") }}
+                            </badge>
+                        </template>
+                        <template v-else-if="transaction.status == 'liquidated'">
+                            <badge class="mr-2" :type="'red'">
+                                {{ $t("已强平") }}
+                            </badge>
+                        </template>
+                        <template v-else>
+                            <badge class="mr-2" :type="'green'">
+                                {{ $t("进行中") }}
+                            </badge>
+                        </template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ getOpenTime(transaction) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ getCloseTime(transaction) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-3 py-2 flex items-center">
+                        <button
+                            v-if="canManageFutures && transaction.status !== 'closed' && transaction.status !== 'liquidated'"
+                            @click="forceLiquidate(transaction)"
+                            class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded bg-red-600 text-white hover:bg-red-700 focus:outline-none"
+                        >
+                            {{ $t("强制平仓") }}
+                        </button>
+
+                        <span
+                            v-else
+                            class="text-gray-400 text-sm"
+                        >
+                            -
+                        </span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr v-if="transactions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到交易记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="transactions.links" />
+
+    <div
+        v-if="showSuperiorModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-4"
+        @click.self="closeSuperiorModal"
+    >
+        <div class="bg-white rounded shadow-lg w-full max-w-3xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b">
+                <h3 class="font-bold text-lg">{{ $t("所有上级") }}</h3>
+
+                <button type="button" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" @click="closeSuperiorModal">
+                    ×
+                </button>
+            </div>
+
+            <div class="p-5 overflow-x-auto">
+                <table class="w-full whitespace-no-wrap">
+                    <tr class="text-left font-bold">
+                        <th class="px-3 py-2">{{ $t("层级") }}</th>
+                        <th class="px-3 py-2">{{ $t("上级ID") }}</th>
+                        <th class="px-3 py-2">{{ $t("账号") }}</th>
+                        <th class="px-3 py-2">{{ $t("昵称") }}</th>
+                    </tr>
+
+                    <tr v-for="item in superiorRows" :key="'superior-' + item.level + '-' + item.id">
+                        <td class="border-t px-3 py-2">{{ item.level }}</td>
+                        <td class="border-t px-3 py-2">{{ item.id || '-' }}</td>
+                        <td class="border-t px-3 py-2">{{ item.account || '-' }}</td>
+                        <td class="border-t px-3 py-2">{{ item.nickname || '-' }}</td>
+                    </tr>
+
+                    <tr v-if="superiorRows.length === 0">
+                        <td class="border-t px-3 py-2 text-gray-500" colspan="4">{{ $t("暂无上级数据。") }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</app-layout>

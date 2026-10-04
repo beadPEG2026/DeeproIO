@@ -1,0 +1,334 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="finances"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("财务报表") }}
+    </h1>
+
+    <div class="mb-6 flex flex-wrap items-center justify-between">
+        <div class="flex items-center flex-1 mr-4">
+
+            <div class="pr-6 pb-8 lg:w-1/2" v-if="!filters.referrer">
+                <label class="form-label d-block">{{ $t("报表：") }}</label>
+                <t-rich-select
+                    :options="types"
+                    v-model="form.type"
+                    placeholder="选择报表"
+                    value-attribute="id"
+                    text-attribute="name"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col ml-2 text-gray-800">
+                                <strong>{{ option.text }}</strong>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-select>
+            </div>
+
+            <div class="pr-6 pb-8 pt-1 lg:w-1/2 period-block hidden md:block min-w-md" v-if="!filters.referrer">
+                <label class="form-label d-block">{{ $t("周期：") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                />
+            </div>
+
+        </div>
+
+        <button @click="exportCsv" class="btn-blue inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none mt-4 md:mt-0">
+            {{ $t ? $t('导出') : $t("导出") }}
+        </button>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+
+        <table v-if="form.type == 'trades' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("交易收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("推荐收益") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("交易笔数") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("基础币种成交量") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("计价币种成交量") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.referrals, 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.basevolume, 8) }} {{ report.basesymbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.quotevolume, 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'deposits' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.volume, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'withdrawals' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提现金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提现收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提现笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.volume, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'fiat_deposits' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("法币充值金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("法币充值收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.volume, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'fiat_withdrawals' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("法币提现金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("法币提现收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提现笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.volume, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 8) }} {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'peer_trades' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("交易对") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("挂单方收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("吃单方收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("总收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("交易笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.maker_income, 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.taker_income, 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(parseFloat(report.maker_income) + parseFloat(report.taker_income), 8) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'options' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("交易对") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("下单笔数") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.pair }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 2) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+        <table v-if="form.type == 'futures' && form.period" class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("交易对") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("收入") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("持仓数量") }}</th>
+            </tr>
+            <tr v-for="report in reports" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.pair }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(report.income, 2) }} {{ report.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ report.total }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="!reports">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("暂无报表数据。") }}</td>
+            </tr>
+        </table>
+
+    </div>
+</app-layout>

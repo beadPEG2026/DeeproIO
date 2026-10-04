@@ -1,0 +1,131 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.cold_storage')">{{ $t("冷钱包") }}</Link>
+        - {{ subTitle }}
+    </h1>
+<p v-if="!twoFactorConfigured" class="mb-6"><Link href="/user/profile/2fa?lite=1">{{ $t('Set up authenticator') }} ↗</Link></p>
+<p class="mb-6">{{ $t('Blank cold addresses stay disabled. Configuration changes require independent approval.') }}</p>
+<div v-if="!showGoogleVerifyModal">
+    <div :class="{ 'pointer-events-none opacity-50': showGoogleVerifyModal }">
+        <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+            <form @submit.prevent="submit">
+                <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                    <div class="pr-6 pb-8 w-full">
+                        <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("冷钱包信息") }}</div>
+                    </div>
+
+                    <div class="pr-6 pb-8 w-full lg:w-full">
+
+                        <div class="pr-6 pb-8 w-full lg:w-1/2">
+                            <label class="form-label d-block">{{ $t("币种：") }}</label>
+                            <t-rich-select
+                                :options="currencies"
+                                v-model="form.currency_id"
+                                @input="$nextTick(changeAsset)"
+                                placeholder="选择币种"
+                                value-attribute="id"
+                                text-attribute="name"
+                            >
+                                <template slot="label" slot-scope="{ className, option, query }">
+                                    <div class="flex">
+                                        <div class="flex flex-col">
+                                            <span>{{ option.text }}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </t-rich-select>
+                            <div v-if="errors.currency_id" class="form-error text-red-400">{{ errors.currency_id }}</div>
+                        </div>
+
+                        <div class="pr-6 pb-8 w-full lg:w-1/2">
+                            <label class="form-label d-block">{{ $t("网络：") }}</label>
+                            <themed-select network v-model="form.network_id" :aria-label="$t('Network')" required :disabled="!form.currency_id || !selectableNetworks.length" :placeholder="$t(form.currency_id ? 'Select network' : 'Select an asset first')"><option v-for="n in selectableNetworks" :key="n.id" :value="n.id">{{ n.name }}</option></themed-select>
+                            <small v-if="form.currency_id && !selectableNetworks.length">{{ $t('No configurable network for this asset') }}</small>
+                            <div v-if="errors.network_id" class="form-error text-red-400">{{ errors.network_id }}</div>
+                        </div>
+
+                        <text-input
+                            v-model="form.cold_min_balance_amount"
+                            :error="errors.cold_min_balance_amount"
+                            class="pr-6 pb-8 w-full lg:w-1/2"
+                            label="金额（达到后转出）"
+                        />
+
+                        <text-input
+                            v-model="form.cold_transfer_amount"
+                            :error="errors.cold_transfer_amount"
+                            class="pr-6 pb-8 w-full lg:w-1/2"
+                            label="转账金额"
+                        />
+
+                        <text-input
+                            v-model="form.address"
+                            :error="errors.address"
+                            class="pr-6 pb-8 w-full lg:w-1/2"
+                            label="转入地址"
+                        />
+
+                        <text-input v-model="form.hot_reserve" :error="errors.hot_reserve" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('Hot wallet reserve')" />
+                        <text-input v-model="form.daily_limit" :error="errors.daily_limit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('Daily transfer limit')" />
+
+                        <jet-input-error :message="errors.status" class="mt-2" />
+                    </div>
+
+                </div>
+
+                <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                    <button
+                        v-if="isEdit"
+                        class="focus:outline-none text-red-600 hover:underline"
+                        tabindex="-1"
+                        type="button"
+                        @click="destroy"
+                    >
+                        {{ $t("删除冷钱包") }}
+                    </button>
+
+                    <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                        {{ $t(actionButtonTitle) }}
+                    </loading-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    <jet-dialog-modal :show="showGoogleVerifyModal">
+        <template #title>
+            {{ $t("Google 二次验证") }}
+        </template>
+
+        <template #content>
+            <div class="mb-3 text-sm text-gray-600">
+                {{ $t("请输入 Google 验证器中的 6 位验证码后继续操作冷钱包页面。") }}
+            </div>
+
+            <input
+                v-model="googleCode"
+                type="text"
+                maxlength="6"
+                class="w-full form-input rounded"
+                placeholder="请输入 6 位验证码"
+            />
+        </template>
+
+        <template #footer>
+            <jet-danger-button @click.native="verifyGoogleCode">
+                <svg
+                    v-if="verifyingGoogleCode"
+                    class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ $t("确认验证") }}
+            </jet-danger-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

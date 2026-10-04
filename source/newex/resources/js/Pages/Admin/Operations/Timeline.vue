@@ -1,0 +1,2 @@
+<template><section><h2>{{ $t('Processing history') }}</h2><p class="ops-muted">{{ $t('Recent recorded events only. Older business records may not have a complete event history.') }}</p><p v-if="!events || !events.length">{{ $t('No recorded events') }}</p><div v-else class="ops-timeline"><article v-for="(event,i) in events" :key="event.id || i"><ops-fields :record="event"/></article></div></section></template>
+<script>import OpsFields from './Fields';export default {components:{OpsFields},props:{events:Array}};</script>

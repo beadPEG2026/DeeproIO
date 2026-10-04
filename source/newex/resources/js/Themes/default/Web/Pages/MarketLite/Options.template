@@ -1,0 +1,144 @@
+<app-layout>
+    <Head>
+        <title>{{ market.data.name }} {{ $t('Market')}}</title>
+        <meta name="description" content="">
+    </Head>
+    <market-channel></market-channel>
+    <div class="trade">
+
+        <!-- trade head start -->
+        <div class="trade-head">
+            <div class="trade-head__row-left">
+                <div class="trade-head__block-top flex justify-between items-center">
+                    <markets-options-stats :quotes="quotes" :market="market.data"></markets-options-stats>
+
+                    <button
+                        type="button"
+                        class="risk-icon"
+                        @click="showRiskModal = true"
+                        :title="$t('Risk Notice')"
+                    >?</button>
+                </div>
+
+                <div class="module-head mobile-head-title">
+                    <div class="module-orderopen__navigation">
+                        <div
+                            @click="setFirstTab('chart')"
+                            :class="{'module-orderopen__navigation-active': mobileFirstTab == 'chart'}"
+                            class="module-orderopen__navigation-title"
+                        >
+                            <h4>{{ $t('Chart') }}</h4>
+                        </div>
+
+                        <div
+                            @click="setFirstTab('trades')"
+                            :class="{'module-orderopen__navigation-active': mobileFirstTab == 'trades'}"
+                            class="module-orderopen__navigation-title"
+                        >
+                            <h4>{{ $t('Trades') }}</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trade-head__block-middle" v-if="mobileFirstTab == 'orderbook' || mobileFirstTab == 'chart'">
+                    <div class="trade-head__right w-full-force chart-height" v-if="mobileFirstTab == 'chart' || !isMobile">
+                        <img v-if="!chartLoaded" width="50" class="loader-img" src="/images/loader.gif" />
+                        <iframe class="chartDisabled" :class="{'chartActive': chartLoaded}" @load="toggleIframe" scrolling="no"  :key="chartIteration" id="market-chart" :src="chartUrl" width="100%" height="300"></iframe>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="trade-head__row-right option-w-full-container">
+                <options-order-form :fee="fee" :market="market.data"></options-order-form>
+            </div>
+
+            <div class="trade-body__row mob-order-open option-no-padding">
+                <div style="position: relative; width: 100%;">
+                    <button
+                        type="button"
+                        @click="goTradeRecords"
+                        style="
+                            position: absolute;
+                            top: 0;
+                            left: 100px;
+                            z-index: 20;
+                            height: 55px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 0 12px;
+                            border: 0;
+                            background: transparent;
+                            color: var(--second-text-color);
+                            font: inherit;
+                            font-weight: 600;
+                            cursor: pointer;
+                            white-space: nowrap;
+                            line-height: 1;
+                        "
+                    >
+                        {{ $t('Trade Records') }}
+                    </button>
+
+                    <options-open-orders :market="market.data"></options-open-orders>
+                </div>
+                <options-trades v-if="mobileFirstTab == 'trades' || !isMobile" :market="market.data"></options-trades>
+            </div>
+
+        </div>
+        <!-- trade head  end -->
+
+        <orderbook-channel :market="market.data"></orderbook-channel>
+        <binance-socket :market="market.data" />
+    </div>
+
+    <div v-if="showRiskModal" class="risk-modal" @click.self="showRiskModal = false">
+        <div ref="riskDialog" class="risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">
+            <div class="risk-header">
+                <h4>{{ $t('options_risk_notice_title') }}</h4>
+                <button class="risk-close" :aria-label="$t('Close')" @click="showRiskModal = false">×</button>
+            </div>
+
+            <div class="risk-body">
+                <p>
+                    <strong>{{ $t('options_what_is_title') }}</strong>
+                </p>
+                <p>{{ $t('options_what_is_desc_1') }}</p>
+                <p>{{ $t('options_what_is_desc_2') }}</p>
+                <p>{{ $t('options_what_is_desc_3') }}</p>
+
+                <p>
+                    <strong>{{ $t('options_direction_title') }}</strong>
+                </p>
+                <p>{{ $t('options_direction_desc') }}</p>
+
+                <p>
+                    <strong>{{ $t('options_settlement_title') }}</strong>
+                </p>
+                <p>{{ $t('options_settlement_desc') }}</p>
+
+                <p>
+                    <strong>{{ $t('options_profit_loss_title') }}</strong>
+                </p>
+                <p>{{ $t('options_profit_loss_desc') }}</p>
+
+                <p>
+                    <strong>{{ $t('options_price_volatility_title') }}</strong>
+                </p>
+                <p>{{ $t('options_price_volatility_desc') }}</p>
+
+                <p>
+                    <strong>{{ $t('options_beginner_reminder_title') }}</strong>
+                </p>
+                <p>{{ $t('options_beginner_reminder_desc') }}</p>
+            </div>
+
+            <div class="risk-footer">
+                <button class="risk-confirm" @click="showRiskModal = false">
+                    {{ $t('I Understand') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

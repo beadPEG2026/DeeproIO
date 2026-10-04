@@ -1,0 +1,52 @@
+
+/** tfood start */
+.table-result {
+
+    &__notfound {
+        width: 100%;
+        font-size: 0.90rem;
+        text-align: center;
+        margin: 0 auto;
+        padding: 6rem 0;
+
+        &-icon {
+            display: inline-block;
+
+            margin-bottom: 0.30rem;
+
+            width: 60px;
+            height: 60px;
+        }
+
+        &-color {
+            stroke: var(--second-text-color);
+            stroke-width: 1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .color-yellow {
+            stroke: var(--yellow-color);
+        }
+
+        &-text {
+            display: flex;
+            justify-content: center;
+            color: var(--second-text-color);
+
+            a {
+                display: block;
+                margin: 0 0.40rem;
+                color: var(--yellow-color);
+
+                &:hover {
+                    text-decoration: underline;
+                }
+
+            }
+        }
+
+    }
+
+}
+/** tfood end */

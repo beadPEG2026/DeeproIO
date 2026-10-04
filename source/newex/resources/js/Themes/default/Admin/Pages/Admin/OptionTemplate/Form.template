@@ -1,0 +1,127 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.options.templates')">{{ $t("期权模板") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("模板信息") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("市场：") }}</label>
+                    <t-rich-select
+                        :options="markets"
+                        v-model="form.market_id"
+                        placeholder="选择市场"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.market_id" class="form-error text-red-400">{{ errors.market_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("周期：") }}</label>
+                    <t-rich-select
+                        :options="[
+                            {'id': '1', 'name': '30秒 - 5%'},
+                            {'id': '2', 'name': '60秒 - 10%'},
+                            {'id': '3', 'name': '90秒 - 15%'},
+                            {'id': '4', 'name': '120秒 - 20%'},
+                            {'id': '5', 'name': '180秒 - 25%'}
+                        ]"
+                        v-model="form.period"
+                        placeholder="选择周期"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.period" class="form-error text-red-400">{{ errors.period }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("类型：") }}</label>
+                    <t-rich-select
+                        :options="[
+                            {'id': 'buy', 'name': '做多'},
+                            {'id': 'sell', 'name': '做空'},
+                        ]"
+                        v-model="form.type"
+                        placeholder="选择类型"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.period" class="form-error text-red-400">{{ errors.period }}</div>
+                </div>
+
+                <text-input v-model="form.amount" :error="errors.amount" class="pr-6 pr-6 pb-20 w-full lg:w-1/2" :label="$t(&quot;金额&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("操作：") }}</label>
+                    <t-rich-select
+                        :options="[
+                            {'id': 'profit', 'name': '始终盈利'},
+                            {'id': 'loss', 'name': '始终亏损'},
+                        ]"
+                        v-model="form.action"
+                        placeholder="选择操作"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.period" class="form-error text-red-400">{{ errors.period }}</div>
+                </div>
+
+            </div>
+            <div class="mt-20 px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除模板") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

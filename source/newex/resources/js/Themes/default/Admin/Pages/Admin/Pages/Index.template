@@ -1,0 +1,68 @@
+<app-layout>
+    <site-presentation-settings scope="navigation"/>
+    <site-presentation-settings scope="help"/>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("页面") }}</h1>
+
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.pages.create')">
+            <span>{{ $t("新增") }}</span>
+            <span class="hidden md:inline">{{ $t(" 页面") }}</span>
+        </nav-button-link>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("标题") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("URL标识") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr v-for="page in pages.data" :key="page.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+
+                <td class="border-t">
+                    <Link :href="route('admin.pages.edit', page.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ page.title }}
+                    </Link>
+                </td>
+
+                <td class="border-t">
+                    <Link :href="route('admin.pages.edit', page.id)" class="px-6 py-4 flex items-center">
+                        {{ page.slug }}
+                    </Link>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" :type="page.status ? 'green' : 'gray'">
+                            {{ page.status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+
+                        <nav-button-link class="mr-2" type="red" :href="route('admin.pages.edit', page.id)">
+                            <span>{{ $t("编辑页面") }}</span>
+                        </nav-button-link>
+
+                        <nav-button-link type="indigo" :href="route('page.show', page.slug)">
+                            <span>{{ $t("访问页面") }}</span>
+                        </nav-button-link>
+
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr v-if="pages.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("暂无页面") }}</td>
+            </tr>
+
+        </table>
+    </div>
+
+    <pagination :links="pages.links" />
+</app-layout>

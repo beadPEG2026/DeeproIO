@@ -1,0 +1,49 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.peerPaymentFields', paymentMethod.id)">{{ $t("支付字段") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input 
+                    v-model="form.title" 
+                    :error="errors.title" 
+                    class="pr-6 pb-8 w-full lg:w-1/2" 
+                    label="字段名称" 
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为必填字段？") }}</label>
+                    <t-toggle v-model="form.required" />
+                    <div class="text-red-600 mb-3" v-if="errors.required">
+                        {{ errors.required }}
+                    </div>
+                </div>
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button 
+                    v-if="isEdit" 
+                    class="focus:outline-none text-red-600 hover:underline" 
+                    tabindex="-1" 
+                    type="button" 
+                    @click="destroy">
+                    {{ $t("删除支付字段") }}
+                </button>
+
+                <loading-button 
+                    :loading="sending" 
+                    class="btn-indigo ml-auto" 
+                    type="submit">
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

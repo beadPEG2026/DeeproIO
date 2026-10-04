@@ -1,0 +1,141 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Deposits') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('Deposits')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="rounded-card rounded-xl p-4 shadow-sm">
+                <p class=" text-sm">{{ $t('Total Deposits') }}</p>
+                <p class="text-2xl font-bold ">{{ stats.total_deposits }}</p>
+            </div>
+            <div class="rounded-card rounded-xl p-4 shadow-sm">
+                <p class=" text-sm">{{ $t('Confirmed') }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ stats.confirmed_deposits }}</p>
+            </div>
+            <div class="rounded-card rounded-xl p-4 shadow-sm">
+                <p class=" text-sm">{{ $t('Pending') }}</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ stats.pending_deposits }}</p>
+            </div>
+            <div class="rounded-card rounded-xl p-4 shadow-sm">
+                <p class=" text-sm">{{ $t('Total Volume') }}</p>
+                <p class="text-2xl font-bold text-blue-600">{{ formatCurrency(stats.total_volume_usd) }}</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="components-filter">
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <label>{{ $t('Status:') }}</label>
+                    <t-rich-user-select
+                        :options="statusOptions"
+                        v-model="localFilters.status"
+                        :placeholder="$t('Select status')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="components-filter__item">
+                    <label>{{ $t('From Date:') }}</label>
+                    <input type="date" v-model="localFilters.date_from" class="components-filter__input" />
+                </div>
+
+                <div class="components-filter__item">
+                    <label>{{ $t('To Date:') }}</label>
+                    <input type="date" v-model="localFilters.date_to" class="components-filter__input" />
+                </div>
+
+                <div class="components-filter__item">
+                    <t-button-green @click.stop="applyFilters" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ $t('Search') }}
+                        </span>
+                    </t-button-green>
+                </div>
+
+                <div class="components-filter__item">
+                    <button @click="clearFilters" class="components-filter__button mt-8 py-2 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        {{ $t('Clear') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deposits Table -->
+        <div class=" rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full merchant-table">
+                    <thead class="">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('Transaction') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('Amount') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('USD Value') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('Status') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('Confirmations') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium  uppercase">{{ $t('Date') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="">
+                        <tr v-for="deposit in deposits.data" :key="deposit.id" class="hover:">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-mono text-sm truncate max-w-[150px]" :title="deposit.txn_hash">
+                                        {{ deposit.txn_hash.substring(0, 10) }}...{{ deposit.txn_hash.slice(-8) }}
+                                    </span>
+                                    <button @click="doCopy(deposit.txn_hash)" class=" hover:">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </button>
+                                    <a v-if="deposit.explorer_url" :href="deposit.explorer_url" target="_blank" class="text-blue-600 hover:text-blue-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-medium">{{ formatCrypto(deposit.amount_crypto, deposit.invoice && deposit.invoice.currency_model ? deposit.invoice.currency_model.symbol : '') }}</span>
+                            </td>
+                            <td class="px-6 py-4 font-medium">{{ formatCurrency(deposit.amount_usd) }}</td>
+                            <td class="px-6 py-4">
+                                <span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusClass(deposit.status)]">
+                                    {{ deposit.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm">{{ deposit.confirmations }}/{{ deposit.required_confirmations }}</span>
+                            </td>
+                            <td class="px-6 py-4  text-sm">{{ formatDate(deposit.detected_at) }}</td>
+                        </tr>
+                        <tr v-if="!deposits.data || deposits.data.length === 0">
+                            <td colspan="6" class="px-6 py-8 text-center ">{{ $t('No deposits found') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div v-if="deposits.data && deposits.data.length > 0" class="py-4 px-4">
+                <pagination :links="deposits.links" />
+            </div>
+        </div>
+    </div>
+</app-layout>

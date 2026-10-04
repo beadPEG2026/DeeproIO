@@ -1,0 +1,167 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('商户收单控制台') }}</title>
+    </Head>
+
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{{ $t('商户收单控制台') }}</h1>
+            <button @click="refresh" :disabled="refreshing" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                {{ refreshing ? $t('刷新中...') : $t('刷新') }}
+            </button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <!-- Total Merchants -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">{{ $t('商户总数') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ stats.merchants.total || 0 }}</p>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-full">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-4 text-sm">
+                    <span class="text-green-600">{{ stats.merchants.active || 0 }} {{ $t('活跃') }}</span>
+                    <span class="text-yellow-600">{{ stats.merchants.pending || 0 }} {{ $t('待审核') }}</span>
+                </div>
+            </div>
+
+            <!-- Today's Invoices -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">{{ $t('今日发票') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ stats.today_invoices.total || 0 }}</p>
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-4 text-sm">
+                    <span class="text-green-600">{{ stats.today_invoices.paid || 0 }} {{ $t('已支付') }}</span>
+                    <span class="text-gray-600">${{ Number(stats.today_invoices.volume_usd || 0).toLocaleString() }}</span>
+                </div>
+            </div>
+
+            <!-- Pending Webhooks -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">{{ $t('待处理 Webhook') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ stats.pending_webhooks || 0 }}</p>
+                    </div>
+                    <div class="p-3 bg-yellow-100 rounded-full">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-red-600">{{ stats.dead_letter_webhooks || 0 }} {{ $t('死信') }}</span>
+                </div>
+            </div>
+
+            <!-- Orphan Payments -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">{{ $t('孤立支付') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ stats.orphan_payments || 0 }}</p>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-full">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    {{ $t('需要处理') }}
+                </div>
+            </div>
+
+            <!-- Pending Payouts -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">{{ $t('待处理提现') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ stats.pending_payouts ? stats.pending_payouts.count : 0 }}</p>
+                    </div>
+                    <div class="p-3 bg-purple-100 rounded-full">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-purple-600">${{ stats.pending_payouts ? Number(stats.pending_payouts.total_usd).toLocaleString() : '0' }}</span>
+                    <span class="text-gray-500 ml-1">{{ $t('待处理') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <a :href="route('admin.merchant.merchants')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('商户管理') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('查看、审核和管理商户账户') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.invoices')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('所有发票') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('浏览和搜索所有发票') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.payouts')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('提现管理') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('管理商户提现请求') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.earnings')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('平台收益') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('平台收益和手续费概览') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.webhooks')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('Webhook 管理') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('管理 Webhook 发送和重试') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.webhooks.dead-letters')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('死信队列') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('查看失败的 Webhook 发送记录') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.orphan-payments')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('孤立支付') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('处理未匹配的支付') }}</p>
+            </a>
+
+            <a :href="route('admin.merchant.reports')" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $t('报表') }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('数据分析和报表') }}</p>
+            </a>
+        </div>
+
+        <!-- Address Pool Status -->
+        <div class="bg-white rounded-xl shadow-sm p-6" v-if="stats.address_pool">
+            <h3 class="font-semibold text-gray-800 mb-4">{{ $t('地址池状态') }}</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div v-for="(pool, network) in stats.address_pool" :key="network" class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm font-medium text-gray-600">{{ network }}</p>
+                    <p class="text-lg font-bold" :class="pool.available < 10 ? 'text-red-600' : 'text-green-600'">
+                        {{ pool.available }} / {{ pool.total }}
+                    </p>
+                    <p class="text-xs text-gray-500">{{ $t('可用') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

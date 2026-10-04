@@ -1,0 +1,89 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.launchpads')">{{ $t("Launchpad") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Launchpad 信息") }}</div>
+                </div>
+
+                <text-input v-model="form.name" :error="errors.name" class="pr-6 pb-8 w-full" :label="$t(&quot;Launchpad 名称&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("货币：") }}</label>
+                    <t-rich-select
+                        :options="currencies"
+                        v-model="form.currency_id"
+                        placeholder="选择货币"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.currency_id" class="form-error text-red-400">{{ errors.currency_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("网络：") }}</label>
+                    <themed-select network v-model="form.network_id" :aria-label="$t('Network')"><option v-for="n in networks" :key="n.id" :value="n.id">{{ n.name }}</option></themed-select>
+                    <div v-if="errors.network_id" class="form-error text-red-400">{{ errors.network_id }}</div>
+                </div>
+
+                <textarea-input v-model="form.description" :error="errors.description" class="pr-6 pb-8 w-full h-150" :label="$t(&quot;Launchpad 描述&quot;)" />
+
+                <text-input v-model="form.rate" :error="errors.rate" class="pr-6 pb-8 w-full" :label="$t(&quot;兑换比例（例如：1 BNB/ETH 可购买多少代币）&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("开始时间 (UTC)：") }}</label>
+                    <t-datepicker
+                        v-model="form.start_time"
+                        :timepicker="true"
+                        dateFormat="Y-m-d H:i:00"
+                        userFormat="Y-m-d H:i:00"
+                    />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("结束时间 (UTC)：") }}</label>
+                    <t-datepicker
+                        v-model="form.end_time"
+                        :timepicker="true"
+                        dateFormat="Y-m-d H:i:00"
+                        userFormat="Y-m-d H:i:00"
+                    />
+                </div>
+
+                <text-input v-model="form.soft_cap" :error="errors.soft_cap" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;软顶（BNB 或 ETH）&quot;)" />
+                <text-input v-model="form.hard_cap" :error="errors.hard_cap" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;硬顶（BNB 或 ETH）&quot;)" />
+
+                <text-input v-model="form.min_buy" :error="errors.min_buy" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小购买金额（BNB 或 ETH）&quot;)" />
+                <text-input v-model="form.max_buy" :error="errors.max_buy" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大购买金额（BNB 或 ETH）&quot;)" />
+                <text-input v-model="form.dy_am" :error="errors.dy_am" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;合约交易量 &gt;  多少USDT&quot;)" />
+                <text-input v-model="form.kt_sl" :error="errors.kt_sl" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;空投多少代币(1000就是1000个代币)&quot;)" />
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用 Launchpad") }}</label>
+                    <t-toggle v-model="form.status" />
+                </div>
+
+            </div>
+            <div class="p-8"><publication-fields :value="form" :error="errors.publication_reference || errors.publication_status" /></div>
+            <product-config-preview :form="form" :original="original" :fields="previewFields" :is-edit="isEdit" :currencies="currencies" :networks="networks" />
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除 Launchpad") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                    {{ $t(actionButtonTitle) }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

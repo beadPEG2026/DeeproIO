@@ -1,0 +1,370 @@
+<!-- MODULE ORDERFORM START -->
+<div class="module module-orderform options-module-bordered" :class="{'module-orderform-opened': openForm}">
+    <order-result-notice :sides="uncertainOrderSides" @reviewed="acknowledgeOrderReview" />
+    <div @click="openForm = false" class="close-item">
+        {{ $t('Close') }}
+    </div>
+
+    <div class="flex gap-8 dp-ticket-side-tabs">
+        <button
+            @click="setTab('buy')"
+            :class="{'button-tab-buy-active': activeTab == 'buy'}"
+            class="module-orderform__buy-forms__button button-tab button-tab-buy"
+        >
+            <span>
+                {{ $t('Buy') }}
+            </span>
+        </button>
+
+        <button
+            @click="setTab('sell')"
+            :class="{'button-tab-sell-active': activeTab == 'sell'}"
+            class="module-orderform__buy-forms__button button-tab button-tab-sell"
+        >
+            <span>
+                {{ $t('Sell') }}
+            </span>
+        </button>
+    </div>
+
+    <div class="button-clear"></div>
+
+    <div class="module-container">
+        <!-- module head start -->
+        <div class="module-head">
+            <div class="module-orderform__title">
+                <div
+                    @click="setOrderType('market')"
+                    :class="{ 'module-orderform__active' : orderType == 'market' }"
+                    class="module-orderform__title-item"
+                >
+                    {{ $t('Market') }}
+                </div>
+
+                <div
+                    @click="setOrderType('limit')"
+                    :class="{ 'module-orderform__active' : orderType == 'limit' }"
+                    class="module-orderform__title-item"
+                >
+                    {{ $t('Limit') }}
+                </div>
+
+                <!--<div @click="setOrderType('stop_limit')" :class="{ 'module-orderform__active' : orderType == 'stop_limit' }" class="module-orderform__title-item">{{ $t('Stop-Limit') }}</div>-->
+            </div>
+        </div>
+        <!-- module head end -->
+
+        <!-- module body start -->
+        <div class="module-body">
+            <p v-if="orderType === 'market' && estimateNotice" class="text-xs mb-3" role="status" data-testid="estimate-notice">{{ estimateNotice }}</p>
+            <div class="module-orderform__container">
+
+                <!-- module orderform buy start -->
+                <div :class="{'dp-ticket-inactive': activeTab !== 'buy'}" @focusin="activeTab = 'buy'" class="module-orderform__buy">
+                    <div class="module-orderform__buy-title">
+                        <h3>{{ $t('Buy') }} {{ market.base_currency }}</h3>
+
+                        <div class="module-orderform__buy-currency">
+                            <span class="module-orderform__buy-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect class="module-orderform__buy-color" x="2" y="4" width="20" height="16" rx="4"/>
+                                    <line class="module-orderform__buy-color" x1="21.5" y1="9.5" x2="2.5" y2="9.5"/>
+                                    <line class="module-orderform__buy-color" x1="19.5" y1="16.5" x2="16.5" y2="16.5"/>
+                                </svg>
+                            </span>
+                            {{ quoteTradeBalance }} {{ market.quote_currency }}
+                        </div>
+                    </div>
+
+                    <div class="module-orderform__buy-forms">
+
+                        <!-- 买入价格 -->
+                        <div
+                            v-if="orderType == 'market'"
+                            class="module-orderform__buy-forms__item"
+                            :class="{'form-disabled': true}"
+                        >
+                            <label class="module-orderform__buy-forms__item-left">{{ $t('Price') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'buy','price')"
+                                @paste.prevent
+                                @drop.prevent
+                                :placeholder="$t('Market')"
+                                :disabled="true"
+                                type="text"
+                            >
+                            <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <div
+                            v-else
+                            class="module-orderform__buy-forms__item"
+                            :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'price'}"
+                        >
+                            <label class="module-orderform__buy-forms__item-left">{{ $t('Price') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'buy','price')"
+                                @paste.prevent
+                                @drop.prevent
+                                v-model="bid.price"
+                                type="text"
+                            >
+                            <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <!-- 买入输入 USDT 数量 -->
+                        <div
+                            class="module-orderform__buy-forms__item"
+                            :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'quoteQuantity'}"
+                        >
+                            <label class="module-orderform__buy-forms__item-left">{{ $t('Amount') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'buy','quoteQuantity')"
+                                @paste.prevent
+                                @drop.prevent
+                                v-model="bid.quoteQuantity"
+                                type="text"
+                            >
+                            <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <!-- 买入输入原币数量 -->
+                        <div
+                            class="module-orderform__buy-forms__item"
+                            :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'quantity'}"
+                        >
+                            <label class="module-orderform__buy-forms__item-left" style="white-space: nowrap;">{{ orderType === 'market' ? $t('Estimated quantity') : $t('Quantity') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'buy','quantity')"
+                                @paste.prevent
+                                @drop.prevent
+                                :value="isStockEstimate && orderType === 'market' && !estimatePrice ? '' : bid.quantity"
+                                :placeholder="isStockEstimate && orderType === 'market' && !estimatePrice ? '暂无法估算' : ''"
+                                @input="bid.quantity = $event.target.value"
+                                type="text"
+                            >
+                            <label class="module-orderform__buy-forms__item-right">{{ market.base_currency }}</label>
+                        </div>
+
+                        <div
+                            v-if="orderType == 'stop_limit'"
+                            class="module-orderform__buy-forms__item"
+                            :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'trigger_price'}"
+                        >
+                            <label class="module-orderform__buy-forms__item-left">{{ $t('Stop') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'buy','trigger_price')"
+                                @paste.prevent
+                                @drop.prevent
+                                v-model="bid.trigger_price"
+                                type="text"
+                            >
+                            <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <vue-slider
+                            @input="changeBuySlider"
+                            @change="changeBuySlider"
+                            @dragging="changeBuySlider"
+                            v-model="buySlider.value"
+                            :min="buySlider.min"
+                            :max="buySlider.max"
+                            :interval="buySlider.interval"
+                            :disabled="buySlider.disabled"
+                            :tooltip-formatter="formatSliderTooltip"
+                            :adsorb="false"
+                            :included="true"
+                            :hide-label="true"
+                            :tooltip-placement="'top'"
+                        ></vue-slider>
+
+                        <div class="mb-2" v-if="balanceBuyError">
+                            <span class="text-sm color-sell info-badge-error">{{ $t('Insufficient balance') }}</span>
+                        </div>
+
+                        <div class="">
+                            <span class="info-badge">{{ $t('Est. fee:') }}</span> {{ estimateBidFee }} {{ market.quote_currency }}
+                        </div>
+
+                        <div class="">
+                            <span class="info-badge">{{ $t('Max buy:') }}</span> {{ tradeMaxBuyQuote }} {{ market.quote_currency }}
+                        </div>
+
+                        <button
+                            @click="placeBuyOrder()"
+                            :disabled="sessionBlocked"
+                            :style="sessionBlocked ? {opacity:0.45,cursor:'not-allowed'} : null"
+                            :class="{ 'opacity-75': placingBuyOrder }"
+                            class="module-orderform__buy-forms__button"
+                        >
+                            <span>
+                                <svg v-show="placingBuyOrder" class="inline animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ sessionBlocked ? $t(sessionLabel) : $t('Buy') }}
+                                <template v-if="!sessionBlocked">{{ market.base_currency }}</template>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <!-- module orderform buy end -->
+
+                <!-- module orderform sell start -->
+                <div :class="{'dp-ticket-inactive': activeTab !== 'sell'}" @focusin="activeTab = 'sell'" class="module-orderform__sell">
+                    <div class="module-orderform__sell-title">
+                        <h3>{{ $t('Sell') }} {{ market.base_currency }}</h3>
+
+                        <div class="module-orderform__sell-currency">
+                            <span class="module-orderform__sell-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect class="module-orderform__sell-color" x="2" y="4" width="20" height="16" rx="4"/>
+                                    <line class="module-orderform__sell-color" x1="21.5" y1="9.5" x2="2.5" y2="9.5"/>
+                                    <line class="module-orderform__sell-color" x1="19.5" y1="16.5" x2="16.5" y2="16.5"/>
+                                </svg>
+                            </span>
+                            {{ baseTradeBalance }} {{ market.base_currency }}
+                        </div>
+                    </div>
+
+                    <div class="module-orderform__sell-forms">
+
+                        <!-- 卖出价格 -->
+                        <div
+                            v-if="orderType == 'market'"
+                            class="module-orderform__sell-forms__item"
+                            :class="{'form-disabled': true}"
+                        >
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Price') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'ask','price')"
+                                @paste.prevent
+                                @drop.prevent
+                                :placeholder="$t('Market')"
+                                :disabled="true"
+                                type="text"
+                            >
+                            <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <div
+                            v-else
+                            class="module-orderform__sell-forms__item"
+                            :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'price'}"
+                        >
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Price') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'ask','price')"
+                                @paste.prevent
+                                @drop.prevent
+                                v-model="ask.price"
+                                type="text"
+                            >
+                            <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <!-- 卖出输入 USDT 数量 -->
+                        <div
+                            class="module-orderform__sell-forms__item"
+                            :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'quoteQuantity'}"
+                        >
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Amount') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'ask','quoteQuantity')"
+                                @paste.prevent
+                                @drop.prevent
+                                type="text"
+                                v-model="ask.quoteQuantity"
+                            >
+                            <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <!-- 卖出输入原币数量 -->
+                        <div
+                            class="module-orderform__sell-forms__item"
+                            :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'quantity'}"
+                        >
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Quantity') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'ask','quantity')"
+                                @paste.prevent
+                                @drop.prevent
+                                type="text"
+                                v-model="ask.quantity"
+                            >
+                            <label class="module-orderform__sell-forms__item-right">{{ market.base_currency }}</label>
+                        </div>
+
+                        <div
+                            v-if="orderType == 'stop_limit'"
+                            class="module-orderform__sell-forms__item"
+                            :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'trigger_price'}"
+                        >
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Stop') }}</label>
+                            <input
+                                @keyup="(e) => clearInput(e, 'ask','trigger_price')"
+                                @drop.prevent
+                                type="text"
+                                v-model="ask.trigger_price"
+                            >
+                            <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
+                        </div>
+
+                        <vue-slider
+                            @input="changeSellSlider"
+                            @change="changeSellSlider"
+                            @dragging="changeSellSlider"
+                            v-model="sellSlider.value"
+                            :min="sellSlider.min"
+                            :max="sellSlider.max"
+                            :interval="sellSlider.interval"
+                            :disabled="sellSlider.disabled"
+                            :tooltip-formatter="formatSliderTooltip"
+                            :adsorb="false"
+                            :included="true"
+                            :hide-label="true"
+                            :tooltip-placement="'top'"
+                        ></vue-slider>
+
+                        <div class="mb-2" v-if="balanceSellError">
+                            <span class="text-sm color-sell info-badge-error">{{ $t('Insufficient balance') }}</span>
+                        </div>
+
+                        <div class="">
+                            <span class="info-badge">{{ $t('Est. fee:') }}</span> {{ estimateAskFee }} {{ market.quote_currency }}
+                        </div>
+
+                        <div>
+                            <span class="info-badge">{{ $t('Max sell:') }}</span> {{ tradeMaxSellQuote }} {{ market.quote_currency }}
+                        </div>
+
+                        <button
+                            @click="placeSellOrder()"
+                            :disabled="sessionBlocked"
+                            :style="sessionBlocked ? {opacity:0.45,cursor:'not-allowed'} : null"
+                            :class="{ 'opacity-75': placingSellOrder }"
+                            class="module-orderform__sell-forms__button"
+                        >
+                            <span>
+                                <svg v-show="placingSellOrder" class="inline animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ sessionBlocked ? $t(sessionLabel) : $t('Sell') }}
+                                <template v-if="!sessionBlocked">{{ market.base_currency }}</template>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <!-- module orderform sell end -->
+
+            </div>
+
+            <div v-if="errors" class="mt-5 text-sm text-red-500">
+                {{ errors }}
+            </div>
+        </div>
+        <!-- module body end -->
+    </div>
+</div>
+<!-- MODULE ORDERFORM END -->

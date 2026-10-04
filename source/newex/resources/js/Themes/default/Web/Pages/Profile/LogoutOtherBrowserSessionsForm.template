@@ -1,0 +1,89 @@
+
+<jet-action-section>
+    <div class="form-container browser-sessions">
+        <!-- form components start -->
+        <div class="form-components">
+
+            <div class="form-components__title"><h3>{{ $t('Browser Sessions') }}</h3></div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-text">
+                            <p>{{ $t('Manage and logout your active sessions on other browsers and devices.') }}</p>
+                        </div>
+                        <div class="form-components__block-item block-text">
+                            <p>{{ $t('If necessary, you may logout of all of your other browser sessions across all of your devices. Some of your recent sessions are listed below; however, this list may not be exhaustive. If you feel your account has been compromised, you should also update your password.') }}</p>
+                        </div>
+                    </div>
+                    <div class="form-components__block" v-if="sessions.length > 0">
+
+                        <div v-for="(session, i) in sessions" :key="i" class="form-components__block-item block-status">
+                            <div class="block-status__icon" v-if="session.agent.is_desktop">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="block-status__color" d="M2 7.4C2 5.15016 2 4.02524 2.57295 3.23664C2.75799 2.98196 2.98196 2.75799 3.23664 2.57295C4.02524 2 5.15016 2 7.4 2H16.6C18.8498 2 19.9748 2 20.7634 2.57295C21.018 2.75799 21.242 2.98196 21.4271 3.23664C22 4.02524 22 5.15016 22 7.4V12.6C22 14.8498 22 15.9748 21.4271 16.7634C21.242 17.018 21.018 17.242 20.7634 17.4271C19.9748 18 18.8498 18 16.6 18H7.4C5.15016 18 4.02524 18 3.23664 17.4271C2.98196 17.242 2.75799 17.018 2.57295 16.7634C2 15.9748 2 14.8498 2 12.6V7.4Z"/>
+                                    <path class="block-status__color" d="M12 22H16H8H12ZM12 22V18"/>
+                                </svg>
+                            </div>
+                            <div class="block-status__icon" v-else>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500">
+                                    <path d="M0 0h24v24H0z" stroke="none"></path><rect x="7" y="4" width="10" height="16" rx="1"></rect><path d="M11 5h2M12 17v.01"></path>
+                                </svg>
+                            </div>
+                            <div class="block-status__title">
+                                {{ session.agent.platform }} - {{ session.agent.browser }}
+                                <p v-if="session.is_current_device"><template v-if="$page.props.mode == 'readonly'">{{ 'Hidden in demo' }}</template><template v-else>{{ session.ip_address }}</template>, <span class="color-buy">{{ $t('This device') }}</span></p>
+                                <p v-else><template v-if="$page.props.mode == 'readonly'">{{ 'Hidden in demo' }}</template><template v-else>{{ session.ip_address }}</template>, <span class="color-buy">{{ $t('Last active') }} {{ session.last_active }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-button">
+                            <button @click.stop="confirmLogout" :disabled="form.processing" :class="{ 'opacity-75': form.processing }" class="form-components__block-button">{{ $t('Logout other browser sessions') }}</button>
+                        </div>
+                    </div>
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-text">
+                            <p>
+                                <jet-action-message :on="form.recentlySuccessful" class="mr-3">
+                                    {{ $t('Done.') }}
+                                </jet-action-message>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- form components end -->
+    </div>
+
+        <!-- Logout Other Devices Confirmation Modal -->
+        <jet-dialog-modal :show="confirmingLogout" @close="closeModal">
+            <template #title>
+                {{ $t('Logout Other Browser Sessions') }}
+            </template>
+
+            <template #content>
+                {{ $t('Please enter your password to confirm you would like to logout of your other browser sessions across all of your devices.') }}
+
+                <div class="mt-4">
+                    <jet-input type="password" class="modal-change-password mt-1 block w-3/4" :placeholder="$t('Password')"
+                                ref="password"
+                                v-model="form.password"
+                                @keyup.enter.native="logoutOtherBrowserSessions" />
+
+                    <jet-input-error :message="form.errors.password" class="mt-2" />
+                </div>
+            </template>
+
+            <template #footer>
+                <jet-secondary-button @click.native="closeModal">
+                    {{ $t('Nevermind') }}
+                </jet-secondary-button>
+
+                <jet-button class="ml-2 modal-change-password-confirm" @click.native="logoutOtherBrowserSessions" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    {{ $t('Logout Other Browser Sessions') }}
+                </jet-button>
+            </template>
+        </jet-dialog-modal>
+</jet-action-section>

@@ -1,0 +1,953 @@
+<app-layout>
+
+    <Head>
+        <title>{{ $t('P2P Order')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+<top-menu :label="$t('Order Details')"></top-menu>
+
+<div class="table-components">
+    <div class="p2p-order-view p2p-order-mob flex w-full">
+        <div class="lg:w-2/3 w-full">
+            <template v-if="!isBuy">
+                <div class="container">
+                    <div class="flex relative pb-5 w-full">
+                        <div class="order-info-container flex">
+
+                            <div class="">
+                                <div v-if="order.status == 'completed'" class="mr-5">
+                                    <svg class="width64 height64" viewBox="0 0 97 96" xmlns="http://www.w3.org/2000/svg"><path opacity="0.25" fill-rule="evenodd" clip-rule="evenodd" d="M48.096 88c22.091 0 40-17.908 40-40 0-22.09-17.909-40-40-40-22.092 0-40 17.91-40 40 0 22.092 17.908 40 40 40zm12.312-50.597l4.243 4.242-19.799 19.8-4.243-4.243-7.07-7.071 4.242-4.243 7.071 7.071 15.556-15.556z" fill="#2EE39D"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M48.096 77c16.016 0 29-12.983 29-29 0-16.015-12.984-29-29-29-16.017 0-29 12.985-29 29 0 16.017 12.983 29 29 29zm12.312-39.597l4.243 4.242-19.799 19.8-4.243-4.243-7.07-7.071 4.242-4.243 7.071 7.071 15.556-15.556z" fill="#2EE39D"></path></svg>
+                                </div>
+                            </div>
+                            <div class="">
+                                <div class="order-info-container-title">
+                                    <template v-if="order.status == 'payment_pending'">
+                                        {{ $t('Order Created, Pay the Seller within') }}
+
+                                            <Countdown :end-time="endTimeCalc(order.cancel_order_after)">
+                                                            <span slot="process" slot-scope="{ timeObj }">
+                                                                <template v-if="timeObj.h > 0">
+                                                                    {{ `${timeObj.h}:${timeObj.m}:${timeObj.s}` }}
+                                                                </template>
+                                                                <template v-else>
+                                                                    {{ `${timeObj.m}:${timeObj.s}` }}
+                                                                </template>
+                                                            </span><span slot="finish">00:00</span>
+                                            </Countdown>
+
+                                    </template>
+                                    <template v-if="order.status == 'confirm_transfer'">
+                                        {{ $t('The coins will be released in') }}
+                                        <Countdown :key="refreshKey" :end-time="endTimeCalc(order.appeal_available_after)">
+                                            <span slot="process" slot-scope="{ timeObj }">
+                                                <template v-if="timeObj.h > 0">
+                                                    {{ `${timeObj.h}:${timeObj.m}:${timeObj.s}` }}
+                                                </template>
+                                                <template v-else>
+                                                    {{ `${timeObj.m}:${timeObj.s}` }}
+                                                </template>
+                                            </span><span slot="finish">00:00</span>
+                                        </Countdown>
+                                    </template>
+                                    <template v-if="order.status == 'completed'">
+                                        {{ $t('Order Completed') }}
+                                    </template>
+                                    <template v-if="order.cancelledBySystem">
+                                        {{ $t('The Order Has Been Cancelled By System') }}
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_counterparty'">
+                                        <template v-if="order.cancelledByOwner">
+                                            {{ $t('You Have Canceled the Order') }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('The Order Has Been Cancelled By Counterparty') }}
+                                        </template>
+                                    </template>
+                                    <template v-if="order.status == 'appealed_by_counterparty'">
+                                        {{ $t('Appeal in progress.') }} <Link class="action-link" :href="route('p2p.my-appeal', order.id)">{{ $t('View') }}</Link>
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_owner'">
+                                        <template v-if="order.cancelledByOwner">
+                                            {{ $t('You Have Canceled the Order') }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('The Order Has Been Cancelled By Counterparty') }}
+                                        </template>
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_system'">
+                                        {{ $t('The Order Has Been Cancelled By System') }}
+                                    </template>
+                                </div>
+                                <div class="order-info-container-subtitle flex">
+                                    <span>{{ $t('Order Number:') }}</span>
+                                    <div class="ml-1">{{ order.id }}</div>
+                                    <div @click="doCopy(order.id)" class="copy-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect class="list-text__icon-color" x="1" y="2" width="17" height="16" rx="2"/>
+                                            <path class="list-text__icon-color" d="M18 4H18.4C19.8999 4 20.6498 4 21.1756 4.38197C21.3454 4.50533 21.4947 4.65464 21.618 4.82443C22 5.35016 22 6.10011 22 7.6V18.4C22 19.8999 22 20.6498 21.618 21.1756C21.4947 21.3454 21.3454 21.4947 21.1756 21.618C20.6498 22 19.9012 22 18.404 22C15.5371 22 11.3886 22 7.59963 22C6.09998 22 5.35016 22 4.82443 21.618C4.65464 21.4947 4.50533 21.3454 4.38197 21.1756C4 20.6498 4 19.8999 4 18.4V18"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div v-if="order.appealed_at && order.status !== 'appealed_by_counterparty'" class="mt-3 order-info-container-subtitle flex">
+                                    <span>{{ $t('Appeal History:') }}</span>
+                                    <div class="ml-1">
+                                        <Link class="action-link" :href="route('p2p.my-appeal', order.id)">
+                                            {{ $t('View records')}}
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 w-full">
+                        <template v-if="order.status == 'payment_pending'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                    <polygon points="9.993 19.421 3.286 12.58 4.714 11.179 10.007 16.579 19.293 7.293 20.707 8.707 9.993 19.421"/>
+                                </svg>
+
+                            </div>
+                        </template>
+                        <div class="flex-grow  flex sm:items-center items-start flex-col sm:flex-row" :class="{'pl-6': order.status == 'payment_pending'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <h2 v-if="order.status == 'payment_pending'">{{ $t('Order Created') }}</h2>
+
+                                <div class="flex w-full p2p-headline-info p2p-payment-method-card flex-col" :class="{'no-mt': order.status !== 'payment_pending'}">
+                                    <div class="w-full">
+                                        <div class="text-headline">{{ $t('Fiat Amount')}}</div>
+                                        <div class="text-bottom color-buy">{{ order.quote_amount }} {{ order.quoteSymbol }}</div>
+                                    </div>
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Price')}}</div>
+                                        <div class="text-bottom">{{ order.price }} {{ order.quoteSymbol }}</div>
+                                    </div>
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Crypto Amount')}}</div>
+                                        <div class="text-bottom">{{ order.amount }} {{ order.baseSymbol }}</div>
+                                    </div>
+
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Processing Fee')}}</div>
+                                        <div class="text-bottom">{{ order.fee_taker }} {{ order.baseSymbol }}</div>
+                                    </div>
+
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Time Created')}}</div>
+                                        <div class="text-bottom">{{ order.created_at }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 "  :class="{'pt-10 pt-5': order.status == 'payment_pending'}">
+                        <template v-if="order.status == 'payment_pending'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">2</div>
+                        </template>
+                        <div class="flex-grow flex sm:items-center items-start flex-col sm:flex-row" :class="{'pl-6': order.status == 'payment_pending'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <template v-if="order.status == 'payment_pending'">
+                                    <h2 class="">{{ $t('Open') }} {{ order.payment_method.name }} {{ $t('to transfer')}} {{ order.quote_amount }} {{ order.quoteSymbol }}</h2>
+                                </template>
+                                <div class="flex w-full p2p-headline-info">
+                                    <div class="w-full">
+
+                                        <template v-if="order.status == 'payment_pending'">
+                                            <div class="text-headline">{{ $t("Transfer the funds to the seller's account provided below.")}}</div>
+                                        </template>
+
+                                        <template v-for="method in paymentMethods">
+                                            <div v-if="method.id == order.user_payment_method" class="p2p-payment-method-card">
+                                                <div class="p2p-payment-method-card-element">
+                                                    <div class="p2p-payment-method-card-left headline-text flex">
+                                                        <div>{{ $t('Payment Method')}}</div>
+                                                        <div v-if="order.status == 'payment_pending'" @click.prevent="showMethod" class="ml-5 action-link flex">
+                                                            {{ $t('Change')}}
+                                                            <svg height="10px" width="10px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                                 viewBox="0 0 330 330" xml:space="preserve">
+                                                            <path id="XMLID_222_" d="M250.606,154.389l-150-149.996c-5.857-5.858-15.355-5.858-21.213,0.001
+                                                                c-5.857,5.858-5.857,15.355,0.001,21.213l139.393,139.39L79.393,304.394c-5.857,5.858-5.857,15.355,0.001,21.213
+                                                                C82.322,328.536,86.161,330,90,330s7.678-1.464,10.607-4.394l149.999-150.004c2.814-2.813,4.394-6.628,4.394-10.606
+                                                                C255,161.018,253.42,157.202,250.606,154.389z"/>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                    <div class="p2p-payment-method-card-right">
+                                                        <div class="p2p-payment-item">
+                                                            <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                                            {{ method.name }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div v-for="fields in method.fields" class="p2p-payment-method-card-element ">
+                                                    <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                                                    <div class="p2p-payment-method-card-right">
+
+                                                        {{ fields.content }}
+
+                                                        <span @click="doCopy(fields.content)" class="copy-icon">
+                                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <rect class="list-text__icon-color" x="1" y="2" width="17" height="16" rx="2"/>
+                                                                <path class="list-text__icon-color" d="M18 4H18.4C19.8999 4 20.6498 4 21.1756 4.38197C21.3454 4.50533 21.4947 4.65464 21.618 4.82443C22 5.35016 22 6.10011 22 7.6V18.4C22 19.8999 22 20.6498 21.618 21.1756C21.4947 21.3454 21.3454 21.4947 21.1756 21.618C20.6498 22 19.9012 22 18.404 22C15.5371 22 11.3886 22 7.59963 22C6.09998 22 5.35016 22 4.82443 21.618C4.65464 21.4947 4.50533 21.3454 4.38197 21.1756C4 20.6498 4 19.8999 4 18.4V18"/>
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 " :class="{'pt-10 pt-5': order.status == 'payment_pending'}">
+
+                        <template v-if="order.status == 'payment_pending'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">3</div>
+                        </template>
+                        <div class="flex-grow flex sm:items-center items-start flex-col sm:flex-row w-full-mob" :class="{'pl-6': order.status == 'payment_pending'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <template v-if="order.status == 'payment_pending'">
+                                    <h2 class="">{{ $t('Notify Seller') }}</h2>
+                                </template>
+
+
+                                <div class="flex w-full p2p-headline-info">
+                                    <div class="w-full">
+
+                                        <template v-if="order.status == 'payment_pending'">
+                                            <div class="text-headline">{{ $t("After transferring the funds, click on the 'Transferred, notify seller' button.")}}</div>
+                                        </template>
+
+                                        <div class="flex lg:w-1/2 gap-2 w-full-mob flex-col-mob">
+
+                                            <template v-if="order.status == 'payment_pending'">
+
+                                                <div class="lg:w-1/2 w-full">
+                                                    <t-button-green @click.stop="confirmTransfer()" class="components-filter__button mt-8 py-2 px-6">{{ $t('Transferred, notify seller')}}</t-button-green>
+                                                </div>
+
+                                                <div class="lg:w-1/2 w-full">
+                                                    <t-button-green @click.stop="showCancelPopup()" class="components-filter__button components-filter__button-cancel mt-8 py-2 px-6">{{ $t('Cancel Order')}}</t-button-green>
+                                                </div>
+
+                                            </template>
+
+                                            <template v-if="order.status == 'confirm_transfer'">
+
+                                                <div class="lg:w-1/2 w-full">
+                                                    <t-button-green @click.stop="showAppealPopup()" class="components-filter__button mt-8 py-2 px-6" :class="{'button-disabled': !order.appeal_available}">
+
+                                                        <template v-if="order.appeal_available">
+                                                            {{ $t('Appeal') }}
+                                                        </template>
+                                                        <template v-else>
+                                                            {{ $t('Appeal after:')}}
+                                                            <Countdown :key="refreshKey" :end-time="endTimeCalc(order.appeal_available_after)">
+                                                            <span slot="process" slot-scope="{ timeObj }">
+                                                                <template v-if="timeObj.h > 0">
+                                                                    {{ `${timeObj.h}:${timeObj.m}:${timeObj.s}` }}
+                                                                </template>
+                                                                <template v-else>
+                                                                    {{ `${timeObj.m}:${timeObj.s}` }}
+                                                                </template>
+                                                            </span><span slot="finish">00:00</span>
+                                                            </Countdown>
+                                                        </template>
+                                                    </t-button-green>
+                                                </div>
+
+                                                <div class="lg:w-1/2 w-full">
+                                                    <t-button-green @click.stop="showCancelPopup()" class="components-filter__button components-filter__button-cancel mt-8 py-2 px-6">{{ $t('Cancel Order')}}</t-button-green>
+                                                </div>
+
+                                            </template>
+
+                                            <template v-if="order.status == 'cancel' || order.status == 'cancelled_by_owner' || order.status == 'cancelled_by_system' || order.status == 'cancelled_by_counterparty' || order.status == 'completed'">
+                                                <div v-if="$page.props.user.referral_code == order.user.referral_code" class="lg:w-1/2 w-full">
+                                                    <Link :href="route('p2p.profile', order.seller.referral_code)">
+                                                    <t-button-green class="components-filter__button mt-2 py-2 px-6">{{ $t('Reorder')}}</t-button-green>
+                                                    </Link>
+                                                </div>
+                                            </template>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+
+                <div class="container">
+
+                    <div class="flex relative pb-5 w-full">
+                        <div class="order-info-container flex">
+
+                            <div class="">
+                                <div v-if="order.status == 'completed'" class="mr-5">
+                                    <svg class="width64 height64" viewBox="0 0 97 96" xmlns="http://www.w3.org/2000/svg"><path opacity="0.25" fill-rule="evenodd" clip-rule="evenodd" d="M48.096 88c22.091 0 40-17.908 40-40 0-22.09-17.909-40-40-40-22.092 0-40 17.91-40 40 0 22.092 17.908 40 40 40zm12.312-50.597l4.243 4.242-19.799 19.8-4.243-4.243-7.07-7.071 4.242-4.243 7.071 7.071 15.556-15.556z" fill="#2EE39D"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M48.096 77c16.016 0 29-12.983 29-29 0-16.015-12.984-29-29-29-16.017 0-29 12.985-29 29 0 16.017 12.983 29 29 29zm12.312-39.597l4.243 4.242-19.799 19.8-4.243-4.243-7.07-7.071 4.242-4.243 7.071 7.071 15.556-15.556z" fill="#2EE39D"></path></svg>
+                                </div>
+                            </div>
+                            <div class="">
+                                <div class="order-info-container-title">
+                                    <template v-if="order.status == 'payment_pending'">
+                                        {{ $t("Waiting for Buyer's Payment.") }} {{ $t("Time Remaining:") }}
+
+                                        <Countdown :end-time="endTimeCalc(order.cancel_order_after)">
+                                                <span slot="process" slot-scope="{ timeObj }">
+                                                    <template v-if="timeObj.h > 0">
+                                                        {{ `${timeObj.h}:${timeObj.m}:${timeObj.s}` }}
+                                                    </template>
+                                                    <template v-else>
+                                                        {{ `${timeObj.m}:${timeObj.s}` }}
+                                                    </template>
+                                                </span><span slot="finish">00:00</span>
+                                        </Countdown>
+                                    </template>
+                                    <template v-if="order.status == 'confirm_transfer'">
+                                        {{ $t('Verify Payment') }}
+                                    </template>
+                                    <template v-if="order.status == 'completed'">
+                                        {{ $t('Order Completed') }}
+                                    </template>
+                                    <template v-if="order.status == 'appealed_by_counterparty'">
+                                        {{ $t('Appeal in progress.') }} <Link class="action-link" :href="route('p2p.my-appeal', order.id)">{{ $t('View') }}</Link>
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_counterparty'">
+                                        <template v-if="order.cancelledByOwner">
+                                            {{ $t('You Have Canceled the Order') }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('The Order Has Been Cancelled By Counterparty') }}
+                                        </template>
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_owner'">
+                                        <template v-if="order.cancelledByOwner">
+                                            {{ $t('You Have Canceled the Order') }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('The Order Has Been Cancelled By Counterparty') }}
+                                        </template>
+                                    </template>
+                                    <template v-if="order.status == 'cancelled_by_system'">
+                                        {{ $t('The Order Has Been Cancelled By System') }}
+                                    </template>
+                                </div>
+                                <div class="order-info-container-subtitle flex">
+                                    <span>{{ $t('Order Number:') }}</span>
+                                    <div class="ml-1">{{ order.id }}</div>
+                                    <div @click="doCopy(order.id)" class="copy-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect class="list-text__icon-color" x="1" y="2" width="17" height="16" rx="2"/>
+                                            <path class="list-text__icon-color" d="M18 4H18.4C19.8999 4 20.6498 4 21.1756 4.38197C21.3454 4.50533 21.4947 4.65464 21.618 4.82443C22 5.35016 22 6.10011 22 7.6V18.4C22 19.8999 22 20.6498 21.618 21.1756C21.4947 21.3454 21.3454 21.4947 21.1756 21.618C20.6498 22 19.9012 22 18.404 22C15.5371 22 11.3886 22 7.59963 22C6.09998 22 5.35016 22 4.82443 21.618C4.65464 21.4947 4.50533 21.3454 4.38197 21.1756C4 20.6498 4 19.8999 4 18.4V18"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div v-if="order.appealed_at && order.status !== 'appealed_by_counterparty'" class="mt-3 order-info-container-subtitle flex">
+                                    <span>{{ $t('Appeal History:') }}</span>
+                                    <div class="ml-1">
+                                        <Link class="action-link" :href="route('p2p.my-appeal', order.id)">
+                                        {{ $t('View records')}}
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 w-full">
+                        <template v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                    <polygon points="9.993 19.421 3.286 12.58 4.714 11.179 10.007 16.579 19.293 7.293 20.707 8.707 9.993 19.421"/>
+                                </svg>
+
+                            </div>
+                        </template>
+                        <div class="flex-grow  flex sm:items-center items-start flex-col sm:flex-row" :class="{'pl-6': order.status == 'payment_pending' || order.status == 'confirm_transfer'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <h2 v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">{{ $t('Order Created') }}</h2>
+
+                                <div class="flex w-full p2p-headline-info p2p-payment-method-card flex-col" :class="{'no-mt': order.status !== 'payment_pending' || order.status == 'confirm_transfer'}">
+                                    <div class="w-full">
+                                        <div class="text-headline">{{ $t('Fiat Amount')}}</div>
+                                        <div class="text-bottom color-sell">{{ order.quote_amount }} {{ order.quoteSymbol }}</div>
+                                    </div>
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Price')}}</div>
+                                        <div class="text-bottom">{{ order.price }} {{ order.quoteSymbol }}</div>
+                                    </div>
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Crypto Amount')}}</div>
+                                        <div class="text-bottom">{{ order.amount }} {{ order.baseSymbol }}</div>
+                                    </div>
+
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Processing Fee')}}</div>
+                                        <div class="text-bottom">{{ order.fee_taker }} {{ order.baseSymbol }}</div>
+                                    </div>
+
+                                    <div class="w-full mt-5">
+                                        <div class="text-headline">{{ $t('Time Created')}}</div>
+                                        <div class="text-bottom">{{ order.created_at }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 " :class="{'pt-10 pt-5': order.status == 'payment_pending' || order.status == 'confirm_transfer'}">
+                        <template v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">2</div>
+                        </template>
+                        <div class="flex-grow flex sm:items-center items-start flex-col sm:flex-row" :class="{'pl-6': order.status == 'payment_pending' || order.status == 'confirm_transfer'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <h2 v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">{{ $t('Confirm that the payment from ') }} <strong>
+                                    <span class="text-important">
+                                        <template v-if="order.type == 'buy'">{{ order.user.name }}</template>
+                                        <template v-if="order.type == 'sell'">{{ order.seller.name }}</template>
+                                    </span>
+                                    {{ $t("(buyer's name).")}}</strong>
+                                </h2>
+                                <div class="flex w-full p2p-headline-info">
+                                    <div class="w-full">
+                                        <div v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'" class="text-headline">{{ $t("Log into your payment method account below, confirm you have received the payment.")}}</div>
+                                            <div class="p2p-payment-method-card">
+                                                <div class="p2p-payment-method-card-element">
+                                                    <div class="p2p-payment-method-card-left headline-text flex">
+                                                        <div>{{ $t('Payment Method')}}</div>
+                                                    </div>
+                                                    <div class="p2p-payment-method-card-right">
+                                                        <div class="p2p-payment-item">
+                                                            <div class="p2p-payment-badge column-badge" :class='userPaymentMethod.color'></div>
+                                                            {{ userPaymentMethod.name }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div v-for="fields in userPaymentMethod.fields" class="p2p-payment-method-card-element ">
+                                                    <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                                                    <div class="p2p-payment-method-card-right">
+
+                                                        {{ fields.content }}
+
+                                                        <span @click="doCopy(fields.content)" class="copy-icon">
+                                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <rect class="list-text__icon-color" x="1" y="2" width="17" height="16" rx="2"/>
+                                                            <path class="list-text__icon-color" d="M18 4H18.4C19.8999 4 20.6498 4 21.1756 4.38197C21.3454 4.50533 21.4947 4.65464 21.618 4.82443C22 5.35016 22 6.10011 22 7.6V18.4C22 19.8999 22 20.6498 21.618 21.1756C21.4947 21.3454 21.3454 21.4947 21.1756 21.618C20.6498 22 19.9012 22 18.404 22C15.5371 22 11.3886 22 7.59963 22C6.09998 22 5.35016 22 4.82443 21.618C4.65464 21.4947 4.50533 21.3454 4.38197 21.1756C4 20.6498 4 19.8999 4 18.4V18"/>
+                                                        </svg>
+                                                    </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="p2p-payment-method-card-element card-bordered">
+                                                    <div class="p2p-payment-method-card-left headline-text flex">
+                                                        <div>{{ $t("Buyer's name")}}</div>
+                                                    </div>
+                                                    <div class="p2p-payment-method-card-right">
+                                                        <template v-if="order.type == 'buy'">{{ order.user.name }}</template>
+                                                        <template v-if="order.type == 'sell'">{{ order.seller.name }}</template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative pb-5 " :class="{'pt-10 pt-5': order.status == 'payment_pending' || order.status == 'confirm_transfer'}">
+                        <template v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">
+                            <div class="h-full w-6 absolute inset-0 flex items-center justify-center">
+                                <div class="p2p-step-divider h-full w-1 pointer-events-none"></div>
+                            </div>
+                            <div class="p2p-step-pointer flex-shrink-0 w-6 h-6 rounded-full mt-10 sm:mt-0 inline-flex items-center justify-center text-white relative z-10 title-font font-medium text-sm">3</div>
+                        </template>
+                        <div class="flex-grow flex sm:items-center items-start flex-col sm:flex-row w-full-mob"  :class="{'pl-6': order.status == 'payment_pending' || order.status == 'confirm_transfer'}">
+                            <div class="flex-grow  mt-6 sm:mt-0 mt-mob-no w-full-mob">
+                                <h2 v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer' " class="">{{ $t('Confirm payment is received.') }}</h2>
+
+                                <div class="flex w-full p2p-headline-info">
+                                    <div class="w-full">
+                                        <div v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'" class="text-headline">{{ $t('After confirming the payment, be sure click the "Payment Received" button.')}}</div>
+
+                                        <div class="flex lg:w-1/2 gap-2 w-full-mob flex-col-mob">
+
+                                            <template v-if="order.status == 'payment_pending' || order.status == 'confirm_transfer'">
+
+                                                <div class="lg:w-1/2 w-full">
+                                                    <t-button-green :class="{'button-disabled': order.status == 'payment_pending'}" @click.stop="showReleasePopup()" class="components-filter__button mt-8 py-2 px-6">{{ $t('Payment Received')}}</t-button-green>
+                                                </div>
+                                                <div v-if="order.status == 'confirm_transfer'" class="lg:w-1/2 w-full">
+                                                    <t-button-green @click.stop="showAppealPopup()" class="components-filter__button components-filter__button-cancel mt-8 py-2 px-6">{{ $t('Appeal Order')}}</t-button-green>
+                                                </div>
+                                            </template>
+
+                                            <template v-if="order.status == 'cancel' || order.status == 'cancelled_by_owner' || order.status == 'cancelled_by_system' || order.status == 'cancelled_by_counterparty' || order.status == 'completed'">
+                                                <div v-if="$page.props.user.referral_code == order.user.referral_code" class="lg:w-1/2 w-full">
+                                                    <Link :href="route('p2p.profile', order.seller.referral_code)">
+                                                        <t-button-green class="components-filter__button mt-2 py-2 px-6">{{ $t('Reorder')}}</t-button-green>
+                                                    </Link>
+                                                </div>
+                                            </template>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </template>
+            <template v-if="userFeedback">
+                <div class="p2p-order-feedback">
+                    <template v-if="$page.props.user.referral_code == order.user.referral_code">
+                        <div class="p2p-order-feedback-headline">{{ $t('My Feedback')}}</div>
+                    </template>
+                    <template v-else>
+                        <div class="p2p-order-feedback-headline">{{ $t("Counterparty's Feedback")}}</div>
+                    </template>
+
+                    <div class="p2p-order-feedback-body">
+                        <button class="btn-large mr-2" :class="{'btn-large-green': !userFeedback.is_negative, 'btn-large-red': userFeedback.is_negative}">
+                            <div class="mr-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="bn-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z" fill="currentColor"></path></svg></div>
+                            <div class="btnLink2 no-underline">{{ $t(userFeedback.is_negative ? 'Negative' : 'Positive')}}</div>
+                        </button>
+                    </div>
+
+                    <div class="p2p-order-feedback-date">
+                        <div>{{ userFeedback.created_at }}</div>
+
+                        <div v-if="$page.props.user.referral_code == order.user.referral_code" @click.prevent="editFeedback(userFeedback)" class="cursor-pointer table-div-body-column-container-action">
+                            <svg width="17" height="17" class="fill-gray" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g transform="translate(-59.000000, -400.000000)">
+                                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                                            <path d="M3,260 L24,260 L24,258.010742 L3,258.010742 L3,260 Z M13.3341,254.032226 L9.3,254.032226 L9.3,249.950269 L19.63095,240 L24,244.115775 L13.3341,254.032226 Z" ></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <div v-if="$page.props.user.referral_code == order.user.referral_code" @click.prevent="deleteFeedback(userFeedback)" class="cursor-pointer table-div-body-column-container-action">
+                            <svg class="stroke-gray" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 11V17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 11V17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4 7H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6 7H12H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="p2p-order-feedback-body">
+                        {{ userFeedback.content }}
+                    </div>
+
+                    <div v-if="userFeedback.reply_content" class="p2p-order-feedback-headline">
+                        <template v-if="$page.props.user.referral_code == order.user.referral_code">
+                            {{ $t("Counterparty's Feedback")}}
+                        </template>
+                        <template v-else>
+                            {{ $t("My Feedback")}}
+                        </template>
+                    </div>
+
+                    <div class="p2p-order-feedback-body">
+                        {{ userFeedback.reply_content }}
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <template v-if="order.user && $page.props.user.referral_code == order.user.referral_code && order.status == 'completed'">
+                    <div class="p2p-order-feedback">
+                        <div class="p2p-order-feedback-headline">{{ $t('How was your trading experience?')}}</div>
+                        <div class="p2p-order-feedback-actions">
+                            <button @click="leaveFeedback(true, true)" class="btn-large">
+                                <div class="mr-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="bn-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z" fill="currentColor"></path></svg></div>
+                                <div class="btnLink2 no-underline">{{ $t('Positive') }}</div>
+                            </button>
+                            <button @click="leaveFeedback(false, true)" class="btn-large">
+                                <div class="mr-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="bn-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 14.268l3.444 3.392v3.321h.888a3.106 3.106 0 003.106-3.105v-1.673H21V9.778A4.778 4.778 0 0016.222 5H8v9.268zm-2 .039H3V5h3v9.306z" fill="currentColor"></path></svg></div>
+                                <div class="btnLink2 no-underline">{{ $t('Negative') }}</div>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </div>
+
+        <div class="lg:w-1/3 w-full">
+            <chat :order="order"></chat>
+        </div>
+    </div>
+</div>
+
+<jet-dialog-modal :max-width="'6xl'" :show="showConfirmAd" @close="showConfirmAd = null">
+    <template #content>
+        <div class="p2pmodal">
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-secondary-button @click.native="showConfirmAd = null">
+            {{ $t('Cancel') }}
+        </jet-secondary-button>
+
+        <jet-button class="ml-2" @click.native="confirmTransfer">
+            {{ $t('Confirm Transfer') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+
+<jet-dialog-modal :max-width="'6xl'" :show="showReleaseOrder" @close="showReleaseOrder = null">
+    <template #title>
+        {{ $t('Received payment in your account?') }}
+    </template>
+    <template #content>
+        <div class="p2pmodal flex-col">
+            <div class="p2pmodal-information">
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        <svg height="18" width="18" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 490.05 490.05" xml:space="preserve">
+                            <g>
+                                <g>
+                                    <path d="M418.275,418.275c95.7-95.7,95.7-250.8,0-346.5s-250.8-95.7-346.5,0s-95.7,250.8,0,346.5S322.675,513.975,418.275,418.275
+                                        z M157.175,207.575l55.1,55.1l120.7-120.6l42.7,42.7l-120.6,120.6l-42.8,42.7l-42.7-42.7l-55.1-55.1L157.175,207.575z"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t('Log in to your receiving account to verify that the payment has been credited to your account.') }}
+                    </div>
+                </div>
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        <svg height="18" width="18" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                             viewBox="0 0 490.05 490.05" xml:space="preserve">
+                            <g>
+                                <g>
+                                    <path d="M418.275,418.275c95.7-95.7,95.7-250.8,0-346.5s-250.8-95.7-346.5,0s-95.7,250.8,0,346.5S322.675,513.975,418.275,418.275
+                                        z M157.175,207.575l55.1,55.1l120.7-120.6l42.7,42.7l-120.6,120.6l-42.8,42.7l-42.7-42.7l-55.1-55.1L157.175,207.575z"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t("Verify the buyer's real name.") }}
+                    </div>
+                </div>
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        <svg height="18" width="18" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                             viewBox="0 0 490.05 490.05" xml:space="preserve">
+                            <g>
+                                <g>
+                                    <path d="M418.275,418.275c95.7-95.7,95.7-250.8,0-346.5s-250.8-95.7-346.5,0s-95.7,250.8,0,346.5S322.675,513.975,418.275,418.275
+                                        z M157.175,207.575l55.1,55.1l120.7-120.6l42.7,42.7l-120.6,120.6l-42.8,42.7l-42.7-42.7l-55.1-55.1L157.175,207.575z"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t('Check the box below, then click "Confirm Release" to proceed with the crypto release.') }}
+                    </div>
+                </div>
+            </div>
+            <div class="p2pmodal-information-checkbox">
+                <div class="form-components__block ">
+                    <div class="form-components__block-item block-checkbox cursor-pointer">
+                        <jet-checkbox name="terms" id="FormLabel-ref-state" v-model="releaseCheckboxState" />
+                        <label class="form-components__block-label" for="FormLabel-ref-state">
+                            {{ $t('I have verified that I received')}} {{ order.quote_amount }} {{ order.quoteSymbol }} {{ $t('in my account from the buyer')}} -
+                            <template v-if="order.type == 'buy'">{{ order.user.name }}</template>
+                            <template v-if="order.type == 'sell'">{{ order.seller.name }}</template>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="$page.props.user.two_factor_enabled" class="p2p-order-feedback-body p2p-form-modal mt-4">
+                <div class="components-filter__item"><label>{{ $t('2FA Code') }}</label>
+                    <input :placeholder="$t('Enter 2FA Code')" type="text" maxlength="20" v-model="releaseTwoFa" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template #footer>
+        <jet-button class="ml-2" :class="{'button-disabled': !releaseCheckboxState}" @click.native="releaseOrder">
+            {{ $t('Confirm Release') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+<jet-dialog-modal :max-width="'6xl'" :show="showCancelOrder" @close="showCancelOrder = null">
+    <template #title>
+        {{ $t('Cancellation Reason') }}
+    </template>
+    <template #content>
+        <div class="p2pmodal flex-col">
+            <div class="">{{ $t('Due to buyer')}}</div>
+            <div class="mt-5 input-radio">
+                <t-radio id="cancelForm1" name="document" v-model="cancelForm.type" value="1" />
+                <label for="cancelForm1">{{ $t(buyerCancellationReasons[0]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm2" name="document" v-model="cancelForm.type" value="2"/>
+                <label for="cancelForm2">{{ $t(buyerCancellationReasons[1]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm3" name="document" v-model="cancelForm.type" value="3"/>
+                <label for="cancelForm3">{{ $t(buyerCancellationReasons[2]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm4" name="document" v-model="cancelForm.type" value="4"/>
+                <label for="cancelForm4">{{ $t(buyerCancellationReasons[3]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm5" name="document" v-model="cancelForm.type" value="5"/>
+                <label for="cancelForm5">{{ $t(buyerCancellationReasons[4]) }}</label>
+            </div>
+
+            <div v-if="cancelForm.type == 5" class="mt-2 input-radio">
+                <textarea ref="message" v-model="cancelForm.message" type="text" :placeholder="$t('Reason will not be displayed to the counterparty.')"
+                      class="textarea-modal"
+                      name="message" />
+            </div>
+
+            <div class="mt-10">{{ $t('Due to seller')}}</div>
+            <div class="mt-5 input-radio">
+                <t-radio id="cancelForm6" name="document" v-model="cancelForm.type" value="6" />
+                <label for="cancelForm6">{{ $t(sellerCancellationReasons[0]) }}</label>
+            </div>
+            <div class="mt-2 input-radio mb-10">
+                <t-radio id="cancelForm7" name="document" v-model="cancelForm.type" value="7"/>
+                <label for="cancelForm7">{{ $t(sellerCancellationReasons[1]) }}</label>
+            </div>
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-button class="ml-2" @click.native="cancelOrder">
+            {{ $t('Confirm Cancellation') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+<jet-dialog-modal :max-width="'6xl'" :show="showAppealOrder" @close="showAppealOrder = null">
+    <template #title>
+        {{ $t('Submit Appeal') }}
+    </template>
+    <template #content>
+        <div class="p2pmodal flex-col">
+            <div class="p2pmodal-information p2pmodal-information-warning">
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        1
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t('Submitted contents are visible to both parties and CS. Avoid including any private or sensitive info.') }}
+                    </div>
+                </div>
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        2
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t("Baseless appeals can result in account ban.") }}
+                    </div>
+                </div>
+                <div class="p2pmodal-information-item">
+                    <div class="p2pmodal-information-item-icon">
+                        3
+                    </div>
+                    <div class="p2pmodal-information-item-text">
+                        {{ $t('CS review takes a few hours. More proof from both parties might be requested.') }}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10 p2p-order-feedback-body">
+                <label class="">{{ $t('Description (Max Length: 500)')}}</label>
+                <textarea maxlength="500" class="textarea-modal mt-5" :placeholder="$t('Please describe the complaint as detailed as possible')" v-model="appealForm.reason"></textarea>
+            </div>
+
+            <div class="mt-5 mb-10 form-components__block-item">
+
+                <label class="mb-5">{{ $t('Upload proof (Mandatory)') }}</label>
+
+                <div class="text-small">
+                    <p class="mb-5 mt-5">{{ $t('Screenshots or video/audio recordings of payment and communication data should not exceed a total of 5 files with total size of 200 MB. Supported file formats include pdf, jpg, jpeg, png, mp4, avi, mov, wmv.')}}</p>
+                    <ul>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Interface / Check">
+                                    <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                            </svg>
+                            {{ $t('Ensure that the date, time, account number, and name of the sender and recipient are displayed in the payment transaction details.') }}</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Interface / Check">
+                                <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>{{ $t('Video should show the entire payment account log in process (please hide the password), and the payment transaction details.') }}</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Interface / Check">
+                                <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>{{ $t('Video must be recorded using another phone/camera and unedited.') }}</li>
+                        <li><svg class="close-fill" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9393 12L6.9696 15.9697L8.03026 17.0304L12 13.0607L15.9697 17.0304L17.0304 15.9697L13.0607 12L17.0303 8.03039L15.9696 6.96973L12 10.9393L8.03038 6.96973L6.96972 8.03039L10.9393 12Z" />
+                        </svg>{{ $t('Account will be restricted if fake payment proof is provided.') }}</li>
+                    </ul>
+                </div>
+                <div id="file-uploader-form" class="file-uploader-form-modal">
+                    <VueFileAgent
+                        class="profile-pic-upload-block"
+                        ref="fileUploadForm"
+                        :multiple="true"
+                        :deletable="true"
+                        :meta="false"
+                        :maxFiles="5"
+                        :accept="'image/*,video/*,.pdf'"
+                        :helpText="'Drag an image file here'"
+                        :errorText="{type: 'Please select an image'}"
+                        v-model="fileRecords"
+                        @select="onSelect($event)"
+                        @upload="onUpload($event)"
+                        @beforedelete="onDelete($event)"
+                    >
+
+                    </VueFileAgent>
+                </div>
+                <div class="text-red-600 mb-3" v-if="appealErrors">
+                    {{ appealErrors }}
+                </div>
+            </div>
+
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-button class="ml-2" @click.native="appealOrder">
+            {{ $t('Send Appeal') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+<jet-dialog-modal :max-width="'4xl'" :show="showFeedbackOrder" @close="showFeedbackOrder = null">
+    <template #title>
+        {{ $t('Feedback')}}
+    </template>
+    <template #content>
+        <div class="p2p-order-feedback-modal">
+
+            <div class="p2p-order-feedback-headline">{{ $t('How was your trading experience?')}}</div>
+
+            <div class="p2p-order-feedback-actions">
+                <button @click="leaveFeedback(true)" class="btn-large mr-2" :class="{'btn-large-green': showFeedbackType}">
+                    <div class="mr-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="bn-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z" fill="currentColor"></path></svg></div>
+                    <div class="btnLink2 no-underline">{{ $t('Positive')}}</div>
+                </button>
+                <button @click="leaveFeedback(false)" class="btn-large" :class="{'btn-large-red': !showFeedbackType}">
+                    <div class="mr-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="bn-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 14.268l3.444 3.392v3.321h.888a3.106 3.106 0 003.106-3.105v-1.673H21V9.778A4.778 4.778 0 0016.222 5H8v9.268zm-2 .039H3V5h3v9.306z" fill="currentColor"></path></svg></div>
+                    <div class="btnLink2 no-underline">{{ $t('Negative')}}</div>
+                </button>
+            </div>
+            <div class="p2p-order-feedback-body">
+                <textarea v-model="feedbackForm.content"></textarea>
+
+                <div class="form-components__block">
+                    <div class="block-checkbox__group">
+                        <jet-checkbox id="p2p-popup-feedback-anonymous" :value="1" v-model="feedbackForm.is_anonymous"/>
+                        <label for="p2p-popup-feedback-anonymous" class="form-components__block-label">
+                            <div>{{ $t('Anonymous') }}</div>
+                            <small>
+                                <template v-if="feedbackForm.is_anonymous">
+                                    {{ $t('Your comment will be displayed anonymously')}}
+                                </template>
+                                <template v-else>
+                                    {{ $t('By selecting this, your comment will be displayed anonymously')}}
+                                </template>
+                            </small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-button class="ml-2" @click.native="submitFeedback">
+            {{ $t('Leave comments') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+<jet-dialog-modal :show="showMethods" @close="closeMethods">
+    <template #title>
+        {{ $t('Select Payment Methods')}}
+    </template>
+    <template #content>
+        <div class="payment-method-wrapper-modal">
+
+            <div class="checkbox-select-group" v-if="paymentMethods" v-for="method in paymentMethods">
+                <label class="" @click="confirmMethod(method)">
+                    <div class="flex items-center justify-between p2p-payment-method-card-mini-head">
+                            <span class="ml-2 text-sm text-gray-600 flex">
+                                <div class="payment-method-label blue"></div>
+                                <div class="payment-method-title">{{ method.name }}</div>
+                            </span>
+                    </div>
+                    <div class="p2p-payment-method-card p2p-payment-method-card-mini">
+                        <div v-for="fields in method.fields" class="p2p-payment-method-card-element ">
+                            <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                            <div class="p2p-payment-method-card-right">
+                                {{ fields.content }}
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </template>
+</jet-dialog-modal>
+</app-layout>

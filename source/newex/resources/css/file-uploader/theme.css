@@ -1,0 +1,115 @@
+#file-uploader-form .drop-help-text {
+    display: none;
+}
+#file-uploader-form .is-drag-over .drop-help-text {
+    display: block;
+}
+#file-uploader-form .profile-pic-upload-block {
+    border: 2px dashed transparent;
+    padding: 0px;
+    padding-top: 0;
+}
+
+#file-uploader-form .is-drag-over.profile-pic-upload-block {
+    border-color: #aaa;
+}
+#file-uploader-form .vue-file-agent {
+    width: 80px;
+    float: left;
+    margin: 0 15px 5px 0;
+    border: 0;
+    box-shadow: none;
+}
+
+#file-uploader-form .file-error-message {
+    display: none !important;
+}
+
+#file-uploader-form .file-progress-bar {
+    background: #12b981;
+}
+
+#file-uploader-form .has-error .file-progress-bar {
+    background: #ef4444;
+}
+
+#file-uploader-form .vue-file-agent .file-preview-new svg {
+    display: inline-block;
+}
+
+.quillWrapper .ql-toolbar {
+    -webkit-border-top-left-radius: 6px;
+    -webkit-border-top-right-radius: 6px;
+    -moz-border-radius-topleft: 6px;
+    -moz-border-radius-topright: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.quillWrapper .ql-container, .quillWrapper .ql-editor {
+    -webkit-border-bottom-right-radius: 6px;
+    -webkit-border-bottom-left-radius: 6px;
+    -moz-border-radius-bottomright: 6px;
+    -moz-border-radius-bottomleft: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.ql-editor {
+    height: 850px !important;
+}
+
+.ql-video {
+    width: 560px;
+    height: 315px;
+}
+
+.ql-editor iframe {
+    width: 500px;
+    height: auto;
+}
+
+.grid-block-wrapper .grid-block {
+    min-width: 80px !important;
+}
+
+.vue-file-agent .file-preview-new .help-text {
+    font-size: 11px !important;
+    line-height: 14px !important;
+}
+
+.vue-file-agent .file-preview-new svg {
+    margin-top: 0 !important;
+    height: 28% !important;
+}
+
+.admin-dashboard-nav svg {
+    width: 16px !important;
+}
+
+
+.admin-layout .admin-filter-dropdown {
+    position: fixed; top: 0; right: 0; left: 0; bottom: 0; z-index: 99998; background: black; opacity: .2
+}
+
+.admin-layout .admin-filter-dropdown-secondary {
+    position: absolute; z-index: 99999;
+}
+
+.network-select {
+    background: transparent;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+    border: 1px solid #e4e7eb;
+    width: 100%;
+}
+
+.network-select option {
+    background: #1d2234;
+    color: #fff;
+}
+
+.dark .network-select {
+    border: 1px solid #252539;
+}

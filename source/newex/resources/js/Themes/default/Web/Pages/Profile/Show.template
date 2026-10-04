@@ -1,0 +1,308 @@
+<app-layout>
+<section class="dp-profile">
+    <Head>
+        <title>{{ $t('My Dashboard')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="components-title"><h2>{{ $t('User Dashboard') }}</h2></div>
+
+    <!-- tab component nav start -->
+    <div class="tabs-components tabs">
+
+        <!-- tabs left start -->
+        <div class="tabs-left mob-hide">
+            <div class="tabs-nav">
+                <div
+                    @click="setPage('info')"
+                    class="mobapp-hide tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'info'}"
+                >
+                    <h4>{{ $t('Profile') }}</h4>
+                </div>
+
+                <div
+                    @click="setPage('password')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'password'}"
+                >
+                    <h4>{{ $t('Change Password') }}</h4>
+                </div>
+
+                <div
+                    @click="setPage('2fa')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == '2fa'}"
+                >
+                    <h4>{{ $t('2FA') }}</h4>
+                </div>
+
+                <div
+                    @click="setPage('browser_sessions')"
+                    class="mobapp-hide tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'browser_sessions'}"
+                >
+                    <h4>{{ $t('Browser Sessions') }}</h4>
+                </div>
+
+                <Link
+                    as="div"
+                    :href="route('api-tokens.index', {'lite': 1})"
+                    class="tabs-nav__item"
+                >
+                    {{ $t('API') }}
+                </Link>
+
+                <div
+                    @click="setPage('user.kyc', true)"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'kyc'}"
+                >
+                    <h4>{{ $t('KYC') }}</h4>
+                </div>
+
+                <div v-if="$uiFeatures.bankPayout"
+                    @click="setPage('bank_accounts')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'bank_accounts'}"
+                >
+                    <h4>{{ $t('Bank Accounts') }}</h4>
+                </div>
+
+
+
+                <div
+                    v-if='$page.props.mode !== "readonly"'
+                    @click="setPage('account_delete')"
+                    class="mobapp-hide tabs-nav__item"
+                    :class="{'tabs-nav__active' : page == 'account_delete'}"
+                >
+                    <h4>{{ $t('Delete Account') }}</h4>
+                </div>
+            </div>
+        </div>
+        <!-- tabs left end -->
+
+        <div class="form-search__result-block mob-show">
+            <div class="form-search__result-title">
+                {{ $t('Select section') }}
+            </div>
+
+            <div class="form-search__result-link">
+                <themed-select v-model="tabPage" @change="setTabPage" class="network-select">
+                    <option value="info">{{ $t('Profile') }}</option>
+                    <option value="kyc">{{ $t('KYC') }}</option>
+                    <option v-if="$uiFeatures.bankPayout" value="bank_accounts">{{ $t('Bank Accounts') }}</option>
+                    <option value="password">{{ $t('Password Change') }}</option>
+                    <option value="2fa">{{ $t('Two Factor Authentication') }}</option>
+                    <option value="browser_sessions">{{ $t('Browser Sessions') }}</option>
+                    <option value="api_tokens">{{ $t('Api Tokens') }}</option>
+                    <option v-if='$page.props.mode !== "readonly"' value="account_delete">{{ $t('Delete Account') }}</option>
+                </themed-select>
+            </div>
+        </div>
+
+    </div>
+    <!-- tab component nav end -->
+
+    <div class="profile-inner-page">
+        <template v-if="page == 'vouchers'">
+            <vouchers />
+        </template>
+
+        <template v-else-if="page == 'bank_accounts'">
+            <bank-accounts />
+        </template>
+
+        <template v-else-if="page == 'password'">
+            <update-password-form />
+        </template>
+
+        <template v-else-if="page == '2fa'">
+            <two-factor-authentication-form />
+        </template>
+
+        <template v-else-if="page == 'browser_sessions'">
+            <logout-other-browser-sessions-form :sessions="sessions"/>
+        </template>
+
+        <template v-else-if="page == 'account_delete'">
+            <delete-user-form class=" sm:mt-0" />
+        </template>
+
+        <template v-else>
+            <!-- Overview Dashboard -->
+            <div class="space-y-6">
+                <!-- Profile header and quick summary -->
+                <div class="bordered-dark rounded p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                {{ $t ? $t('Account Overview') : 'Account Overview' }}
+                            </h3>
+
+                            <div class="text-sm text-gray-500 mt-1">
+                                {{ $t ? $t('Manage your profile, security, and funds from one place.') : 'Manage your profile, security, and funds from one place.' }}
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500 text-balance">
+                                {{ $t ? $t('Estimated Balance') : 'Estimated Balance' }}
+                            </div>
+
+                            <div class="text-2xl font-bold">
+                                ≈ {{ Number(totalBalanceUSD || 0).toFixed(2) }}$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Allocation -->
+                <div v-if="wallets" class="bordered-dark rounded p-5">
+                    <div class="flex flex-col md:flex-row gap-6 items-center chart-flex-row">
+                        <div v-if="assetAllocationData.length" class="flex-0">
+                            <simple-pie :data="assetAllocationData" :size="220" :thickness="28" />
+                        </div>
+
+                        <div class="flex-1 w-full">
+                            <h4 class="text-lg font-semibold mb-3">
+                                {{ $t ? $t('Asset Allocation') : 'Asset Allocation' }}
+                            </h4>
+
+                            <div v-if="assetAllocationData.length" class="space-y-2">
+                                <div
+                                    v-for="(d, idx) in assetAllocationData"
+                                    :key="idx"
+                                    class="flex items-center justify-between"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            :style="{
+                                                background: d.color,
+                                                width: '10px',
+                                                height: '10px',
+                                                display: 'inline-block',
+                                                borderRadius: '2px'
+                                            }"
+                                        ></span>
+                                        <span class="font-medium">{{ d.label }}</span>
+                                    </div>
+
+                                    <div class="text-right text-sm">
+                                        <div class="font-semibold">
+                                            ≈ {{ Number(d.value || 0).toFixed(2) }}$
+                                        </div>
+
+                                        <div class="text-gray-500">
+                                            {{ assetTotalUSD > 0 ? ((d.value / assetTotalUSD) * 100).toFixed(2) : '0.00' }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-else class="text-gray-500">
+                                {{ $t ? $t('No assets to display yet.') : 'No assets to display yet.' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security & Compliance -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bordered-dark rounded p-5">
+                        <h4 class="text-lg font-semibold mb-3">
+                            {{ $t ? $t('Security') : 'Security' }}
+                        </h4>
+
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center justify-between">
+                                <span>
+                                    {{ $t ? $t('Two-Factor Authentication (2FA)') : 'Two-Factor Authentication (2FA)' }}
+                                </span>
+
+                                <span
+                                    class=""
+                                    :class="($page.props.user && $page.props.user.two_factor_enabled) ? 'text-green-500' : 'text-red-500'"
+                                >
+                                    {{ ($page.props.user && $page.props.user.two_factor_enabled) ? ($t ? $t('Enabled') : 'Enabled') : ($t ? $t('Disabled') : 'Disabled') }}
+
+                                    <Link :href="route('profile.show', { slug: '2fa', lite: 1 })" class="text-yellow ml-4">
+                                        {{ $t ? $t('Configure 2FA') : 'Configure 2FA' }}
+                                    </Link>
+                                </span>
+                            </li>
+
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('Change Password') : 'Change Password' }}</span>
+                                <Link :href="route('profile.show', { slug: 'password', lite: 1 })" class="text-yellow">
+                                    {{ $t ? $t('Manage') : 'Manage' }}
+                                </Link>
+                            </li>
+
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('Browser Sessions') : 'Browser Sessions' }}</span>
+                                <Link :href="route('profile.show', { slug: 'browser_sessions', lite: 1 })" class="text-yellow">
+                                    {{ $t ? $t('Manage') : 'Manage' }}
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bordered-dark rounded p-5">
+                        <h4 class="text-lg font-semibold mb-3">
+                            {{ $t ? $t('Compliance') : 'Compliance' }}
+                        </h4>
+
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('KYC Verification') : 'KYC Verification' }}</span>
+
+                                <span
+                                    class=""
+                                    :class="($page.props.user && $page.props.user.kyc_verified) ? 'text-green-500' : 'text-red-500'"
+                                >
+                                    {{ ($page.props.user && $page.props.user.kyc_verified) ? ($t ? $t('Verified') : 'Verified') : ($t ? $t('Not Verified') : 'Not Verified') }}
+
+                                    <Link v-if="!$page.props.user.kyc_verified" :href="route('user.kyc')" class="text-yellow ml-4">
+                                        {{ $t ? $t('Verify') : 'Verify' }}
+                                    </Link>
+                                </span>
+                            </li>
+
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('Bank Accounts') : 'Bank Accounts' }}</span>
+
+                                <Link v-if="$uiFeatures.bankPayout" :href="route('profile.show', { slug: 'bank_accounts', lite: 1 })" class="text-yellow">
+                                    {{ $t ? $t('Manage') : 'Manage' }}
+                                </Link>
+                            </li>
+
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('API Keys') : 'API Keys' }}</span>
+
+                                <Link :href="route('api-tokens.index', { lite: 1 })" class="text-yellow">
+                                    {{ $t ? $t('Manage') : 'Manage' }}
+                                </Link>
+                            </li>
+
+                            <li class="flex items-center justify-between">
+                                <span>{{ $t ? $t('Vouchers & Promotions') : 'Vouchers & Promotions' }}</span>
+
+                                <Link :href="route('profile.show', { slug: 'vouchers', lite: 1 })" class="text-yellow">
+                                    {{ $t ? $t('View') : 'View' }}
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Profile details -->
+                <div class="bordered-dark rounded p-5">
+                    <profile-information :user="$page.props.user" />
+                </div>
+            </div>
+        </template>
+    </div>
+</section>
+</app-layout>

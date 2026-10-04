@@ -1,0 +1,60 @@
+<div>
+    <div class="profile-information">
+        <!-- form components start -->
+        <div class="form-components">
+
+            <div class="mb-6">
+            <h3 class="text-xl font-semibold">{{ $t('User Information')}}</h3>
+            </div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+                    <div class="">
+                        <div class="form-components__block-item block-text">
+                            <p>{{ $t('User ID:') }} <strong>{{ user.referral_code }} <span @click="doCopy(user.referral_code)" class="form-search__result-icon pt-1 ">
+                                    <svg-icon icon="copy" classname="form-search__result-color"></svg-icon>
+                                </span></strong></p>
+                            <p class="mt-4">{{ $t('Email:') }} <strong>{{ user.email ? user.email : $t('Not Set') }}</strong></p>
+                            
+                            <p class="mt-4">
+                                <span class="inline-flex items-center whitespace-nowrap">
+                                    {{ $t('Vip:') }}
+                                    <strong class="ml-1">{{ $page.props.vip ? $page.props.vip : 0 }}</strong>
+                            
+                                    <span
+                                        class="cursor-pointer text-indigo-500 hover:text-indigo-600 inline-flex items-center ml-1"
+                                        @click="goVipHelp"
+                                        title="VIP Help"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            style="width:16px;height:16px;display:inline-block;vertical-align:middle;"
+                                        >
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
+                                            <path d="M12 17h.01"></path>
+                                        </svg>
+                                    </span>
+                                </span>
+                            </p>
+                            <p class="mt-4 ">
+                                {{ $t('Referral Link:') }} <strong>{{ route('register', { referral: user.referral_code }) }}</strong>
+                                <span @click="doCopy(route('register', { referral: user.referral_code}))" class="form-search__result-icon pt-1 ">
+                                    <svg-icon icon="copy" classname="form-search__result-color"></svg-icon>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- form components end -->
+    </div>
+
+</div>

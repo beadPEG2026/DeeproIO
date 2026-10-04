@@ -1,0 +1,73 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("币种") }}</h1>
+    <div class="mb-6 flex justify-between items-center">
+        <search-filter v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset">
+            <label class="block text-gray-700">{{ $t("类型：") }}</label>
+            <themed-select v-model="form.type" class="mt-1 w-full form-select rounded">
+                <option :value="null" />
+                <option value="coin">{{ $t("数字货币") }}</option>
+                <option value="fiat">{{ $t("法币") }}</option>
+            </themed-select>
+        </search-filter>
+        <nav-button-link :href="route('admin.currencies.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新币种") }}</span>
+        </nav-button-link>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("符号") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+            </tr>
+            <tr v-for="currency in currencies.data" :key="currency.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.currencies.edit', currency.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ currency.name }}
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <Link :href="route('admin.currencies.edit', currency.id)" class="px-6 py-4 flex items-center">
+                        {{ currency.symbol }}
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <badge v-if="currency.type == 'coin'" class="mr-2" type="gray">
+                            {{ $t("数字货币") }}
+                        </badge>
+                        <badge v-if="currency.type == 'fiat'" class="mr-2" type="green">
+                            {{ $t("法币") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+
+                        <badge class="mr-2" v-if="currency.deleted_at" type="red">
+                            {{ $t("已删除") }}
+                        </badge>
+
+                        <badge class="mr-2" v-if="!currency.deleted_at" :type="currency.status ? 'green' : 'gray'">
+                            {{ currency.status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+
+                        <badge class="mr-2" v-if="!currency.deleted_at && currency.status" :type="currency.deposit_status ? 'green' : 'red'">
+                            {{ currency.deposit_status ? $t("可充值") : $t("暂停充值") }}
+                        </badge>
+
+                        <badge v-if="!currency.deleted_at && currency.status" :type="currency.withdraw_status ? 'green' : 'red'">
+                            {{ currency.withdraw_status ? $t("可提现") : $t("暂停提现") }}
+                        </badge>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="currencies.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("未找到币种。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="currencies.links" />
+</app-layout>

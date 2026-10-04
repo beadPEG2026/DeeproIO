@@ -1,0 +1,60 @@
+<app-layout>
+  <Head>
+    <title>{{ $t('Trading Rules') }}</title>
+    <meta name="description" content="" />
+  </Head>
+
+  <div class="components-title"><h2>{{ $t('Trading Rules') }}</h2></div>
+
+  <div class="bordered-dark rounded p-5 mb-4">
+    <div class="text-sm text-gray-600">
+      <div>
+        <strong>{{ $t('Global Fees') }}:</strong>
+        <span class="ml-2">{{ $t('Maker') }}: {{ makerFee }}%</span>
+        <span class="ml-4">{{ $t('Taker') }}: {{ takerFee }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <p v-if="intro()" class="dp-rules-intro">{{ intro() }}</p>
+  <div class="table-components">
+    <table class="tables mob-table-referral-transactions">
+      <thead class="table-sort no-cursor">
+        <tr>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Pair') }}</span></div></th>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Minimum order quantity (base asset)') }}</span></div></th>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Minimum Amount Movement') }}</span></div></th>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Minimum Price Movement') }}</span></div></th>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Minimum order value (quote asset)') }}</span></div></th>
+        </tr>
+      </thead>
+      <tbody class="table-list">
+        <tr v-for="m in markets" :key="m.id">
+          <td>
+            <div class="table-list__subtitle">{{ $t('Pair') }}</div>
+            <div class="table-list__value title-icon">
+              <div class="title-icon__name">{{ m.base_currency && m.base_currency.symbol }}<span class="quote-symbol">/{{ m.quote_currency && m.quote_currency.symbol }}</span></div>
+            </div>
+          </td>
+          <td>
+            <div class="table-list__subtitle">{{ $t('Minimum order quantity (base asset)') }}</div>
+            <div class="table-list__value"><div class="table-list__text">{{ m.min_trade_size }} {{ m.base_currency && m.base_currency.symbol }}</div></div>
+          </td>
+          <td>
+            <div class="table-list__subtitle">{{ $t('Minimum Amount Movement') }}</div>
+            <div class="table-list__value"><div class="table-list__text">{{ m.base_ticker_size }} {{ m.base_currency && m.base_currency.symbol }}</div></div>
+          </td>
+          <td>
+            <div class="table-list__subtitle">{{ $t('Minimum Price Movement') }}</div>
+            <div class="table-list__value"><div class="table-list__text">{{ m.quote_ticker_size }} {{ m.quote_currency && m.quote_currency.symbol }}</div></div>
+          </td>
+          <td>
+            <div class="table-list__subtitle">{{ $t('Minimum order value (quote asset)') }}</div>
+            <div class="table-list__value"><div class="table-list__text">{{ m.min_trade_value }} {{ m.quote_currency && m.quote_currency.symbol }}</div></div>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot class="table-result"></tfoot>
+    </table>
+  </div>
+</app-layout>

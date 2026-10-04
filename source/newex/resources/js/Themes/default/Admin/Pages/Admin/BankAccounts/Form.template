@@ -1,0 +1,66 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.bank_accounts')">{{ $t("银行账户") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("银行账户信息") }}</div>
+                </div>
+
+                <text-input v-model="form.name" :error="errors.name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;银行名称&quot;)" />
+
+                <text-input v-model="form.reference_number" :error="errors.reference_number" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;参考编号&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("国家：") }}</label>
+                    <t-rich-select
+                        :options="countries"
+                        v-model="form.country_id"
+                        placeholder="选择国家"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.country_id" class="form-error text-red-400">{{ errors.country_id }}</div>
+                </div>
+
+                <text-input v-model="form.address" :error="errors.address" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;银行地址&quot;)" />
+                <text-input v-model="form.account_holder_name" :error="errors.account_holder_name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;账户持有人&quot;)" />
+                <text-input v-model="form.account_holder_address" :error="errors.account_holder_address" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;账户持有人地址&quot;)" />
+
+                <text-input v-model="form.iban" :error="errors.iban" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;IBAN&quot;)" />
+                <text-input v-model="form.swift" :error="errors.swift" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;SWIFT&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用银行账户") }}</label>
+                    <t-toggle v-model="form.status" />
+
+                    <jet-input-error :message="errors.status" class="mt-2" />
+                </div>
+
+                <text-input v-model="form.ifsc" :error="errors.ifsc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;IFSC&quot;)" />
+
+                <textarea-input v-model="form.note" :error="errors.note" class="pr-6 pb-8 w-full h-100" :label="$t(&quot;备注&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除银行账户") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

@@ -1,0 +1,510 @@
+<app-layout class="dp-kyc-page">
+    <Head>
+        <title>{{ $t('KYC') }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="form-container">
+
+        <template v-if="$page.props.mode == 'readonly'">
+
+            <section class="user-status">
+                <div class="user-status__row">
+                    <div class="user-status__item">
+                        <font-awesome-icon class="text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation"></font-awesome-icon>
+                        <h2 class="user-status__title">{{ $t('KYC is disabled in Demo Mode') }}</h2>
+                        <p class="mb-8 leading-relaxed">{{ $t("KYC's full functionality is enabled only in production mode.") }}</p>
+                    </div>
+                </div>
+            </section>
+
+        </template>
+        <template v-else>
+
+            <template v-if="disabled">
+
+                <section class="user-status">
+                    <div class="user-status__row">
+                        <div class="user-status__item">
+                            <font-awesome-icon class="text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation"></font-awesome-icon>
+                            <h2 class="user-status__title">{{ $t('KYC Is Disabled') }}</h2>
+                            <p class="mb-8 leading-relaxed">{{ $t("KYC is disabled in the platform.") }}</p>
+                        </div>
+                    </div>
+                </section>
+
+            </template>
+
+            <template v-else>
+
+                <template v-if="false">
+
+                    <section v-if="$page.props.user.kyc_verified" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="text-4xl text-green-500 mb-5 user-status__icon" icon="check"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('You are verified user') }}</h2>
+                                <p class="mb-8 leading-relaxed">{{ $t('Now you can deposit cryptocurrency and start trading.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="sumsub_pending" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="animate-bounce text-4xl text-yellow-500 mb-5 user-status__icon" icon="clock"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('Your KYC request is being reviewed') }}</h2>
+                                <p class="mb-8 leading-relaxed">{{ $t('Once we verify your identity, the system will adjust your status.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="sumsub_rejected" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('Your KYC request was rejected.') }}</h2>
+                                <p class="mt-5">{{ $t('Please submit your documents again.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div v-if="!$page.props.user.kyc_verified && !sumsub_pending" class="components-filter">
+                        <div class="mt-10 clear-both form-components__block">
+                            <div class="form-components__block-item block-button form-components__block-button-v2">
+                                <button @click="startKyc" type="button" class="form-components__block-button">
+                                    <span>
+                                        {{ $t('Start KYC') }}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </template>
+
+                <template v-else>
+
+                    <section v-if="$page.props.user.kyc_verified" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="text-4xl text-green-500 mb-5 user-status__icon" icon="check"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('You are verified user') }}</h2>
+                                <p class="mb-8 leading-relaxed">{{ $t('Now you can deposit cryptocurrency and start trading.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="pendingDocument" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="animate-bounce text-4xl text-yellow-500 mb-5 user-status__icon" icon="clock"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('Your KYC request is being reviewed') }}</h2>
+                                <p class="mb-8 leading-relaxed">{{ $t('Once we verify your identity, the system will adjust your status.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="rejectedDocument" class="user-status">
+                        <div class="user-status__row">
+                            <div class="user-status__item">
+                                <font-awesome-icon class="text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation"></font-awesome-icon>
+                                <h2 class="user-status__title">{{ $t('Your KYC request was rejected.') }}</h2>
+                                <p class="mb-8 leading-relaxed">{{ $t('Reason:') }} <strong>{{ rejectedDocument.rejected_reason }}</strong>.</p>
+                                <p class="mt-5">{{ $t('Please submit your documents again.') }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div v-if="!$page.props.user.kyc_verified && !pendingDocument" class="components-filter components-filter__form form-border">
+
+                        <div v-if="!rejectedDocument" class="user-status__title">
+                            <h2>{{ $t('KYC Procedure') }}</h2>
+                        </div>
+
+                        <form @submit.prevent="submit">
+
+                            <div class="components-filter__row form-row">
+                                <text-user-input
+                                    v-model="form.first_name"
+                                    :error="errors.first_name"
+                                    class="components-filter__item"
+                                    :label="$t('First Name')"
+                                />
+                            </div>
+
+                            <div class="components-filter__row form-row">
+                                <text-user-input
+                                    v-model="form.last_name"
+                                    :error="errors.last_name"
+                                    class="components-filter__item"
+                                    :label="$t('Last Name')"
+                                />
+                            </div>
+
+                            <div class="components-filter__row form-row">
+                                <text-user-input
+                                    v-model="form.middle_name"
+                                    :error="errors.middle_name"
+                                    class="components-filter__item"
+                                    :label="$t('Middle Name (optional)')"
+                                />
+                            </div>
+
+                            <div class="components-filter__row form-row">
+                                <div class="components-filter__item">
+                                    <div class="input-field" :class="{'invalid': errors.country_id}">
+                                        <label for="input_name">{{ $t('Select the country that issued your document:') }}</label>
+                                        <t-rich-user-select
+                                            :options="countries.data"
+                                            v-model="form.country_id"
+                                            :placeholder="$t('Select country')"
+                                            value-attribute="id"
+                                            text-attribute="name"
+                                        >
+                                            <template
+                                                slot="label"
+                                                slot-scope="{ className, option, query }"
+                                            >
+                                                <div class="flex">
+                                                    <div class="flex flex-col">
+                                                        <span>{{ option.text }}</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </t-rich-user-select>
+                                        <span v-if="errors.country_id" class="helper-text">{{ errors.country_id }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="components-filter__row form-row">
+                                <div class="components-filter__item">
+                                    <div
+                                        class="kyc-phone-verify-card"
+                                        :class="{
+                                            'invalid': errors.phone || errors.phone_code,
+                                            'is-sent': phoneCountdown > 0
+                                        }"
+                                    >
+                                        <div class="kyc-phone-verify-card__body">
+                                            <div class="kyc-phone-verify-card__field kyc-phone-verify-card__field--phone">
+                                                <label for="kyc-phone-number">
+                                                    {{ $t('Phone:') }}
+                                                </label>
+
+                                                <div class="kyc-phone-input-row">
+                                                    <themed-select
+                                                        v-model="selectedPhoneCountryCode"
+                                                        class="kyc-phone-country-select"
+                                                        @change="onPhoneCountryCodeChange"
+                                                    >
+                                                        <option value="" disabled>
+                                                            {{ $t('Country Code') }}
+                                                        </option>
+                                                        <option
+                                                            v-for="item in allowedPhoneCountryCodes"
+                                                            :key="item.key"
+                                                            :value="item.code"
+                                                            :title="item.name + ' ' + item.code"
+                                                        >
+                                                            {{ item.code }}
+                                                        </option>
+                                                    </themed-select>
+
+                                                    <input
+                                                        id="kyc-phone-number"
+                                                        v-model="form.phone"
+                                                        type="text"
+                                                        autocomplete="tel"
+                                                        inputmode="numeric"
+                                                        pattern="[0-9]*"
+                                                        :maxlength="currentPhoneLocalMaxLength"
+                                                        :placeholder="$t('Enter phone number without country code')"
+                                                        @input="onPhoneInput"
+                                                    >
+                                                </div>
+
+                                                <span v-if="errors.phone" class="helper-text">
+                                                    {{ errors.phone }}
+                                                </span>
+                                            </div>
+
+                                            <div class="kyc-phone-verify-card__field kyc-phone-verify-card__field--code">
+                                                <label for="kyc-phone-code">
+                                                    {{ $t('Phone Verification Code:') }}
+                                                </label>
+
+                                                <div class="kyc-phone-verify-card__code-row">
+                                                    <input
+                                                        id="kyc-phone-code"
+                                                        v-model="form.phone_code"
+                                                        type="text"
+                                                        autocomplete="off"
+                                                        inputmode="numeric"
+                                                        maxlength="6"
+                                                        :placeholder="$t('Enter phone verification code')"
+                                                        @input="onPhoneCodeInput"
+                                                    >
+
+                                                    <button
+                                                        type="button"
+                                                        class="kyc-phone-verify-card__send"
+                                                        :disabled="sendingPhoneCode || phoneCountdown > 0 || !canSendPhoneCode"
+                                                        @click="sendPhoneVerificationCode"
+                                                    >
+                                                        <template v-if="phoneCountdown > 0">
+                                                            {{ phoneCountdown }}s
+                                                        </template>
+                                                        <template v-else>
+                                                            {{ $t('Send') }}
+                                                        </template>
+                                                    </button>
+                                                </div>
+
+                                                <span v-if="errors.phone_code" class="helper-text">
+                                                    {{ errors.phone_code }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-components__block">
+                                <div class="form-components__block-item block-title">
+                                    <h3>{{ $t('Choose your document type:') }}</h3>
+                                </div>
+
+                                <div class="form-components__item form-components__item-radio">
+                                    <div class="input-radio">
+                                        <t-radio id="document_id_card" name="document" v-model="form.document_type" value="id"/>
+                                        <label for="document_id_card">{{ $t('ID Card') }}</label>
+                                    </div>
+
+                                    <div class="input-radio">
+                                        <t-radio id="document_passport" name="document" v-model="form.document_type" value="passport" />
+                                        <label for="document_passport">{{ $t('Passport') }}</label>
+                                    </div>
+
+                                    <div class="input-radio">
+                                        <t-radio id="document_driver_license" name="document" v-model="form.document_type" value="driver_license" />
+                                        <label for="document_driver_license">{{ $t("Driver's license") }}</label>
+                                    </div>
+
+                                    <div class="input-radio">
+                                        <t-radio id="document_residence_permit" name="document" v-model="form.document_type" value="residence_permit" />
+                                        <label for="document_residence_permit">{{ $t('Residence Permit') }}</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="components-filter__row form-row">
+                                <text-user-input
+                                    v-model="form.document_number"
+                                    :error="errors.document_number"
+                                    class="components-filter__item"
+                                    :label="$t(documentNumberLabel)"
+                                    @input="onDocumentNumberInput"
+                                />
+                            </div>
+
+                            <div class="form-components__block">
+                                <div class="mb-10 form-components__block-item block-list">
+                                    <div class="block-list__item-title">{{ $t('All photos should be:') }}</div>
+
+                                    <ul>
+                                        <li>{{ $t('bright and clear (good quality).') }}</li>
+                                        <li>{{ $t('uncut (all corners of the document should be visible).') }}</li>
+                                    </ul>
+
+                                    <div class="mt-10 block-list__item-title">
+                                        {{ $t('Take a photo of front part of your document.') }}
+                                    </div>
+
+                                    <div id="file-uploader-form">
+                                        <VueFileAgent
+                                            class="profile-pic-upload-block"
+                                            ref="fileUploadForm"
+                                            :multiple="false"
+                                            :deletable="false"
+                                            :meta="false"
+                                            :compact="true"
+                                            :maxFiles="1"
+                                            :accept="'image/*'"
+                                            :helpText="$t('Drag an image file here')"
+                                            :errorText="{ type: $t('Please select an image') }"
+                                            v-model="documentPhoto"
+                                            @select="onSelect($event)"
+                                            @upload="onUpload($event)"
+                                        >
+                                            <template v-slot:before-outer></template>
+
+                                            <template v-slot:after-outer>
+                                                <div :title="$t(&quot;after-outer&quot;)">
+                                                    <div class="drop-help-text">
+                                                        <p class="text-success">{{ $t('Drop the file!') }}</p>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none"
+                                                        :class="[uploaded ? 'btn-danger' : 'btn-secondary']"
+                                                        v-if="documentPhoto"
+                                                        @click="removePic()"
+                                                    >
+                                                        {{ $t('Remove') }}
+                                                    </button>
+
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </template>
+                                        </VueFileAgent>
+                                    </div>
+
+                                    <div class="text-red-600 mb-3" v-if="errors.front_id">
+                                        {{ errors.front_id }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-10 form-components__block clear-both">
+                                <div v-if="isMultiple" class="mt-10 form-components__block-item block-list">
+                                    <div class="block-list__item-title">
+                                        {{ $t('Take a back side photo of your document.') }}
+                                    </div>
+
+                                    <div id="file-uploader-form">
+                                        <VueFileAgent
+                                            class="profile-pic-upload-block"
+                                            ref="backUploadForm"
+                                            :multiple="false"
+                                            :deletable="false"
+                                            :meta="false"
+                                            :compact="true"
+                                            :maxFiles="1"
+                                            :accept="'image/*'"
+                                            :helpText="$t('Drag an image file here')"
+                                            :errorText="{ type: $t('Please select an image') }"
+                                            v-model="backPhoto"
+                                            @select="onSelectBack($event)"
+                                            @upload="onUploadBack($event)"
+                                        >
+                                            <template v-slot:before-outer></template>
+
+                                            <template v-slot:after-outer>
+                                                <div :title="$t(&quot;after-outer&quot;)">
+                                                    <div class="block-list__item-info">
+                                                        <p>{{ $t('Allowed types:') }}<span>{{ $t('jpg, png.') }}</span></p>
+                                                        <p>{{ $t('Max filesize:') }}<span>{{ $t('1MB') }}</span></p>
+                                                    </div>
+
+                                                    <div class="drop-help-text">
+                                                        <p class="text-success">{{ $t('Drop the file!') }}</p>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none"
+                                                        :class="[uploadedBack ? 'btn-danger' : 'btn-secondary']"
+                                                        v-if="backPhoto"
+                                                        @click="removeBackPic()"
+                                                    >
+                                                        {{ $t('Remove') }}
+                                                    </button>
+
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </template>
+                                        </VueFileAgent>
+                                    </div>
+
+                                    <div class="text-red-600 mb-3" v-if="errors.back_id">
+                                        {{ errors.back_id }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-components__block">
+                                <div class="form-components__block-item block-list">
+                                    <div class="block-list__item-title">
+                                        {{ $t('Take a selfie photo with your document.') }}
+                                    </div>
+
+                                    <div id="file-uploader-form">
+                                        <VueFileAgent
+                                            class="profile-pic-upload-block"
+                                            ref="selfieUploadForm"
+                                            :multiple="false"
+                                            :deletable="false"
+                                            :meta="false"
+                                            :compact="true"
+                                            :maxFiles="1"
+                                            :accept="'image/*'"
+                                            :helpText="$t('Drag an image file here')"
+                                            :errorText="{ type: $t('Please select an image') }"
+                                            v-model="selfiePhoto"
+                                            @select="onSelectSelfie($event)"
+                                            @upload="onUploadSelfie($event)"
+                                        >
+                                            <template v-slot:before-outer></template>
+
+                                            <template v-slot:after-outer>
+                                                <div :title="$t(&quot;after-outer&quot;)">
+                                                    <div class="mb-4">
+                                                        <p>{{ $t('Allowed types:') }}<strong>{{ $t('jpg, png.') }}</strong></p>
+                                                        <p>{{ $t('Max filesize:') }}<strong>{{ $t('1MB') }}</strong></p>
+                                                    </div>
+
+                                                    <div class="drop-help-text">
+                                                        <p class="text-success">{{ $t('Drop the file!') }}</p>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none"
+                                                        :class="[uploadedSelfie ? 'btn-danger' : 'btn-secondary']"
+                                                        v-if="selfiePhoto"
+                                                        @click="removeSelfiePic()"
+                                                    >
+                                                        {{ $t('Remove') }}
+                                                    </button>
+
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </template>
+                                        </VueFileAgent>
+                                    </div>
+
+                                    <div class="text-red-600 mb-3" v-if="errors.selfie_id">
+                                        {{ errors.selfie_id }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-10 clear-both form-components__block">
+                                <div class="form-components__block-item block-button">
+                                    <button type="submit" class="form-components__block-button" :class="{ 'opacity-75': sending }">
+                                        <span>
+                                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            {{ $t('Submit') }}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </template>
+            </template>
+        </template>
+    </div>
+
+
+
+
+</app-layout>

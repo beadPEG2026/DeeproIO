@@ -1,0 +1,135 @@
+<app-layout>
+
+<h1 class="mb-8 font-bold text-3xl">{{ $t("市场服务") }}</h1>
+<div class="bg-white rounded shadow overflow-x-auto">
+    <table class="w-full whitespace-no-wrap">
+        <tr class="text-left font-bold">
+            <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+        </tr>
+        <tr v-for="service in services" class="hover:bg-gray-100 focus-within:bg-gray-100">
+            <td class="border-t flex justify-between px-6 py-4">
+                <div>
+                    <span class="flex items-center">
+                        {{ service.title }}
+                    </span>
+                </div>
+                <div>
+                    <nav-button v-if="!service.status" :class="{ 'opacity-75': sending ==  service.name}" @click.native="runLiquidity(service, true)">
+                        <svg v-show="sending ==  service.name" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ $t("运行") }}</span>
+                    </nav-button>
+
+                    <nav-button-active v-if="service.status" @click.native="stopLiquidity(service, true)">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ $t("停止") }}</span>
+                    </nav-button-active>
+                </div>
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+<h1 class="mb-8 font-bold text-3xl mt-10">{{ $t("市场流动性") }}</h1>
+<div class="bg-white rounded shadow overflow-x-auto">
+    <table class="w-full whitespace-no-wrap">
+        <tr class="text-left font-bold">
+            <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+            <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+            <th class="px-6 pt-6 pb-4 text-right">{{ $t("操作") }}</th>
+        </tr>
+        <tr v-for="market in markets.data" :key="market.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+            <td class="border-t">
+                <span class="px-6 py-4 flex items-center">
+                    {{ market.name }}
+                </span>
+            </td>
+            <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" v-if="!market.deleted_at" :type="market.status ? 'green' : 'gray'">
+                            {{ market.status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+
+                        <badge v-if="!market.deleted_at" :type="market.trade_status ? 'green' : 'red'">
+                            {{ market.trade_status ? $t("可交易") : $t("不可交易") }}
+                        </badge>
+                    </span>
+            </td>
+            <td class="border-t">
+                <div class="grid px-6 py-4">
+                    <nav-button v-if="market.status && !market.deleted_at && !market.liq_enabled" :class="{ 'opacity-75': sending ==  market.id, 'justify-self-end': true}" @click.native="runLiquidity(market)">
+                        <svg v-show="sending ==  market.id" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ $t("运行") }}</span>
+                    </nav-button>
+
+                    <nav-button-active v-if="market.liq_enabled" @click.native="stopLiquidity(market)" :class="{ 'justify-self-end': true}">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ $t("停止") }}</span>
+                    </nav-button-active>
+                </div>
+            </td>
+        </tr>
+        <tr v-if="markets.data.length === 0">
+            <td class="border-t px-6 py-4" colspan="100">{{ $t("没有找到市场。") }}</td>
+        </tr>
+    </table>
+</div>
+<pagination :links="markets.links" />
+
+
+<h1 class="mb-8 font-bold text-3xl mt-10">{{ $t("日志（用于调试）") }}</h1>
+<div class="bg-white rounded shadow overflow-x-auto">
+    <table class="w-full whitespace-no-wrap">
+        <tr class="text-left font-bold">
+            <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+            <th class="px-6 pt-6 pb-4">{{ $t("进程 ID (PID)") }}</th>
+            <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+            <th class="px-6 pt-6 pb-4">{{ $t("主目录") }}</th>
+        </tr>
+        <tr v-if="debug" v-for="daemon in daemons" class="hover:bg-gray-100 focus-within:bg-gray-100">
+            <td class="border-t px-6 py-4">
+                <span class="flex items-center">
+                    {{ daemon.name }}
+                </span>
+            </td>
+            <td class="border-t px-6 py-4">
+                <span class="flex items-center">
+                    {{ daemon.pid }}
+                </span>
+            </td>
+            <td class="border-t px-6 py-4">
+                <span class="flex items-center">
+                    {{ daemon.pm2Env.status }}
+                </span>
+            </td>
+            <td class="border-t px-6 py-4">
+                <span class="flex items-center">
+                    {{ daemon.pm2Env.pm2Home }}
+                </span>
+            </td>
+        </tr>
+        <tr v-if="!debug">
+            <td class="border-t px-6 py-4">
+                <span class="flex items-center">
+                    {{ $t("演示模式已禁用") }}
+                </span>
+            </td>
+            <td class="border-t px-6 py-4"></td>
+            <td class="border-t px-6 py-4"></td>
+            <td class="border-t px-6 py-4"></td>
+        </tr>
+    </table>
+</div>
+</app-layout>

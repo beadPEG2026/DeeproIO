@@ -1,0 +1,212 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Invoice Details') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('Invoice Details')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <button @click="goBack" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-6 h-6 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="text-2xl font-bold ">{{ $t('Invoice') }}</h1>
+                    <p class="font-mono text-sm ">{{ invoice.id }}</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusBadge(invoice.status).color]">
+                    {{ getStatusBadge(invoice.status).label }}
+                </span>
+                <button
+                    v-if="canCancel"
+                    @click="openCancelModal"
+                    class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                    {{ $t('Cancel Invoice') }}
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Info -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Amount & Currency -->
+                <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                    <h3 class="text-lg font-semibold  mb-4">{{ $t('Payment Details') }}</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <div class="text-sm  mb-1">{{ $t('Amount') }}</div>
+                            <div class="text-3xl font-bold ">{{ formatCurrency(invoice.amount_usd) }}</div>
+                        </div>
+                        <div v-if="invoice.currency">
+                            <div class="text-sm  mb-1">{{ $t('Crypto Amount') }}</div>
+                            <div class="text-2xl font-bold ">
+                                {{ formatCrypto(invoice.amount_crypto) }} {{ invoice.currency.symbol }}
+                            </div>
+                            <div class="text-sm ">{{ invoice.currency.network }}</div>
+                        </div>
+                    </div>
+
+                    <div v-if="invoice.deposit_address" class="mt-6 pt-6 border-t">
+                        <div class="text-sm  mb-2">{{ $t('Deposit Address') }}</div>
+                        <div class="flex items-center space-x-2">
+                            <code class="flex-1 p-3  rounded-lg text-sm break-all">{{ invoice.deposit_address }}</code>
+                            <button
+                                @click="doCopy(invoice.deposit_address)"
+                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments -->
+                <div v-if="hasPayments" class=" rounded-xl shadow-sm p-6 rounded-card">
+                    <h3 class="text-lg font-semibold  mb-4">{{ $t('Payments') }}</h3>
+                    <div class="space-y-4">
+                        <div
+                            v-for="payment in invoice.payments"
+                            :key="payment.id"
+                            class="p-4 border rounded-lg"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold">{{ formatCrypto(payment.amount_crypto) }} {{ invoice.currency.symbol }}</span>
+                                <span :class="['px-2 py-1 rounded-full text-xs font-medium', payment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800']">
+                                    {{ payment.status }}
+                                </span>
+                            </div>
+                            <div class="text-sm  mb-2">
+                                {{ payment.confirmations }} / {{ payment.required_confirmations }} {{ $t('confirmations') }}
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <code class="text-xs  truncate">{{ payment.txn_hash }}</code>
+                                <a
+                                    v-if="payment.explorer_url"
+                                    :href="payment.explorer_url"
+                                    target="_blank"
+                                    class="text-blue-600 hover:text-blue-700"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div v-if="hasTimeline" class=" rounded-xl shadow-sm p-6 rounded-card">
+                    <h3 class="text-lg font-semibold  mb-4">{{ $t('Timeline') }}</h3>
+                    <div class="space-y-4">
+                        <div
+                            v-for="event in invoice.timeline"
+                            :key="event.id"
+                            class="flex items-start space-x-3"
+                        >
+                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="font-medium ">{{ event.event_type }}</div>
+                                <div class="text-sm ">{{ formatDate(event.occurred_at) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Info -->
+                <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                    <h3 class="text-lg font-semibold  mb-4">{{ $t('Details') }}</h3>
+                    <dl class="space-y-4">
+                        <div>
+                            <dt class="text-sm ">{{ $t('External ID') }}</dt>
+                            <dd class="font-medium">{{ invoice.external_id || '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm ">{{ $t('Customer') }}</dt>
+                            <dd class="font-medium">{{ invoice.customer_email || '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm ">{{ $t('Description') }}</dt>
+                            <dd class="font-medium">{{ invoice.description || '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm ">{{ $t('Created') }}</dt>
+                            <dd class="font-medium">{{ formatDate(invoice.created_at) }}</dd>
+                        </div>
+                        <div v-if="invoice.paid_at">
+                            <dt class="text-sm ">{{ $t('Paid') }}</dt>
+                            <dd class="font-medium">{{ formatDate(invoice.paid_at) }}</dd>
+                        </div>
+                        <div v-if="invoice.expires_at">
+                            <dt class="text-sm ">{{ $t('Expires') }}</dt>
+                            <dd class="font-medium">{{ formatDate(invoice.expires_at) }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Checkout URL -->
+                <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                    <h3 class="text-lg font-semibold  mb-4">{{ $t('Checkout URL') }}</h3>
+                    <div class="space-y-3">
+                        <input
+                            type="text"
+                            :value="checkoutUrl"
+                            readonly
+                            class="w-full px-3 py-2  border rounded-lg text-sm merchant-input"
+                        />
+                        <button
+                            @click="doCopy(checkoutUrl)"
+                            class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            {{ $t('Copy URL') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Modal -->
+    <div v-if="showCancelModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class=" rounded-xl w-full max-w-md p-6 merchant-modal shadow-md">
+            <h3 class="text-xl font-bold  mb-4">{{ $t('Cancel Invoice') }}</h3>
+            <p class=" mb-4">{{ $t('Are you sure you want to cancel this invoice?') }}</p>
+            <div class="mb-6">
+                <label class="block text-sm  mb-2">{{ $t('Reason (optional)') }}</label>
+                <textarea
+                    v-model="cancelReason"
+                    rows="3"
+                    class="w-full px-3 py-2 border rounded-lg merchant-input"
+                    :placeholder="$t('Enter cancellation reason')"
+                ></textarea>
+            </div>
+            <div class="flex space-x-3">
+                <button
+                    @click="showCancelModal = false"
+                    class="flex-1 px-4 py-2 border border-gray-300  rounded-lg hover:"
+                >
+                    {{ $t('Keep Invoice') }}
+                </button>
+                <button
+                    @click="cancelInvoice"
+                    :disabled="cancelling"
+                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                    {{ cancelling ? $t('Cancelling...') : $t('Cancel Invoice') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

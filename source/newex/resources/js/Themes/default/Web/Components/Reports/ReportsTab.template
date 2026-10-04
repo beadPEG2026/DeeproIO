@@ -1,0 +1,81 @@
+<!-- tabs components start -->
+<div class="tabs">
+
+    <!-- tabs left start -->
+    <div class="tabs-left mob-hide">
+        <div class="tabs-nav">
+            <div @click="setReport('reports.trades')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'trades'}">
+                <h4>{{ $t('Trades') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.trades.futures')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'futures_trades'}">
+                <h4>{{ $t('Futures Trades') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.funding-fee-distributions')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'funding_fee_distributions'}">
+                <h4>{{ $t('Funding Fee') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.fee-refunds')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'fee_refunds'}">
+                <h4>{{ $t('Fee Refunds') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.deposits')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'deposits'}">
+                <h4>{{ $t('Crypto Deposits') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.withdrawals')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'withdrawals'}">
+                <h4>{{ $t('Crypto Withdrawals') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.deposits.fiat')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'fiat_deposits'}">
+                <h4>{{ $t('Fiat Deposits') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.withdrawals.fiat')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'fiat_withdrawals'}">
+                <h4>{{ $t('Fiat Withdrawals') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.launchpad-transactions')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'launchpads'}">
+                <h4>{{ $t('Launchpads') }}</h4>
+            </div>
+
+            <div v-if="$uiFeatures.binaryOptions" @click="setReport('reports.options')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'options'}">
+                <h4>{{ $t('Options') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.bonuses')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'bonuses'}">
+                <h4>{{ $t('Deposit Bonuses') }}</h4>
+            </div>
+
+            <div @click="setReport('reports.adjustments')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'adjustments'}">
+                <h4>{{ $t('Wallet Adjustments') }}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- tabs left end -->
+
+    <div class="form-search__result-block mob-show">
+        <div class="form-search__result-title">{{ $t('Select section') }}</div>
+
+        <div class="form-search__result-link">
+            <themed-select v-model="tabPage" @change="setTabPage" class="network-select">
+                <option value="reports.trades">{{ $t('Trades') }}</option>
+                <option value="reports.trades.futures">{{ $t('Futures Trades') }}</option>
+                <option value="reports.funding-fee-distributions">{{ $t('Funding Fee') }}</option>
+                <option value="reports.fee-refunds">{{ $t('Fee Refunds') }}</option>
+                <option value="reports.deposits">{{ $t('Crypto Deposits') }}</option>
+                <option value="reports.withdrawals">{{ $t('Crypto Withdrawals') }}</option>
+                <option value="reports.deposits.fiat">{{ $t('Fiat Deposits') }}</option>
+                <option value="reports.withdrawals.fiat">{{ $t('Fiat Withdrawals') }}</option>
+                <option value="reports.referral-transactions">{{ $t('Referrals') }}</option>
+                <option value="reports.launchpad-transactions">{{ $t('Launchpads') }}</option>
+                <option v-if="$uiFeatures.binaryOptions" value="reports.options">{{ $t('Options') }}</option>
+                <option value="reports.bonuses">{{ $t('Deposit Bonuses') }}</option>
+                <option value="reports.adjustments">{{ $t('Adjustments') }}</option>
+            </themed-select>
+        </div>
+    </div>
+
+</div>
+<!-- tabs components end -->

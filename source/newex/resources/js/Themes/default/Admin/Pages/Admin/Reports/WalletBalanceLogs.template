@@ -1,0 +1,180 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="wallet_balance_logs"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("資金明細") }}
+    </h1>
+
+    <div class="mb-6 flex flex-wrap items-start justify-between">
+        <div class="flex flex-wrap items-center flex-1 mr-4">
+            <search-filter
+                :filter="false"
+                v-model="form.search"
+                class="w-full max-w-md mr-4 mb-3 focus:outline-none"
+                @reset="reset"
+            ></search-filter>
+
+            <input
+                v-model="form.user_id"
+                type="text"
+                placeholder="用户ID"
+                class="mr-4 mb-3 px-3 py-2 border rounded focus:outline-none"
+            >
+
+            <input
+                v-model="form.referral"
+                type="text"
+                placeholder="推荐码/推荐人"
+                class="mr-4 mb-3 px-3 py-2 border rounded focus:outline-none"
+            >
+
+            <input
+                v-model="form.currency"
+                type="text"
+                placeholder="币种"
+                class="mr-4 mb-3 px-3 py-2 border rounded focus:outline-none"
+            >
+
+            <themed-select v-model="form.account_field" class="mr-4 mb-3 form-select rounded">
+                <option :value="null">{{ $t("全部账户") }}</option>
+                <option v-for="field in accountFields" :key="field.id" :value="field.id">
+                    {{ field.name }}
+                </option>
+            </themed-select>
+
+            <themed-select v-model="form.change_type" class="mr-4 mb-3 form-select rounded">
+                <option :value="null">{{ $t("全部类型") }}</option>
+                <option v-for="type in changeTypes" :key="type.id" :value="type.id">
+                    {{ type.name }}
+                </option>
+            </themed-select>
+
+            <themed-select v-model="form.per_page" class="mr-4 mb-3 form-select rounded">
+                <option value="25">{{ $t("25条") }}</option>
+                <option value="50">{{ $t("50条") }}</option>
+                <option value="100">{{ $t("100条") }}</option>
+                <option value="200">{{ $t("200条") }}</option>
+            </themed-select>
+
+            <div class="period-block hidden md:block min-w-md mb-3">
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                />
+            </div>
+        </div>
+
+        <button
+            @click="exportCsv"
+            class="btn-blue inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none mt-1"
+        >
+            {{ $t ? $t('导出') : $t("导出") }}
+        </button>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("钱包ID") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("账户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作人") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("变动金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("变动前") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("变动后") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+
+            <tr v-for="record in records.data" :key="record.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="$page.props.mode == 'readonly'">{{ $t("演示模式隐藏") }}</template>
+                        <template v-else>
+                            {{ record.user && record.user.email ? record.user.email : '-' }}
+                            <span class="text-gray-500 ml-1">{{ $t("(ID:") }} {{ record.user_id || '-' }})</span>
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.currency && record.currency.symbol ? record.currency.symbol : '-' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.wallet_id || '-' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.account_label || '-' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <span
+                            class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
+                            :class="record.change_type === 'increase' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                        >
+                            {{ changeTypeLabel(record.change_type) }}
+                        </span>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.operation || '-' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex flex-col">
+                        <template v-if="$page.props.mode == 'readonly'">{{ $t("演示模式隐藏") }}</template>
+                        <template v-else>
+                            <span>{{ record.actor_email || '-' }}</span>
+                            <span class="text-xs text-gray-500" v-if="record.actor_user_id">{{ $t("ID:") }} {{ record.actor_user_id }}</span>
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center font-semibold" :class="amountClass(record.amount)">
+                        {{ withCurrency(record, formatSignedAmount(record.amount)) }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withCurrency(record, formatAmount(record.balance_before)) }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withCurrency(record, formatAmount(record.balance_after)) }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.created_at }}
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="records.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到資金明細。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="records.links" />
+</app-layout>

@@ -1,0 +1,305 @@
+<app-layout>
+    <Head>
+        <title>{{ merchant.business_name }}</title>
+    </Head>
+
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <a :href="route('admin.merchant.merchants')" class="text-blue-600 hover:text-blue-800 text-sm">&larr; {{ $t('返回商户列表') }}</a>
+                <h1 class="text-2xl font-bold text-gray-800 mt-2">{{ merchant.business_name }}</h1>
+            </div>
+            <div class="flex space-x-3">
+                <button v-if="merchant.verification_status === 'pending'" @click="showVerifyModal = true" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">{{ $t('审核') }}</button>
+                <button v-if="merchant.status === 'active'" @click="showSuspendModal = true" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">{{ $t('暂停') }}</button>
+                <button v-if="merchant.status === 'suspended'" @click="showReactivateModal = true" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">{{ $t('重新启用') }}</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Merchant Info -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Suspension Alert -->
+                <div v-if="merchant.status === 'suspended'" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-red-800">{{ $t('商户已暂停') }}</h4>
+                            <p v-if="merchant.suspended_at" class="text-sm text-red-600 mt-1">
+                                {{ $t('暂停时间') }}: {{ new Date(merchant.suspended_at).toLocaleString() }}
+                            </p>
+                            <p v-if="merchant.suspension_reason" class="text-sm text-red-700 mt-2">
+                                <strong>{{ $t('原因') }}:</strong> {{ merchant.suspension_reason }}
+                            </p>
+                        </div>
+                        <button @click="showReactivateModal = true" class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                            {{ $t('重新启用') }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('商户信息') }}</h3>
+                    <dl class="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('商户名称') }}</dt>
+                            <dd class="font-medium">{{ merchant.business_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('邮箱') }}</dt>
+                            <dd class="font-medium">{{ merchant.business_email }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('网站') }}</dt>
+                            <dd class="font-medium">{{ merchant.business_website || '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('状态') }}</dt>
+                            <dd><span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusBadge(merchant.status)]">{{ merchant.status }}</span></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('认证状态') }}</dt>
+                            <dd><span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusBadge(merchant.verification_status)]">{{ merchant.verification_status }}</span></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('费率') }}</dt>
+                            <dd class="font-medium">{{ merchant.fee_percent }}%</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Invoice Stats -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('账单统计') }}</h3>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-gray-50 rounded-lg">
+                            <p class="text-2xl font-bold">{{ invoiceStats.total || 0 }}</p>
+                            <p class="text-sm text-gray-500">{{ $t('总数') }}</p>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <p class="text-2xl font-bold text-green-600">{{ invoiceStats.paid || 0 }}</p>
+                            <p class="text-sm text-gray-500">{{ $t('已支付') }}</p>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                            <p class="text-2xl font-bold text-yellow-600">{{ invoiceStats.pending || 0 }}</p>
+                            <p class="text-sm text-gray-500">{{ $t('待处理') }}</p>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <p class="text-2xl font-bold text-blue-600">${{ Number(invoiceStats.volume_usd || 0).toLocaleString() }}</p>
+                            <p class="text-sm text-gray-500">{{ $t('交易额') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Invoices -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('最近账单') }}</h3>
+                    <table class="w-full" v-if="recentInvoices.length">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase">
+                                <th class="pb-2">{{ $t('ID') }}</th>
+                                <th class="pb-2">{{ $t('金额') }}</th>
+                                <th class="pb-2">{{ $t('状态') }}</th>
+                                <th class="pb-2">{{ $t('日期') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr v-for="invoice in recentInvoices" :key="invoice.id">
+                                <td class="py-2 font-mono text-sm">{{ invoice.id.substring(0, 8) }}...</td>
+                                <td class="py-2">${{ Number(invoice.amount_usd).toFixed(2) }}</td>
+                                <td class="py-2"><span class="px-2 py-1 rounded-full text-xs bg-gray-100">{{ invoice.status }}</span></td>
+                                <td class="py-2 text-sm text-gray-500">{{ new Date(invoice.created_at).toLocaleDateString() }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p v-else class="text-gray-500 text-center py-4">{{ $t('暂无账单') }}</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-gray-800">{{ $t('限额与费率') }}</h3>
+                        <button @click="openLimitsModal" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            {{ $t('编辑') }}
+                        </button>
+                    </div>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('每日限额') }}</dt>
+                            <dd class="font-medium">${{ Number(merchant.daily_volume_limit_usd || 0).toLocaleString() }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('每月限额') }}</dt>
+                            <dd class="font-medium">${{ Number(merchant.monthly_volume_limit_usd || 0).toLocaleString() }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('单笔账单限额') }}</dt>
+                            <dd class="font-medium">${{ Number(merchant.single_invoice_limit_usd || 0).toLocaleString() }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('费率') }}</dt>
+                            <dd class="font-medium">{{ merchant.fee_percent || 0 }}%</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('API 密钥') }}</h3>
+                    <p class="text-2xl font-bold">{{ merchant.api_keys.length || 0 }}</p>
+                    <p class="text-sm text-gray-500">{{ $t('有效密钥') }}</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('Webhook 统计') }}</h3>
+                    <dl class="space-y-2">
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">{{ $t('已送达') }}</dt>
+                            <dd class="font-medium text-green-600">{{ webhookStats.delivered || 0 }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">{{ $t('待处理') }}</dt>
+                            <dd class="font-medium text-yellow-600">{{ webhookStats.pending || 0 }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">{{ $t('失败') }}</dt>
+                            <dd class="font-medium text-red-600">{{ webhookStats.failed || 0 }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Modal -->
+    <div v-if="showVerifyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="font-semibold text-lg mb-4">{{ $t('审核商户') }}</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('审核结果') }}</label>
+                    <themed-select v-model="verifyForm.verification_status" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="verified">{{ $t('通过') }}</option>
+                        <option value="rejected">{{ $t('拒绝') }}</option>
+                    </themed-select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('备注') }}</label>
+                    <textarea v-model="verifyForm.notes" class="w-full px-4 py-2 border rounded-lg" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showVerifyModal = false" class="px-4 py-2 border rounded-lg">{{ $t('取消') }}</button>
+                <button @click="verifyMerchant" :disabled="processing" class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ $t('提交') }}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspend Modal -->
+    <div v-if="showSuspendModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="font-semibold text-lg mb-4">{{ $t('暂停商户') }}</h3>
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ $t('原因') }}</label>
+                <textarea v-model="suspendForm.reason" class="w-full px-4 py-2 border rounded-lg" rows="3" required></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showSuspendModal = false" class="px-4 py-2 border rounded-lg">{{ $t('取消') }}</button>
+                <button @click="suspendMerchant" :disabled="processing || !suspendForm.reason" class="px-4 py-2 bg-red-600 text-white rounded-lg">{{ $t('暂停') }}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reactivate Modal -->
+    <div v-if="showReactivateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-lg">{{ $t('重新启用商户') }}</h3>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <p class="text-sm text-gray-600">{{ $t('你即将重新启用') }} <strong>{{ merchant.business_name }}</strong>。</p>
+                <p class="text-sm text-gray-500 mt-2">{{ $t('这将恢复其创建账单、管理 API 密钥以及申请付款的能力。') }}</p>
+            </div>
+
+            <div v-if="merchant.suspension_reason" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p class="text-sm text-yellow-800"><strong>{{ $t('之前的暂停原因') }}:</strong></p>
+                <p class="text-sm text-yellow-700 mt-1">{{ merchant.suspension_reason }}</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ $t('备注（可选）') }}</label>
+                <textarea v-model="reactivateForm.notes" class="w-full px-4 py-2 border rounded-lg" rows="3" :placeholder="$t('添加有关此次重新启用的备注...')"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showReactivateModal = false" class="px-4 py-2 border rounded-lg hover:bg-gray-50">{{ $t('取消') }}</button>
+                <button @click="reactivateMerchant" :disabled="processing" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
+                    <span v-if="processing">{{ $t('处理中...') }}</span>
+                    <span v-else>{{ $t('重新启用商户') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Limits Modal -->
+    <div v-if="showLimitsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-lg">{{ $t('编辑限额与费率') }}</h3>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('每日交易额限额 (USD)') }}</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                        <input type="number" v-model="limitsForm.daily_volume_limit_usd" class="w-full pl-7 pr-4 py-2 border rounded-lg" min="0" step="0.01">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('每月交易额限额 (USD)') }}</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                        <input type="number" v-model="limitsForm.monthly_volume_limit_usd" class="w-full pl-7 pr-4 py-2 border rounded-lg" min="0" step="0.01">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('单笔账单限额 (USD)') }}</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                        <input type="number" v-model="limitsForm.single_invoice_limit_usd" class="w-full pl-7 pr-4 py-2 border rounded-lg" min="0" step="0.01">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('费率 (%)') }}</label>
+                    <div class="relative">
+                        <input type="number" v-model="limitsForm.fee_percent" class="w-full pl-4 pr-7 py-2 border rounded-lg" min="0" max="100" step="0.01">
+                        <span class="absolute right-3 top-2 text-gray-500">%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showLimitsModal = false" class="px-4 py-2 border rounded-lg hover:bg-gray-50">{{ $t('取消') }}</button>
+                <button @click="updateLimits" :disabled="processing" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    <span v-if="processing">{{ $t('保存中...') }}</span>
+                    <span v-else>{{ $t('保存更改') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

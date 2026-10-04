@@ -1,0 +1,40 @@
+
+/** link start */
+.header-button {
+    display: flex;
+    align-items: center;
+
+    &__signin {
+        margin: 0 1.5rem;
+        transition: all 0.5s ease-out;
+
+        &:hover {
+            color: var(--yellow-color);
+        }
+    }
+
+    &__signup {
+        width: 160px;
+        padding: 0.60rem 1.50rem;
+        text-align: center;
+        background-color: var(--purple-color);
+        border: 1px solid var(--purple-color);
+        border-radius: 4px;
+        transition: all 0.5s ease-out;
+
+        &:hover {
+            background-color: var(--purple-second-color);
+        }
+
+        &:focus {
+            background-color: var(--purple-second-color);
+        }
+
+        &:active {
+            background-color: var(--purple-color);
+        }
+
+    }
+
+}
+/** link end */

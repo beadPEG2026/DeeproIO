@@ -1,0 +1,32 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.networks')">{{ $t("网络") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input v-model="form.name" :error="errors.name" class="pr-6 pb-8 w-full" :label="$t(&quot;名称&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("充值状态") }}</label>
+                    <t-toggle v-model="form.deposit_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("提现状态") }}</label>
+                    <t-toggle v-model="form.withdraw_status" />
+                </div>
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

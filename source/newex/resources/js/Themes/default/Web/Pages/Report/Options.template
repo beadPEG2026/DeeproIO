@@ -1,0 +1,423 @@
+<app-layout>
+
+<!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Transactions') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="options"></reports-tab>
+
+    <div class="components-filter">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <label>{{ $t('Market:') }}</label>
+                <t-rich-user-select
+                    :options="markets.data"
+                    v-model="form.market"
+                    :placeholder="$t('Select market')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <label>{{ $t('Status:') }}</label>
+                <t-rich-user-select
+                    :options="[{'id': '', 'name': $t('All')},{'id': 'buy', 'name': $t('Buy')}, {'id': 'sell', 'name': $t('Sell')}]"
+                    v-model="form.side"
+                    :placeholder="$t('Select side')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                <span class="components-filter__icon">
+                    <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ $t('Search') }}
+                </span>
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-trades">
+            <!-- thead start -->
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Market') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Type') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Enter Price') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Closed Price') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Amount') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Period') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Status') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('PNL') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr
+                v-for="transaction in transactions.data"
+                :key="transaction.id"
+                class="cursor-pointer"
+                @click="openOptionDetail(transaction)"
+            >
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Market') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getMarketName(transaction) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <div class="components-label" :class="getSideBadgeClass(transaction)">
+                                {{ getSideLabel(transaction) }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Enter Price') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getEnterPriceText(transaction) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Closed Price') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getClosedPriceText(transaction) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getAmountText(transaction) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Period') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getPeriodText(transaction) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <div class="components-label" :class="getStatusClass(transaction)">
+                                {{ getStatusLabel(transaction) }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('PNL') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span :class="getPnlClass(transaction)">
+                                {{ getPnlText(transaction) }}
+                            </span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ transaction.created_at }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="transactions.data.length === 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No trades found.') }}</span>
+                    </div>
+                    <pagination :links="transactions.meta.links" />
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+    </div>
+    <!-- table components end -->
+
+    <!-- option detail modal start -->
+    <div
+        v-if="showOptionDetailModal && selectedOption"
+        class="fixed inset-0 flex items-center justify-center px-4"
+        style="z-index: 99999;"
+    >
+        <div
+            class="absolute inset-0"
+            style="background: rgba(0, 0, 0, 0.74);"
+            @click="closeOptionDetail"
+        ></div>
+
+        <div
+            class="relative w-full max-w-2xl rounded-2xl overflow-hidden"
+            style="background: #080b12; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 80px rgba(0,0,0,0.45); max-height: 90vh; overflow-y: auto;"
+            @click.stop
+        >
+            <div class="flex items-center justify-between px-6 py-5" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button
+                    type="button"
+                    class="text-white"
+                    style="font-size: 28px; line-height: 1;"
+                    @click="closeOptionDetail"
+                >
+                    ‹
+                </button>
+
+                <h3 class="text-white font-bold text-xl">
+                    {{ $t('Option Details') }}
+                </h3>
+
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between mb-7">
+                    <div>
+                        <div class="text-white font-bold text-2xl mb-2">
+                            {{ getOptionTitle(selectedOption) }}
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="px-2 py-1 rounded text-xs"
+                                :class="getSideClass(selectedOption)"
+                                style="background: rgba(255,255,255,0.08);"
+                            >
+                                {{ getSideLabel(selectedOption) }}
+                            </span>
+
+                            <span
+                                class="px-2 py-1 rounded text-xs text-white"
+                                style="background: rgba(255,255,255,0.10);"
+                            >
+                                {{ getPeriodText(selectedOption) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex items-center">
+                        <div
+                            class="components-label"
+                            :class="getStatusClass(selectedOption)"
+                            style="min-width: 120px; height: 26px; display: flex; align-items: center; justify-content: center; padding: 0 18px; line-height: 1;"
+                        >
+                            {{ getStatusLabel(selectedOption) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 15px;">
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Status') }}</span>
+                        <span style="color: #ffffff;">{{ getStatusLabel(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Type') }}</span>
+                        <span style="color: #ffffff;">{{ getSideLabel(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Enter Price') }}</span>
+                        <span style="color: #ffffff;">{{ getEnterPriceText(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Closed Price') }}</span>
+                        <span style="color: #ffffff;">{{ getClosedPriceText(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Amount') }}</span>
+                        <span style="color: #ffffff;">{{ getAmountText(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Period') }}</span>
+                        <span style="color: #ffffff;">{{ getPeriodText(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('PNL') }}</span>
+                        <span :class="getPnlClass(selectedOption)">{{ getPnlText(selectedOption) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Order Time') }}</span>
+                        <span style="color: #ffffff;">{{ selectedOption.created_at }}</span>
+                    </div>
+
+                    <div class="flex items-start justify-between gap-5">
+                        <span style="color: #8d93a6;">{{ $t('Order ID') }}</span>
+
+                        <span style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;">
+                            {{ getOptionId(selectedOption) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="height: 1px; background: rgba(255,255,255,0.10); margin: 26px 0;"></div>
+
+                <h4 class="text-white font-bold text-lg mb-5">
+                    {{ $t('Trade Details') }}
+                </h4>
+
+                <div style="padding-bottom: 6px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Amount') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                {{ getDetailQuantityText(selectedOption) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Enter Price') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                {{ getDetailPriceText(selectedOption) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Closed Price') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                {{ getDetailClosedPriceText(selectedOption) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3" style="color: #8d93a6;">
+                        {{ getDetailTime(selectedOption) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- option detail modal end -->
+
+</app-layout>

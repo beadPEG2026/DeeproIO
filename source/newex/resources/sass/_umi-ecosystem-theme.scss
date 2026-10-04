@@ -1,0 +1,158 @@
+
+
+.umi-shell {
+  --eco-green: var(--ui-umi-link);
+  --eco-green-hover: var(--ui-umi-link);
+  --eco-accent: var(--ui-umi-link);
+  --eco-ink: var(--ui-umi-text);
+  --eco-muted: var(--ui-umi-muted);
+  --eco-mint: var(--ui-umi-soft);
+  --eco-line: var(--ui-umi-line);
+  --eco-forest: var(--ui-umi-text);
+}
+
+.deepro-ecosystem {
+  color: var(--eco-ink);
+
+  :is(button, a, summary):focus-visible {
+    outline: 3px solid var(--eco-accent);
+    outline-offset: 4px;
+  }
+
+  .umi-button {
+    background: var(--eco-green);
+    color: var(--ui-on-accent) !important;
+    box-shadow: none;
+    transition: background .2s, box-shadow .2s;
+
+    &:hover { background: var(--eco-green-hover); box-shadow: none; }
+  }
+
+  .deepro-text-button { color: var(--eco-accent) !important; }
+  .deepro-text-button:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+  .deepro-eco-hero {
+    color: var(--eco-ink);
+    background:
+      var(--ui-umi-soft);
+    border: 1px solid var(--eco-line);
+  }
+
+  .deepro-eco-kicker { color: var(--eco-accent); }
+  .deepro-eco-copy h2 { color: var(--eco-accent); }
+  .deepro-eco-copy p { color: var(--eco-muted); }
+  .deepro-eco-topics { color: var(--ui-umi-text); border-color: var(--ui-umi-line); }
+  .deepro-eco-topics span:before { background: var(--eco-green); }
+
+  .deepro-orbit-ring { border-color: var(--ui-umi-line); }
+  .deepro-orbit-ring.second { border-color: var(--ui-umi-line); }
+  .deepro-eco-core {
+    background: var(--ui-umi-soft);
+    box-shadow: none;
+  }
+  .deepro-eco-core>span { color: var(--ui-umi-muted); text-shadow: 0 2px 9px #00361d70; }
+  .deepro-eco-core>small { color: var(--ui-umi-muted); }
+  .orbit-point {
+    background: var(--ui-umi-soft);
+    border-color: var(--ui-umi-line);
+    color: var(--eco-accent);
+    box-shadow: none;
+  }
+
+  .deepro-eco-navigation { border-color: var(--eco-line); }
+  .deepro-eco-navigation button { color: var(--eco-muted); }
+  .deepro-eco-navigation button.active { color: var(--eco-accent); }
+  .deepro-eco-navigation button.active:after { background: var(--eco-green); }
+  .deepro-eco-navigation>span { color: var(--ui-umi-muted); }
+  .deepro-section-heading>span { color: var(--eco-accent); }
+  .deepro-section-heading p { color: var(--eco-muted); }
+
+  .deepro-eco-modules>button { border-color: var(--eco-line); }
+  .deepro-eco-modules>button:hover { border-color: var(--ui-umi-line); background: var(--ui-umi-accent); }
+  .deepro-eco-modules>button.active {
+    border-color: var(--eco-green);
+    background: var(--ui-umi-accent);
+    box-shadow: none;
+  }
+  .deepro-module-icon { background: var(--ui-umi-soft); color: var(--eco-accent); }
+  .deepro-eco-modules small { color: var(--ui-umi-muted); }
+  .deepro-eco-modules p { color: var(--eco-muted); }
+  .deepro-module-more { color: var(--eco-accent); }
+  .deepro-module-detail { background: var(--eco-mint); }
+  .deepro-module-detail span { color: var(--eco-accent); }
+  .deepro-module-detail p { color: var(--eco-muted); }
+
+  .deepro-architecture>div { border-color: var(--eco-line); }
+  .deepro-architecture>div>span { color: var(--ui-umi-muted); }
+  .deepro-architecture svg { color: var(--eco-accent); }
+  .deepro-architecture p { color: var(--eco-muted); }
+  .deepro-token-model {
+    background: var(--ui-umi-soft);
+    border-color: var(--eco-line);
+  }
+  .deepro-token-model>div>span,
+  .deepro-token-model button { color: var(--eco-accent); }
+  .deepro-token-model p,
+  .deepro-token-model dt,
+  .deepro-token-model dd small { color: var(--eco-muted); }
+
+  .deepro-scenario-grid>article { border-color: var(--eco-line); }
+  .deepro-scenario-icon { background: var(--ui-umi-soft); color: var(--eco-accent); }
+  .deepro-planned { background: var(--ui-umi-soft); color: var(--ui-umi-text); }
+  .deepro-scenario-grid p { color: var(--eco-muted); }
+  .deepro-scenario-grid>article>div>span { color: var(--eco-accent); }
+  .deepro-eco-connect {
+    background: var(--ui-umi-soft);
+    border: 1px solid var(--eco-line);
+  }
+  .deepro-eco-connect span { color: var(--eco-accent); }
+  .deepro-eco-connect p { color: var(--eco-muted); }
+
+  .deepro-documents>article { border-color: var(--eco-line); }
+  .deepro-doc-cover {
+    background: var(--ui-umi-soft);
+    color: var(--ui-umi-text);
+    border-left-color: var(--eco-green);
+    box-shadow: none;
+  }
+  .deepro-documents article>div:last-child>span { color: var(--ui-umi-muted); }
+  .deepro-documents p { color: var(--eco-muted); }
+  .deepro-faq details { border-color: var(--eco-line); }
+  .deepro-faq summary svg { color: var(--eco-accent); }
+  .deepro-faq details[open] summary { color: var(--eco-accent); }
+  .deepro-faq details p { color: var(--eco-muted); }
+  .deepro-eco-source { border-color: var(--eco-line); color: var(--ui-umi-text); }
+}
+
+.deepro-discover-eco {
+  background: var(--ui-umi-soft);
+  border: 1px solid var(--ui-umi-line);
+  color: var(--ui-umi-text) !important;
+
+  div>span { color: var(--ui-umi-muted); }
+  p { color: var(--ui-umi-muted); }
+  b { color: var(--ui-umi-text); }
+  &:hover { border-color: var(--eco-green); }
+  &:focus-visible { outline-color: var(--eco-accent); }
+
+  .deepro-discover-orb {
+    background: var(--ui-umi-soft);
+    border-color: var(--ui-umi-line);
+    color: var(--ui-umi-text);
+    box-shadow: none;
+  }
+}
+
+.umi-quick-actions a[href$="/umi-ecosystem/portfolio"] {
+  span { color: var(--eco-accent); background: var(--ui-umi-soft); }
+  &:hover span { background: var(--ui-umi-soft); }
+  &:focus-visible { outline-color: var(--eco-accent); }
+}
+
+.umi-desktop-nav a[href$="/umi-ecosystem/portfolio"],
+.deepro-mobile-sections a[href$="/umi-ecosystem/portfolio"] {
+  &.active { color: var(--eco-accent); }
+  &.active::after { background: var(--eco-green); }
+  &:focus-visible { outline-color: var(--eco-accent); }
+  .deepro-new-dot { background: var(--eco-green); }
+}

@@ -1,0 +1,243 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('API Keys') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('API Keys')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold ">{{ $t('API Keys') }}</h1>
+                <p class=" mt-1">{{ $t('Manage your API keys for integration') }}</p>
+            </div>
+            <button
+                @click="openCreateModal"
+                :disabled="!canOperate"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>{{ $t('Create API Key') }}</span>
+            </button>
+        </div>
+
+        <!-- Restriction Notice -->
+        <div v-if="!canOperate && operationRestriction" class="mb-6 rounded-xl p-4 border-l-4"
+            :class="{
+                'bg-yellow-50 border-yellow-500': operationRestriction.type === 'pending',
+                'bg-red-50 border-red-500': operationRestriction.type === 'suspended' || operationRestriction.type === 'rejected',
+                'bg-orange-50 border-orange-500': operationRestriction.type === 'unverified' || operationRestriction.type === 'inactive'
+            }">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg v-if="operationRestriction.type === 'pending'" class="h-6 w-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <svg v-else-if="operationRestriction.type === 'suspended' || operationRestriction.type === 'rejected'" class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <svg v-else class="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-semibold"
+                        :class="{
+                            'text-yellow-800': operationRestriction.type === 'pending',
+                            'text-red-800': operationRestriction.type === 'suspended' || operationRestriction.type === 'rejected',
+                            'text-orange-800': operationRestriction.type === 'unverified' || operationRestriction.type === 'inactive'
+                        }">
+                        {{ $t(operationRestriction.title) }}
+                    </h3>
+                    <p class="mt-1 text-sm"
+                        :class="{
+                            'text-yellow-700': operationRestriction.type === 'pending',
+                            'text-red-700': operationRestriction.type === 'suspended' || operationRestriction.type === 'rejected',
+                            'text-orange-700': operationRestriction.type === 'unverified' || operationRestriction.type === 'inactive'
+                        }">
+                        {{ $t(operationRestriction.message) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start space-x-3">
+                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div>
+                    <h4 class="font-semibold text-yellow-800">{{ $t('Keep your API keys secure') }}</h4>
+                    <p class="text-sm text-yellow-700 mt-1">{{ $t('Never share your secret keys. They provide full access to your merchant account.') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Keys List -->
+        <div class=" rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full merchant-table">
+                <thead class="">
+                    <tr class="text-left text-sm ">
+                        <th class="px-6 py-4 font-medium">{{ $t('Name') }}</th>
+                        <th class="px-6 py-4 font-medium">{{ $t('Public Key') }}</th>
+                        <th class="px-6 py-4 font-medium">{{ $t('Environment') }}</th>
+                        <th class="px-6 py-4 font-medium">{{ $t('Last Used') }}</th>
+                        <th class="px-6 py-4 font-medium">{{ $t('Created') }}</th>
+                        <th class="px-6 py-4 font-medium">{{ $t('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        v-for="apiKey in apiKeys"
+                        :key="apiKey.id"
+                        class=""
+                    >
+                        <td class="px-6 py-4">
+                            <div class="font-medium ">{{ apiKey.name }}</div>
+                            <div class="text-xs ">****{{ apiKey.secret_key_last4 }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2">
+                                <code class="text-sm px-2 py-1 rounded">{{ apiKey.public_key }}</code>
+                                <button
+                                    @click="doCopy(apiKey.public_key, 'Public key')"
+                                    class="p-1  hover:text-blue-600"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span :class="['px-2 py-1 rounded-full text-xs font-medium', getEnvironmentBadge(apiKey.environment).color]">
+                                {{ getEnvironmentBadge(apiKey.environment).label }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm ">
+                            {{ apiKey.last_used_at ? formatDate(apiKey.last_used_at) : $t('Never') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm ">{{ formatDate(apiKey.created_at) }}</td>
+                        <td class="px-6 py-4">
+                            <button
+                                v-if="!apiKey.revoked_at"
+                                @click="revokeApiKey(apiKey)"
+                                :disabled="revoking === apiKey.id"
+                                class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                            >
+                                {{ revoking === apiKey.id ? $t('Revoking...') : $t('Revoke') }}
+                            </button>
+                            <span v-else class="text-sm ">{{ $t('Revoked') }}</span>
+                        </td>
+                    </tr>
+                    <tr v-if="!apiKeys || apiKeys.length === 0">
+                        <td colspan="6" class="px-6 py-12 text-center ">
+                            {{ $t('No API keys yet. Create one to get started.') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class=" rounded-xl w-full max-w-md p-6 merchant-modal shadow-md">
+            <h3 class="text-xl font-bold  mb-4">{{ $t('Create API Key') }}</h3>
+            <form @submit.prevent="createApiKey">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium  mb-2">{{ $t('Key Name') }} *</label>
+                        <input
+                            v-model="newKeyForm.name"
+                            type="text"
+                            class="w-full px-4 py-3 border rounded-lg"
+                            :placeholder="$t('e.g., Production Server')"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium  mb-2">{{ $t('Environment') }}</label>
+                        <themed-select v-model="newKeyForm.environment" class="w-full px-4 py-3 border rounded-lg">
+                            <option value="live">{{ $t('Live') }}</option>
+                            <option value="test">{{ $t('Test') }}</option>
+                        </themed-select>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button
+                        type="button"
+                        @click="showCreateModal = false"
+                        class="flex-1 px-4 py-2 border border-gray-300  rounded-lg hover:"
+                    >
+                        {{ $t('Cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="creating"
+                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        {{ creating ? $t('Creating...') : $t('Create') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Secret Key Modal -->
+    <div v-if="showSecretModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ">
+        <div class=" rounded-xl w-full max-w-lg p-6 merchant-modal">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold ">{{ $t('API Key Created!') }}</h3>
+                <p class="text-sm  mt-2">{{ $t('Copy your secret key now. It will not be shown again.') }}</p>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm  mb-2">{{ $t('Public Key') }}</label>
+                    <div class="flex items-center space-x-2">
+                        <input :value="newKeyData.public_key" readonly class="merchant-input  flex-1 px-3 py-2  border rounded-lg text-sm font-mono" />
+                        <button @click="doCopy(newKeyData.public_key, 'Public key')" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm  mb-2">{{ $t('Secret Key') }} <span class="text-red-500">{{ $t('(save this now!)') }}</span></label>
+                    <div class="flex items-center space-x-2">
+                        <input :value="newKeyData.secret_key" readonly class="merchant-input flex-1 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm font-mono" />
+                        <button @click="doCopy(newKeyData.secret_key, 'Secret key')" class="p-2 bg-red-100 rounded-lg hover:bg-red-200">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-800">
+                    <strong>{{ $t('Warning:') }}</strong> {{ $t('This secret key will only be shown once. Store it securely.') }}
+                </p>
+            </div>
+
+            <button
+                @click="closeSecretModal"
+                class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                {{ $t('I have saved my secret key') }}
+            </button>
+        </div>
+    </div>
+</app-layout>

@@ -1,0 +1,116 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Application Pending') }}</title>
+    </Head>
+
+    <div class="container mx-auto px-4 py-12 merchant-container">
+        <div class="max-w-2xl mx-auto">
+            <!-- Pending Notice -->
+            <div class="rounded-card rounded-xl shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="bg-yellow-500 px-8 py-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0 w-16 h-16  rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">{{ $t('Application Under Review') }}</h1>
+                            <p class="text-yellow-100" v-if="formattedSubmittedAt">{{ $t('Submitted') }}: {{ formattedSubmittedAt }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-8">
+                    <!-- Resubmission Notice -->
+                    <div v-if="isResubmission" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-blue-700">{{ $t('This is your resubmission') }} ({{ $t('attempt') }} #{{ submissionCount }})</span>
+                        </div>
+                    </div>
+
+                    <!-- Business Info -->
+                    <div class="mb-6 pb-6 border-b">
+                        <h2 class="text-lg font-semibold  mb-2">{{ merchant.business_name }}</h2>
+                        <p class="">{{ merchant.business_email }}</p>
+                        <p v-if="merchant.business_website" class=" text-sm mt-1">{{ merchant.business_website }}</p>
+                    </div>
+
+                    <!-- Status Timeline -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold  uppercase tracking-wide mb-4">{{ $t('Application Status') }}</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium ">{{ $t('Application Submitted') }}</p>
+                                    <p class="text-sm ">{{ formattedSubmittedAt }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center animate-pulse">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium ">{{ $t('Under Review') }}</p>
+                                    <p class="text-sm ">{{ $t('Our team is reviewing your application') }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <svg class="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium ">{{ $t('Decision') }}</p>
+                                    <p class="text-sm ">{{ $t('Pending') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expected Time -->
+                    <div class="mb-8 p-4  rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="">{{ $t('Reviews typically take 1-2 business days. You will receive an email once a decision is made.') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- What happens next -->
+                    <div>
+                        <h3 class="text-sm font-semibold  uppercase tracking-wide mb-3">{{ $t('What happens next') }}</h3>
+                        <ul class="space-y-3 ">
+                            <li class="flex items-start space-x-3">
+                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-semibold">1</span>
+                                <span>{{ $t('Our team reviews your business information') }}</span>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-semibold">2</span>
+                                <span>{{ $t('We may contact you for additional information if needed') }}</span>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-semibold">3</span>
+                                <span>{{ $t('Once approved, you can start creating invoices and accepting payments') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

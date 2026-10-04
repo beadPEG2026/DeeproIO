@@ -1,0 +1,178 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Swap')}}</title>
+        <meta name="description" content="">
+    </Head>
+    <!-- components title start -->
+    <div class="components-title">
+        <h2 class="text-center">{{ $t('Quick Buy') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <!-- table components start -->
+    <div id="swap-container" class="table-components">
+
+        <div class="flex components-filter__item swap-inner rounded-lg p-8 flex flex-col mt-10 md:mt-0 relative">
+            <div v-if="placingOrder || placedOrder" id="orderProcessing">
+                <div v-if="placingOrder">
+                    <div
+                        class="loadingio-eclipse">
+                        <div class="ldio-rpinwye8j0b">
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="orderProcessingText mt-4">
+                        <h3>{{ $t('Starting') }}</h3>
+                        <span v-if="exchangeState == 'searching'">{{ $t('Searching orders with best rate...') }}</span>
+                        <span v-else>{{ $t('Your exchange is starting...') }}</span>
+                    </div>
+                </div>
+                <div v-if="placedOrder">
+                    <div class="text-center">
+                        <font-awesome-icon class="text-5xl text-green-500 user-status__icon" icon="check"></font-awesome-icon>
+                    </div>
+                    <div class="orderProcessingText">
+                        <h3>{{ $t('Completed') }}</h3>
+                        <span>{{ $t('Your order was processed. Please check your wallet and transaction history to get a report.') }}</span>
+
+                        <button @click="startNewTrade" class="flex mt-4 m-auto text-white text-sm bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">{{ $t('Start new order') }}</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pb-6 w-full">
+                <label class="swap-block float-left">{{ $t('You send:') }}</label>
+                <div class="swap-block cursor-pointer module-orderform__sell-currency"><span class="module-orderform__sell-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="20" height="16" rx="4" class="module-orderform__sell-color"></rect> <line x1="21.5" y1="9.5" x2="2.5" y2="9.5" class="module-orderform__sell-color"></line> <line x1="19.5" y1="16.5" x2="16.5" y2="16.5" class="module-orderform__sell-color"></line></svg></span>
+                    <span v-if="!processing_balance" @click="injectBalance" class="swap-wallet-balance">{{ balance }}</span>
+                    <svg v-show="processing_balance" class="animate-spin ml-2 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="pl-1" v-if="currencies[basePair]">{{ currencies[basePair].name }}</span>
+                </div>
+                <div class="swap-container-elements rounded filter-select w-full flex text-left mt-2 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                    <t-rich-user-select
+                    v-model="basePair"
+                    :options="baseMarkets"
+                    v-on:change="setupInitialData"
+                    :placeholder="$t('Select coin')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <div class="swap-label flex items-stretch">
+                                    <img :src="option.raw.logo" width="28" />
+                                    <span class="pt-1 ml-5">{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template
+                        slot="option"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                    <img :src="option.raw.logo" width="28" />
+                                    <span class="pt-1 ml-5">{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+                    <div class="relative-right" style="display: flex; align-items: center; flex-wrap: nowrap;">
+                        <input placeholder="0.00" type="text" v-model="form.base_amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                        <button
+                            type="button"
+                            @click.stop.prevent="injectBalance"
+                            style="border: none; background: transparent; padding: 0; margin-left: 8px; margin-right: 8px; color: #ffa71d; font-size: 13px; font-weight: 700; line-height: 1; cursor: pointer; white-space: nowrap;"
+                        >
+                            {{ $t('Max') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full">
+                <img @click="swapPair" src="/images/swap.png" width="42" class="m-auto cursor-pointer exchange-coins" />
+            </div>
+            <div class="pb-6 w-full">
+                <div class="">
+                    <label>{{ $t('You get:') }}</label>
+                    <div class="swap-container-elements rounded filter-select w-full flex text-left mt-2 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                        <t-rich-user-select
+                            v-model="quotePair"
+                            :options="quoteMarkets"
+                            :placeholder="$t('Select coin')"
+                            value-attribute="id"
+                            text-attribute="name"
+                            v-on:change="setupInitialData"
+                            :clearable="true"
+                        >
+                            <template
+                                slot="label"
+                                slot-scope="{ className, option, query }"
+                            >
+                                <div class="flex">
+                                    <div class="flex flex-col">
+                                        <div class="swap-label flex items-stretch">
+                                            <img :src="option.raw.logo" width="28" />
+                                            <span class="pt-1 ml-5">{{ option.text }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template
+                                slot="option"
+                                slot-scope="{ className, option, query }"
+                            >
+                                <div class="flex">
+                                    <div class="flex flex-col">
+                                        <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                            <img :src="option.raw.logo" width="28" />
+                                            <span class="pt-1 ml-5">{{ option.text }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </t-rich-user-select>
+                        <div class="relative-right">
+                            <div class="filter-select filter-select-borderless w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                                ~ {{ form.quote_amount }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pb-8 w-full">
+                <div class="mb-4 text-red-600">
+                    {{ error }}
+                </div>
+                <div class="">
+                    {{ $t('Exchange Rate:') }}
+                    <span v-if="exchangeRate && !processing && !error">1 <span v-if="currencies[basePair]">{{ currencies[basePair].name }}</span> = {{ exchangeRate }} <span v-if="currencies[quotePair]">{{ currencies[quotePair].name }}</span></span>
+                    <span v-else-if="!processing">{{ $t('N/A') }}</span>
+                    <svg v-show="processing" class="animate-spin ml-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="pb-2 w-full">
+                <div class="form-components__block">
+                    <div class="form-components__block-item block-button">
+                        <button @click="submitExchange" :class="{'disabled': !selectedMarket || !$page.props.user}" class="form-components__block-button">{{ $t($page.props.user ? 'Exchange' : 'Login to continue') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- table components end -->
+
+</app-layout>

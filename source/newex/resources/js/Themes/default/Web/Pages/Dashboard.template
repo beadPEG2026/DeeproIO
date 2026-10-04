@@ -1,0 +1,410 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Home') }}</title>
+        <meta name="description" content="">
+    </Head>
+    <!-- head start -->
+
+    <section class="head noselect">
+        <div class="head-row">
+
+            <div class="head-title hidden-in-mobile">
+                <h1>{{ $t('The Most') }}
+                    <span class="typer typer-text" id="typer-main" :data-words="$t('Trusted') +','+ $t('Secure') +','+ $t('Fast') +','+ $t('Reliable')" data-delay="100" data-deleteDelay="1000"></span>
+                    <span class="cursor typer-cursor" data-owner="typer-main"></span>
+                    <br>{{ $t('Cryptocurrency Exchange.') }}
+                </h1>
+                <p>{{ $t('Begin your crypto journey on a secure, intuitive platform designed to buy, sell, trade, and earn digital assets.') }}</p>
+                <Link :href="route('markets')">{{ $t('Get Access') }}</Link>
+            </div>
+
+            <div v-if="articles && articles.data" class="head-carousel head-carousel flex flex-col">
+                <Link as="div" :href="route('articles')" class="mobile-order-1 cursor-pointer text-right pr-3 home-news-link">{{ $t('All news announcements')}} &rarr;</Link>
+                <hooper :settings="hooperSettings">
+                    <slide v-for="article in articles.data">
+                            <div @click.stop="setArticle(article)" class="cursor-pointer head-carousel__item">
+                                <img :src="article.thumbnail">
+                            </div>
+                    </slide>
+                </hooper>
+            </div>
+
+        </div>
+    </section>
+    <!-- head end -->
+
+    <div class="shortcut-section hidden-in-desktop grid grid-cols-5 gap-4 w-full">
+
+        <div class="shortcut-item">
+            <Link :href="route('wallets.deposit.crypto', 'USDT')" class="shortcut-item__link">
+                <span class="shortcut-item__icon">
+                    <svg class="filled" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="Icons" x="-192" y="-320" width="1280" height="800" style="fill:none;"/>
+    <g id="turn-off">
+        <path d="M40,14.62c7.91,3.16 13.505,10.896 13.505,19.928c0,11.838 -9.611,21.449 -21.449,21.449c-11.838,0 -21.449,-9.611 -21.449,-21.449c0,-8.99 5.542,-16.695 13.393,-19.883l0,4.332c-5.616,2.918 -9.456,8.789 -9.456,15.551c0,9.665 7.847,17.512 17.512,17.512c9.665,0 17.512,-7.847 17.512,-17.512c0,-6.806 -3.891,-12.711 -9.568,-15.608l0,-4.32Z"/>
+        <path d="M34.056,9.886c0,-1.104 -0.896,-2 -2,-2c-1.104,0 -2,0.896 -2,2l0,24c0,1.104 0.896,2 2,2c1.104,0 2,-0.896 2,-2l0,-24Z"/>
+    </g>
+</svg>
+                </span>
+                <span class="shortcut-item__title">{{ $t('Deposit') }}</span>
+            </Link>
+        </div>
+
+        <div class="shortcut-item">
+            <Link :href="route('profile.show', {'slug': 'vouchers' })" class="shortcut-item__link">
+                <span class="shortcut-item__icon">
+                    <svg fill="none" class="stroked" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 9.5C3 9.03534 3 8.80302 3.03843 8.60982C3.19624 7.81644 3.81644 7.19624 4.60982 7.03843C4.80302 7 5.03534 7 5.5 7H12H18.5C18.9647 7 19.197 7 19.3902 7.03843C20.1836 7.19624 20.8038 7.81644 20.9616 8.60982C21 8.80302 21 9.03534 21 9.5V9.5V9.5C21 9.96466 21 10.197 20.9616 10.3902C20.8038 11.1836 20.1836 11.8038 19.3902 11.9616C19.197 12 18.9647 12 18.5 12H12H5.5C5.03534 12 4.80302 12 4.60982 11.9616C3.81644 11.8038 3.19624 11.1836 3.03843 10.3902C3 10.197 3 9.96466 3 9.5V9.5V9.5Z"  stroke-width="1" stroke-linejoin="round"/>
+<path d="M4 12V16C4 17.8856 4 18.8284 4.58579 19.4142C5.17157 20 6.11438 20 8 20H9H15H16C17.8856 20 18.8284 20 19.4142 19.4142C20 18.8284 20 17.8856 20 16V12"  stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 7V20"  stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M11.3753 6.21913L9.3959 3.74487C8.65125 2.81406 7.26102 2.73898 6.41813 3.58187C5.1582 4.8418 6.04662 7 7.82843 7L11 7C11.403 7 11.6271 6.53383 11.3753 6.21913Z"  stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.6247 6.21913L14.6041 3.74487C15.3488 2.81406 16.739 2.73898 17.5819 3.58187C18.8418 4.8418 17.9534 7 16.1716 7L13 7C12.597 7 12.3729 6.53383 12.6247 6.21913Z"  stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+                </span>
+                <span class="shortcut-item__title">{{ $t('Vouchers') }}</span>
+            </Link>
+        </div>
+
+        <div class="shortcut-item">
+            <Link :href="route('user.kyc')" class="shortcut-item__link">
+                <span class="shortcut-item__icon">
+                    <svg class="stroked" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 21H5.6C5.03995 21 4.75992 21 4.54601 20.891C4.35785 20.7951 4.20487 20.6422 4.10899 20.454C4 20.2401 4 19.9601 4 19.4V17.6841C4 17.0485 4 16.7306 4.04798 16.4656C4.27087 15.2344 5.23442 14.2709 6.46558 14.048C6.5425 14.0341 6.6237 14.0242 6.71575 14.0172C6.94079 14 7.05331 13.9914 7.20361 14.0026C7.35983 14.0143 7.4472 14.0297 7.59797 14.0722C7.74302 14.1131 8.00429 14.2315 8.52682 14.4682C8.98953 14.6778 9.48358 14.8304 10 14.917M19.8726 15.2038C19.8044 15.2079 19.7357 15.21 19.6667 15.21C18.6422 15.21 17.7077 14.7524 17 14C16.2923 14.7524 15.3578 15.2099 14.3333 15.2099C14.2643 15.2099 14.1956 15.2078 14.1274 15.2037C14.0442 15.5853 14 15.9855 14 16.3979C14 18.6121 15.2748 20.4725 17 21C18.7252 20.4725 20 18.6121 20 16.3979C20 15.9855 19.9558 15.5853 19.8726 15.2038ZM15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z"  stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="shortcut-item__title">{{ $t('KYC') }}</span>
+            </Link>
+        </div>
+
+        <div class="shortcut-item">
+            <Link :href="route('articles')" class="shortcut-item__link">
+                <span class="shortcut-item__icon">
+                    <svg class="stroked" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 13.9999L5.57465 20.2985C5.61893 20.4756 5.64107 20.5642 5.66727 20.6415C5.92317 21.397 6.60352 21.9282 7.39852 21.9933C7.4799 21.9999 7.5712 21.9999 7.75379 21.9999C7.98244 21.9999 8.09677 21.9999 8.19308 21.9906C9.145 21.8982 9.89834 21.1449 9.99066 20.193C10 20.0967 10 19.9823 10 19.7537V5.49991M18.5 13.4999C20.433 13.4999 22 11.9329 22 9.99991C22 8.06691 20.433 6.49991 18.5 6.49991M10.25 5.49991H6.5C4.01472 5.49991 2 7.51463 2 9.99991C2 12.4852 4.01472 14.4999 6.5 14.4999H10.25C12.0164 14.4999 14.1772 15.4468 15.8443 16.3556C16.8168 16.8857 17.3031 17.1508 17.6216 17.1118C17.9169 17.0756 18.1402 16.943 18.3133 16.701C18.5 16.4401 18.5 15.9179 18.5 14.8736V5.1262C18.5 4.08191 18.5 3.55976 18.3133 3.2988C18.1402 3.05681 17.9169 2.92421 17.6216 2.88804C17.3031 2.84903 16.8168 3.11411 15.8443 3.64427C14.1772 4.55302 12.0164 5.49991 10.25 5.49991Z" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="shortcut-item__title">{{ $t('News') }}</span>
+            </Link>
+        </div>
+
+        <div class="shortcut-item">
+            <Link :href="route('reports.trades')" class="shortcut-item__link">
+                <span class="shortcut-item__icon">
+                    <svg class="stroked" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 5.00005C7.01165 5.00082 6.49359 5.01338 6.09202 5.21799C5.71569 5.40973 5.40973 5.71569 5.21799 6.09202C5 6.51984 5 7.07989 5 8.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.07989 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V8.2C19 7.07989 19 6.51984 18.782 6.09202C18.5903 5.71569 18.2843 5.40973 17.908 5.21799C17.5064 5.01338 16.9884 5.00082 16 5.00005M8 5.00005V7H16V5.00005M8 5.00005V4.70711C8 4.25435 8.17986 3.82014 8.5 3.5C8.82014 3.17986 9.25435 3 9.70711 3H14.2929C14.7456 3 15.1799 3.17986 15.5 3.5C15.8201 3.82014 16 4.25435 16 4.70711V5.00005M15 12H12M15 16H12M9 12H9.01M9 16H9.01" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+                </span>
+                <span class="shortcut-item__title">{{ $t('History') }}</span>
+            </Link>
+        </div>
+    </div>
+
+
+    <!-- table home start -->
+    <section class="table-home noselect markets-tabs-list">
+        <div class="table-home__row">
+
+            <!-- table home title start -->
+            <div class="table-home__title">
+                <h2>{{ $t('Crypto Markets Today') }}</h2>
+            </div>
+            <!-- table home title end -->
+
+            <div class="market-filter hidden-in-desktop">
+                <div @click="setFilter('qVolume', 'desc', true)" :class="{'active': filter.filterBy == 'qVolume'}" class="market-filter-item">{{ $t('Hot') }}</div>
+                <div @click="setFilter('change', 'desc', true)" :class="{'active': filter.filterBy == 'change' && filter.filterDirection == 'desc'}" class="market-filter-item">{{ $t('Gainers') }}</div>
+                <div @click="setFilter('change', 'asc', true)" :class="{'active': filter.filterBy == 'change' && filter.filterDirection == 'asc'}" class="market-filter-item">{{ $t('Losers') }}</div>
+                <div @click="setFilter('listed_at', 'desc', true)" :class="{'active': filter.filterBy == 'listed_at'}" class="market-filter-item">{{ $t('New') }}</div>
+            </div>
+
+            <!-- table home table start -->
+            <table class="list-table mob-table-markets">
+                <thead class="table-sort">
+                    <tr>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Markets') }}</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Last Price') }}</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('24h Change') }}</span>
+                            </div>
+                        </th>
+                        <th class="mob-hide-alt">
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('24h High') }}</span>
+                            </div>
+                        </th>
+                        <th class="mob-hide-alt">
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('24h Low') }}</span>
+                            </div>
+                        </th>
+                        <th class="mob-hide-alt">
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Volume') }}</span>
+                            </div>
+                        </th>
+
+                        <th class="mob-hide-alt">
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Actions') }}</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="table-list">
+                    <tr @click="setMarket(market, false, false)" class="cursor-pointer"  v-for="market in topMarkets">
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('Markets') }}</div>
+                            <div class="table-list__title title-icon">
+                                <span class="table-list__image">
+                                    <img :src="market.base_currency_logo"/>
+                                </span>
+                                <div class="title-icon__name">
+                                    {{ market.base_currency }} <span class="quote-symbol">{{ market.quote_currency }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('Last Price') }}</div>
+                            <div class="table-list__value">
+                                <div :ref="market.name" class="table-list__name" >{{ market.last }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('24h Change') }}</div>
+                            <div @click.stop="setMarket(market, false, false, 'chart')" class="table-list__value">
+                                <div class="table-list__name" :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">{{ market.change > 0 ? '+' : ''}}{{ market.change }}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('24h High') }}</div>
+                            <div class="table-list__value mob-hide-alt">
+                                <div class="table-list__name" >{{ market.high }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('24h Low') }}</div>
+                            <div class="table-list__value mob-hide-alt">
+                                <div class="table-list__name" >{{ market.low }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle mob-hide-alt">{{ $t('Volume') }}</div>
+                            <div class="table-list__value mob-hide-alt">
+                                <div class="table-list__name">{{ formatNumber(market.volume, 2) }}</div>
+                            </div>
+                        </td>
+                        <td class="mob-hide-alt">
+                            <div class="table-list__subtitle mob-hide-alt"></div>
+                            <div class="table-list__value">
+                                <div class="table-list__link">
+                                    <a href="#!">{{ $t('Trade') }}</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <!-- tfood start -->
+                <tfoot class="table-result">
+                    <tr>
+                        <td colspan="100">
+                            <div v-if="!topMarkets" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                                <span class="table-result__notfound-text">{{ $t('No markets found.') }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+                <!-- tfood end -->
+            </table>
+            <!-- table home table end -->
+
+
+            <div class="table-home__link">
+                <Link :href="route('markets')">{{ $t('View all') }}</Link>
+            </div>
+
+
+        </div>
+    </section>
+    <!-- table home end -->
+
+
+    <!-- screen start -->
+    <section class="noselect screen hidden-in-mobile">
+        <div class="screen-row">
+
+            <!-- screen title start -->
+            <div class="screen-title">
+                <h2>{{ $t('Trade anywhere') }}</h2>
+                <p>{{ $t('Trade safely and conveniently across multiple devices with full compatibility and ease of access.') }}</p>
+
+                <!--<div class="download-buttons mt-20">
+                    <a class="btn btn-white mr-2" href="https://apps.apple.com/" target="_blank" rel="noopener">
+                        <div class="inline-flex items-center">
+                            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:8px">
+                                <path d="M16.365 1.43c-.982.057-2.147.686-2.82 1.49-.616.733-1.133 1.9-.932 3.016 1.094.088 2.204-.558 2.86-1.374.638-.8 1.094-1.95.892-3.132zM20.91 17.08c-.53 1.226-.783 1.772-1.463 2.86-.95 1.487-2.292 3.343-3.966 3.357-1.484.014-1.87-.972-3.9-.961-2.03.012-2.45.98-3.936.966-1.675-.014-2.962-1.688-3.912-3.172-2.677-4.19-2.958-9.104-1.307-11.692 1.17-1.828 3.02-2.9 4.758-2.9 1.773 0 2.886.99 4.35.99 1.437 0 2.312-.99 4.351-.99 1.571 0 3.232.859 4.4 2.345-3.878 2.126-3.257 7.668.619 9.197z"/>
+                            </svg>
+                        {{ $t('Download for iOS') }}
+                        </div>
+                    </a>
+                    <a class="btn btn-white" href="https://play.google.com/" target="_blank" rel="noopener">
+                        <div class="inline-flex items-center">
+                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:8px">
+                            <path d="M1.5 2.75c0-.6.49-1.05 1.07-.99l11.41 6.57-2.41 2.41-9.94-7.99c-.13-.1-.13-.27-.13-.4zM.98 3.86v16.28c0 .6.49 1.05 1.07.99l11.43-6.58-2.63-2.63L.98 3.86zM14.08 10.54l2.9-2.9 4.16 2.4c1.02.59 1.02 2.05 0 2.64l-4.16 2.4-2.9-2.9 1.58-1.64zM11.99 13.46l2.41 2.41-11.83 6.81c-.58.06-1.07-.39-1.07-.99v-.17l10.49-8.06z"/>
+                        </svg>
+                        {{ $t('Download for Android') }}
+                        </div>
+                    </a>
+                </div>-->
+
+                <img class="d-block home-example-image m-auto mt-20" :src="route('home') + '/images/mockup.png'" />
+            </div>
+            <!-- screen title end -->
+
+            <div class="screen-img">
+
+            </div>
+
+        </div>
+    </section>
+    <!-- screen end -->
+
+
+    <!-- features start -->
+    <section class="noselect features hidden-in-mobile">
+        <div class="features-row">
+
+            <!-- features title start -->
+            <div class="features-title">
+                <h2>{{ $t('Features') }}</h2>
+            </div>
+            <!-- features title end -->
+
+            <div class="features-block">
+                <div class="features-item">
+                    <span class="features-item__icon">
+                        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M49.8051 54.1406C49.054 54.1406 48.4443 54.7531 48.4443 55.5078C48.4443 56.2625 49.054 56.875 49.8051 56.875C50.5563 56.875 51.1659 56.2625 51.1659 55.5078C51.1659 54.7531 50.5563 54.1406 49.8051 54.1406Z" class="features-item__icon-color"/>
+                            <path d="M53.1548 49.7196L46.687 47.5539L44.365 42.8881C46.4568 40.749 47.9092 37.9187 48.399 34.9665L48.6886 33.2227H51.1651C53.4161 33.2227 55.2475 31.3827 55.2475 29.1211V20.5078C55.2475 9.19981 46.0907 0 34.8355 0C23.5515 0 14.4235 9.17342 14.4235 20.5078V29.1211C14.4235 30.9034 15.5613 32.4231 17.1451 32.9875V34.5898C17.1451 36.8514 18.9765 38.6914 21.2275 38.6914H22.4225C23.0125 39.9789 23.776 41.1713 24.7052 42.2425C24.8978 42.4651 25.0988 42.6809 25.3047 42.8907L22.984 47.5539L16.516 49.7197C8.99555 52.2391 3.53711 60.1933 3.53711 68.6328C3.53711 69.3879 4.14634 70 4.89791 70H64.7731C65.5245 70 66.1339 69.3879 66.1339 68.6328C66.1339 60.1933 60.6756 52.2391 53.1548 49.7196ZM52.5259 29.1211C52.5259 29.875 51.9154 30.4883 51.1651 30.4883H49.0882C49.4341 27.7963 49.6647 24.9316 49.7573 22.1102C49.76 22.0306 49.7622 21.9532 49.7647 21.875H52.5259V29.1211ZM18.5059 30.4883C17.7556 30.4883 17.1451 29.875 17.1451 29.1211V21.875H19.9072C19.9117 22.0176 19.9165 22.1609 19.9218 22.3051C19.9219 22.31 19.9222 22.3148 19.9224 22.3197C19.9224 22.3202 19.9224 22.3206 19.9224 22.321C20.0176 25.0652 20.2451 27.8555 20.5832 30.4881H18.5059V30.4883ZM21.2275 35.957C20.4772 35.957 19.8667 35.3437 19.8667 34.5898V33.2227H20.9823L21.2719 34.9671C21.3271 35.2986 21.395 35.6289 21.4735 35.957H21.2275ZM19.869 19.1406H17.1968C17.8861 9.9776 25.4973 2.73438 34.8355 2.73438C44.1322 2.73438 51.7769 9.97664 52.474 19.1406H49.8021C49.7041 11.5901 43.5842 5.46875 36.0535 5.46875H33.6177C26.0872 5.46875 19.9669 11.5901 19.869 19.1406ZM33.6176 8.20313H36.0534C42.151 8.20313 47.0862 13.214 47.0827 19.3334C47.0827 19.7637 47.0793 20.1383 47.0721 20.4791C47.0721 20.4835 47.0719 20.488 47.0719 20.4925L45.3698 20.2482C40.7458 19.5848 36.3799 17.3916 33.0761 14.0723C32.8208 13.816 32.4748 13.6719 32.1139 13.6719C28.4593 13.6719 24.961 15.3448 22.6484 18.171C23.2183 12.604 27.9026 8.20313 33.6176 8.20313ZM24.2947 35.957C23.6135 33.6803 22.8341 26.981 22.6618 22.6881L24.4933 20.2345C26.1754 17.9819 28.7923 16.5823 31.5761 16.4217C35.239 19.9239 39.9775 22.2366 44.985 22.9549L46.9884 23.2426C46.8545 26.098 46.5808 28.9633 46.1888 31.5986C46.1886 31.5994 46.1885 31.6004 46.1884 31.6013C46.0637 32.4486 45.9655 32.9938 45.7145 34.5167C44.9938 38.8596 41.7685 42.7868 37.5107 43.8564C35.7584 44.2959 33.9123 44.2958 32.161 43.8564C29.5024 43.1886 27.0646 41.3405 25.4914 38.6914H28.2655C28.8273 40.2827 30.3398 41.4258 32.1139 41.4258H34.8355C37.091 41.4258 38.9179 39.5905 38.9179 37.3242C38.9179 35.0626 37.0865 33.2227 34.8355 33.2227H32.1139C30.3004 33.2227 28.8101 34.3995 28.2632 35.957H24.2947ZM31.9994 46.6233C32.9328 46.8208 33.8844 46.9219 34.8355 46.9219C35.58 46.9219 36.3246 46.8593 37.0608 46.7379L34.6563 49.2927L31.9994 46.6233ZM32.7854 51.2803L28.4693 55.8662C27.281 53.581 26.26 51.2028 25.4226 48.7681L27.0434 45.5112L32.7854 51.2803ZM42.3969 45.048L44.2481 48.768C43.4093 51.2068 42.3881 53.5858 41.201 55.8682L36.5814 51.2269L42.3969 45.048ZM30.7531 37.3242C30.7531 36.5694 31.3625 35.957 32.1139 35.957H34.8355C35.5858 35.957 36.1963 36.5704 36.1963 37.3242C36.1963 38.0792 35.5868 38.6914 34.8355 38.6914H32.1139C31.3635 38.6914 30.7531 38.0781 30.7531 37.3242ZM6.31314 67.2656C6.85242 60.4927 11.3388 54.3365 17.3767 52.3137L23.1049 50.3958C24.1543 53.3113 25.4544 56.1451 26.9781 58.8368C26.9807 58.8414 26.9831 58.8461 26.9857 58.8506C26.9857 58.8507 26.9859 58.8507 26.9859 58.8509C28.0991 60.8181 29.3521 62.7405 30.7106 64.5656L32.3847 67.2656H6.31314ZM34.8355 66.0469L32.99 63.0701C32.9693 63.0368 32.9472 63.0044 32.9238 62.9729C31.8219 61.4961 30.7939 59.9516 29.8577 58.3707L34.7107 53.2145L39.8243 58.3521C38.8818 59.9445 37.8503 61.4954 36.7474 62.9727C36.6807 63.0619 36.7753 62.9213 34.8355 66.0469ZM37.2863 67.2656L38.9602 64.5657C40.3247 62.7337 41.5867 60.7958 42.7111 58.8055C42.7179 58.7934 42.7243 58.7811 42.7311 58.7691C42.7319 58.7676 42.7327 58.7662 42.7336 58.7647C44.2379 56.0987 45.5244 53.2896 46.5661 50.3958L52.2941 52.3137C58.3321 54.3365 62.8185 60.4927 63.3578 67.2656H37.2863Z" class="features-item__icon-color"/>
+                            <path d="M59.2694 61.7324C58.36 59.9035 57.0279 58.2787 55.4172 57.0338C54.8214 56.5732 53.9671 56.6851 53.5089 57.2837C53.0506 57.8822 53.162 58.7406 53.7577 59.201C55.0442 60.1954 56.108 61.4933 56.8346 62.9544C57.1711 63.631 57.9889 63.9033 58.6601 63.5665C59.3323 63.229 59.6051 62.4079 59.2694 61.7324Z" class="features-item__icon-color"/>
+                        </svg>
+                    </span>
+                    <div class="features-item__title">
+                        <h4>{{ $t('Customer Service 24/7') }}</h4>
+                        <p>{{ $t("New to trading or unsure how to navigate the markets? Our customer support team is always ready to help.") }}</p>
+                    </div>
+                </div>
+                <div class="features-item">
+                    <span class="features-item__icon">
+                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                             viewBox="0 0 512.043 512.043" style="enable-background:new 0 0 512.043 512.043;" xml:space="preserve">
+                            <path class="features-item__icon-color" d="M467.989,402.219l-32.021-7.979l-1.344-5.376c8.299-9.173,14.208-20.885,16.661-33.045
+                                c5.696-2.944,9.835-8.555,10.667-15.275l2.304-18.517c0.704-5.611-1.024-11.307-4.757-15.573
+                                c-1.152-1.301-2.475-2.453-3.904-3.413l0.555-11.328l1.941-1.963c5.504-5.824,12.949-18.325,1.173-36.309
+                                c-5.589-8.533-17.088-18.752-40.192-18.752c-6.805,0-22.144,0-37.035,9.365c-43.904,1.536-49.067,25.195-49.067,43.051
+                                c0,3.52,0.64,10.112,1.237,15.637c-1.579,1.003-3.029,2.24-4.288,3.669c-3.797,4.288-5.547,9.984-4.821,15.616l2.304,18.56
+                                c0.875,6.955,5.291,12.715,11.797,15.552c2.389,11.648,7.957,22.891,15.765,31.851l-1.557,6.272l-32.021,7.979
+                                c-25.92,6.485-44.053,29.696-44.053,56.448c0,2.837,1.109,5.568,3.115,7.552c2.005,1.984,4.715,3.115,7.552,3.115l213.376-0.021
+                                c5.888,0,10.667-4.779,10.667-10.667C512.043,431.936,493.931,408.725,467.989,402.219z M300.224,448
+                                c3.669-12.16,13.504-21.845,26.368-25.067l38.229-9.536c3.819-0.96,6.805-3.925,7.765-7.765l4.544-18.197
+                                c0.939-3.733-0.235-7.701-3.072-10.347c-8.299-7.829-13.781-19.243-14.699-30.549c-0.448-5.547-5.184-8.597-10.752-8.597
+                                l-2.752-16.981c3.072,0,5.973-1.323,8-3.605c2.027-2.325,2.965-5.355,2.581-8.405c-0.811-6.443-2.112-18.112-2.112-21.867
+                                c0-11.029,0-21.461,31.189-21.781c2.176-0.021,4.309-0.704,6.101-2.005c10.155-7.275,21.845-7.275,27.456-7.275
+                                c16.384,0,20.843,6.827,22.357,9.088c4.331,6.656,2.56,8.533,1.365,9.813l-4.629,4.629c-1.877,1.877-2.987,4.373-3.115,7.019
+                                l-1.131,23.232c-0.128,2.901,0.213,4.928,2.197,7.04c2.005,2.112,4.053,2.517,6.955,2.56l-1.365,17.323
+                                c-5.568,0-10.176,4.267-10.624,9.813c-0.939,11.52-6.848,23.467-15.424,31.147c-2.923,2.624-4.181,6.677-3.221,10.517
+                                l4.352,17.429c0.96,3.819,3.925,6.805,7.765,7.765l38.229,9.536c12.843,3.221,22.656,12.907,26.325,25.088L300.224,448z"/>
+                            <path class="features-item__icon-color" d="M74.667,320.021H224c5.888,0,10.667-4.779,10.667-10.667s-4.779-10.667-10.667-10.667H74.667
+                                c-5.888,0-10.667,4.779-10.667,10.667S68.779,320.021,74.667,320.021z"/>
+                            <path class="features-item__icon-color" d="M74.667,277.355H160c5.888,0,10.667-4.779,10.667-10.667s-4.779-10.667-10.667-10.667H74.667
+                                C68.779,256.021,64,260.8,64,266.688S68.779,277.355,74.667,277.355z"/>
+                            <path class="features-item__icon-color" d="M298.667,373.355c0-5.888-4.779-10.667-10.667-10.667H53.333c-17.643,0-32-14.357-32-32V192.021H448v21.333
+                                c0,5.888,4.779,10.667,10.667,10.667c5.888,0,10.667-4.779,10.667-10.667V96.021c0-29.419-23.915-53.333-53.333-53.333H53.333
+                                C23.915,42.688,0,66.603,0,96.021v234.667c0,29.419,23.915,53.333,53.333,53.333H288
+                                C293.888,384.021,298.667,379.243,298.667,373.355z M21.333,96.021c0-17.643,14.357-32,32-32H416c17.643,0,32,14.357,32,32
+                                v10.667H21.333V96.021z M21.333,128.021H448v42.667H21.333V128.021z"/>
+                        </svg>
+
+                    </span>
+                    <div class="features-item__title">
+                        <h4>{{ $t('Credit Card Payments') }}</h4>
+                        <p>{{ $t('Begin your cryptocurrency journey today — easily purchase digital assets using your credit card.') }}</p>
+                    </div>
+                </div>
+                <div class="features-item">
+                    <span class="features-item__icon">
+                        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0)">
+                            <path d="M32.1495 47.4786C32.6815 46.944 32.6815 46.0789 32.1495 45.5443C31.6169 45.0113 30.7541 45.0113 30.2209 45.5443C29.6894 46.0789 29.6894 46.944 30.2209 47.4786C30.7541 48.0116 31.6169 48.0116 32.1495 47.4786Z" class="features-item__icon-color"/>
+                            <path d="M25.6943 15.0348C25.6943 23.325 32.4206 30.0701 40.6882 30.0701C48.9557 30.0701 55.682 23.325 55.682 15.0348C55.682 6.74462 48.9557 0 40.6882 0C32.4206 0 25.6943 6.74462 25.6943 15.0348V15.0348ZM52.9561 15.0348C52.9561 21.8179 47.4527 27.3363 40.6882 27.3363C33.9236 27.3363 28.4202 21.8179 28.4202 15.0348C28.4202 8.25226 33.9236 2.73384 40.6882 2.73384C47.4527 2.73384 52.9561 8.25226 52.9561 15.0348Z" class="features-item__icon-color"/>
+                            <path d="M15.7688 69.595C16.2972 70.1291 17.1573 70.135 17.6926 69.6063L24.3011 63.0779C25.4238 61.9521 25.7652 60.2854 25.2715 58.8365L26.693 57.4618C27.4584 56.7205 28.466 56.312 29.5313 56.312H47.652C50.8668 56.312 53.9053 55.074 56.2088 52.8262C56.3036 52.7338 55.4892 53.6956 68.571 38.0178C70.5113 35.716 70.221 32.2596 67.9234 30.3119C65.6401 28.3823 62.2197 28.6595 60.2741 30.9218L52.2308 39.2114C51.2151 37.958 49.6663 37.1767 47.9928 37.1767H32.7929C30.63 36.2693 28.335 35.81 25.9671 35.81C19.4033 35.81 13.672 38.8499 10.5962 44.5493C9.30036 44.3031 7.9337 44.6962 6.95051 45.6821L0.466081 52.2035C-0.0633257 52.7359 -0.0643908 53.5973 0.463951 54.1314L15.7688 69.595ZM25.9665 38.5433C28.0543 38.5433 30.0729 38.9647 31.9674 39.7957C32.1399 39.8715 32.3258 39.9105 32.5138 39.9105H47.9928C49.4708 39.9105 50.7192 41.1191 50.7192 42.6438C50.7192 44.1515 49.4964 45.3777 47.9928 45.3777H36.8716C36.119 45.3777 35.5086 45.9897 35.5086 46.7443C35.5086 47.4995 36.119 48.111 36.8716 48.111H47.9928C50.9994 48.111 53.4451 45.6586 53.4451 42.6438C53.4451 42.4035 53.4281 42.1653 53.3972 41.9293C61.1779 33.9093 62.2751 32.7824 62.322 32.7264C63.2934 31.5765 65.018 31.4307 66.1652 32.4006C67.3135 33.3742 67.4589 35.1024 66.4848 36.2586L54.2589 50.9142C52.4736 52.6328 50.1296 53.5787 47.652 53.5787H29.5313C27.7556 53.5787 26.0747 54.2596 24.7996 55.4949L23.6412 56.6158L12.9625 45.9085C15.4583 41.2136 20.1415 38.5433 25.9665 38.5433V38.5433ZM8.8796 47.6138C9.32912 47.163 10.0194 47.0818 10.5674 47.4215C10.8034 47.5657 10.1259 46.9473 22.3736 59.2114C22.9185 59.7577 22.8892 60.6282 22.3811 61.1377L16.7472 66.7031L3.35385 53.1706L8.8796 47.6138Z" class="features-item__icon-color"/>
+                            <path d="M39.0528 6.83594V8.43758C37.4662 9.00154 36.3264 10.5209 36.3264 12.3031C36.3264 14.5638 38.1607 16.4036 40.4157 16.4036C41.1672 16.4036 41.7786 17.0167 41.7786 17.7702C41.7786 18.5238 41.1672 19.1369 40.4157 19.1369C39.8336 19.1369 39.2046 18.77 38.6459 18.103C38.1612 17.5251 37.3016 17.4509 36.7253 17.9363C36.149 18.4223 36.0745 19.2843 36.5591 19.8621C37.2877 20.7311 38.1447 21.3367 39.0528 21.6422V23.2374C39.0528 23.9925 39.6631 24.604 40.4157 24.604C41.1683 24.604 41.7786 23.9925 41.7786 23.2374V21.6358C43.3653 21.0713 44.505 19.5519 44.505 17.7702C44.505 15.509 42.6707 13.6697 40.4157 13.6697C39.6642 13.6697 39.0528 13.0566 39.0528 12.3031C39.0528 11.5495 39.6642 10.9359 40.4157 10.9359C40.8988 10.9359 41.4085 11.1832 41.89 11.6505C42.4311 12.1754 43.2939 12.161 43.8174 11.619C44.341 11.0764 44.3266 10.2112 43.786 9.68621C43.0942 9.01489 42.4018 8.63518 41.7786 8.42796V6.83594C41.7786 6.08078 41.1683 5.46875 40.4157 5.46875C39.6631 5.46875 39.0528 6.08078 39.0528 6.83594V6.83594Z" class="features-item__icon-color"/>
+                            </g>
+                            <defs>
+                            <clipPath id="clip0">
+                            <rect width="69.6729" height="70" fill="white"/>
+                            </clipPath>
+                            </defs>
+                        </svg>
+                    </span>
+                    <div class="features-item__title">
+                        <h4>{{ $t('Markets') }}</h4>
+                        <p>{{ $t('Buy and sell top digital currencies — track and manage all your assets in one convenient place.') }}</p>
+                    </div>
+                </div>
+                <div class="features-item">
+                    <span class="features-item__icon">
+                        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0)">
+                            <path d="M34.8224 39.7852C35.575 39.7852 36.1859 39.1726 36.1859 38.418C36.1859 37.6633 35.575 37.0508 34.8224 37.0508C34.0699 37.0508 33.459 37.6633 33.459 38.418C33.459 39.1726 34.0699 39.7852 34.8224 39.7852Z" class="features-item__icon-color"/>
+                            <path d="M34.0433 69.6088C34.2803 69.7787 34.5578 69.8636 34.8358 69.8636C35.1138 69.8636 35.3913 69.7787 35.6283 69.6088C49.5202 59.6588 63.4685 55.2928 63.4685 34.8197V9.47327C63.4685 8.76244 62.9247 8.17016 62.2185 8.11088L58.6746 7.81395C50.5497 7.13516 42.5564 4.45739 35.5586 0.0711636C35.1165 -0.206013 34.5551 -0.206013 34.1131 0.0711636C27.1147 4.45739 19.1214 7.13516 10.9965 7.81448L7.45314 8.11088C6.74638 8.17016 6.20312 8.76244 6.20312 9.47327V34.8197C6.20312 55.8702 22.1104 61.0617 34.0433 69.6088V69.6088ZM8.93005 10.731L11.2234 10.5392C19.5006 9.84711 27.6452 7.1875 34.8358 2.83492C42.026 7.1875 50.171 9.84711 58.4477 10.5392L60.7416 10.731V34.8197C60.7416 53.2805 48.4742 57.2416 34.8337 66.8232C22.8624 58.4908 8.93005 53.7622 8.93005 34.8197V10.731Z" class="features-item__icon-color"/>
+                            <path d="M34.0421 59.6728C34.5374 60.012 35.161 59.9874 35.6313 59.6371C47.9744 51.0702 55.2886 48.2515 55.2886 34.8231V16.891C55.2886 16.2143 54.7949 15.6392 54.1275 15.5388C47.6021 14.5555 41.3222 12.5192 35.462 9.48626C35.0401 9.26783 34.5379 9.2956 34.1512 9.5167C28.3075 12.5336 22.0478 14.5598 15.5458 15.5388C14.8785 15.6392 14.3848 16.2138 14.3848 16.891V34.8231C14.3848 48.378 22.3956 51.7047 34.0421 59.6728V59.6728ZM17.1117 18.0568C22.7823 17.095 28.266 15.3652 33.4594 12.9058V32.9512C33.4594 33.7064 34.0697 34.3184 34.8228 34.3184C35.5759 34.3184 36.1863 33.7064 36.1863 32.9512V12.893C41.3872 15.3582 46.881 17.0929 52.5617 18.0568V34.8231C52.5617 45.9368 47.3699 48.3599 36.1863 55.944V43.8887C36.1863 43.1336 35.5759 42.5215 34.8228 42.5215C34.0697 42.5215 33.4594 43.1336 33.4594 43.8887V55.9836C23.0103 49.0088 17.1117 46.0282 17.1117 34.8231V18.0568Z" class="features-item__icon-color"/>
+                            </g>
+                            <defs>
+                            <clipPath id="clip0">
+                            <rect width="69.6729" height="70" fill="white"/>
+                            </clipPath>
+                            </defs>
+                        </svg>
+                    </span>
+                    <div class="features-item__title">
+                        <h4>{{ $t('Security') }}</h4>
+                        <p>{{ $t('The majority of digital assets are safely kept in highly secure offline storage for maximum protection.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <marquee-slider v-if="sliderMarkets && sliderMarkets.length > 0"
+        id="marquee-slider"
+        :speed="40000"
+        :autoWidth="true"
+        :repeat="10"
+        :length="sliderMarkets.length"
+    >
+        <div class="text-slider-item flex" v-for="market in sliderMarkets">
+            <div class="text-slider-item-m"><img width="20" height="20" :src="market.base_currency_logo"/> {{ market.name }}</div> <div class="ml-5" :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">{{ market.change > 0 ? '' : ''}}{{ market.last }}$</div>
+        </div>
+    </marquee-slider>
+    <!-- features end -->
+    <market-channel></market-channel>
+</app-layout>

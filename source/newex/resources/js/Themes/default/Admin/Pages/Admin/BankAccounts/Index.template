@@ -1,0 +1,221 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("银行账户") }}</h1>
+
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.bank_accounts.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新银行账户") }}</span>
+        </nav-button-link>
+    </div>
+
+    <div class="mb-6 bg-white rounded shadow p-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            <div>
+                <label class="block text-gray-700 text-sm mb-2">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded"
+                    placeholder="用户 / 邮箱 / 卡号 / 银行名称"
+                />
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm mb-2">{{ $t("状态") }}</label>
+                <themed-select v-model="form.status_type" class="w-full form-select rounded">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="0">{{ $t("待审核") }}</option>
+                    <option value="1">{{ $t("通过") }}</option>
+                    <option value="2">{{ $t("拒绝") }}</option>
+                </themed-select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm mb-2">{{ $t("用户ID") }}</label>
+                <input
+                    v-model="form.user_id"
+                    type="text"
+                    class="w-full form-input rounded"
+                    placeholder="用户ID"
+                />
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm mb-2">{{ $t("每页显示") }}</label>
+                <themed-select v-model="form.per_page" class="w-full form-select rounded">
+                    <option value="20">{{ $t("20条") }}</option>
+                    <option value="50">{{ $t("50条") }}</option>
+                    <option value="100">{{ $t("100条") }}</option>
+                    <option value="200">{{ $t("200条") }}</option>
+                </themed-select>
+            </div>
+
+            <div class="flex items-end">
+                <button
+                    type="button"
+                    @click="reset"
+                    class="px-5 py-2 rounded bg-green-500 hover:bg-green-600 text-white transition"
+                >
+                    {{ $t("重置") }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <thead>
+                <tr class="text-left font-bold">
+                    <th class="px-6 pt-6 pb-4">{{ $t("用户") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("卡号") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("银行名称") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr
+                    v-for="account in bankAccounts.data"
+                    :key="account.id"
+                    class="hover:bg-gray-100 focus-within:bg-gray-100"
+                >
+                    <td class="border-t">
+                        <div class="px-6 py-4 text-sm" style="min-width: 220px;">
+                            <div class="font-medium text-gray-800">
+                                {{ userName(account) }}
+                            </div>
+
+                            <div v-if="userEmail(account)" class="text-gray-600 break-all mt-1">
+                                {{ userEmail(account) }}
+                            </div>
+
+                            <div v-if="userId(account)" class="text-gray-500 mt-1">
+                                {{ $t("ID:") }} {{ userId(account) }}
+                            </div>
+
+                            <div v-if="!userId(account)" class="text-gray-400 mt-1">
+                                {{ $t("平台账户") }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="border-t">
+                        <div class="px-6 py-4 text-sm break-all" style="min-width: 220px;">
+                            {{ bankNumber(account) }}
+                        </div>
+                    </td>
+
+                    <td class="border-t">
+                        <Link
+                            :href="route('admin.bank_accounts.edit', account.id)"
+                            class="px-6 py-4 flex items-center text-indigo-500"
+                            style="min-width: 180px;"
+                        >
+                            {{ bankName(account) }}
+                        </Link>
+                    </td>
+
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center">
+                            <badge class="mr-2" :type="statusBadgeType(account)">
+                                {{ statusText(account) }}
+                            </badge>
+                        </span>
+                    </td>
+
+                    <td class="border-t">
+                        <div class="px-6 py-4 flex items-center" style="min-width: 260px;">
+                            <button
+                                v-if="statusType(account) !== 1"
+                                type="button"
+                                @click="askApprove(account)"
+                                class="px-3 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100 text-sm transition mr-2"
+                            >
+                                {{ $t("通过") }}
+                            </button>
+
+                            <button
+                                v-if="statusType(account) !== 2"
+                                type="button"
+                                @click="askReject(account)"
+                                class="px-3 py-1 rounded bg-orange-50 text-orange-600 hover:bg-orange-100 text-sm transition mr-2"
+                            >
+                                {{ $t("拒绝") }}
+                            </button>
+
+                            <button
+                                type="button"
+                                @click="askDelete(account)"
+                                class="px-3 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100 text-sm transition"
+                            >
+                                {{ $t("删除") }}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-if="bankAccounts.data.length === 0">
+                    <td class="border-t px-6 py-4 text-gray-500" colspan="100">
+                        {{ $t("没有找到银行账户。") }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <pagination :links="bankAccounts.links" />
+
+    <jet-confirmation-modal :show="!!selectedAccount">
+        <template #title>
+            {{ actionTitle() }}
+        </template>
+
+        <template #content>
+            <div>
+                {{ actionContent() }}
+
+                <div v-if="selectedAccount" class="mt-4 bg-gray-50 rounded p-4 text-sm">
+                    <div>
+                        <strong>{{ $t("用户：") }}</strong>
+                        {{ userName(selectedAccount) }}
+                    </div>
+
+                    <div class="mt-2" v-if="userId(selectedAccount)">
+                        <strong>{{ $t("用户ID：") }}</strong>
+                        {{ userId(selectedAccount) }}
+                    </div>
+
+                    <div class="mt-2 break-all">
+                        <strong>{{ $t("卡号：") }}</strong>
+                        {{ bankNumber(selectedAccount) }}
+                    </div>
+
+                    <div class="mt-2">
+                        <strong>{{ $t("银行名称：") }}</strong>
+                        {{ bankName(selectedAccount) }}
+                    </div>
+
+                    <div class="mt-2">
+                        <strong>{{ $t("当前状态：") }}</strong>
+                        {{ statusText(selectedAccount) }}
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeActionModal">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-danger-button
+                class="ml-2"
+                @click.native="confirmAction"
+                :disabled="sending"
+            >
+                {{ actionButtonText() }}
+            </jet-danger-button>
+        </template>
+    </jet-confirmation-modal>
+</app-layout>

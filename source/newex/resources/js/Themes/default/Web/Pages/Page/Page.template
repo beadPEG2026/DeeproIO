@@ -1,0 +1,21 @@
+<app-layout>
+    <Head>
+        <title>{{ page.title }}</title>
+        <meta name="description" content="">
+    </Head>
+    <div class="page-section page-h1" :class="{'table-components': page.slug !== 'p2p-help-center'}">
+        <template v-if="page.slug == 'p2p-help-center'">
+            <top-menu :label="$t('P2P Help Center')"></top-menu>
+        </template>
+        <template v-else>
+            <!-- components title start -->
+            <!-- components title end -->
+        </template>
+
+        <div class="min-h-screen page-section-content">
+            <div v-html="cleanMessage" class="w-full mt-10 prose"></div>
+        </div>
+
+    </div>
+
+</app-layout>

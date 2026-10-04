@@ -1,0 +1,17 @@
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import {spotOrderPayload} from '../../resources/js/Functions/SpotOrderPayload.mjs';
+const [variant='Market',side='buy',type='limit']=process.argv.slice(2);
+if(!['Market','MarketLite'].includes(variant)||!['buy','sell'].includes(side)||!['limit','market','stop_limit'].includes(type))throw Error('Unsupported fixture');
+let source=readFileSync(new URL(`../../resources/js/Pages/${variant}/Partials/OrderForm.vue`,import.meta.url),'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
+source=source.replace(/^import .*;?\s*$/gm,'').replace('export default Template(','globalThis.component = Template(');
+let payload;
+const chain={then(){return this},catch(){return this},finally(){return this}};
+const context={spotOrderPayload,legacyText:x=>x,Template:x=>x,MarketSession:{},OrderEstimate:{},OrderFeedback:{},MarketMixin:{},AppLayout:{},TextInput:{},SelectInput:{},VueSlider:{},mapGetters:()=>({}),requestIntent:(_scope,_identity,p)=>({payload:p,key:`fixture-${variant}-${side}-${type}`}),spotIntent:p=>p,axios:{post(_url,p){payload=p;return chain}}};
+vm.runInNewContext(source,context);
+const c=context.component;
+const ctx={...c.data(),market:{name:'BTC-USDT'},$page:{props:{user:{id:1}}},orderType:type,canSubmitOrder:()=>true,syncBuyQuantityFromQuote(){},syncBuyQuoteFromQuantity(){},syncSellQuantityFromQuote(){},syncSellQuoteFromQuantity(){},getOrderAccountType:()=> 'real',getVirtualBalanceSource:()=>null,quoteWallet:{},baseWallet:{},route:x=>x};
+ctx.bid={...ctx.bid,price:'90',quantity:'0.1',quoteQuantity:'9'};ctx.ask={...ctx.ask,price:'110',quantity:'0.1',quoteQuantity:'11'};
+c.methods[side==='buy'?'placeBuyOrder':'placeSellOrder'].call(ctx);
+if(!payload)throw Error('Form did not submit');
+process.stdout.write(JSON.stringify(payload));

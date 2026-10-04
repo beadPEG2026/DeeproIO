@@ -1,0 +1,209 @@
+
+.widget-market-stats .widget-stats{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    padding: 1px 1px 20px 1px;
+
+    border-bottom: 1px solid var(--border-line-color);
+
+
+    /** title start */
+    &__title {
+        margin-right: 9rem;
+        font-size: var(--default-font__size);
+
+        &__market-name {
+
+            span.market-label {
+                color: var(--ui-text);
+                text-decoration: underline;
+            }
+
+            div.absolute {
+                z-index: 1 !important;
+            }
+
+            margin-bottom: 4px;
+            cursor: pointer;
+
+        }
+
+        &__currency-name {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        &__currency-icon {
+            display: block;
+            margin-right: 8px;
+
+            img {
+                width: 18px;
+            }
+
+        }
+
+
+    }
+    /** title end */
+
+
+    /** price start */
+    &__price {
+
+        font-size: var(--small-font__size);
+
+        &-title {
+            margin-bottom: 6px;
+            color: var(--second-text-color);
+        }
+
+        // &-number {
+        // }
+
+    }
+    /** price end */
+
+
+    /** list start */
+    &__list {
+        display: flex;
+        justify-content: flex-start;
+
+        font-size: var(--small-font__size);
+
+        &-item {
+            margin-right: 40px;
+        }
+
+        &__lable-title {
+            margin-bottom: 6px;
+            color: var(--second-text-color);
+        }
+
+        // &__lable-number {
+        // }
+
+    }
+    /** list end */
+
+    // Funding Rate styles
+    &__funding-rate {
+        display: flex;
+        flex-direction: column;
+        
+        .widget-stats__funding-countdown {
+            font-size: 0.75rem;
+            color: var(--second-text-color);
+            margin-top: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    }
+
+}
+
+.widget-stats__inner {
+    display: flex;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-line-color);
+
+    .widget-stats__row {
+        display: flex;
+        margin-right: 2rem;
+    }
+}
+
+
+@media screen and (max-width: 1360px) {
+
+    .widget-stats__inner {
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-line-color);
+        display: flex;
+
+        .widget-stats__row {
+            display: flex;
+            margin-right: 1rem;
+        }
+    }
+
+    .widget-market-stats .widget-stats {
+        &__title {
+            margin-right: 1rem;
+        }
+    }
+
+}
+
+@media screen and (max-width: 840px) {
+
+    .widget-market-stats .widget-stats {
+        /** list start */
+        &__list {
+
+            &-item {
+                margin-right: 10px;
+            }
+
+        }
+        /** list end */
+    }
+
+}
+
+@media screen and (max-width: 680px) {
+
+    .widget-stats__inner {
+        display: block;
+        padding-bottom: 0px;
+        .widget-stats__row {
+            display: flex;
+            margin-right: 0;
+            margin-bottom: 1rem;
+        }
+    }
+
+}
+
+@media screen and (max-width: 480px) {
+
+    .widget-stats__inner {
+
+        .widget-stats__row {
+            display: flex;
+            margin-right: 0;
+            margin-bottom: 1rem;
+
+            &:nth-last-child(1) {
+                display: block;
+            }
+
+        }
+    }
+
+
+    .widget-market-stats .widget-stats {
+        /** list start */
+        &__list {
+            display: block;
+
+            &-item {
+                display: inline-block;
+                width: 42%;
+                margin-bottom: 0.50rem;
+            }
+
+            // Funding rate responsive
+            .widget-stats__funding-rate {
+                width: 100%;
+                display: block;
+            }
+
+        }
+        /** list end */
+    }
+
+}

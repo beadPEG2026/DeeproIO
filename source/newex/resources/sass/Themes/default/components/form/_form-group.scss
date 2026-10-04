@@ -1,0 +1,144 @@
+
+
+/** form group start */
+.form-group {
+    margin-bottom: 2rem;
+
+    &_field {
+        position: relative;
+        display: block;
+
+        margin-bottom: 0.30rem;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        color: var(--second-text-color);
+
+        &:focus, &:hover {
+            .form-group_color {
+                stroke: var(--purple-color);
+            }
+        }
+
+    }
+
+    label {
+        display: block;
+
+        margin-bottom: 0.30rem;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        color: var(--second-text-color);
+    }
+
+    &_icon {
+        position: absolute;
+        top: 12px;
+
+        display: block;
+        width: 22px;
+        height: 22px;
+    }
+
+    &_color {
+        stroke: var(--second-text-color);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    input {
+        width: 100%;
+        
+        margin: 0;
+        padding: 0.60rem 0 0.60rem 2rem;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        color: var(--second-text-color);
+
+        outline: none;
+        border: none;
+        border-bottom: 2px solid var(--border-line-color);
+        background-color: transparent !important;
+
+        transition: all 0.5s ease-out; 
+        
+
+        &:hover {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+        }
+
+        &:focus {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+            box-shadow: none;
+
+        }
+
+        &:active {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);                
+        }
+        
+
+    }
+
+}
+/** form group end */
+
+
+.valid .helper-text, .invalid .helper-text  {
+    display: block;
+    margin-top: 0.50rem;
+    
+    font-weight: 500;
+    font-size: 0.90rem;
+}
+
+.valid  {
+    input {
+        border-bottom: 2px solid var(--green-color);
+    }
+    .helper-text {
+        color: var(--green-color);
+    }
+    .form-group_color {
+        stroke: var(--green-color);
+    }
+    &:focus, &:hover {
+        .form-group_color {
+            stroke: var(--green-color);
+        }
+        input {
+            border-bottom: 2px solid var(--green-color);
+        }
+    }
+}
+.invalid {
+    input {
+        border-bottom: 2px solid var(--red-color);
+    }
+    .helper-text {
+        color: var(--red-color);
+    }
+    .form-group_color {
+        stroke: var(--red-color);
+    }
+    &:focus, &:hover {
+        .form-group_color {
+            stroke: var(--red-color);
+        }
+        input {
+            border-bottom: 2px solid var(--red-color);
+        }
+    }
+}

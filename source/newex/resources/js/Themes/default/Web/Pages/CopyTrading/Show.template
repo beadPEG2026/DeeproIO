@@ -1,0 +1,209 @@
+<app-layout>
+    <Head>
+        <title>{{ trader.name || 'Copy Trading' }}</title>
+        <meta name="description" content="Copy trading strategy details">
+    </Head>
+
+    <div class="copy-detail-page">
+        <div class="copy-detail-shell">
+
+            <div class="copy-detail-top">
+                <div class="copy-detail-titlebar">
+                    <button type="button" class="copy-back" @click="goBack">
+                        {{ $t("合约跟单") }}
+                    </button>
+                    <span class="copy-pipe"></span>
+                    <button type="button" class="copy-domain">
+                        {{ $t("公域") }}
+                    </button>
+                </div>
+
+                <div class="copy-detail-actions">
+                    <button
+                        type="button"
+                        :class="followButtonClass()"
+                        :disabled="trader.is_self"
+                        @click="toggleFollow"
+                    >
+                        {{ followButtonText() }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="copy-profile">
+                <div>
+                    <div class="copy-profile-name">{{ trader.name }}</div>
+                    <div class="copy-profile-desc">
+                        {{ trader.strategy_label || $t("稳健合约跟单策略。") }}
+                    </div>
+
+
+
+
+
+                </div>
+            </div>
+
+
+
+
+
+            <div class="copy-detail-tabs">
+                <button
+                    v-for="tab in tabs"
+                    :key="'detail-tab-' + tab.key"
+                    type="button"
+                    :class="activeTab === tab.key ? 'copy-detail-tab copy-detail-tab--active' : 'copy-detail-tab'"
+                    @click="setActiveTab(tab.key)"
+                >
+                    {{ tab.label }}
+                </button>
+            </div>
+
+            <div class="copy-orders-panel" v-if="activeTab === 'positions'">
+                <div class="copy-order-row copy-order-head">
+                    <div>{{ $t("交易对") }}</div>
+                    <div>{{ $t("方向") }}</div>
+                    <div>{{ $t("杠杆") }}</div>
+                    <div>{{ $t("保证金") }}</div>
+                    <div>{{ $t("收益率") }}</div>
+                    <div>{{ $t("开仓时间") }}</div>
+                </div>
+
+                <div
+                    v-for="order in activeOrders"
+                    :key="'detail-order-' + order.id"
+                    class="copy-order-row"
+                >
+                    <div data-label="交易对" class="copy-order-market">{{ order.market }}</div>
+                    <div data-label="方向">
+                        <span class="copy-side-pill" :class="orderSideClass(order)">
+                            {{ order.side_label }}
+                        </span>
+                    </div>
+                    <div data-label="杠杆">{{ order.leverage }}X</div>
+                    <div data-label="保证金">{{ order.margin }} {{ order.quote_symbol }}</div>
+                    <div data-label="收益率" :class="pnlClass(order)">{{ order.pnl_percent }}%</div>
+                    <div data-label="开仓时间">{{ order.opened_at || '-' }}</div>
+                </div>
+
+                <div class="copy-empty" v-if="activeOrders.length === 0">
+                    {{ $t("暂无当前开仓") }}
+                </div>
+            </div>
+
+            <div class="copy-history-wrap" v-else-if="activeTab === 'history'">
+                <div class="copy-history-toolbar">
+                    <span>{{ $t("排序方式") }}</span>
+                    <button type="button">{{ $t("开仓时间") }}</button>
+                </div>
+
+                <div
+                    v-for="order in historyOrders"
+                    :key="'history-order-' + order.id"
+                    class="copy-history-card"
+                >
+                    <div class="copy-history-title">
+                        <span :class="tokenIconClass(order)">{{ order.base_symbol || order.market }}</span>
+                        <span class="copy-history-market">{{ order.market }}</span>
+                        <span class="copy-history-pill">{{ $t("永续") }}</span>
+                        <span class="copy-history-pill">{{ order.leverage }}x</span>
+                        <span class="copy-history-pill copy-history-pill--green">{{ $t("全仓") }} {{ order.side_label }}</span>
+                        <span class="copy-history-close">{{ $t("全部平仓") }}</span>
+                    </div>
+
+                    <div class="copy-history-grid">
+                        <div>
+                            <span>{{ $t("开仓时间") }}</span>
+                            <strong>{{ order.opened_at || '-' }}</strong>
+                            <span>{{ $t("平仓均价") }}</span>
+                            <strong>{{ order.market_price }} {{ order.quote_symbol }}</strong>
+                        </div>
+                        <div>
+                            <span>{{ $t("开仓价格") }}</span>
+                            <strong>{{ order.entry_price }} {{ order.quote_symbol }}</strong>
+                            <span>{{ $t("已平仓量") }}</span>
+                            <strong>{{ order.quantity }} {{ order.base_symbol }}</strong>
+                        </div>
+                        <div>
+                            <span>{{ $t("最大持仓量") }}</span>
+                            <strong>{{ order.quantity }} {{ order.base_symbol }}</strong>
+                        </div>
+                        <div>
+                            <span>{{ $t("平仓盈亏") }}</span>
+                            <strong :class="pnlClass(order)">{{ order.pnl_amount }} {{ order.quote_symbol }}</strong>
+                        </div>
+                        <div>
+                            <span>{{ $t("全部平仓") }}</span>
+                            <strong>{{ order.closed_at || '--' }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="copy-empty" v-if="historyOrders.length === 0">
+                    {{ $t("暂无历史仓位") }}
+                </div>
+            </div>
+
+            <div class="copy-timeline" v-else-if="activeTab === 'actions'">
+                <div class="copy-date-filter">{{ actionDateRange }}</div>
+
+                <div
+                    v-for="order in operationOrders"
+                    :key="'operation-order-' + order.id"
+                    class="copy-timeline-row"
+                >
+                    <div class="copy-timeline-time">
+                        <span>{{ order.event_date || '-' }}</span>
+                        <span>{{ order.event_time || '-' }}</span>
+                    </div>
+                    <div class="copy-timeline-dot"></div>
+                    <div class="copy-timeline-body">
+                        <span :class="operationClass(order)">{{ order.action_label }}</span>
+                        <div class="copy-timeline-text">{{ operationText(order) }}</div>
+                    </div>
+                </div>
+
+                <div class="copy-empty" v-if="operationOrders.length === 0">
+                    {{ $t("暂无最新操作记录") }}
+                </div>
+            </div>
+
+            <div class="copy-orders-panel" v-else-if="activeTab === 'followers'">
+                <div class="copy-follower-row copy-follower-head">
+                    <div>{{ $t("邮箱") }}</div>
+                    <div>{{ $t("跟单保证金余额") }}</div>
+                    <div>{{ $t("总盈亏") }}</div>
+                    <div>{{ $t("累计收益率") }}</div>
+                    <div>{{ $t("运行时间") }}</div>
+                </div>
+
+                <div
+                    v-for="follower in followers"
+                    :key="'follower-' + follower.id"
+                    class="copy-follower-row"
+                >
+                    <div>{{ follower.email }}</div>
+                    <div>{{ follower.margin }} USDT</div>
+                    <div :class="Number(follower.profit || 0) >= 0 ? 'copy-positive' : 'copy-negative'">
+                        {{ Number(follower.profit || 0) >= 0 ? '+' : '' }}{{ follower.profit }} USDT
+                    </div>
+                    <div :class="Number(follower.roi || 0) >= 0 ? 'copy-positive' : 'copy-negative'">
+                        {{ Number(follower.roi || 0) >= 0 ? '+' : '' }}{{ follower.roi }}%
+                    </div>
+                    <div>{{ follower.running_days }} {{ $t("天") }}</div>
+                </div>
+
+                <div class="copy-empty" v-if="followers.length === 0">
+                    {{ $t("暂无跟单者") }}
+                </div>
+            </div>
+
+            <div class="copy-orders-panel" v-else>
+                <div class="copy-empty">
+                    {{ $t("暂无记录") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

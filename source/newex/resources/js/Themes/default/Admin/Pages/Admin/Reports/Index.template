@@ -1,0 +1,3 @@
+<app-layout>
+    <stats :stats="stats"></stats>
+</app-layout>

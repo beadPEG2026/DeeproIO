@@ -1,0 +1,67 @@
+<div class="">
+    <div class="form-search flex flex-wrap -m-4">
+        <div class="form-search__container w-full">
+            <div class="form-search__result xl:w-1/2 md:w-1/2 w-full p-4">
+                <div class="flex flex-wrap">
+                    <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Minimum Deposit Amount') }}</span>
+                            <p>{{ currency.min_deposit }} {{ currency.symbol }}</p>
+                        </div>
+                    </div>
+                    <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Maximum Deposit Amount') }}</span>
+                            <p>{{ currency.max_deposit }} {{ currency.symbol }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-components__table-title"><h4>{{ $t('3. Submit a deposit request') }}</h4></div>
+
+    <div class="components-filter components-filter__form">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <form ref="perfectMoneyForm" action="https://perfectmoney.is/api/step1.asp" method="POST">
+                    <input type="hidden" name="PAYEE_ACCOUNT" :value="accountId">
+                    <input type="hidden" name="PAYEE_NAME" :value="siteName">
+                    <input type="hidden" name="PAYMENT_AMOUNT" v-model="form.amount">
+                    <input type="hidden" name="PAYMENT_UNITS" value="USD">
+                    <input type="hidden" name="PAYMENT_ID" :value="$page.props.user.email + ':' + $page.props.t">
+                    <input type="hidden" name="STATUS_URL" :value="route('perfectmoney.ipn')">
+                    <input type="hidden" name="PAYMENT_URL" :value="route('perfectmoney.ipn')">
+                    <input type="hidden" name="PAYMENT_URL_METHOD" value="GET">
+                    <input type="hidden" name="NOPAYMENT_URL" :value="route('wallets.deposit.fiat.cancel', currency.symbol)">
+                    <input type="hidden" name="NOPAYMENT_URL_METHOD" value="GET">
+                    <input type="hidden" name="BAGGAGE_FIELDS" value="">
+                    <input type="hidden" name="SUGGESTED_MEMO" value="">
+                    <input type="hidden" name="SUGGESTED_MEMO_NOCHANGE" value="">
+                    <input type="hidden" name="FORCED_PAYER_ACCOUNT" value="">
+                    <input type="hidden" name="AVAILABLE_PAYMENT_METHODS" value="all">
+                    <input type="hidden" name="INTERFACE_LANGUAGE" :value="siteLang">
+                </form>
+
+                <text-user-input @keyup.native="(e) => clearInput(e)" @keypress.native="(e) => handleInput(e)" @paste.native.prevent @drop.native.prevent v-model="form.amount" :error="errors.amount" :label="$t('Amount')" />
+            </div>
+        </div>
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <t-button-green @click.stop="submit" class="components-filter__button py-3 px-5" :class="{ 'opacity-75': sending }">
+                    <span class="components-filter__icon">
+                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ $t('Pay now')}}
+                    </span>
+                </t-button-green>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

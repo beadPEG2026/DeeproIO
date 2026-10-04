@@ -1,0 +1,46 @@
+@use "./tabs-components__nav";
+@use "./tabs-components__search";
+
+/** components tabs start */
+.tabs {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 4rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-line-color);
+
+    /** left start */
+    &-left {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    /** left end */
+
+
+    /** right */
+    &-right {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        .tabs-balance {
+            display: block;
+            p {
+                margin-top: 10px;
+                display: inline-block;
+                font-size: 1.2rem;
+                border-bottom: 1px dashed rgb(132, 142, 156);
+            }
+
+            small {
+                margin-top: 10px;
+                font-size: 0.9rem;
+                display: block;
+            }
+        }
+    }
+    /** right end */
+
+}
+

@@ -1,0 +1,436 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.pages')">{{ $t("页面") }}</Link>
+        - {{ subTitle }}
+    </h1>
+
+    <div class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('publish')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title"
+                    :error="errors.title"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="名称 / English Title"
+                />
+
+                <text-input
+                    v-model="form.slug"
+                    :error="errors.slug"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="URL标识"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用页面") }}</label>
+                    <t-toggle v-model="form.status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("英文内容 / English Content") }}</label>
+                    <quill-editor
+                        v-model="form.content"
+                        height="250"
+                    />
+                    <div v-if="errors.content" class="form-error text-red-500">{{ errors.content }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("使用 HTML") }}</label>
+                    <t-toggle v-model="form.is_html" />
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content"
+                        :error="errors.html_content"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="英文 HTML 内容 / English HTML Content"
+                    />
+                    <div v-if="errors.html_content" class="form-error text-red-500">{{ errors.html_content }}</div>
+                </div>
+
+                <!-- 多语言内容 -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("多语言内容") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <h2 class="text-lg border-b mb-4 pb-3">{{ $t('Simplified Chinese') }} / zh-cn</h2>
+                    <p class="text-sm mb-4">{{ $t('When empty, the existing Traditional Chinese edition is converted to Simplified Chinese.') }}</p>
+                    <text-input v-model="form['title_zh-cn']" :error="errors['title_zh-cn']" :label="$t('Title')" class="mb-4" />
+                    <label class="form-label block mb-2">{{ $t('Content') }}</label>
+                    <quill-editor v-if="!form.is_html" v-model="form['content_zh-cn']" height="250" />
+                    <textarea-input v-else v-model="form['html_content_zh-cn']" :error="errors['html_content_zh-cn']" :label="$t('HTML content')" class="w-full" />
+                    <p v-if="errors['content_zh-cn']" class="text-red-500">{{ errors['content_zh-cn'] }}</p>
+                </div>
+                <!-- 繁体中文 zh-tw -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("繁体中文 / zh-tw") }}</div>
+                </div>
+
+<text-input
+    v-model="form.title_zh_tw"
+    :error="errors.title_zh_tw"
+    class="pr-6 pb-8 w-full lg:w-1/2"
+    label="繁体中文标题"
+/>
+
+<div class="pr-6 pb-8 w-full">
+    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("繁体中文内容") }}</label>
+    <quill-editor
+        v-model="form.content_zh_tw"
+        height="250"
+    />
+    <div v-if="errors.content_zh_tw" class="form-error text-red-500">{{ errors.content_zh_tw }}</div>
+</div>
+
+<div v-if="form.is_html" class="pr-6 pb-8 w-full">
+    <textarea-input
+        v-model="form.html_content_zh_tw"
+        :error="errors.html_content_zh_tw"
+        class="pr-6 pb-8 w-full h-100"
+        label="繁体中文 HTML 内容"
+    />
+    <div v-if="errors.html_content_zh_tw" class="form-error text-red-500">{{ errors.html_content_zh_tw }}</div>
+</div>
+
+                <!-- 日语 ja -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("日语 / ja") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_ja"
+                    :error="errors.title_ja"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="日语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("日语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_ja"
+                        height="250"
+                    />
+                    <div v-if="errors.content_ja" class="form-error text-red-500">{{ errors.content_ja }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_ja"
+                        :error="errors.html_content_ja"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="日语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_ja" class="form-error text-red-500">{{ errors.html_content_ja }}</div>
+                </div>
+
+                <!-- 捷克语 cs -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("捷克语 / cs") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_cs"
+                    :error="errors.title_cs"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="捷克语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("捷克语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_cs"
+                        height="250"
+                    />
+                    <div v-if="errors.content_cs" class="form-error text-red-500">{{ errors.content_cs }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_cs"
+                        :error="errors.html_content_cs"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="捷克语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_cs" class="form-error text-red-500">{{ errors.html_content_cs }}</div>
+                </div>
+
+                <!-- 德语 de -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("德语 / de") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_de"
+                    :error="errors.title_de"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="德语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("德语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_de"
+                        height="250"
+                    />
+                    <div v-if="errors.content_de" class="form-error text-red-500">{{ errors.content_de }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_de"
+                        :error="errors.html_content_de"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="德语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_de" class="form-error text-red-500">{{ errors.html_content_de }}</div>
+                </div>
+
+                <!-- 西班牙语 es -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("西班牙语 / es") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_es"
+                    :error="errors.title_es"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="西班牙语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("西班牙语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_es"
+                        height="250"
+                    />
+                    <div v-if="errors.content_es" class="form-error text-red-500">{{ errors.content_es }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_es"
+                        :error="errors.html_content_es"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="西班牙语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_es" class="form-error text-red-500">{{ errors.html_content_es }}</div>
+                </div>
+
+                <!-- 法语 fr -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("法语 / fr") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_fr"
+                    :error="errors.title_fr"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="法语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("法语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_fr"
+                        height="250"
+                    />
+                    <div v-if="errors.content_fr" class="form-error text-red-500">{{ errors.content_fr }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_fr"
+                        :error="errors.html_content_fr"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="法语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_fr" class="form-error text-red-500">{{ errors.html_content_fr }}</div>
+                </div>
+
+                <!-- 荷兰语 nl -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("荷兰语 / nl") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_nl"
+                    :error="errors.title_nl"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="荷兰语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("荷兰语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_nl"
+                        height="250"
+                    />
+                    <div v-if="errors.content_nl" class="form-error text-red-500">{{ errors.content_nl }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_nl"
+                        :error="errors.html_content_nl"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="荷兰语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_nl" class="form-error text-red-500">{{ errors.html_content_nl }}</div>
+                </div>
+
+                <!-- 葡萄牙语 pt -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("葡萄牙语 / pt") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_pt"
+                    :error="errors.title_pt"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="葡萄牙语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("葡萄牙语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_pt"
+                        height="250"
+                    />
+                    <div v-if="errors.content_pt" class="form-error text-red-500">{{ errors.content_pt }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_pt"
+                        :error="errors.html_content_pt"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="葡萄牙语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_pt" class="form-error text-red-500">{{ errors.html_content_pt }}</div>
+                </div>
+
+                <!-- 罗马尼亚语 ro -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("罗马尼亚语 / ro") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_ro"
+                    :error="errors.title_ro"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="罗马尼亚语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("罗马尼亚语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_ro"
+                        height="250"
+                    />
+                    <div v-if="errors.content_ro" class="form-error text-red-500">{{ errors.content_ro }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_ro"
+                        :error="errors.html_content_ro"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="罗马尼亚语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_ro" class="form-error text-red-500">{{ errors.html_content_ro }}</div>
+                </div>
+
+                <!-- 意大利语 it -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-4 pb-3 font-medium">{{ $t("意大利语 / it") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title_it"
+                    :error="errors.title_it"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="意大利语标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3 font-medium">{{ $t("意大利语内容") }}</label>
+                    <quill-editor
+                        v-model="form.content_it"
+                        height="250"
+                    />
+                    <div v-if="errors.content_it" class="form-error text-red-500">{{ errors.content_it }}</div>
+                </div>
+
+                <div v-if="form.is_html" class="pr-6 pb-8 w-full">
+                    <textarea-input
+                        v-model="form.html_content_it"
+                        :error="errors.html_content_it"
+                        class="pr-6 pb-8 w-full h-100"
+                        label="意大利语 HTML 内容"
+                    />
+                    <div v-if="errors.html_content_it" class="form-error text-red-500">{{ errors.html_content_it }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("SEO 信息") }}</div>
+
+                    <empty-column></empty-column>
+
+                    <text-input
+                        v-model="form.seo_title"
+                        :error="errors.seo_title"
+                        class="pr-6 pb-8 w-full lg:w-1/2"
+                        label="SEO 标题"
+                    />
+
+                    <text-input
+                        v-model="form.seo_keywords"
+                        :error="errors.seo_keywords"
+                        class="pr-6 pb-8 w-full lg:w-1/2"
+                        label="SEO 关键词"
+                    />
+
+                    <text-input
+                        v-model="form.seo_description"
+                        :error="errors.seo_description"
+                        class="pr-6 pb-8 w-full lg:w-1/2"
+                        label="SEO 描述"
+                    />
+                </div>
+            </div>
+
+            <section class="p-6">
+              <p v-if="publication && publication.fixed">{{ $t('This page has a fixed public address.') }} /{{ page.slug }}</p>
+              <p>{{ $t(publication && publication.draft?'Unpublished draft':'Published version') }}</p>
+              <text-input v-model="publishReason" :label="$t('Reason for change')" :error="errors.reason || errors.revision" />
+              <button type="button" class="btn-indigo my-4" @click="previewPage">{{ $t('Preview current edits') }}</button><p role="status">{{ previewError }}</p>
+              <article v-if="preview" class="p-6 border rounded"><h2 class="text-xl font-bold">{{ preview.title }}</h2><div v-html="preview.content"></div></article>
+              <details v-if="publication" class="my-4"><summary>{{ $t('Change history') }}</summary><article v-for="event in publication.history" :key="event.id" class="my-4"><b>{{ event.created_at }} · #{{ event.actor_id }} · {{ event.action }}</b><p>{{ event.reason }}</p><button v-if="event.changes.after" type="button" @click="restoreVersion(event.changes.after)">{{ $t('Load version into editor') }}</button></article></details>
+              <button type="button" class="btn-indigo" :disabled="sending || publishReason.length<5" @click="submit('draft')">{{ $t('Save draft') }}</button>
+            </section>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button
+                    v-if="isEdit"
+                    class="focus:outline-none text-red-600 hover:underline"
+                    tabindex="-1"
+                    type="button"
+                    @click="destroy"
+                >
+                    {{ $t("删除页面") }}
+                </button>
+
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

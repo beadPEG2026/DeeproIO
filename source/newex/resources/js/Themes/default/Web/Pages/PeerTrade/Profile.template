@@ -1,0 +1,265 @@
+<app-layout>
+
+<Head>
+    <title>{{ $t('P2P Profile')}}</title>
+    <meta name="description" content="">
+</Head>
+
+<top-menu :label="$t('User Center')"></top-menu>
+
+
+<div class="profile-mob">
+
+    <div class="max-w-screen-2xl mx-auto">
+
+<!-- components title start -->
+    <div class="components-title flex justify-between p2p-user-profile">
+        <div class="p2p-user-profile-left">
+            <div class="p2p-user-profile-info">
+                <div class="p2p-user-profile-avatar">
+                    <div class="">
+                        {{ seller.nickname_first }}
+                    </div>
+                </div>
+                <div class="p2p-user-profile-text">
+                    <div class="p2p-user-profile-text-headline flex">
+                        <div class="">{{ seller.nickname }}</div>
+
+                        <div v-if="seller.is_merchant" class="user-badge merchant-badge">
+                            <svg v-tooltip="$t('Verified Merchant')" width="18" height="18" class="ml-2 mt-1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ><path fill-rule="evenodd" clip-rule="evenodd" d="M16.438 4.313L14.814 1.5 12 3.124 9.187 1.5 7.562 4.313H4.313v3.25L1.5 9.186 3.124 12 1.5 14.813l2.813 1.625v3.248h3.25L9.186 22.5 12 20.876l2.813 1.624 1.625-2.814h3.248v-3.248l2.814-1.624L20.876 12 22.5 9.187l-2.814-1.625V4.313h-3.248zm-.902 4.215l1.414 1.414-6.364 6.364L7.05 12.77l1.414-1.414 2.122 2.122 4.95-4.95z" fill="#F0B90B"></path></svg>
+                        </div>
+
+                        <div v-if="owner" @click="openUsernameModal()" class="ml-3 mt-1">
+                            <svg width="16" height="16" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 121.51"><path d="M28.66,1.64H58.88L44.46,16.71H28.66a13.52,13.52,0,0,0-9.59,4l0,0a13.52,13.52,0,0,0-4,9.59v76.14H91.21a13.5,13.5,0,0,0,9.59-4l0,0a13.5,13.5,0,0,0,4-9.59V77.3l15.07-15.74V92.85a28.6,28.6,0,0,1-8.41,20.22l0,.05a28.58,28.58,0,0,1-20.2,8.39H11.5a11.47,11.47,0,0,1-8.1-3.37l0,0A11.52,11.52,0,0,1,0,110V30.3A28.58,28.58,0,0,1,8.41,10.09L8.46,10a28.58,28.58,0,0,1,20.2-8.4ZM73,76.47l-29.42,6,4.25-31.31L73,76.47ZM57.13,41.68,96.3.91A2.74,2.74,0,0,1,99.69.38l22.48,21.76a2.39,2.39,0,0,1-.19,3.57L82.28,67,57.13,41.68Z"/></svg>
+                        </div>
+                        <template v-if="!owner && $page.props.user">
+                            <hr class="line-separator">
+
+                            <template v-if="!userBlocked">
+                                <div @click="showBlockModal()" class="link-action">{{ $t('Block')}}</div>
+                            </template>
+                            <template v-else>
+                                <div @click="unblockUser()" class="link-action">{{ $t('Unblock')}}</div>
+                            </template>
+
+                        </template>
+                    </div>
+
+                    <div class="flex mt-2 flex-col-mob">
+                        <div class="">
+                            <div class="">{{ $t('Last seen')}} {{ seller.last_seen_at }}</div>
+                        </div>
+                        <hr class="line-separator desktop-visible">
+                        <div class="">
+                            <div class="">{{ $t('Joined on')}} {{ seller.joined_at}}</div>
+                        </div>
+                    </div>
+
+                    <div class="p2p-user-profile-text-stats">
+                        <div v-if="seller.email_verified" class="p2p-user-profile-text-stats-item">
+                            <div class="p2p-user-profile-text-stats-item-label">{{ $t('Email')}}</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-e2zng1"><path d="M19.068 4.932A9.917 9.917 0 0012 2a9.917 9.917 0 00-7.068 2.932A9.917 9.917 0 002 11.988C2 17.521 6.479 22 12 22a9.917 9.917 0 007.068-2.932A9.992 9.992 0 0022 11.988a9.918 9.918 0 00-2.932-7.056zm-8.912 12.234L5.71 12.71l1.42-1.42 3.025 3.024 6.7-6.713 1.421 1.42-8.121 8.145z" fill="currentColor"></path></svg>
+                        </div>
+                        <div v-if="seller.kyc_verified" class="p2p-user-profile-text-stats-item">
+                            <div class="p2p-user-profile-text-stats-item-label">{{ $t('ID Verification')}}</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-e2zng1"><path d="M19.068 4.932A9.917 9.917 0 0012 2a9.917 9.917 0 00-7.068 2.932A9.917 9.917 0 002 11.988C2 17.521 6.479 22 12 22a9.917 9.917 0 007.068-2.932A9.992 9.992 0 0022 11.988a9.918 9.918 0 00-2.932-7.056zm-8.912 12.234L5.71 12.71l1.42-1.42 3.025 3.024 6.7-6.713 1.421 1.42-8.121 8.145z" fill="currentColor"></path></svg>
+                        </div>
+                        <div v-if="seller.is_merchant" class="p2p-user-profile-text-stats-item">
+                            <div class="p2p-user-profile-text-stats-item-label">{{ $t('Address')}}</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-e2zng1"><path d="M19.068 4.932A9.917 9.917 0 0012 2a9.917 9.917 0 00-7.068 2.932A9.917 9.917 0 002 11.988C2 17.521 6.479 22 12 22a9.917 9.917 0 007.068-2.932A9.992 9.992 0 0022 11.988a9.918 9.918 0 00-2.932-7.056zm-8.912 12.234L5.71 12.71l1.42-1.42 3.025 3.024 6.7-6.713 1.421 1.42-8.121 8.145z" fill="currentColor"></path></svg>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div v-if="owner" class="p2p-user-profile-right">
+            <div class="tabs-right tabs-right-mob">
+                <div class="tabs-search tabs-balance cursor-pointer mr-5" v-tooltip.right-end="{ content: $t('The estimated balance is calculated by converting the total assets of your wallets into USD and BTC.'), classes: 'toolTip' }" >
+                    <h3>{{ $t('P2P Estimated Value') }} <font-awesome-icon icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></h3>
+
+                    <div class="flex" v-if="totalBalance">
+                        <p class="mr-1">
+                            {{ totalBalance.totatUsdBalance }} {{ $t('USD')}}
+                        </p>
+
+                        <small class="pt-1">{{ $t('≈')}} {{ totalBalance.totalBtcBalance }} {{ $t('BTC')}}</small>
+                    </div>
+                    <div class="flex" v-else>
+                        <p class="mr-1">
+                            0.00 {{ $t('USD')}}
+                        </p>
+
+                        <small class="pt-1">{{ $t('≈')}} 0.00000000 {{ $t('BTC')}}</small>
+                    </div>
+                </div>
+
+                <div v-if="!$page.props.user.merchant_verified" class="peer-profile-merchant">
+                    <Link :href="route('p2p.kyc')" as="div" class="btn-action-mini btn-action-xs btn-action-max btn-action-yellow">{{ $t('Become Merchant')}}</Link>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="components-title grid grid-cols-5 gap-4 p2p-user-profile-stats mt-10">
+
+        <div class="p2p-user-profile-stats-item">
+            <div class="p2p-user-profile-stats-item-title">
+                <div class="">{{ $t('All Trades')}} <font-awesome-icon v-tooltip="$t('Total Number of completed orders (buy and sell included)')" icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></div>
+            </div>
+            <div class="p2p-user-profile-stats-item-text">
+                <div class="">{{ seller.orders_completed }} {{ $t('Time(s)')}}</div>
+            </div>
+        </div>
+
+        <div class="p2p-user-profile-stats-item">
+            <div class="p2p-user-profile-stats-item-title">
+                <div class="">{{ $t('30d Trades')}} <font-awesome-icon v-tooltip="$t('Total Number of completed orders (buy and sell included) in the past 30 days')" icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></div>
+            </div>
+            <div class="p2p-user-profile-stats-item-text">
+                <div class="">{{ seller.orders_completed_thirty }} {{ $t('Time(s)')}}</div>
+            </div>
+        </div>
+
+        <div class="p2p-user-profile-stats-item">
+            <div class="p2p-user-profile-stats-item-title">
+                <div class="">{{ $t('30d Completion Rate')}} <font-awesome-icon v-tooltip="$t('Completion rate = Trades/Orders(30d)*100%')" icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></div>
+            </div>
+            <div class="p2p-user-profile-stats-item-text">
+                <div class="">{{ seller.orders_completion_rate }} %</div>
+            </div>
+        </div>
+
+        <div class="p2p-user-profile-stats-item">
+            <div class="p2p-user-profile-stats-item-title">
+                <div class="">{{ $t('Avg. Release Time')}} <font-awesome-icon v-tooltip="$t('The average time taken in the last 30 days to release crypto assets as the seller')" icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></div>
+            </div>
+            <div class="p2p-user-profile-stats-item-text">
+                <div class="">{{ seller.orders_avg_releasetime }} {{$t('Minute(s)')}}</div>
+            </div>
+        </div>
+
+        <div class="p2p-user-profile-stats-item">
+            <div class="p2p-user-profile-stats-item-title">
+                <div class="">{{ $t('Positive Feedback')}} <font-awesome-icon v-tooltip="$t('The percentage of good reviews received')" icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></div>
+            </div>
+            <div class="p2p-user-profile-stats-item-text">
+                <div class="p2p-user-profile-stats-item-text-top">{{ feedbackStats.percentage }} % ({{ feedbackStats.total }})</div>
+                <div class="p2p-user-profile-stats-item-text-bottom">
+                    <div class="flex">
+                        <div class="color-buy">{{ $t('Positive') }} {{ feedbackStats.positive }}</div>
+                        <div class="ml-1 mr-1">/</div>
+                        <div class="color-sell">{{ $t('Negative') }} {{ feedbackStats.negative }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+</div>
+<div id="p2p-payment-methods-block"></div>
+<div class="components-title justify-between p2p-user-center mt-10">
+
+    <div class="profile-tab">
+        <div class="profile-tab-inner">
+            <div @click="setTab('ads')" v-if="!owner" id="tab-ads" class="profile-tab-item">
+                <div class="profile-tab-item-label" :class="{'active': activeTab == 'ads'}">{{ $t('Online Ads')}}</div>
+            </div>
+            <div @click="setTab('payment_method')" v-if="owner" id="tab-payment" class="profile-tab-item">
+                <div class="profile-tab-item-label" :class="{'active': activeTab == 'payment_method'}">{{ $t('P2P Payment Methods')}}</div>
+            </div>
+            <div @click="setTab('feedbacks')" id="tab-feedback" class="profile-tab-item">
+                <div class="profile-tab-item-label" :class="{'active': activeTab == 'feedbacks'}">{{ $t('Feedbacks')}} ({{ feedbackStats.total }})</div>
+            </div>
+        </div>
+    </div>
+
+    <payment-methods v-if="activeTab == 'payment_method' && owner"></payment-methods>
+    <feedbacks :stats="feedbackStats" :owner="owner" :user="seller" v-if="activeTab == 'feedbacks'"></feedbacks>
+    <online-ads :user="seller" v-if="activeTab == 'ads' && !owner"></online-ads>
+</div>
+
+<jet-dialog-modal :max-width="'4xl'" :show="showUsernameModal" @close="showUsernameModal = null">
+    <template #title>
+        {{ $t('Set Nickname')}}
+    </template>
+    <template #content>
+        <div class="p2p-order-feedback-modal">
+
+            <div>
+                 {{ $t('It is recommended not to use your real name.')}}
+            </div>
+
+            <div class="">
+                {{ $t('Nickname can only be modified once every 180 days.')}}
+            </div>
+
+            <div class="p2p-order-feedback-body p2p-form-modal">
+                <div class="components-filter__item"><label>{{ $t('Nickname (Max: 20 symbols)') }}</label>
+                    <input :placeholder="$t('Your nickname')" type="text" maxlength="20" v-model="usernameForm" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                </div>
+            </div>
+
+            <div class="mt-5">
+                {{ $t('Supports numbers, English letters, and special characters ("-" / "_").') }}
+            </div>
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-button class="ml-2" @click.native="submitUsername">
+            {{ $t('Confirm') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+<jet-dialog-modal :max-width="'6xl'" :show="showBlockForm" @close="showBlockForm = null">
+    <template #title>
+        {{ $t('Select Reason') }}
+    </template>
+    <template #content>
+        <div class="p2pmodal flex-col">
+            <div class="mt-5 input-radio">
+                <t-radio id="cancelForm1" name="document" v-model="blockForm.type" value="1" />
+                <label for="cancelForm1">{{ $t(blockReasons[0]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm2" name="document" v-model="blockForm.type" value="2"/>
+                <label for="cancelForm2">{{ $t(blockReasons[1]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm3" name="document" v-model="blockForm.type" value="3"/>
+                <label for="cancelForm3">{{ $t(blockReasons[2]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm4" name="document" v-model="blockForm.type" value="4"/>
+                <label for="cancelForm4">{{ $t(blockReasons[3]) }}</label>
+            </div>
+            <div class="mt-2 input-radio">
+                <t-radio id="cancelForm5" name="document" v-model="blockForm.type" value="5"/>
+                <label for="cancelForm5">{{ $t(blockReasons[4]) }}</label>
+            </div>
+
+            <div v-if="blockForm.type == 5" class="mt-2 input-radio">
+            <textarea ref="message" maxlength="200" v-model="blockForm.message" type="text" :placeholder="$t('Please tell us the reason for blocking this user. Max length: 200 chars')"
+                      class="textarea-modal"
+                      name="message" />
+            </div>
+
+        </div>
+    </template>
+
+    <template #footer>
+
+        <jet-button class="ml-2" @click.native="blockUser">
+            {{ $t('Block') }}
+        </jet-button>
+    </template>
+</jet-dialog-modal>
+
+
+</app-layout>

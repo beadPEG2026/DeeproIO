@@ -1,0 +1,334 @@
+<app-layout>
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('Withdraw') }} {{ symbol }}</h2>
+</div>
+<!-- components title end -->
+<div v-if="!currency.withdraw_status" class="mb-20">
+    <div class="form-search__info">
+        <div class="form-search__info-icon">
+            <svg-icon icon="info"></svg-icon>
+        </div>
+        <div class="block-info__content">
+            <h4>{{ currency.name }} {{ $t('Withdrawal Suspended') }}</h4>
+            <p>{{ $t('We have disabled withdrawals as our systems are currently undergoing maintenance.') }}</p>
+        </div>
+    </div>
+</div>
+<div class="form-search flex flex-wrap -m-4">
+    <div class="form-search__container w-full">
+        <div class="form-search__result xl:w-1/2 md:w-1/2 w-full p-4">
+            <div class="flex flex-wrap">
+                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full w-full">
+                    <div class="form-search__result-item w-full">
+                        <span>{{ $t('Available Balance') }}</span>
+                        <template v-if="wallet">
+                            <p>{{ availableBalance }} {{ currency.symbol }}</p>
+                            <p v-if="isVirtualAccount" class="mt-1 text-sm opacity-75">
+                                {{ $t('Virtual Balance') }}: {{ virtualAvailableBalanceDisplay }} {{ currency.symbol }}
+                            </p>
+                        </template>
+                        <p v-else>{{ $t('Loading...') }}</p>
+                    </div>
+                </div>
+                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                    <div class="form-search__result-item w-full">
+                        <span>{{ $t('Withdraw Fee') }}</span>
+                        <p v-if="withdrawFee.type == 'floating'">{{ withdrawFee.displayFee ? withdrawFee.displayFee : '0.00' }}%</p>
+                        <p v-else>{{ withdrawFee.displayFee ? withdrawFee.displayFee : '0' }} {{ currency.symbol }}</p>
+                    </div>
+                </div>
+                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                    <div class="form-search__result-item w-full">
+                        <span>{{ $t('Minimum Withdraw Amount') }}</span>
+                        <p>{{ currency.min_withdraw }} {{ currency.symbol }}</p>
+                    </div>
+                </div>
+                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                    <div  class="form-search__result-item w-full">
+                        <span>{{ $t('Maximum Withdraw Amount') }}</span>
+                        <p>{{ currency.max_withdraw }} {{ currency.symbol }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ <div v-if="currency.withdraw_status" class="components-filter components-filter__form">
+        <form @submit.prevent="submit">
+            <template v-if="networks.includes('payeer')">
+                <div class="components-filter__row">
+                    <text-user-input @keyup.native="(e) => clearInput(e)" @keypress.native="(e) => handleInput(e)" @paste.prevent @drop.prevent v-model="form.amount" :error="errors.amount" class="components-filter__item" :label="$t('Amount')" />
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input v-model="form.account_holder_address" :error="errors.account_holder_address" class="components-filter__item" :label="$t('Account Number (P...)')" />
+                </div>
+            </template>
+            <template v-else-if="networks.includes('bank_credit_card')">
+                <div class="components-filter__row">
+
+                    <div class="components-filter__item">
+                        <label class="form-label d-block">{{ $t('Country:') }}</label>
+                        <t-rich-user-select
+                            :options="countries.data"
+                            v-model="form.country_id"
+                            :placeholder="$t('Select country')"
+                            value-attribute="id"
+                            text-attribute="name"
+                        >
+                            <template
+                                slot="label"
+                                slot-scope="{ className, option, query }"
+                            >
+                                <div class="flex">
+                                    <div class="flex flex-col">
+                                        <span>{{ option.text }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </t-rich-user-select>
+                        <div v-if="errors.country_id" class="form-error text-red-400">{{ errors.country_id }}</div>
+                    </div>
+
+                    <text-user-input v-model="form.account_holder_address" :error="errors.account_holder_address" class="components-filter__item" :label="$t('Account Holder Address')" />
+
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input  v-model="form.name" :error="errors.name" class="components-filter__item" :label="$t('Bank Name')" />
+
+                    <text-user-input v-model="form.iban" :error="errors.iban" class="components-filter__item" :label="$t('Account Number')" />
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input v-model="form.swift" :error="errors.swift" class="components-filter__item" :label="$t('SWIFT')" />
+
+                    <text-user-input v-model="form.ifsc" :error="errors.ifsc" class="components-filter__item" :label="$t('IFSC')" />
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input v-model="form.address" :error="errors.address" class="components-filter__item" :label="$t('Bank Address')" />
+
+                    <text-user-input v-model="form.account_holder_name" :error="errors.account_holder_name" class="components-filter__item" :label="$t('Account Holder Name')" />
+                </div>
+                <div class="components-filter__row">
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input-badge @clickBadge="setMaxAmount()" :badge="$t('MAX')" @keyup.native="(e) => clearInput(e)" @keypress.native="(e) => handleInput(e)" @paste.prevent @drop.prevent v-model="form.amount" :error="errors.amount" class="components-filter__item" :label="$t(&quot;Amount&quot;)" />
+                </div>
+                <div class="components-filter__row">
+                    <div>{{ $t('You get:') }} <strong>{{ calculatedFee }} {{ currency.symbol }}</strong></div>
+                </div>
+                <div v-if="limit.status" class="components-filter__row">
+                    <div>{{ $t('24h withdrawal limit:') }} <strong>{{ limit.available }} / {{ limit.total }} {{ currency.symbol }}</strong></div>
+                </div>
+            </template>
+            <template v-else-if="networks.includes('perfectmoney')">
+                <div class="components-filter__row">
+                    <text-user-input @keyup.native="(e) => clearInput(e)" @keypress.native="(e) => handleInput(e)" @paste.prevent @drop.prevent v-model="form.amount" :error="errors.amount" class="components-filter__item" :label="$t('Amount')" />
+                </div>
+                <div class="components-filter__row">
+                    <text-user-input v-model="form.account_holder_address" :error="errors.account_holder_address" class="components-filter__item" :label="$t('Account Number (U...)')" />
+                </div>
+            </template>
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <t-button-green :disabled='$page.props.mode == "readonly"' @click=""class="components-filter__button py-3 px-5" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ $t('Request a withdrawal') }}
+                        </span>
+                    </t-button-green>
+
+
+                    <template v-if='$page.props.mode == "readonly"'><div class="mt-10 color-sell">{{ $t('Withdrawals are disabled in DEMO mode')}}</div></template>
+
+                </div>
+            </div>
+        </form>
+</div>
+
+<div class="table-components__table-title"><h4>{{ $t('Recent Withdrawals') }}</h4></div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-recent-fiat-withdrawals">
+            <!-- tbody start -->
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Amount') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Status') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value"></div>
+                </th>
+            </tr>
+            </thead>
+            <tbody class="table-list">
+            <tr class="cursor-pointer" v-if="withdrawals" v-for="withdrawal in withdrawals" @click="openModal(withdrawal)">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__image"><img :src="withdrawal.logo"></div>
+                        <div class="table-list__title">{{ withdrawal.amount }} {{ withdrawal.symbol }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="{'label-green': withdrawal.status == 'confirmed', 'label-red': withdrawal.status == 'rejected', 'label-orange': withdrawal.status == 'pending' }">
+                            <template v-if="withdrawal.status == 'confirmed'">
+                                {{ 'Confirmed' }}
+                            </template>
+                            <template v-else-if="withdrawal.status == 'rejected'">
+                                <span :title="withdrawal.rejected_reason">{{ $t('Rejected') }}</span>
+                            </template>
+                            <template v-else>
+                                {{ $t('Pending') }}
+                            </template>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span class="list-text__name">{{ $t('Date:') }}</span>
+                            {{ withdrawal.created_at }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle"></div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                                <span class="list-text__icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="list-text__icon-color" d="M10 16.5C10 16.5 14 12.5 14 12C14 11.5 10 7.5 10 7.5"/>
+                                    </svg>
+                                </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="withdrawals && withdrawals.length == 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                        <span class="table-result__notfound-text">{{ $t('No withdrawals found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+    </div>
+    <!-- table components end -->
+
+
+    <!-- Show User  Modal -->
+    <jet-dialog-modal :show="showWithdrawalModal" @close="closeModal">
+        <template #title>
+            {{ $t('Withdrawal') }}
+        </template>
+
+        <template #content>
+            <div v-if="withdrawalModal">
+                <div class="form-search">
+                    <div class="form-search__container">
+                        <div class="form-search__result">
+                            <div class="flex flex-wrap">
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Status') }}</span>
+                                        <p>
+                                            <div v-if="withdrawalModal.status == 'confirmed'" class="components-label label-green mt-2">
+                                                {{ $t('Completed') }}
+                                            </div>
+                                            <div v-if="withdrawalModal.status == 'pending'" class="components-label label-orange mt-2">
+                                                {{ $t('Pending') }}
+                                            </div>
+                                            <div v-if="withdrawalModal.status == 'rejected'" class="components-label label-red mt-2">
+                                                <span :title="withdrawalModal.rejected_reason">{{ $t('Rejected') }}</span>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Currency') }}</span>
+                                        <p>{{ withdrawalModal.currency }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Symbol') }}</span>
+                                        <p>{{ withdrawalModal.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Amount') }}</span>
+                                        <p>{{ amountWithFee(withdrawalModal) }} {{ currency.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Withdraw Fee') }}</span>
+                                        <p>{{ withdrawalModal.fee}} {{ currency.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Date') }}</span>
+                                        <p>{{ withdrawalModal.created_at}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t('Close') }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+</app-layout>

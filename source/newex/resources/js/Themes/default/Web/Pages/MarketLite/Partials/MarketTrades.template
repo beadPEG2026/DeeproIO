@@ -1,0 +1,38 @@
+<!-- WIDGET MARKET TRADES START -->
+<div class="widget widget-market-trades">
+    <div class="widget-container">
+        <!-- widget body start -->
+        <div class="widget-body">
+            <p v-if="historicalTradesFailed" class="text-xs px-3 text-gray-500" role="status">{{ $t('Recent trades could not be loaded.') }} <button type="button" @click="fetchHistoricalTrades">{{ $t('Retry') }}</button></p>
+            <p v-if="market.stock_token && stockTradesStale" class="text-xs px-3 text-gray-500" role="status">{{ $t('Trade updates delayed') }}</p>
+            <!-- widget market trades title start -->
+            <div class="widget-market-trades__title">
+                <div class="widget-market-trades__title-price">{{ $t('Price') }} ({{ market.quote_currency }})</div>
+                <div class="widget-market-trades__title-amount">{{ $t('Amount') }} ({{ market.base_currency }})</div>
+                <div class="widget-market-trades__title-time">{{ $t('Time') }} <small :title="$t('Browser time zone')">{{ $t('Local time') }}</small></div>
+            </div>
+            <!-- widget market trades title end -->
+
+            <!-- widget market trades list start -->
+            <div class="widget-market-trades__list">
+                <vue-scroll>
+                    <div v-for="(trade, index) in trades" :key="trade.id || index" class="widget-market-trades__list-item">
+                        <a class="widget-market-trades__list-item__link">
+                            <div class="widget-market-trades__list-item__price">
+                                <span :class="{'color-buy': trade.side == 'buy', 'color-sell': trade.side == 'sell'}">{{ decimal_format(trade.price, market.quote_precision, market.quote_currency_type) }}</span>
+                            </div>
+                            <div class="widget-market-trades__list-item__amount">{{ decimal_format(trade.quantity, market.base_precision) }}</div>
+                            <div class="widget-market-trades__list-item__time" :title="market.stock_token ? stockTradeDate(trade) : trade.created_at">{{ market.stock_token ? stockTradeTime(trade) : parseTime(trade.created_at) }}</div>
+                        </a>
+                    </div>
+                    <div class="widget-empty" v-if="trades && trades.length == 0">
+                        <span>{{ $t(market.stock_token && stockTradesLoading ? 'Loading...' : 'No trades found') }}</span>
+                    </div>
+                </vue-scroll>
+            </div>
+            <!-- widget market trades list end -->
+        </div>
+        <!-- widget body end -->
+    </div>
+</div>
+<!-- WIDGET MARKET TRADES END -->

@@ -1,0 +1,484 @@
+<app-layout>
+    <div class="mb-8">
+        <h1 class="font-bold text-3xl text-gray-800">{{ $t("跟单配置") }}</h1>
+        <p class="mt-2 text-sm text-gray-500">
+            {{ $t("选择要在前台展示的用户，并设置前台卡片里的分组、标签、收益、回撤、带单天数等展示参数。") }}
+        </p>
+    </div>
+
+    <div class="copy-admin-card p-5 mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+            <div class="copy-admin-field flex-1 min-w-[260px]">
+                <label>{{ $t("搜索可选择用户") }}</label>
+                <div class="flex gap-2">
+                    <input
+                        v-model="query.user_search"
+                        type="text"
+                        class="copy-admin-input"
+                        placeholder="输入 UID / 邮箱 / 邀请码 / 昵称"
+                        @keyup.enter="searchUsers"
+                    />
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+                        @click="searchUsers"
+                    >
+                        {{ $t("搜索") }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="copy-admin-field flex-1 min-w-[260px]">
+                <label>{{ $t("选择用户") }}</label>
+                <themed-select v-model="form.user_id" class="copy-admin-input">
+                    <option value="">{{ $t("请选择用户") }}</option>
+                    <option
+                        v-for="user in safeUserOptions"
+                        :key="'copy-user-' + user.id"
+                        :value="user.id"
+                    >
+                        {{ userLabel(user) }}{{ user.is_xn ? $t(" / 虚拟账户") : '' }}
+                    </option>
+                </themed-select>
+            </div>
+
+            <div class="copy-admin-field flex-1 min-w-[220px]">
+                <label>{{ $t("前台显示名称") }}</label>
+                <input
+                    v-model="form.display_name"
+                    type="text"
+                    class="copy-admin-input"
+                    placeholder="例如：稳健趋势交易员"
+                />
+            </div>
+
+            <div class="copy-admin-field flex-1 min-w-[220px]">
+                <label>{{ $t("策略标签") }}</label>
+                <input
+                    v-model="form.strategy_label"
+                    type="text"
+                    class="copy-admin-input"
+                    placeholder="例如：低回撤合约策略"
+                />
+            </div>
+
+            <div class="copy-admin-field w-32">
+                <label>{{ $t("前台分组") }}</label>
+                <input
+                    v-model="form.section_label"
+                    type="text"
+                    class="copy-admin-input"
+                    placeholder="高盈亏"
+                />
+            </div>
+
+            <div class="copy-admin-field w-32">
+                <label>{{ $t("展示跟单人数") }}</label>
+                <input
+                    v-model="form.display_followers_count"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                />
+            </div>
+
+            <div class="copy-admin-field w-32">
+                <label>{{ $t("跟单上限") }}</label>
+                <input
+                    v-model="form.display_followers_limit"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                />
+            </div>
+
+            <div class="copy-admin-field flex-1 min-w-[220px]">
+                <label>{{ $t("卡片标签（多个用逗号或换行）") }}</label>
+                <textarea
+                    v-model="form.display_badges"
+                    class="copy-admin-input"
+                    placeholder="例如：行家,TradFi,大师"
+                ></textarea>
+            </div>
+
+            <div class="copy-admin-field w-36">
+                <label>{{ $t("30天盈亏USD") }}</label>
+                <input
+                    v-model="form.display_profit_amount"
+                    type="number"
+                    class="copy-admin-input"
+                    step="0.01"
+                />
+            </div>
+
+            <div class="copy-admin-field w-32">
+                <label>{{ $t("收益率%") }}</label>
+                <input
+                    v-model="form.display_roi_percent"
+                    type="number"
+                    class="copy-admin-input"
+                    step="0.01"
+                />
+            </div>
+
+            <div class="copy-admin-field w-36">
+                <label>{{ $t("资产管理规模") }}</label>
+                <input
+                    v-model="form.display_asset_scale"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                    step="0.01"
+                />
+            </div>
+
+            <div class="copy-admin-field w-32">
+                <label>{{ $t("最大回撤%") }}</label>
+                <input
+                    v-model="form.display_max_drawdown"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                />
+            </div>
+
+            <div class="copy-admin-field w-28">
+                <label>{{ $t("带单天数") }}</label>
+                <input
+                    v-model="form.display_lead_days"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                />
+            </div>
+
+            <div class="copy-admin-field flex-1 min-w-[260px]">
+                <label>{{ $t("走势图数据") }}</label>
+                <input
+                    v-model="form.display_chart_points"
+                    type="text"
+                    class="copy-admin-input"
+                    placeholder="例如：1,3,2,6,9,8,12"
+                />
+            </div>
+
+            <div class="copy-admin-field w-28">
+                <label>{{ $t("历史订单") }}</label>
+                <input
+                    v-model="form.history_orders_count"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                />
+            </div>
+
+            <div class="copy-admin-field w-28">
+                <label>{{ $t("胜率%") }}</label>
+                <input
+                    v-model="form.win_rate"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                />
+            </div>
+
+            <div class="copy-admin-field w-28">
+                <label>{{ $t("排序") }}</label>
+                <input
+                    v-model="form.sort_order"
+                    type="number"
+                    class="copy-admin-input"
+                    min="0"
+                />
+            </div>
+
+            <publication-fields class="col-span-full" :value="form" :error="$page.props.errors.publication_reference || $page.props.errors.publication_status" />
+            <label class="inline-flex items-center gap-2 h-10 mb-0">
+                <input v-model="form.is_enabled" type="checkbox" class="rounded border-gray-300" />
+                <span class="text-sm text-gray-700">{{ $t("启用展示") }}</span>
+            </label>
+
+            <button
+                type="button"
+                class="px-5 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                :disabled="saving"
+                @click="addTrader"
+            >
+                {{ saving ? $t("保存中...") : $t("添加展示") }}
+            </button>
+        </div>
+    </div>
+
+    <div class="copy-admin-card p-5 mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+            <div class="copy-admin-field flex-1 min-w-[260px]">
+                <label>{{ $t("搜索已配置") }}</label>
+                <input
+                    v-model="query.search"
+                    type="text"
+                    class="copy-admin-input"
+                    placeholder="显示名称 / 用户 / 策略标签"
+                />
+            </div>
+
+            <div class="copy-admin-field w-40">
+                <label>{{ $t("状态") }}</label>
+                <themed-select v-model="query.status" class="copy-admin-input">
+                    <option value="">{{ $t("全部") }}</option>
+                    <option value="enabled">{{ $t("启用") }}</option>
+                    <option value="disabled">{{ $t("停用") }}</option>
+                </themed-select>
+            </div>
+
+            <div class="copy-admin-field w-36">
+                <label>{{ $t("每页") }}</label>
+                <themed-select v-model="query.per_page" class="copy-admin-input">
+                    <option :value="20">{{ $t("20条") }}</option>
+                    <option :value="50">{{ $t("50条") }}</option>
+                    <option :value="100">{{ $t("100条") }}</option>
+                </themed-select>
+            </div>
+        </div>
+    </div>
+
+    <div class="copy-admin-card overflow-x-auto">
+        <table class="copy-admin-table">
+            <thead>
+                <tr>
+                    <th>{{ $t("展示用户") }}</th>
+                    <th>{{ $t("真实用户") }}</th>
+                    <th>{{ $t("策略标签") }}</th>
+                    <th>{{ $t("前台卡片") }}</th>
+                    <th>{{ $t("订单数据") }}</th>
+                    <th>{{ $t("排序") }}</th>
+                    <th>{{ $t("状态") }}</th>
+                    <th>{{ $t("更新时间") }}</th>
+                    <th>{{ $t("操作") }}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr v-for="row in rows" :key="'copy-trader-row-' + row.id" class="hover:bg-gray-50">
+                    <td>
+                        <input
+                            v-model="row.edit_display_name"
+                            type="text"
+                            class="copy-admin-input"
+                            placeholder="前台显示名称"
+                        />
+                        <div class="text-xs text-gray-400 mt-2">
+                            {{ $t("当前展示：") }}{{ row.display_title || '-' }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="font-semibold text-gray-800">
+                            {{ accountLabel(row) }}
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">
+                            UID {{ row.user_id }}{{ row.user && row.user.is_xn ? $t(" / 虚拟账户") : '' }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <input
+                            v-model="row.edit_strategy_label"
+                            type="text"
+                            class="copy-admin-input"
+                            placeholder="策略标签"
+                        />
+                    </td>
+
+                    <td>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("前台分组") }}</label>
+                                <input
+                                    v-model="row.edit_section_label"
+                                    type="text"
+                                    class="copy-admin-input mt-1"
+                                    placeholder="高盈亏"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("带单天数") }}</label>
+                                <input
+                                    v-model="row.edit_display_lead_days"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("展示跟单人数") }}</label>
+                                <input
+                                    v-model="row.edit_display_followers_count"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("跟单上限") }}</label>
+                                <input
+                                    v-model="row.edit_display_followers_limit"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("30天盈亏USD") }}</label>
+                                <input
+                                    v-model="row.edit_display_profit_amount"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    step="0.01"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("收益率%") }}</label>
+                                <input
+                                    v-model="row.edit_display_roi_percent"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    step="0.01"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("资产管理规模") }}</label>
+                                <input
+                                    v-model="row.edit_display_asset_scale"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                    step="0.01"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("最大回撤%") }}</label>
+                                <input
+                                    v-model="row.edit_display_max_drawdown"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="text-xs text-gray-400">{{ $t("卡片标签（多个用逗号或换行）") }}</label>
+                            <textarea
+                                v-model="row.edit_display_badges"
+                                class="copy-admin-input mt-1"
+                                placeholder="行家,TradFi,大师"
+                            ></textarea>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="text-xs text-gray-400">{{ $t("走势图数据") }}</label>
+                            <input
+                                v-model="row.edit_display_chart_points"
+                                type="text"
+                                class="copy-admin-input mt-1"
+                                placeholder="1,3,2,6,9,8,12"
+                            />
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="text-sm text-gray-700">
+                            {{ $t("实际总订单：") }}{{ row.orders_count || 0 }}
+                        </div>
+                        <div class="text-sm text-green-600 mt-1">
+                            {{ $t("开仓中：") }}{{ row.active_orders_count || 0 }}
+                        </div>
+                        <div class="text-sm text-indigo-600 mt-1">
+                            {{ $t("跟单人数：") }}{{ row.followers_count || 0 }}
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("前台历史订单") }}</label>
+                                <input
+                                    v-model="row.edit_history_orders_count"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">{{ $t("前台胜率%") }}</label>
+                                <input
+                                    v-model="row.edit_win_rate"
+                                    type="number"
+                                    class="copy-admin-input mt-1"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <input
+                            v-model="row.edit_sort_order"
+                            type="number"
+                            class="copy-admin-input"
+                            min="0"
+                        />
+                    </td>
+
+                    <td>
+                        <publication-fields :value="row" :error="$page.props.errors.publication_reference || $page.props.errors.publication_status" />
+                        <label class="inline-flex items-center gap-2">
+                            <input v-model="row.edit_is_enabled" type="checkbox" class="rounded border-gray-300" />
+                            <span :class="row.edit_is_enabled ? 'text-green-600' : 'text-gray-400'">
+                                {{ row.edit_is_enabled ? $t("启用") : $t("停用") }}
+                            </span>
+                        </label>
+                    </td>
+
+                    <td>
+                        <div class="text-sm text-gray-600">{{ row.updated_at || '-' }}</div>
+                        <div class="text-xs text-gray-400 mt-1">{{ $t("创建：") }}{{ row.created_at || '-' }}</div>
+                    </td>
+
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                class="px-3 py-2 rounded bg-indigo-600 text-white text-sm hover:bg-indigo-700"
+                                @click="saveTrader(row)"
+                            >
+                                {{ $t("保存") }}
+                            </button>
+
+                            <button
+                                type="button"
+                                class="px-3 py-2 rounded bg-red-600 text-white text-sm hover:bg-red-700"
+                                @click="deleteTrader(row)"
+                            >
+                                {{ $t("删除") }}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-if="rows.length === 0">
+                    <td colspan="100" class="text-center text-gray-400 py-10">
+                        {{ $t("暂无跟单展示用户") }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <pagination :links="traders.links" />
+</app-layout>

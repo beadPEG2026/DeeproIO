@@ -1,0 +1,383 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="trades"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link
+            class="text-indigo-400 hover:text-indigo-600"
+            :href="route('admin.users.edit', filters.referrer)"
+            v-if="filters.referrer"
+        >
+            {{ $t("返回 -") }}
+        </Link>
+        {{ $t("交易记录") }}
+    </h1>
+
+    <div class="mb-6">
+        <div
+            style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+                gap: 12px;
+                align-items: end;
+            "
+        >
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户/邮箱/市场/ID"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("市场") }}</label>
+                <themed-select
+                    v-model="form.market_id"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option
+                        v-for="market in markets"
+                        :key="market.id"
+                        :value="market.id"
+                    >
+                        {{ market.name }}
+                    </option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("买卖方向") }}</label>
+                <themed-select
+                    v-model="form.side"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="buy">{{ $t("买入") }}</option>
+                    <option value="sell">{{ $t("卖出") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("订单类型") }}</label>
+                <themed-select
+                    v-model="form.order_type"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="limit">{{ $t("限价") }}</option>
+                    <option value="market">{{ $t("市价") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("用户ID") }}</label>
+                <input
+                    v-model="form.user_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户ID"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("邮箱") }}</label>
+                <input
+                    v-model="form.email"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户邮箱"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("最低价格") }}</label>
+                <input
+                    v-model="form.price_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最低价格"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("最高价格") }}</label>
+                <input
+                    v-model="form.price_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最高价格"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("最低手续费") }}</label>
+                <input
+                    v-model="form.fee_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最低手续费"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("最高手续费") }}</label>
+                <input
+                    v-model="form.fee_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最高手续费"
+                />
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("基础币数量 ≥") }}</label>
+                <input
+                    v-model="form.base_amount_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="基础币数量"
+                />
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("基础币数量 ≤") }}</label>
+                <input
+                    v-model="form.base_amount_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="基础币数量"
+                />
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("报价币数量 ≥") }}</label>
+                <input
+                    v-model="form.quote_amount_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="报价币数量"
+                />
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("报价币数量 ≤") }}</label>
+                <input
+                    v-model="form.quote_amount_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="报价币数量"
+                />
+            </div>
+
+            <div style="width: 240px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("时间") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    placeholder="选择时间"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("每页显示") }}</label>
+                <themed-select
+                    v-model="form.per_page"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="10">{{ $t("10条") }}</option>
+                    <option :value="50">{{ $t("50条") }}</option>
+                    <option :value="100">{{ $t("100条") }}</option>
+                    <option :value="500">{{ $t("500条") }}</option>
+                </themed-select>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="reset()" class="h-10 px-4">
+                    {{ $t("重置") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="exportCsv()" class="h-10 px-4">
+                    {{ $t("导出") }}
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("成交价格") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("手续费") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("数量（基础）") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("数量（报价）") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+
+            <tr
+                v-for="transaction in transactions.data"
+                :key="transaction.id"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.market.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge
+                            class="mr-2"
+                            :type="transaction.order_side == 'buy' ? 'green' : 'red'"
+                        >
+                            {{ transaction.order_side == 'buy' ? $t("买入") : $t("卖出") }}
+                            {{ formatOrderType(transaction.order_type) }}
+                            <font-awesome-icon
+                                :icon="transaction.order_side == 'buy' ? 'arrow-up' : 'arrow-down'"
+                                class="ml-1"
+                            />
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.price }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.fee }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.base_currency }} {{ transaction.market.base_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.quote_currency }} {{ transaction.market.quote_currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.user.email }}<br>
+                        {{ $t("用户ID:") }} {{ transaction.user.id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.created_at }}
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="transactions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">
+                    {{ $t("未找到交易记录。") }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-6 bg-white rounded shadow p-5">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">
+                    {{ $t("当前页交易统计") }}
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ $t("统计当前页面显示的交易记录。") }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <div class="px-5 py-4 rounded bg-indigo-50" style="min-width: 160px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("交易笔数") }}</div>
+                    <div class="text-2xl font-bold text-indigo-700">
+                        {{ currentPageTradeCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-green-50" style="min-width: 160px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("买入笔数") }}</div>
+                    <div class="text-2xl font-bold text-green-700">
+                        {{ currentPageBuyCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-red-50" style="min-width: 160px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("卖出笔数") }}</div>
+                    <div class="text-2xl font-bold text-red-700">
+                        {{ currentPageSellCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-purple-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("手续费总额") }}</div>
+                    <div class="text-2xl font-bold text-purple-700">
+                        {{ formatAmount(currentPageFeeTotal) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="text-sm text-gray-600">
+            {{ $t("当前每页显示：") }}
+            <themed-select v-model="form.per_page" class="form-select rounded h-9 text-sm mx-2">
+                <option :value="10">{{ $t("10条") }}</option>
+                <option :value="50">{{ $t("50条") }}</option>
+                <option :value="100">{{ $t("100条") }}</option>
+                <option :value="500">{{ $t("500条") }}</option>
+            </themed-select>
+            {{ $t("交易记录") }}
+        </div>
+
+        <pagination :links="transactions.links" />
+    </div>
+</app-layout>

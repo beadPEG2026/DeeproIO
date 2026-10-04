@@ -1,0 +1,112 @@
+/** Funding Rate Info Component */
+.funding-rate-info {
+    background: var(--rows-color);
+    border: 1px solid var(--border-line-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: var(--default-font__size);
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    &__label {
+        color: var(--second-text-color);
+        font-weight: 500;
+    }
+
+    &__rate {
+        font-weight: 600;
+        font-size: 1.1rem;
+
+        &--positive {
+            color: #ef4444; // Red - longs pay
+        }
+
+        &--negative {
+            color: #10b981; // Green - shorts pay
+        }
+
+        &--neutral {
+            color: var(--second-text-color);
+        }
+    }
+
+    &__details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    &__interval {
+        color: var(--second-text-color);
+    }
+
+    &__timer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__timer-label {
+        color: var(--second-text-color);
+    }
+
+    &__timer-value {
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        color: var(--first-text-color);
+        background: var(--sixth-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    &__description {
+        font-size: 0.75rem;
+        color: var(--second-text-color);
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border-line-color);
+    }
+}
+
+// Dark mode adjustments
+body.dark {
+    .funding-rate-info {
+        &__rate {
+            &--positive {
+                color: #f87171; // Lighter red for dark mode
+            }
+
+            &--negative {
+                color: #34d399; // Lighter green for dark mode
+            }
+        }
+    }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+    .funding-rate-info {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+
+        &__header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        &__details {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+}

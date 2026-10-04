@@ -1,0 +1,83 @@
+<!-- MODULE ORDEROPEN START -->
+<div class="module module-orderopen">
+    <div class="module-container">
+        <!-- module body start -->
+        <div class="module-body">
+
+            <!-- module orderopen table start -->
+            <div class="module-orderopen__table">
+
+                <div class="module-orderopen__table-title table-title">
+                    <div class="table-title__name">{{ $t('Date') }}</div>
+                    <div class="table-title__name">{{ $t('Pair') }}</div>
+                    <div class="table-title__name">{{ $t('Side') }}</div>
+                    <div class="table-title__name">{{ $t('Price') }}</div>
+                    <div class="table-title__name">{{ $t('Amount') }}</div>
+                    <div class="table-title__name">{{ $t('Total') }}</div>
+                    <div class="table-title__name"></div>
+                </div>
+
+                <div v-if="orders" v-for="order in orders" class="module-orderopen__table-list table-list">
+                    <div class="table-list__item">
+                        <div class="table-list__item-value table-list__item-date">
+                            <span class="table-list__subtitle">{{ $t('Date') }}</span>
+                            {{ order.created_at }}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Pair') }}</span>
+                            {{ market.name }}
+                        </div>
+                        <div :class="{'color-sell' : order.side == 'sell', 'color-buy': order.side == 'buy'}" class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Side') }}</span>
+                            {{ order.side == "sell" ? 'Sell' : 'Buy'}}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Price') }}</span>
+                            {{ decimal_format(order.price, market.quote_precision, market.quote_currency_type) }} {{ market.quote_currency }}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Amount') }}</span>
+                            {{ decimal_format(order.quantity, market.base_precision) }} {{ market.base_currency }}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Total') }}</span>
+                            {{ decimal_format(parseFloat(order.quantity) * parseFloat(order.price), market.quote_precision, market.quote_currency_type) }} {{ market.quote_currency }}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle"></span>
+                            <button @click="cancelOrder(order)"  class="table-list__item-button btn-warning">{{ $t('Cancel') }}</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- module orderopen table end -->
+
+            <!-- module orderopen login start -->
+            <div v-if="!$page.props.user" class="module-orderopen__login">
+                <div class="module-orderopen__login-text">
+                    <Link :href="route('login')">{{ $t('Log In') }}</Link>
+                    {{ $t('or') }}
+                    <Link :href="route('register')">{{ $t('Register Now') }}</Link>
+                    {{ $t('to trade') }}
+                </div>
+            </div>
+            <!-- module orderopen login end -->
+
+            <!-- module orderopen notfont start -->
+            <div v-if="$page.props.user && orders && orders.length == 0" class="module-orderopen__notfont">
+                <span class="table-result__notfound-icon">
+                            <img src="/images/doc.png" />
+                        </span>
+                <span class="module-orderopen__notfont-text">
+                    {{ $t('No Orders Found.') }}
+                </span>
+            </div>
+            <!-- module orderopen notfont end -->
+
+        </div>
+        <!-- module body end -->
+    </div>
+</div>
+<!-- MODULE ORDEROPEN END -->
+

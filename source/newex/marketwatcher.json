@@ -1,0 +1,5 @@
+{
+  "name": "marketwatcher",
+  "script": "php artisan market-watcher:stats",
+  "args": ""
+}

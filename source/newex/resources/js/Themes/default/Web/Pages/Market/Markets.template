@@ -1,0 +1,5 @@
+<app-layout>
+<Head><title>{{ $i18n.locale.startsWith('zh')?'行情':'Markets' }}</title></Head>
+<div class="dp-markets-page"><market-overview :product="product"></market-overview></div>
+<market-channel></market-channel>
+</app-layout>

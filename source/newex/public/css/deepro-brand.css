@@ -1,0 +1,255 @@
+/* Deepro brand layer: presentation only; semantic buy/sell colours remain green/red. */
+:root {--dp-gold:var(--ui-accent);--dp-gold-hover:var(--ui-accent-hover);--dp-ink:var(--ui-text);--dp-muted:var(--ui-muted);--dp-line:var(--ui-line);--purple-color:var(--ui-accent-text);--purple-second-color:var(--ui-accent-text);--yellow-color:var(--ui-accent);--yellow-darker-color:var(--ui-accent-text);--yellow-secondary-color:var(--ui-accent-text);--blue-dark-color:var(--ui-surface);--blue-dark-second-color:var(--ui-field);--blue-dark-thir-color:var(--ui-surface);--blue-dark-bar-color:var(--ui-page);--blue-dark-fourth-color:var(--ui-line);--blue-dark-fifth-color:var(--ui-surface);--purple-fourth-color:var(--ui-field);--purple-third-color:var(--ui-field);--dark-body-color:var(--ui-page);--dark-profile-body-color:var(--ui-page);--first-text-color:var(--ui-text);--second-text-color:var(--ui-muted);--border-line-color:var(--ui-line);--border-line-color-v2:var(--ui-line);--rows-color:var(--ui-field);--body-color:var(--ui-page);--umi-yellow:#ffc400}
+body {font-family:Inter,-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif}
+body.dark {--purple-color:var(--ui-accent-text);--purple-second-color:var(--ui-accent-text);--first-text-color:var(--ui-text);--second-text-color:var(--ui-muted);--border-line-color:var(--ui-line);--border-line-color-v2:var(--ui-line);--rows-color:var(--ui-field);--white-input:var(--ui-field);--body-color:var(--ui-page)}
+.deepro-brand {display:inline-flex;align-items:center;gap:9px;white-space:nowrap;vertical-align:middle;font-size:25px;font-weight:800;letter-spacing:-.8px;line-height:1}
+.deepro-brand img {width:45px;height:27px;object-fit:contain;flex-shrink:0}.deepro-brand b {color:inherit;font:inherit}
+.gxhead-logo,.gxhead-brand,.footer-left__logo {color:var(--first-text-color)}
+.gxhead {border-bottom:1px solid var(--border-line-color)}
+.gxhead-link.active,.gxhead-sublink.active,.gxhead-link:hover,.gxhead-sublink:hover {color:var(--dp-gold)!important}
+.deepro-ecosystem-link {font-weight:750!important}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {outline:2px solid var(--dp-gold);outline-offset:3px}
+.btn-purple,.btn-primary,.button-primary,.bg-indigo-600,.bg-purple-600 {background:var(--ui-accent)!important;border-color:var(--ui-line)!important;color:var(--ui-on-accent)!important}
+.btn-purple:hover,.btn-primary:hover,.bg-indigo-600:hover {background:var(--ui-accent)!important}
+.text-indigo-600,.text-purple-600,.text-indigo-500 {color:var(--ui-accent-text)!important}.border-indigo-500 {border-color:var(--ui-line)!important}
+body:not(.dark) input,body:not(.dark) select,body:not(.dark) textarea {color:var(--ui-text)}
+input[type=checkbox],input[type=radio] {accent-color:#e7af00}
+/* New modules keep UMI's blue/green identity inside their own panels. */
+.deepro-explore,.deepro-ecosystem,.umi-account,.ub-page {line-height:1.55}
+.deepro-explore button,.deepro-explore a,.deepro-ecosystem button,.deepro-ecosystem a {text-decoration:none}
+.deepro-explore svg,.deepro-ecosystem svg {width:22px;height:22px;flex-shrink:0}
+.deepro-explore {color:var(--ui-text);background:var(--ui-surface);min-height:75vh}
+.deepro-explore .umi-button {background:var(--ui-accent);color:var(--ui-umi-text);border-color:var(--ui-umi-line)}
+.deepro-explore .umi-muted {color:var(--ui-umi-muted)}
+.deepro-brand-symbol b {display:none}
+@media(max-width:760px){.deepro-brand{font-size:22px}.deepro-brand img{width:38px;height:24px}.gxhead-navlist{flex-wrap:wrap}.ub-page,.umi-account{padding:22px 14px!important}}
+
+.deepro-stocks {background:var(--ui-surface);color:var(--ui-text);border-radius:16px;margin-top:24px;margin-bottom:32px;line-height:1.6}.deepro-stocks svg {width:22px;height:22px}.deepro-stocks button {cursor:pointer}.deepro-stocks input {color:var(--ui-text)!important;background:var(--ui-surface)!important}
+/* UMI variables belong to the module, independent of the original shell theme. */
+.deepro-ecosystem {--eco-green:var(--ui-umi-accent);--eco-green-hover:var(--ui-umi-accent);--eco-accent:var(--ui-umi-link);--eco-ink:var(--ui-umi-text);--eco-muted:var(--ui-umi-muted);--eco-mint:var(--ui-umi-soft);--eco-line:var(--ui-umi-line);--eco-forest:var(--ui-umi-text);color:var(--eco-ink)}
+.deepro-ecosystem h1,.deepro-ecosystem h3,.deepro-ecosystem h4 {color:var(--eco-ink)}
+.deepro-ecosystem .deepro-eco-copy h2 {color:var(--eco-accent)}
+.deepro-ecosystem p {color:var(--eco-muted)}
+.deepro-ecosystem .deepro-eco-core span,.deepro-ecosystem .deepro-eco-core small {color:var(--ui-umi-muted)}
+.btn-yellow,.yellow-button,.button-yellow {color:var(--ui-text)!important}
+.form-components__block-button {background:var(--ui-accent)!important;color:var(--ui-on-accent)!important;border-color:var(--ui-line)!important}
+.form-components__block-button:hover {background:var(--ui-accent)!important}
+.form-components__block-input:focus {border-color:var(--ui-line)!important;box-shadow:0 0 0 2px #ffc40020}
+.cex-home__hero {background:var(--ui-surface)!important}
+.cex-home__hero .cex-home__btn--primary {color:var(--ui-text)!important}
+.stock-native-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.stock-native-actions a{padding:10px 14px;background:var(--ui-field);color:var(--ui-text);border-radius:8px;font-weight:600}
+
+/* Deepro 2026: mint navigation, gold actions, light account experience. */
+:root {--dp-green:var(--ui-umi-link);--dp-mint:var(--ui-umi-soft);--dp-ink:var(--ui-text);--dp-muted:var(--ui-muted);--dp-line:var(--ui-line);--dp-radius:16px}
+.header-section.header,body.dark .header-section.header{background:var(--ui-field)!important;border-bottom:1px solid var(--ui-line)!important;box-shadow:none!important;color:var(--ui-text)!important}
+.header__row{max-width:1440px;margin:auto;padding:0 30px;min-height:76px}
+.header-logo,.header-logo a,.header-section .deepro-brand,.header-section .gxhead-link,.header-section .header-dropdown__button{color:var(--ui-text)!important}
+.header-section .gxhead-link:hover,.header-section .gxhead-link.active{color:var(--ui-text)!important}
+.header-section .gxhead-submenu,.header-section .header-dropdown__list{background:var(--ui-surface)!important;border:1px solid var(--ui-line);box-shadow:0 14px 40px #16382312;border-radius:12px}
+.header-section .gxhead-sublink,.header-section .header-dropdown__list a{color:var(--ui-text)!important}
+.header-section .gxhead-sublink:hover{background:var(--ui-field)!important;color:var(--ui-text)!important}
+.header-section .header-dropdown__icon-color,.header-section .left-header-icon svg{stroke:var(--ui-text)!important}
+.header-section .header-dropdown__icon-color2{fill:var(--ui-text)!important}
+.header-section .header-nav.active{background:var(--ui-field)!important;color:var(--ui-text)!important}
+body:not(.dark){background:var(--ui-field);--body-color:var(--ui-page);--first-text-color:var(--ui-text);--second-text-color:var(--ui-muted);--border-line-color:var(--ui-line);--rows-color:var(--ui-field)}
+.main__container{padding:30px 28px;max-width:1400px;margin:auto;width:100%}
+.components-title h2{font-size:28px;font-weight:700;letter-spacing:-.7px}
+body:not(.dark) .table-components,body:not(.dark) .table-list,body:not(.dark) .form-container,body:not(.dark) .market-trends-item{background:var(--ui-surface);border-color:var(--ui-line);border-radius:14px}
+.table-list th{font-size:12px;letter-spacing:.02em;font-weight:500}.table-list td{padding-top:18px;padding-bottom:18px}
+body:not(.dark) .table-list tbody tr:hover{background:var(--ui-field)}.table-list img,.mt-body-img img{object-fit:contain;border-radius:50%;width:28px;height:28px}
+.market-trends{gap:16px}.market-trends-item{padding:20px!important;border:1px solid var(--ui-line)!important;box-shadow:0 3px 12px #133e2603}
+.mt-header{font-size:13px;font-weight:600;color:var(--ui-muted);margin-bottom:16px}.mt-body-item{padding:10px 0}
+.tabs-nav__active{border-color:var(--ui-line)!important}.tabs-nav__active h4{color:var(--ui-text)!important}
+body:not(.dark) .tabs-search{background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:10px}
+.tabs-search input{padding-left:14px}.tabs-nav,.table-filters{gap:8px}
+.footer-section,.footer,.footer-bottom{background:var(--ui-field)!important;color:var(--ui-text)!important}.footer a,.footer h4,.footer .deepro-brand{color:var(--ui-text)!important}
+.mobbar{background:var(--ui-surface)!important;border-top:1px solid var(--ui-line)}.mobbar .active{color:var(--ui-text)!important}
+.deepro-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--ui-text)}
+/* Auth layout is intentionally light, including when a saved dark preference exists. */.ring-one{width:340px;height:155px}.ring-two{width:220px;height:235px;transform:translate(-50%,-50%) rotate(34deg);border-style:dashed;border-color:var(--ui-line)}.node-one{left:7%;top:53%;background:var(--ui-field)}.node-two{right:5%;top:23%}.node-three{right:15%;bottom:6%;background:var(--ui-field);border-color:var(--ui-line);color:var(--ui-accent-text)}.deepro-form-intro{color:var(--ui-muted);font-size:13px;margin-top:10px;line-height:1.7}
+.cex-home__hero{background:var(--ui-surface)!important;color:var(--ui-text)!important}.cex-home__hero h1,.cex-home__hero-stat-value{color:var(--ui-text)!important}.cex-home__hero h1 span{color:var(--ui-text)!important}.cex-home__hero p,.cex-home__hero-stat-label{color:var(--ui-muted)!important}.cex-home__btn--secondary{color:var(--ui-text)!important;border-color:var(--ui-line)!important;background:var(--ui-field)!important}
+.deepro-home-ecosystem{border:1px solid var(--ui-line);border-radius:20px;background:var(--ui-field);padding:38px;display:flex;align-items:center;justify-content:space-between;gap:24px;margin:36px 0}.deepro-home-ecosystem h2{font-size:28px;color:var(--ui-text);margin:12px 0}.deepro-home-ecosystem p{font-size:14px;color:var(--ui-muted)}
+.deepro-help{max-width:880px;margin:30px auto 70px}.deepro-help h1{font-size:36px;color:var(--ui-text);margin:15px 0}.deepro-help>p{color:var(--ui-muted);margin-bottom:36px}.deepro-help-list{background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:18px;padding:8px 24px}.deepro-help details{border-bottom:1px solid var(--ui-line);padding:22px 0}.deepro-help details:last-child{border:0}.deepro-help summary{font-size:15px;color:var(--ui-text);font-weight:600;cursor:pointer}.deepro-help details p{color:var(--ui-muted);line-height:1.9;font-size:14px;margin:16px 0 3px}.deepro-help-footer{display:flex;align-items:center;justify-content:space-between;padding:28px 5px}.deepro-help-footer a{color:var(--ui-text)}
+@media(max-width:1000px){.header__row{padding:0 18px;min-height:64px}.main__container{padding:20px 16px}.market-trends{grid-template-columns:repeat(2,minmax(0,1fr))}.ring-one{width:280px}}
+@media(max-width:760px){.deepro-home-ecosystem{display:block;padding:26px}.deepro-home-ecosystem .cex-home__btn{margin-top:20px}.deepro-help h1{font-size:29px}.deepro-help-list{padding:4px 18px}.market-trends-item{padding:14px!important}.market-trends{gap:10px}.mt-body-item{font-size:11px}.components-title h2{font-size:24px}}
+@media(prefers-reduced-motion:reduce){}
+.deepro-quote-label{display:block;font-size:10px;line-height:1.6;color:var(--ui-muted);font-weight:400;margin-top:3px}
+body:not(.dark) .transfer-container,body:not(.dark) .transfer-form,body:not(.dark) .transfer-card{background:var(--ui-surface)!important;color:var(--ui-text);border:1px solid var(--ui-line);border-radius:18px;padding:28px}
+body:not(.dark) .transfer-select{background:var(--ui-field)!important;color:var(--ui-text)!important;border:1px solid var(--ui-line)!important;border-radius:10px!important;box-shadow:none!important}
+body:not(.dark) .transfer-account-label,body:not(.dark) .form-label{color:var(--ui-muted)!important}
+body:not(.dark) .swap-label{color:var(--ui-text);background:transparent}.transfer-coin-select-inner .currency-avatar{margin:2px 0}
+/* Override the original shell background and fixed-header spacing on auth pages. */
+body:not(.dark) .site-layout{background-color:var(--xp-surface,#fff)!important}
+
+/* Keep navigation controls and the home hero legible in both saved themes. */
+.header-btn span{background:var(--ui-text)!important}
+.header-nav.active{background:var(--ui-field)!important;color:var(--ui-text)!important;border-color:var(--ui-line)!important}
+.cex-home__btn--primary,.cex-home__markets-tab--active{background:var(--ui-accent)!important;color:var(--ui-on-accent)!important;border-color:var(--ui-line)!important}
+.cex-home__hero::before{background:var(--ui-surface)!important}
+@media(max-width:760px){.cex-home__hero{display:block!important;padding:38px 22px!important;margin-top:8px!important;min-height:0!important;border-radius:20px!important}.cex-home__hero-content{padding:0!important}.cex-home__hero-floating{display:none!important}.cex-home__hero h1{font-size:32px!important;line-height:1.35!important}.cex-home__hero p{font-size:13px!important;line-height:1.8!important}.cex-home__hero-stats{margin-top:24px!important}.cex-home__hero-stat-value{font-size:23px!important}}
+/* Readable market columns and touch targets on phones. */
+@media (max-width: 767px) {
+ .trade {width:100%;padding:12px!important;box-sizing:border-box}
+ .trade-head {display:flex!important;flex-direction:column!important;gap:16px!important}
+ .trade-head__row-left,.trade-head__row-right,.trade-head__block-middle,.trade-head__left,.trade-head__right {width:100%!important;min-width:0!important;max-width:100%!important}
+ .trade-head__block-middle {display:flex!important;flex-direction:column!important}
+ .trade-head__left {min-height:280px}
+ .trade .module-orderform {width:100%!important}
+ .trade input,.trade select {font-size:16px!important;min-height:44px}
+ .trade button {min-height:36px}
+ .trade-head iframe {width:100%!important;min-height:350px}
+}
+
+/* Mobile browser shell: match the desktop light theme and use the whole viewport. */
+@media (max-width:1000px) {
+ .header-section.header {height:64px!important;padding:0!important}
+ .header-section.header .header__row {height:64px!important;min-height:64px!important;padding:0 16px!important}
+ .header-section.header .header-logo .deepro-brand {font-size:23px!important}
+ .header-section.header .header-nav {position:fixed!important;top:64px!important;bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;height:auto!important;max-height:none!important;width:100%!important;padding:16px!important;box-sizing:border-box;overflow-y:auto!important;overscroll-behavior:contain}
+ .header-section.header .header-nav:not(.active) {visibility:hidden;pointer-events:none}
+ .header-section.header .header-nav {margin:0!important}
+ .header-section.header .header-nav.active {left:0!important;right:0!important;visibility:visible}
+ body:has(.header-nav.active) {overflow:hidden}
+ .header-nav .gxhead-link {min-height:44px;padding:10px 12px!important;font-size:15px!important}
+ .header-nav .gxhead-navlist {gap:2px!important}
+ .header-nav .gxhead-submenu {position:static!important;max-width:100%!important;padding:4px!important;box-shadow:none!important}
+ .header-nav .header-dropdown__list.active {position:static!important;width:100%!important;min-width:0!important;padding:8px!important}
+ .header-nav .settings-dropdown__list-link {min-height:44px!important;padding:10px 12px!important;gap:10px!important;font-size:14px!important}
+ .header-nav .header-dropdown__list-icon {width:22px!important;height:22px!important;margin:0!important;flex-shrink:0}
+ .header-nav .header-dropdown__list-icon svg [stroke="white"] {stroke:var(--ui-text)}
+ .header-nav .header-dropdown__list-info {padding:10px 12px!important;overflow-wrap:anywhere}
+ .header-nav .theme-switcher h3 {padding:16px 0 10px!important}
+ .site-layout .main__container > .mobile-body {padding-left:0!important;padding-right:0!important}
+ .site-layout .mobbar {border-top:1px solid var(--ui-line)!important;box-shadow:0 -3px 18px #173d2610}
+ .site-layout .mobbar__row {display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))!important;gap:2px}
+ .site-layout .mobbar__link {min-height:48px;min-width:0;color:var(--ui-muted)!important;border-radius:8px;cursor:pointer}
+ .site-layout .mobbar__link.active {color:var(--ui-on-accent)!important;background:var(--ui-field)}
+ .site-layout .mobbar__link h4 {color:inherit!important;font-size:11px;line-height:1.3}
+ .site-layout .mobbar__icon svg {width:22px;height:22px}
+ .site-layout .mobbar__icon svg [stroke="white"] {stroke:currentColor!important}
+ .site-layout .mobbar__icon svg [fill="white"] {fill:currentColor!important}
+ body.dark .site-layout .mobbar__link {color:var(--ui-muted)!important}
+ body.dark .site-layout .mobbar__link.active {background:var(--ui-field);color:var(--ui-on-accent)!important}
+ .tabs-components.tabs:has(+ .profile-inner-page) {display:block!important;margin-bottom:20px!important}
+ .tabs-components.tabs:has(+ .profile-inner-page) .mob-hide {display:none!important}
+ .tabs-components.tabs:has(+ .profile-inner-page) .mob-show {display:block!important;margin:0!important;padding:0!important}
+ .tabs-components.tabs:has(+ .profile-inner-page) select {width:100%;min-height:44px;font-size:16px;border:1px solid var(--ui-line);border-radius:10px;padding:10px 12px}
+ .profile-inner-page {margin-top:0!important}
+ .profile-inner-page .p-5 {padding:18px!important}
+ .profile-inner-page li {gap:12px;align-items:flex-start!important;flex-wrap:wrap}
+ .profile-inner-page .text-yellow {color:var(--ui-text)!important}
+ .components-title {margin-top:4px!important;margin-bottom:20px!important}
+ .components-title h2 {font-size:24px!important;line-height:1.3}
+}
+@media (max-width:985px) {
+ .marker-lite-inner.trade {margin:0!important;padding:0!important;width:100%!important}
+ .marker-lite-inner .trade-head {flex-direction:column!important;gap:20px!important}
+ .marker-lite-inner .trade-head .trade-head__row-left,
+ .marker-lite-inner .trade-head .trade-head__row-right {width:100%!important;max-width:100%!important;min-width:0!important;padding:0!important}
+ .marker-lite-inner .trade-head .trade-head__left,
+ .marker-lite-inner .trade-head .trade-head__block-middle,
+ .marker-lite-inner .trade-head .module-orderbook,
+ .marker-lite-inner .trade-head .module-orderform {width:100%!important;max-width:100%!important;min-width:0!important;padding:0!important;box-sizing:border-box}
+ .marker-lite-inner .mobile-head-title {display:flex!important;gap:12px;min-height:44px;margin-bottom:8px}
+ .marker-lite-inner .trade-intro__right {width:100%;max-width:none;flex-wrap:wrap;gap:8px}
+ .marker-lite-inner .trade-intro {gap:12px}
+ .marker-lite-inner .module-orderbook__sell .module-orderbook__title {padding:0!important}
+ .marker-lite-inner .module-orderbook__list-item__quantity {text-align:right}
+ .marker-lite-inner .module-orderbook .module-orderbook__list {height:168px!important}
+ .marker-lite-inner .module-orderbook .module-orderbook__list-item {height:24px!important;line-height:20px!important;padding-top:2px!important;padding-bottom:2px!important;box-sizing:border-box}
+ .marker-lite-inner .module-orderform__buy-forms__item,
+ .marker-lite-inner .module-orderform__sell-forms__item {min-height:48px;border-radius:8px;margin-bottom:10px}
+ .marker-lite-inner .module-orderform input {min-height:44px;font-size:16px!important}
+ .marker-lite-inner .sub-tabs-nav {display:flex;overflow-x:auto;gap:8px;white-space:nowrap}
+ .marker-lite-inner .sub-tabs-nav__item {flex-shrink:0;padding:12px 8px!important}
+}
+/* Referral tables were hard-coded for a dark desktop canvas. */
+body:not(.dark) .referral-dashboard {color:var(--ui-text)}
+body:not(.dark) .referral-dashboard .referral-section,
+body:not(.dark) .referral-dashboard .referral-stats__item {background:var(--ui-surface);border-color:var(--ui-line)}
+body:not(.dark) .referral-dashboard h2,
+body:not(.dark) .referral-dashboard h3,
+body:not(.dark) .referral-dashboard strong,
+body:not(.dark) .referral-dashboard .referral-table td,
+body:not(.dark) .referral-dashboard .referral-table__email {color:var(--ui-text)}
+body:not(.dark) .referral-dashboard label,
+body:not(.dark) .referral-dashboard .referral-table th,
+body:not(.dark) .referral-dashboard .referral-empty {color:var(--ui-muted)}
+body:not(.dark) .referral-dashboard input {background:var(--ui-surface);border-color:var(--ui-line)}
+body:not(.dark) .referral-dashboard .referral-controls input,
+body:not(.dark) .referral-dashboard .referral-controls .t-datepicker input {background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;color:var(--ui-text)!important}
+body:not(.dark) .referral-dashboard .referral-level-filter__item,
+body:not(.dark) .referral-dashboard .referral-dashboard__ghost {background:var(--ui-surface);color:var(--ui-text);border-color:var(--ui-line)}
+body:not(.dark) .referral-dashboard .referral-level-filter__item--active {background:var(--ui-field);color:var(--ui-text);border-color:var(--ui-line)}
+@media (max-width:767px) {
+ .referral-dashboard {gap:16px!important}
+ .referral-dashboard .referral-stats {grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+ .referral-dashboard .referral-stats__item {min-height:96px;padding:14px}
+ .referral-dashboard .referral-stats__item strong {font-size:24px}
+ .referral-dashboard .referral-section {padding:16px!important;min-width:0}
+ .referral-table-wrap:has(.referral-empty) .referral-table {min-width:0!important}
+ .referral-table-wrap:has(.referral-empty) thead {display:none}
+ .referral-table-wrap:has(.referral-empty) .referral-empty {white-space:normal;padding:28px 12px!important}
+ .referral-dashboard .referral-controls {gap:12px}
+ .referral-dashboard .referral-controls input {font-size:16px}
+ .referral-level-filter {overflow-x:auto;flex-wrap:nowrap!important}
+ .referral-level-filter__item {flex-shrink:0}
+ .deepro-stocks {padding:20px 14px!important;margin-top:0!important}
+ .deepro-ecosystem {padding-left:0!important;padding-right:0!important}
+}
+@media (max-width:767px) {
+ .marker-lite-inner .module-orderbook__empty {height:100px!important;min-height:100px!important}
+ .marker-lite-inner .module-orderbook__list {height:170px!important}
+ .marker-lite-inner .trade-market-title {color:var(--ui-text)!important;font-size:18px!important}
+ .marker-lite-inner .trade-intro {padding-bottom:12px}
+}
+@media(max-width:767px){
+ .marker-lite-inner .module-orderbook__empty-buy{height:100px!important;min-height:100px!important}
+ .marker-lite-inner .module-orderbook__sell,.marker-lite-inner .module-orderbook__buy{min-height:0!important}
+ .marker-lite-inner .module-orderbook .module-container{min-height:0!important}
+ .marker-lite-inner .trade-head__block-middle{gap:16px!important}
+}
+/* Asset views use the selected theme, including inherited legacy wallet styles. */
+body:not(.dark) .wallet-assets-page,
+body:not(.dark) .wallet-assets-title h2,
+body:not(.dark) .wallet-assets-summary__usd,
+body:not(.dark) .wallet-account-card__title,
+body:not(.dark) .wallet-account-card__value,
+body:not(.dark) .wallet-assets-coin__symbol,
+body:not(.dark) .wallet-assets-number,
+body:not(.dark) .wallet-assets-mobile-card strong,
+body:not(.dark) .wallet-assets-search input {color:#213c2b!important}
+body:not(.dark) .wallet-assets-summary__label,
+body:not(.dark) .wallet-assets-summary__btc,
+body:not(.dark) .wallet-account-card__desc,
+body:not(.dark) .wallet-account-card__arrow,
+body:not(.dark) .wallet-assets-checkbox,
+body:not(.dark) .wallet-assets-coin__name,
+body:not(.dark) .wallet-assets-sub,
+body:not(.dark) .wallet-assets-table__head,
+body:not(.dark) .wallet-assets-mobile-card__value span,
+body:not(.dark) .wallet-assets-mobile-card__grid span,
+body:not(.dark) .wallet-assets-mobile-card__grid em,
+body:not(.dark) .wallet-assets-empty {color:#61776a!important}
+body:not(.dark) .wallet-account-card,
+body:not(.dark) .wallet-assets-mobile-card__grid div {background:var(--ui-surface);border-color:var(--ui-line);border-radius:12px}
+body:not(.dark) .wallet-account-card:hover {background:var(--ui-field);border-color:var(--ui-line)}
+body:not(.dark) .wallet-assets-btn:not(.wallet-assets-btn--primary) {background:var(--ui-surface);color:var(--ui-text);border-color:var(--ui-line)}
+body:not(.dark) .wallet-assets-tabs__item--active {color:var(--ui-text)}
+body:not(.dark) .wallet-assets-tabs__item--active:after {background:var(--ui-field)}
+body:not(.dark) .wallet-assets-search input::placeholder {color:var(--ui-muted)}
+body:not(.dark) .wallet-assets-coin__icon {background:#e8f3eb;color:#315b40}
+@media(max-width:1000px){
+ .wallet-assets-page {padding-top:0}
+ .wallet-account-grid {gap:12px;margin-bottom:24px}
+ .wallet-account-card {min-height:104px;padding:16px}
+ .wallet-account-card__head {margin-bottom:10px}
+ .wallet-assets-btn {min-height:44px}
+ .wallet-assets-search {height:44px}
+ .wallet-assets-search input {font-size:16px}
+ /* Reports already provide a native section selector for touch devices. */
+ .tabs:has(> .form-search__result-block.mob-show) {display:block!important;margin-bottom:20px!important}
+ .tabs:has(> .form-search__result-block.mob-show) > .mob-hide {display:none!important}
+ .tabs > .form-search__result-block.mob-show {display:block!important;width:100%;margin:0!important;padding:0!important}
+ .tabs > .form-search__result-block.mob-show .form-search__result-link {margin:0;width:100%}
+ .tabs > .form-search__result-block.mob-show select {width:100%;min-height:44px;font-size:16px;border:1px solid var(--ui-line);border-radius:10px;padding:10px 12px}
+}

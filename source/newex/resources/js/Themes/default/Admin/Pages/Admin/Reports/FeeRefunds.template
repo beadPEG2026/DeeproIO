@@ -1,0 +1,473 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="fee_refunds"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("手续费返现记录") }}
+    </h1>
+
+    <div class="mb-6">
+        <div
+            style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+                gap: 12px;
+                align-items: end;
+            "
+        >
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户/邮箱/来源ID/钱包ID"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("返现类型") }}</label>
+                <themed-select
+                    v-model="form.type"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="spot">{{ $t("现货") }}</option>
+                    <option value="futures">{{ $t("合约") }}</option>
+                    <option value="option">{{ $t("期权") }}</option>
+                    <option value="transfer">{{ $t("转账") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("手续费类型") }}</label>
+                <themed-select
+                    v-model="form.fee_type"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="entry">{{ $t("开仓手续费") }}</option>
+                    <option value="exit">{{ $t("平仓手续费") }}</option>
+                    <option value="order">{{ $t("订单手续费") }}</option>
+                    <option value="cursor">{{ $t("撮合订单手续费") }}</option>
+                    <option value="to_trade">{{ $t("资金账户转交易账户") }}</option>
+                    <option value="to_funding">{{ $t("交易账户转资金账户") }}</option>
+                    <option value="to_lc">{{ $t("资金账户转量化账户") }}</option>
+                    <option value="from_lc">{{ $t("量化账户转资金账户") }}</option>
+                    <option value="trade_to_lc">{{ $t("交易账户转量化账户") }}</option>
+                    <option value="lc_to_trade">{{ $t("量化账户转交易账户") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("用户ID") }}</label>
+                <input
+                    v-model="form.user_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户ID"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("邮箱") }}</label>
+                <input
+                    v-model="form.email"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户邮箱"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("钱包ID") }}</label>
+                <input
+                    v-model="form.wallet_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="钱包ID"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("币种ID") }}</label>
+                <input
+                    v-model="form.currency_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="币种ID"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("市场ID") }}</label>
+                <input
+                    v-model="form.market_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="市场ID"
+                />
+            </div>
+
+            <div style="width: 140px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("VIP等级") }}</label>
+                <themed-select
+                    v-model="form.vip_level"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option :value="0">VIP0</option>
+                    <option :value="1">VIP1</option>
+                    <option :value="2">VIP2</option>
+                    <option :value="3">VIP3</option>
+                    <option :value="4">VIP4</option>
+                    <option :value="5">VIP5</option>
+                    <option :value="6">VIP6</option>
+                    <option :value="7">VIP7</option>
+                    <option :value="8">VIP8</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("原始手续费 ≥") }}</label>
+                <input
+                    v-model="form.original_fee_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最小手续费"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("原始手续费 ≤") }}</label>
+                <input
+                    v-model="form.original_fee_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最大手续费"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("返现金额 ≥") }}</label>
+                <input
+                    v-model="form.refund_amount_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最小返现"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("返现金额 ≤") }}</label>
+                <input
+                    v-model="form.refund_amount_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最大返现"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("返还比例 ≥") }}</label>
+                <input
+                    v-model="form.refund_rate_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最小比例"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("返还比例 ≤") }}</label>
+                <input
+                    v-model="form.refund_rate_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最大比例"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("折扣 ≥") }}</label>
+                <input
+                    v-model="form.discount_rate_min"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最小折扣"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("折扣 ≤") }}</label>
+                <input
+                    v-model="form.discount_rate_max"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="最大折扣"
+                />
+            </div>
+
+            <div style="width: 240px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("时间") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    placeholder="选择时间"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("每页显示") }}</label>
+                <themed-select
+                    v-model="form.per_page"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="10">{{ $t("10条") }}</option>
+                    <option :value="50">{{ $t("50条") }}</option>
+                    <option :value="100">{{ $t("100条") }}</option>
+                    <option :value="500">{{ $t("500条") }}</option>
+                </themed-select>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="reset()" class="h-10 px-4">
+                    {{ $t("重置") }}
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("手续费类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("来源ID") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("原始手续费") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("返现金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("实际手续费") }}</th>
+                <th class="px-3 pt-6 pb-4">VIP</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("折扣") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("返还比例") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("钱包") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+
+            <tr
+                v-for="record in records.data"
+                :key="record.id"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ format_string(record.id, 16) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge :type="productBadgeType(record.product_type)">
+                            {{ formatProductType(record.product_type) }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ formatFeeType(record.fee_type) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ format_string(record.source_id, 20) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ formatAmount(record.original_fee) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center text-green-700 font-bold">
+                        {{ formatAmount(record.refund_amount) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center text-red-700 font-bold">
+                        {{ formatAmount(toNumber(record.original_fee) - toNumber(record.refund_amount)) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        VIP{{ record.vip_level }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ formatDiscount(record.discount_rate) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ formatPercent(record.refund_rate) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.user_email || '-' }}<br>
+                        {{ $t("用户ID:") }} {{ record.user_id }}
+                    </span>
+                </td>
+
+<td class="border-t">
+    <span class="px-3 py-2 flex items-center">
+        {{ formatWallet(record) }}
+    </span>
+</td>
+
+<td class="border-t">
+    <span class="px-3 py-2 flex items-center">
+        {{ formatCurrency(record) }}
+    </span>
+</td>
+
+<td class="border-t">
+    <span class="px-3 py-2 flex items-center">
+        {{ formatMarket(record) }}
+    </span>
+</td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ record.created_at }}
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="records.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">
+                    {{ $t("未找到手续费返现记录。") }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-6 bg-white rounded shadow p-5">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">
+                    {{ $t("当前页返现统计") }}
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ $t("统计当前页面显示的手续费返现记录。") }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <div class="px-5 py-4 rounded bg-indigo-50" style="min-width: 160px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("当前页记录数") }}</div>
+                    <div class="text-2xl font-bold text-indigo-700">
+                        {{ currentPageRecordCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-purple-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("当前页原始手续费") }}</div>
+                    <div class="text-2xl font-bold text-purple-700">
+                        {{ formatAmount(currentPageOriginalFeeTotal) }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-green-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("当前页返现金额") }}</div>
+                    <div class="text-2xl font-bold text-green-700">
+                        {{ formatAmount(currentPageRefundAmountTotal) }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-red-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("当前页实际手续费") }}</div>
+                    <div class="text-2xl font-bold text-red-700">
+                        {{ formatAmount(currentPageActualFeeTotal) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 bg-white rounded shadow p-5">
+        <div class="flex flex-wrap gap-6">
+            <div>
+                <div class="text-xs text-gray-500 mb-1">{{ $t("筛选后总记录数") }}</div>
+                <div class="text-xl font-bold text-indigo-700">
+                    {{ total_records }}
+                </div>
+            </div>
+
+            <div>
+                <div class="text-xs text-gray-500 mb-1">{{ $t("筛选后原始手续费总额") }}</div>
+                <div class="text-xl font-bold text-purple-700">
+                    {{ formatAmount(total_original_fee) }}
+                </div>
+            </div>
+
+            <div>
+                <div class="text-xs text-gray-500 mb-1">{{ $t("筛选后返现总额") }}</div>
+                <div class="text-xl font-bold text-green-700">
+                    {{ formatAmount(total_refund_amount) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="text-sm text-gray-600">
+            {{ $t("当前每页显示：") }}
+            <themed-select v-model="form.per_page" class="form-select rounded h-9 text-sm mx-2">
+                <option :value="10">{{ $t("10条") }}</option>
+                <option :value="50">{{ $t("50条") }}</option>
+                <option :value="100">{{ $t("100条") }}</option>
+                <option :value="500">{{ $t("500条") }}</option>
+            </themed-select>
+            {{ $t("手续费返现记录") }}
+        </div>
+
+        <pagination :links="records.links" />
+    </div>
+</app-layout>

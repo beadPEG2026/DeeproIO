@@ -1,0 +1,843 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        {{ $t("Deepro 平台设置") }}
+    </h1>
+
+    <div class="tabs tabs-main">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <button type="button" @click="setSection('general')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'general'}">
+                    <h4>{{ $t("网站设置") }}</h4>
+                </button>
+                <button type="button" @click="setSection('trade')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'trade'}">
+                    <h4>{{ $t("交易") }}</h4>
+                </button>
+                <button type="button" @click="setSection('mail')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'mail'}">
+                    <h4>{{ $t("邮件") }}</h4>
+                </button>
+                <button type="button" @click="setSection('notification')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'notification'}">
+                    <h4>{{ $t("通知") }}</h4>
+                </button>
+                <button type="button" @click="setSection('ethereum')" class="tabs-nav__item" :class="{'tabs-nav__active':
+                    section == 'ethereum' ||
+                    section == 'bnb' ||
+                    section == 'tron' ||
+                    section == 'bitcoin' ||
+                    section == 'polygon' || section == 'xlayer' ||
+                    section == 'solana' ||
+                    section == 'ripple' ||
+                    section == 'ton' ||
+                    section == 'customtoken'
+                }">
+                    <h4>{{ $t("网络") }}</h4>
+                </button>
+                <button type="button" @click="setSection('stripe')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'stripe'}">
+                    <h4>{{ $t("Stripe") }}</h4>
+                </button>
+                <button type="button" @click="setSection('recaptcha')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'recaptcha'}">
+                    <h4>{{ $t("Recaptcha") }}</h4>
+                </button>
+                <button type="button" @click="setSection('unlimit')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'unlimit'}">
+                    <h4>Unlimit</h4>
+                </button>
+                <button type="button" @click="setSection('social')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'social'}">
+                    <h4>{{ $t("社交") }}</h4>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs tabs-main tabs-submain" v-if="
+          section == 'ethereum' ||
+          section == 'bnb' ||
+          section == 'tron' ||
+          section == 'bitcoin' ||
+          section == 'polygon' || section == 'xlayer' ||
+          section == 'solana' ||
+          section == 'ripple' ||
+          section == 'ton' ||
+          section == 'customtoken'
+    ">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <button type="button" @click="setSection('ethereum')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'ethereum'}">
+                    <h4>{{ $t("Ethereum & ERC") }}</h4>
+                </button>
+                <button type="button" @click="setSection('bnb')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'bnb'}">
+                    <h4>{{ $t("BNB & BEP") }}</h4>
+                </button>
+                <button type="button" @click="setSection('tron')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'tron'}">
+                    <h4>{{ $t("TRON & TRC") }}</h4>
+                </button>
+                <button type="button" @click="setSection('bitcoin')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'bitcoin'}">
+                    <h4>Bitcoin (BTC)</h4>
+                </button>
+                <button type="button" @click="setSection('polygon')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'polygon'}">
+                    <h4>{{ $t("Polygon") }}</h4>
+                </button>                <button type="button" @click="setSection('xlayer')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'xlayer'}">
+                    <h4>{{ $t("X Layer") }}</h4>
+                </button>
+                <button type="button" @click="setSection('solana')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'solana'}">
+                    <h4>{{ $t("Solana") }}</h4>
+                </button>
+                <button type="button" @click="setSection('ripple')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'ripple'}">
+                    <h4>{{ $t("Ripple XRP") }}</h4>
+                </button>
+
+                <button type="button" @click="setSection('ton')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'ton'}">
+                    <h4>TON</h4>
+                </button>
+                <button type="button" @click="setSection('customtoken')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'customtoken'}">
+                    <h4>{{ $t("自定义区块链") }}</h4>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="Object.keys(validationErrors).length !== 0" class="pb-8 w-full">
+        <div class="bg-red-400 border border-red-400 text-white px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">{{ $t("表单验证错误") }}</strong>
+            <span class="block">
+                <p v-for="error in validationErrors">
+                    {{ error }}
+                </p>
+            </span>
+        </div>
+    </div>
+
+    <div v-if="section == 'general'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('general')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("常规设置") }}</div>
+                </div>
+
+                <text-input v-model="general.name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;平台名称&quot;)" :placeholder="$t(&quot;Deepro&quot;)" />
+
+                <empty-column></empty-column>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用维护模式") }}</label>
+                    <t-toggle v-model="general.maintenance_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用KYC") }}</label>
+                    <t-toggle v-model="general.kyc_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用语言切换器") }}</label>
+                    <t-toggle v-model="general.language_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用深色模式") }}</label>
+                    <t-toggle v-model="general.dark_mode_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("注册时要求推荐码") }}</label>
+                    <t-toggle v-model="general.registration_referral_required" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("默认启用深色模式") }}</label>
+                    <t-toggle v-model="general.default_dark_mode_status" />
+                </div>
+
+                <div id="file-uploader-form" class="pr-6 pb-8 w-full">
+                    <div class="border-b mt-10 mb-2 pb-2">{{ $t("网站Logo：") }}</div>
+
+                    <VueFileAgent
+                        class="profile-pic-upload-block"
+                        ref="fileUploadForm"
+                        :multiple="false"
+                        :deletable="false"
+                        :meta="false"
+                        :compact="true"
+                        :accept="'image/*'"
+                        :helpText="'将图片文件拖到这里'"
+                        :errorText="{
+                              type: '请选择图片',
+                            }"
+                        v-model="siteLogo"
+                        @select="onSelect($event)"
+                        @upload="onUpload($event)"
+                    >
+                        <template v-slot:before-outer>
+                        </template >
+                        <template v-slot:after-outer>
+                            <div :title="$t(&quot;after-outer&quot;)">
+                                <div class="mb-4">
+                                    <small>{{ $t("允许的类型：") }}<strong>{{ $t("jpg, png.") }}</strong></small>
+                                    <small>{{ $t("最大文件大小：") }}<strong>1MB</strong></small>
+                                </div>
+                                <div class="drop-help-text">
+                                    <p class="text-success">{{ $t("释放文件即可上传！") }}</p>
+                                </div>
+                                <button type="button" class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none" :class="[uploaded ? 'btn-danger' : 'btn-secondary']" v-if="siteLogo" @click="removePic()">{{ $t("移除") }}</button>
+                                <div class="clearfix"></div>
+                            </div>
+                        </template >
+                    </VueFileAgent>
+                </div>
+
+                <text-input v-model="general.withdrawal_limit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;24小时提现额度 KYC（美元）&quot;)" />
+
+                <text-input v-model="general.withdrawal_limit_kyc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;24小时提现额度 非KYC（美元）&quot;)" />
+
+                <text-input v-model="general.swap_market" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Swap 默认市场名称&quot;)" />
+                <text-input v-model="general.default_trade_pair" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;默认交易对（例如：BTC-USDT）&quot;)" />
+                <text-input v-model="general.default_futures_pair" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;默认合约交易对（例如：BTC-USDT）&quot;)" />
+                
+                <div class="pr-6 pb-8 w-full mt-4">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("APP 下载链接") }}</div>
+                    <small class="text-gray-500">{{ $t("用于前端展示 Android / iOS APP 下载入口。") }}</small>
+                </div>
+                
+                <text-input
+                    v-model="general.android_download_url"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="Android 下载链接"
+                    placeholder="例如：https://example.com/app.apk"
+                />
+                
+                <text-input
+                    v-model="general.ios_download_url"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="iOS 下载链接"
+                    placeholder="例如：https://apps.apple.com/app/xxxx"
+                />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新常规设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'trade'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('trade')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("交易设置") }}</div>
+                </div>
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("禁用交易") }}</label>
+                    <t-toggle v-model="trade.disable_trades" />
+                </div>
+
+
+                <text-input v-model="trade.transfer_commission_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;交易账户 -&gt; 兑换账户 转账佣金 (%)&quot;)" />
+
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("现货交易手续费") }}</div>
+                </div>
+
+                <text-input v-model="trade.maker_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;现货 Maker 手续费 (%)&quot;)" />
+
+                <text-input v-model="trade.taker_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;现货 Taker 手续费 (%)&quot;)" />
+
+                <div class="pr-6 pb-8 w-full"><b>{{ $t('交易所返佣') }}</b><p>15% / 10% / 8% / 6% / 4% / 3% / 2% / 2%</p><a :href="route('admin.referral-center')">{{ $t('邀请与返佣中心') }} →</a></div>
+
+                <div class="pr-6 pb-8 w-full mt-4">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("合约交易手续费") }}</div>
+                </div>
+
+                <text-input v-model="trade.futures_maker_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;合约 Maker 手续费 (%)&quot;)" />
+
+                <text-input v-model="trade.futures_taker_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;合约 Taker 手续费 (%)&quot;)" />
+
+
+                <div class="pr-6 pb-8 w-full mt-4">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("期权交易") }}</div>
+                </div>
+
+                <select-input v-model="trade.options_result_mode" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;期权交易输出&quot;)">
+                   <option value="default">{{ $t("基于市场价格") }}</option>
+                   <option value="win">{{ $t("总是盈利") }}</option>
+                   <option value="lose">{{ $t("总是亏损") }}</option>
+               </select-input>
+
+                <text-input v-model="trade.options_pnl" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;期权交易盈亏&quot;)" />
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("自动转入量化账户收益") }}</div>
+                </div>
+
+                <text-input v-model="trade.lc30" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户活期30天日收益率(例 0.1%-0.3%)&quot;)" />
+
+                <text-input v-model="trade.lc90" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户活期90天日收益率(例 0.1%-0.3%)&quot;)" />
+
+                <text-input v-model="trade.lc180" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户活期180天日收益率(例 0.1%-0.3%)&quot;)" />
+                <text-input v-model="trade.lc365" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户活期365天日收益率(例 0.1%-0.3%)&quot;)" />
+                <text-input v-model="trade.lc_dq30" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户定期30天日收益率(例 0.1%-0.3%)&quot;)" />
+
+                <text-input v-model="trade.lc_dq90" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户定期90天日收益率(例 0.1%-0.3%)&quot;)" />
+
+                <text-input v-model="trade.lc_dq180" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户定期180天收益率(例 0.1%-0.3%)&quot;)" />
+                <text-input v-model="trade.lc_dq365" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;量化账户定期365日天收益率(例 0.1%-0.3%)&quot;)" />
+                <div class="pr-6 pb-8 w-full mt-4">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("VIP量化收益加成") }}</div>
+                    <small class="text-gray-500">{{ $t("填写百分比数字，例如 10 表示基础正收益额外增加 10%。只对正收益加成，负收益不会放大亏损。") }}</small>
+                </div>
+
+                <text-input v-model="trade.lc_vip_1_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP1 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_2_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP2 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_3_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP3 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_4_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP4 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_5_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP5 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_6_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP6 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_7_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP7 量化收益加成 (%)&quot;)" />
+                <text-input v-model="trade.lc_vip_8_boost_percent" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VIP8 量化收益加成 (%)&quot;)" />
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新交易设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'mail'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('mail')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("邮件设置") }}</div>
+                </div>
+
+                <text-input v-model="mail.mail_from_name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;发件人名称&quot;)" />
+                <text-input v-model="mail.mail_from_address" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;发件人邮箱地址&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("Mailgun API") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("使用 Mailgun API") }}</label>
+                    <t-toggle v-model="mail.mailgun_enabled" />
+                </div>
+
+                <empty-column></empty-column>
+
+                <template v-if="mail.mailgun_enabled">
+                    <text-input v-model="mail.mailgun_domain" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Mailgun 域名&quot;)" :placeholder="$t(&quot;mg.yourdomain.com&quot;)" />
+                    <text-input v-model="mail.mailgun_secret" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Mailgun API Key&quot;)" :placeholder="$t(&quot;key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;)" />
+                    <select-input v-model="mail.mailgun_endpoint" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Mailgun 端点（区域）&quot;)">
+                        <option value="api.mailgun.net">{{ $t("美国区域 (api.mailgun.net)") }}</option>
+                        <option value="api.eu.mailgun.net">{{ $t("欧洲区域 (api.eu.mailgun.net)") }}</option>
+                    </select-input>
+                </template>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-lg border-b mb-2 pb-2 font-medium">{{ $t("SMTP 设置") }}</div>
+                    <small class="text-gray-500" v-if="mail.mailgun_enabled">{{ $t("启用 Mailgun API 后将忽略 SMTP 设置") }}</small>
+                </div>
+
+                <text-input v-model="mail.mail_mailer" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;类型（SMTP、API等）&quot;)" :disabled="mail.mailgun_enabled" />
+                <text-input v-model="mail.mail_host" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;SMTP 主机&quot;)" :disabled="mail.mailgun_enabled" />
+                <text-input v-model="mail.mail_port" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;SMTP 端口&quot;)" :disabled="mail.mailgun_enabled" />
+                <text-input v-model="mail.mail_username" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;用户名&quot;)" :disabled="mail.mailgun_enabled" />
+                <text-input v-model="mail.mail_password" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;密码&quot;)" :disabled="mail.mailgun_enabled" />
+                <text-input v-model="mail.mail_encryption" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;加密方式（SSL、TLS等）&quot;)" :disabled="mail.mailgun_enabled" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新邮件设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'recaptcha'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('recaptcha')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Recaptcha 设置") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用 Recaptcha") }}</label>
+                    <t-toggle v-model="recaptcha.status" />
+                </div>
+
+                <text-input v-model="recaptcha.site_key" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;站点 Key&quot;)" />
+                <text-input v-model="recaptcha.secret_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;密钥 Key&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Recaptcha 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'coinpayments'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('coinpayments')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Coinpayments 设置") }}</div>
+                </div>
+
+                <text-input v-model="coinpayments.ipn_secret" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;IPN 密钥&quot;)" />
+                <text-input v-model="coinpayments.public_key" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;公钥&quot;)" />
+                <text-input v-model="coinpayments.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+                <text-input v-model="coinpayments.merchant_id" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;商户 ID&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("支付充值手续费（0.5%）") }}</label>
+                    <t-toggle v-model="coinpayments.pay_deposit_fee" />
+                </div>
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="syncCoins">{{ $t("同步 Coinpayments 币种") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Coinpayments 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'coinpayments'" class="bg-white rounded shadow overflow-hidden w-full mt-10">
+        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+            <div class="pr-6 pb-8 w-full">
+                <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Coinpayments 币种") }}</div>
+            </div>
+            <table class="w-full whitespace-no-wrap">
+                <tr class="text-left font-bold">
+                    <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("符号") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("手续费") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("充值确认数") }}</th>
+                    <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                </tr>
+                <tr v-for="currency in coinpaymentsCurrencies" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                            {{ currency.name }}
+                        </span>
+                    </td>
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                            {{ currency.symbol }}
+                        </span>
+                    </td>
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                            {{ currency.fee }}
+                        </span>
+                    </td>
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                            {{ currency.confirmations }}
+                        </span>
+                    </td>
+                    <td class="border-t">
+                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                            <badge class="mr-2" :type="currency.status == 'online' ? 'green' : 'gray'">
+                                {{ currency.status == "online" ? $t("在线") : $t("维护中") }}
+                            </badge>
+                        </span>
+                    </td>
+                </tr>
+                <tr v-if="coinpaymentsCurrencies.length === 0">
+                    <td class="border-t px-6 py-4" colspan="100">{{ $t("币种尚未同步。") }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div v-if="section == 'ethereum'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('ethereum')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Ethereum 设置") }}</div>
+                </div>
+
+                <text-input v-model="ethereum.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="ethereum.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Ethereum 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'customtoken'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('customtoken')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("自定义区块链设置") }}</div>
+                </div>
+
+                <text-input v-model="customtoken.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="customtoken.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新自定义区块链设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'bnb'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('bnb')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Binance Smart Chain 设置") }}</div>
+                </div>
+
+                <text-input v-model="bnb.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="bnb.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 BNB 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'polygon'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('polygon')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Polygon 设置") }}</div>
+                </div>
+
+                <text-input v-model="polygon.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="polygon.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Polygon 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'xlayer'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('xlayer')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("X Layer 设置") }}</div>
+                </div>
+
+                <text-input v-model="xlayer.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="xlayer.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 X Layer 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'tron'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('tron')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Tron 设置") }}</div>
+                </div>
+
+                <text-input v-model="tron.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                <text-input v-model="tron.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Tron 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'solana'" class="bg-white rounded shadow overflow-hidden w-full">
+            <form @submit.prevent="submit('solana')">
+                <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                    <div class="pr-6 pb-8 w-full">
+                        <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Solana 设置") }}</div>
+                    </div>
+
+                    <text-input v-model="solana.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                    <text-input v-model="solana.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+                </div>
+                <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                    <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Solana 设置") }}</loading-button>
+                </div>
+            </form>
+        </div>
+
+        <div v-if="section == 'ripple'" class="bg-white rounded shadow overflow-hidden w-full">
+            <form @submit.prevent="submit('ripple')">
+                <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                    <div class="pr-6 pb-8 w-full">
+                        <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Ripple 设置") }}</div>
+                    </div>
+
+                    <text-input v-model="ripple.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                    <text-input v-model="ripple.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+                </div>
+                <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                    <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Ripple 设置") }}</loading-button>
+                </div>
+            </form>
+        </div>
+
+        <div v-if="section == 'ton'" class="bg-white rounded shadow overflow-hidden w-full">
+            <form @submit.prevent="submit('ton')">
+                <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                    <div class="pr-6 pb-8 w-full">
+                        <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("TON 设置") }}</div>
+                    </div>
+
+                    <text-input v-model="ton.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+                    <text-input v-model="ton.private_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;私钥（安全加密存储）&quot;)" />
+
+                </div>
+                <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                    <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 TON 设置") }}</loading-button>
+                </div>
+            </form>
+        </div>
+
+    <div v-if="section == 'bitcoin'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('bitcoin')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Bitcoin 设置") }}</div>
+                </div>
+
+                <p class="pr-6 pb-4 w-full">{{ $t("BTC query RPC and signing wallet are separate. View sync and channel status in Operations health and Deposit channels.") }}</p>
+                <text-input v-model="bitcoin.wallet" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;钱包&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Bitcoin 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'stripe'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('stripe')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Stripe 设置") }}</div>
+                </div>
+
+                <text-input v-model="stripe.public_key" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;公钥&quot;)" />
+                <text-input v-model="stripe.secret_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;密钥&quot;)" />
+                <text-input v-model="stripe.currency" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;基础货币&quot;)" />
+
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Stripe 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'unlimit'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('unlimit')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Unlimit (GateFi) 设置") }}</div>
+                </div>
+
+                <text-input v-model="unlimit.base_url" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;基础 URL&quot;)" />
+                <text-input v-model="unlimit.access_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;访问密钥&quot;)" />
+                <text-input v-model="unlimit.secret_key" type="password" autocomplete="new-password" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;密钥&quot;)" />
+                <text-input v-model="unlimit.partner_account_id" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;合作伙伴账户 ID&quot;)" />
+                <text-input
+                    v-model="unlimit.exchange_rate"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="汇率"
+                    placeholder="例如：1 或 7.20"
+                />
+                <text-input
+                    v-model="unlimit.processing_fee"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="手续费 (%)"
+                    placeholder="例如：0.5"
+                />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新 Unlimit 设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'unlimit'" class="bg-white rounded shadow overflow-hidden w-full mt-10">
+        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+            <div class="pr-6 pb-8 w-full">
+                <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Unlimit 入金配置") }}</div>
+                <p v-if="loadingUnlimitConfig" role="status">{{ $t("正在加载入金选项…") }}</p>
+                <p v-else-if="unlimitConfigError" role="status">{{ $t(unlimitConfigError) }}</p>
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center w-full">
+                <button class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="syncUnlimit">{{ $t("同步配置") }}</button>
+            </div>
+
+            <div class="pr-6 pb-4 w-full mt-6">
+                <div class="font-weight-bold text-lg mb-2">{{ $t("支持的币种") }}</div>
+                <table class="w-full whitespace-no-wrap">
+                    <tr class="text-left font-bold">
+                        <th class="px-6 pt-6 pb-4">{{ $t("符号") }}</th>
+                    </tr>
+                    <tr v-for="sym in (unlimitConfig ? unlimitConfig.cryptos : [])" :key="'f-'+sym" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                        <td class="border-t">
+                            <span class="px-6 py-4 flex items-center focus:text-indigo-500">{{ sym.id }}</span>
+                            <div class="px-6 py- ">
+                                <div class="grid grid-cols-5 gap-4 mb-4">
+                                    <small v-for="limit in sym.paymentLimits">
+                                        <p>{{ limit.currency }} {{ limit.id }}</p>
+                                        <p>{{ $t("最小值:") }} {{ limit.min }}</p>
+                                        <p>{{ $t("最大值:") }} {{ limit.max }}</p>
+                                        <p>{{ $t("最小加密货币:") }} {{ limit.minCrypto }}</p>
+                                        <p>{{ $t("最大加密货币:") }} {{ limit.maxCrypto }}</p>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr v-if="!unlimitConfig || (unlimitConfig.fiats && unlimitConfig.fiats.length === 0)">
+                        <td class="border-t px-6 py-4" colspan="100">{{ $t("暂无数据。请点击更新配置。") }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="pr-6 pb-4 w-full mt-6">
+                <div class="font-weight-bold text-lg mb-2">{{ $t("支持的法币") }}</div>
+                <table class="w-full whitespace-no-wrap">
+                    <tr class="text-left font-bold">
+                        <th class="px-6 pt-6 pb-4">{{ $t("符号") }}</th>
+                    </tr>
+                    <tr v-for="sym in (unlimitConfig ? unlimitConfig.fiats : [])" :key="'f-'+sym" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                        <td class="border-t">
+                            <span class="px-6 py-4 flex items-center focus:text-indigo-500">{{ sym.id }}</span>
+                            <div class="px-6 py-4">
+                                <div class="grid grid-cols-5 gap-4 mb-4">
+                                    <small class="mr-6" v-for="limit in sym.paymentLimits">
+                                        <p>{{ $t("类型:") }} {{ limit.id }}</p>
+                                        <p>{{ $t("最小值:") }} {{ limit.min }} {{ sym.id }}</p>
+                                        <p>{{ $t("最大值:") }} {{ limit.max }} {{ sym.id }}</p>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr v-if="!unlimitConfig || (unlimitConfig.fiats && unlimitConfig.fiats.length === 0)">
+                        <td class="border-t px-6 py-4" colspan="100">{{ $t("暂无数据。请点击同步配置。") }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="pr-6 pb-4 w-full mt-6">
+                <div class="font-weight-bold text-lg mb-2">{{ $t("支付方式") }}</div>
+                <table class="w-full whitespace-no-wrap">
+                    <tr class="text-left font-bold">
+                        <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                    </tr>
+                    <tr v-for="p in (unlimitConfig ? unlimitConfig.payments : [])" :key="'p-'+p" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                        <td class="border-t">
+                            <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                <div>{{ p.id }}</div>
+                            </span>
+                            <div class="px-6 py-4"><small v-for="l in p.availableCountries">{{ l }}, </small></div>
+                        </td>
+                    </tr>
+                    <tr v-if="!unlimitConfig || (unlimitConfig.payments && unlimitConfig.payments.length === 0)">
+                        <td class="border-t px-6 py-4" colspan="100">{{ $t("暂无数据。请点击同步配置。") }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="section == 'notification'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('notification')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("通知设置") }}</div>
+                </div>
+
+                <text-input v-model="notification.admin_email" class="pr-6 pb-8 w-full" :label="$t(&quot;管理员邮箱（此地址接收所有启用的邮件通知）&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("加密货币充值邮件") }}</label>
+                    <t-toggle v-model="notification.crypto_deposits" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("加密货币提现邮件") }}</label>
+                    <t-toggle v-model="notification.crypto_withdrawals" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("法币充值邮件") }}</label>
+                    <t-toggle v-model="notification.fiat_deposits" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("法币提现邮件") }}</label>
+                    <t-toggle v-model="notification.fiat_withdrawals" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("KYC 提交邮件") }}</label>
+                    <t-toggle v-model="notification.kyc_received" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("新用户注册邮件") }}</label>
+                    <t-toggle v-model="notification.new_user_registered" />
+                </div>
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新通知设置") }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="section == 'social'" class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit('social')">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("社交网络") }}</div>
+                </div>
+
+                <text-input v-model="social.youtube" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Youtube&quot;)" />
+                <text-input v-model="social.telegram" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Telegram&quot;)" />
+                <text-input v-model="social.facebook" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Facebook&quot;)" />
+                <text-input v-model="social.twitter" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Twitter&quot;)" />
+                <text-input v-model="social.reddit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Reddit&quot;)" />
+                <text-input v-model="social.instagram" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Instagram&quot;)" />
+                <text-input v-model="social.medium" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Medium&quot;)" />
+                <text-input v-model="social.vk" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;VK&quot;)" />
+                <text-input v-model="social.discord" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Discord&quot;)" />
+                <text-input v-model="social.coinmarketcap" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Coinmarketcap&quot;)" />
+                <text-input v-model="social.github" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Github&quot;)" />
+                <text-input v-model="social.linkedin" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Linkedin&quot;)" />
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t("更新社交网络") }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

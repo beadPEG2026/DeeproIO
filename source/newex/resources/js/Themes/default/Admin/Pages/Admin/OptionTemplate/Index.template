@@ -1,0 +1,73 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("期权模板") }}</h1>
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.options.templates.create')">
+            <span>{{ $t("新增") }}</span>
+            <span class="hidden md:inline">{{ $t(" 模板") }}</span>
+        </nav-button-link>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">ID</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("周期") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("金额") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr v-for="option in options.data" :key="option.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.options.templates.edit', option.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ option.id }}
+                    </Link>
+                </td>
+
+                <td class="border-t">
+                    <Link :href="route('admin.options.templates.edit', option.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ option.market.name }}
+                    </Link>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ option.type == "buy" ? $t("做多") : $t("做空") }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <template v-if="option.period == 1">{{ $t("30秒 - 20%") }}</template>
+                        <template v-if="option.period == 2">{{ $t("30秒 - 20%") }}</template>
+                        <template v-if="option.period == 3">{{ $t("90秒 - 30%") }}</template>
+                        <template v-if="option.period == 4">{{ $t("120秒 - 45%") }}</template>
+                        <template v-if="option.period == 5">{{ $t("180秒 - 60%") }}</template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ option.amount }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" :type="option.action == 'profit' ? 'green' : 'red'">
+                            {{ option.action == 'profit' ? $t("始终盈利") : $t("始终亏损") }}
+                        </badge>
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="options.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("暂无模板") }}</td>
+            </tr>
+
+        </table>
+    </div>
+
+    <pagination :links="options.links" />
+</app-layout>

@@ -1,0 +1,178 @@
+<app-layout>
+
+<!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Funding Fee') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="funding_fee_distributions"></reports-tab>
+
+    <div class="components-filter">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <label>{{ $t('Market:') }}</label>
+                <t-rich-user-select
+                    :options="markets.data"
+                    v-model="form.market"
+                    :placeholder="$t('Select market')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <!--<div class="components-filter__item">
+                <label>{{ $t('Start Date:') }}</label>
+                <input v-model="form.start_date" type="date" class="form-control">
+            </div>
+
+            <div class="components-filter__item">
+                <label>{{ $t('End Date:') }}</label>
+                <input v-model="form.end_date" type="date" class="form-control">
+            </div>-->
+
+            <div class="components-filter__item">
+                <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                <span class="components-filter__icon">
+                    <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ $t('Search') }}
+                </span>
+                </t-button-green>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-trades">
+            <!-- thead start -->
+
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Market') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Position') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Position Size') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Funding Fee') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Funding Rate') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr v-for="distribution in distributions.data" :key="distribution.id" >
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Market') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ distribution.market ? distribution.market.name : '-' }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Position') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <div class="components-label" :class="{'label-green': distribution.is_long, 'label-red': !distribution.is_long}">
+                                {{ distribution.is_long ? 'Long' : 'Short' }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Position Size') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ math_formatter(distribution.position_size, distribution.market ? distribution.market.quote_precision : 8) }} {{ distribution.market && distribution.market.quote_currency ? distribution.market.quote_currency.symbol : '' }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Funding Fee') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text" :class="{'color-buy': parseFloat(distribution.funding_fee_amount) < 0, 'color-sell': parseFloat(distribution.funding_fee_amount) >= 0}">
+                            {{ math_formatter(distribution.funding_fee_amount, distribution.market ? distribution.market.quote_precision : 8) }} {{ distribution.market && distribution.market.quote_currency ? distribution.market.quote_currency.symbol : '' }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Funding Rate') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ math_formatter(distribution.funding_rate * 100, 4) }}%
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ distribution.distributed_at }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr v-if="distributions.data.length === 0">
+                <td class="table-list__empty" colspan="100">
+                    <div class="table-list__empty-text">{{ $t('No distributions found.') }}</div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+        </table>
+        <!-- tables end -->
+
+    </div>
+    <!-- table components end -->
+
+    <pagination :links="distributions.links" />
+
+</app-layout>

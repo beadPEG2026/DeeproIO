@@ -1,0 +1,167 @@
+
+.vue {
+
+    &-slider {
+        margin: 1.80rem 0;
+        padding: 7px 4px !important;
+    }
+
+    &-slider-rail {
+        height: 10px;
+
+        background-color: var(--border-line-color);
+        border-radius: 4px;
+    }
+
+    &-slider-process {
+        background-color: var(--progress-color);
+        border-radius: 4px;
+    }
+
+    &-slider-mark {
+        width: 15px !important;
+        height: 15px !important;
+
+        background-color: var(--border-line-color);
+        border-radius: 10px;
+
+        border: 4px solid var(--white-color);
+
+        cursor: pointer;
+
+        &-active {
+            background-color: var(--progress-color);
+        }
+
+    }
+
+    &-slider-dot-handle {
+        position: relative;
+        top: -4px;
+
+        width: 20px;
+        height: 20px;
+
+        background-color: var(--progress-color);
+
+        border: 4px solid var(--white-color);
+        border-radius: 50%;
+
+        cursor: pointer;
+
+
+
+        &-disabled {
+            cursor: not-allowed;
+            background-color: var(--progress-color);
+        }
+
+        // &-focus {
+
+        // }
+
+    }
+
+    &-slider-dot-tooltip-inner {
+
+
+        // &::after {
+            // content: "";
+            // position: absolute;
+        // }
+
+    }
+
+    &-slider-dot-tooltip-text {
+        font-size: 0.80rem;
+        margin-left: 10px;
+        margin-bottom: 3px;
+        color: var(--first-text-color)
+    }
+
+    &-slider-dot-tooltip-top {
+        top: -0px !important;
+    }
+
+}
+
+body.dark {
+    .site-layout {
+        .vue {
+            &-slider-mark {
+                background-color: var(--blue-dark-second-color);
+                border: 4px solid var(--blue-dark-color);
+
+                &-active {
+                    background-color: var(--progress-color);
+                }
+            }
+
+            &-slider-dot-handle {
+                top: 0px;
+                width: 15px;
+                height: 15px;
+                background-color: var(--progress-color);
+                border: 1px solid var(--yellow-color);
+            }
+        }
+    }
+
+    .module-orderform .button-tab {
+        background-color: var(--ui-text);
+        color: var(--white-color);
+    }
+}
+
+// .vue-slider-dot-tooltip-inner-top::after {outline: 0px solid #f00;
+//     top: 100%;
+//     left: 50%;
+//     transform: translate(-50%, 0);
+//     height: 0;
+//     width: 0;
+//     border-color: transparent;
+//     border-style: solid;
+//     border-width: 5px;
+//     border-top-color: inherit;
+// }
+// .vue-slider-dot-tooltip-inner-bottom::after {outline: 0px solid #f00;
+//     bottom: 100%;
+//     left: 50%;
+//     transform: translate(-50%, 0);
+//     height: 0;
+//     width: 0;
+//     border-color: transparent;
+//     border-style: solid;
+//     border-width: 5px;
+//     border-bottom-color: inherit;
+// }
+// .vue-slider-dot-tooltip-inner-left::after {outline: 0px solid #f00;
+//     left: 100%;
+//     top: 50%;
+//     transform: translate(0, -50%);
+//     height: 0;
+//     width: 0;
+//     border-color: transparent;
+//     border-style: solid;
+//     border-width: 5px;
+//     border-left-color: inherit;
+// }
+// .vue-slider-dot-tooltip-inner-right::after {outline: 0px solid #f00;
+//     right: 100%;
+//     top: 50%;
+//     transform: translate(0, -50%);
+//     height: 0;
+//     width: 0;
+//     border-color: transparent;
+//     border-style: solid;
+//     border-width: 5px;
+//     border-right-color: inherit;
+// }
+
+// .vue-slider-dot-tooltip-wrapper {outline: 0px solid #f00;
+//     opacity: 0;
+//     transition: all 0.3s;
+// }
+// .vue-slider-dot-tooltip-wrapper-show {outline: 0px solid #f00;
+//     opacity: 1;
+// }

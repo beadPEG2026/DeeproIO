@@ -1,0 +1,860 @@
+{
+  "AAVE": {
+    "path": "/images/currencies/aave-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20240711/51935450-ab9e-452c-a50a-550f8b977c6c.png",
+    "sha256": "b491fbeac1334279bed1e0dbbae2348e2758549d1c8832a2f44ade7318a907b8",
+    "identities": [
+      {
+        "symbol": "AAVE",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
+        "decimals": 18,
+        "identity": "Aave / Aave",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "BNB": {
+    "path": "/images/currencies/bnb-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20220218/94863af2-c980-42cf-a139-7b9f462a36c2.png",
+    "sha256": "0f4502d8c5254df1eb0eb8d124c7684b4f02e2a5004525d5bd7acd18a6ebb9fc",
+    "identities": [
+      {
+        "symbol": "BNB",
+        "chain": "BSC",
+        "native": true,
+        "contract": null,
+        "decimals": 18,
+        "identity": "BNB Smart Chain",
+        "sourceIds": [
+          "bsc-native",
+          "binance-products"
+        ]
+      }
+    ]
+  },
+  "BTC": {
+    "path": "/images/currencies/btc-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png",
+    "sha256": "f72b9a231c13012613217eec2bec27b923204e8c6cebc2b2ae51485d2b5d679d",
+    "identities": [
+      {
+        "symbol": "BTC",
+        "chain": "BTC",
+        "native": true,
+        "contract": null,
+        "decimals": 8,
+        "identity": "Bitcoin",
+        "sourceIds": [
+          "bitcoin-native",
+          "binance-products"
+        ]
+      },
+      {
+        "symbol": "BTC",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+        "decimals": 18,
+        "identity": "Binance Pegged Bitcoin (BTCB), 1:1 representation of Bitcoin",
+        "sourceIds": [
+          "pancake",
+          "binance-btcb"
+        ]
+      }
+    ]
+  },
+  "COMP": {
+    "path": "/images/currencies/comp-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/bbe7fb63-5b85-4f5a-9c7f-450a8cec116b.png",
+    "sha256": "1feb818d8d02799c91ed1d5435fddbe39ed4ee0009602cde132671644225a301",
+    "identities": [
+      {
+        "symbol": "COMP",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x8505b9d2254A7Ae468c0E9dd10Ccea3A837aef5c",
+        "decimals": 18,
+        "identity": "Compound / Compound",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "CRV": {
+    "path": "/images/currencies/crv-catalog.png",
+    "source": "https://bin.bnbstatic.com/images/20200814/f8d49a7f-d950-4e26-922f-42b11bd95584.png",
+    "sha256": "db2c7dec678495fafcb5ddbade270e9b6e98a8be7c6b130ef46eb3c1adb7893f",
+    "identities": [
+      {
+        "symbol": "CRV",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x172370d5Cd63279eFa6d502DAB29171933a610AF",
+        "decimals": 18,
+        "identity": "Curve DAO Token / Curve DAO",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "DOGE": {
+    "path": "/images/currencies/doge-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/22ef2baf-b210-4882-afd9-1317bb7a3603.png",
+    "sha256": "8abf24f47bc3b4def59a6e6441a9f2dbb8d20c953c2c5373f219ab614a8f208d",
+    "identities": [
+      {
+        "symbol": "DOGE",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
+        "decimals": 8,
+        "identity": "Dogecoin / Binance-Peg Dogecoin",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      }
+    ]
+  },
+  "ETH": {
+    "path": "/images/currencies/eth-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
+    "sha256": "595a7c97f329934d40fa297958ccbb31d3cd101c2965b02a32a7c96fd49c9e11",
+    "identities": [
+      {
+        "symbol": "ETH",
+        "chain": "ETH",
+        "native": true,
+        "contract": null,
+        "decimals": 18,
+        "identity": "Ethereum",
+        "sourceIds": [
+          "ethereum-native",
+          "binance-products"
+        ]
+      },
+      {
+        "symbol": "ETH",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "decimals": 18,
+        "identity": "Binance Pegged ETH",
+        "sourceIds": [
+          "pancake",
+          "uniswap"
+        ]
+      },
+      {
+        "symbol": "ETH",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+        "decimals": 18,
+        "identity": "Polygon PoS bridged Wrapped Ether, Ethereum asset ETH",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly",
+          "polygon-list-doc"
+        ]
+      }
+    ]
+  },
+  "GRAM": {
+    "path": "/images/currencies/gram-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260629/fa322105-372f-434a-97c8-982cac3f8583.png",
+    "sha256": "c052dd18498da12c82e63cb26c5e74f2b8632bf2f9bb2fc16cd18808f94aca45",
+    "identities": [
+      {
+        "symbol": "GRAM",
+        "chain": "TON",
+        "native": true,
+        "contract": null,
+        "decimals": 9,
+        "identity": "Gram (prev. Toncoin)",
+        "sourceIds": [
+          "nonlisted-ton-native",
+          "binance-products",
+          "ton-rebrand",
+          "binance-ton-rebrand"
+        ]
+      }
+    ]
+  },
+  "GRT": {
+    "path": "/images/currencies/grt-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20220329/7beb8b0f-af31-4958-b835-dc8489745770.png",
+    "sha256": "bbd69dd15ce43889b3fffb87df26d7e14193796be172a46509e01e8fabfe4486",
+    "identities": [
+      {
+        "symbol": "GRT",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x5fe2B58c013d7601147DcdD68C143A77499f5531",
+        "decimals": 18,
+        "identity": "The Graph / The Graph",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "HYPE": {
+    "path": "/images/currencies/hype-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260924/e525c247-9348-4ff3-bb85-7bf5c6e9d515.png",
+    "sha256": "d8a64da38ae8692605e7dff101a23e2b124ca2574b88ee5d8d48943d01534c39",
+    "identities": [
+      {
+        "symbol": "HYPE",
+        "chain": "SOL",
+        "native": false,
+        "contract": "98sMhvDwXj1RQi5c5Mndm3vPe9cBqPrbLaufMXFNMh5g",
+        "decimals": 9,
+        "identity": "HYPE / Wormhole Bridged HYPE",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "solana-hype",
+          "sunrise-hype"
+        ]
+      }
+    ]
+  },
+  "JST": {
+    "path": "/images/currencies/jst-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20200522/3dbaccf0-e55c-4bf6-ac6c-d8ea9b7943f0.png",
+    "sha256": "0e457bb69525a4a97979c820ba369e36b42f684f934687261903f631cc0bd5ef",
+    "identities": [
+      {
+        "symbol": "JST",
+        "chain": "TRX",
+        "native": false,
+        "contract": "TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9",
+        "decimals": 18,
+        "identity": "JST TRC20 on TRON mainnet",
+        "sourceIds": [
+          "sun-cli",
+          "justlend"
+        ]
+      }
+    ]
+  },
+  "LINK": {
+    "path": "/images/currencies/link-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/1eda1f7f-585a-4f16-abd7-a7104221414a.png",
+    "sha256": "93d103ab945f2972cbdd53050d239c6b9df3d430e9343a21143e805b280e3967",
+    "identities": [
+      {
+        "symbol": "LINK",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+        "decimals": 18,
+        "identity": "ChainLink Token / Chainlink",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      },
+      {
+        "symbol": "LINK",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
+        "decimals": 18,
+        "identity": "ChainLink Token / Chainlink",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      },
+      {
+        "symbol": "LINK",
+        "chain": "SOL",
+        "native": false,
+        "contract": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+        "decimals": 9,
+        "identity": "Chainlink Token / Chainlink",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "sunrise-link"
+        ]
+      }
+    ]
+  },
+  "POL": {
+    "path": "/images/currencies/pol-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20240909/bb09660d-a1cb-496e-8a9b-92db30904156.png",
+    "sha256": "6229d845e3f53e8197ca33783cc58350cf9e812c32f281550278e17eea601f15",
+    "identities": [
+      {
+        "symbol": "POL",
+        "chain": "MATIC",
+        "native": true,
+        "contract": null,
+        "decimals": 18,
+        "identity": "POL (ex-MATIC)",
+        "sourceIds": [
+          "polygon-native",
+          "binance-products"
+        ]
+      }
+    ]
+  },
+  "PUMP": {
+    "path": "/images/currencies/pump-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250911/e4f746bf-8caa-469b-a56d-4038ddd0c109.png",
+    "sha256": "220ae9be0e50e727221d81b23c3088e3008ab8f5e9b3c538cc82ced83b513ebd",
+    "identities": [
+      {
+        "symbol": "PUMP",
+        "chain": "SOL",
+        "native": false,
+        "contract": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+        "decimals": 6,
+        "identity": "Pump / Pump.fun",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol"
+        ]
+      }
+    ]
+  },
+  "RLUSD": {
+    "path": "/images/currencies/rlusd-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260121/75a0b9b4-1f9b-4e89-8b77-9ef94251e093.png",
+    "sha256": "9976bb364f7a63b3ce8189d413b395e3f5eb8bbac77704b5d39e503ec9f33d51",
+    "identities": [
+      {
+        "symbol": "RLUSD",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD",
+        "decimals": 18,
+        "identity": "RLUSD / Ripple USD",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      }
+    ]
+  },
+  "SOL": {
+    "path": "/images/currencies/sol-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20230404/b2f0c70f-4fb2-4472-9fe7-480ad1592421.png",
+    "sha256": "b4f74a2541dbe53158395e8b054ec169ffe18124b55a0b5e027ebd9c22b5ba11",
+    "identities": [
+      {
+        "symbol": "SOL",
+        "chain": "SOL",
+        "native": true,
+        "contract": null,
+        "decimals": 9,
+        "identity": "Solana",
+        "sourceIds": [
+          "solana-native",
+          "binance-products"
+        ]
+      },
+      {
+        "symbol": "SOL",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF",
+        "decimals": 18,
+        "identity": "SOLANA / Binance-Peg SOL",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      }
+    ]
+  },
+  "SUN": {
+    "path": "/images/currencies/sun-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20200921/9b62ff8d-1b89-4432-9108-d62ade9223b6.png",
+    "sha256": "8e856045615fb03cb0b56f20e4c3b41f56f0103db42b112885630cbea5b562e8",
+    "identities": [
+      {
+        "symbol": "SUN",
+        "chain": "TRX",
+        "native": false,
+        "contract": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+        "decimals": 18,
+        "identity": "SUN TRC20 on TRON mainnet",
+        "sourceIds": [
+          "sun-cli",
+          "justlend"
+        ]
+      }
+    ]
+  },
+  "TRX": {
+    "path": "/images/currencies/trx-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/dd9332e2-0a23-4228-89b2-50d188a09e2b.png",
+    "sha256": "ac3824adc2a37e25d5e63fe30c4de623c0985730450f3e12b58bcc58677d107d",
+    "identities": [
+      {
+        "symbol": "TRX",
+        "chain": "TRX",
+        "native": true,
+        "contract": null,
+        "decimals": 6,
+        "identity": "TRON native TRX",
+        "sourceIds": [
+          "tron-native-doc",
+          "justlend"
+        ]
+      },
+      {
+        "symbol": "TRX",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+        "decimals": 6,
+        "identity": "Tron V2 / TRON (BSC)",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      },
+      {
+        "symbol": "TRX",
+        "chain": "SOL",
+        "native": false,
+        "contract": "GbbesPbaYh5uiAZSYNXTc7w9jty1rpg3P9L4JeN4LkKc",
+        "decimals": 6,
+        "identity": "TRON / Solana Bridged TRX (Solana)",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "sol-trx-issuer"
+        ]
+      }
+    ]
+  },
+  "UNI": {
+    "path": "/images/currencies/uni-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/1992e2e5-4f39-4a1a-a891-fe8afefc1e59.png",
+    "sha256": "03f146f5adaba0d00564b1f3559d7a987356844a0969d7c901c7745d36f43039",
+    "identities": [
+      {
+        "symbol": "UNI",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0xb33EaAd8d922B1083446DC23f610c2567fB5180f",
+        "decimals": 18,
+        "identity": "Uniswap / Uniswap",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "USD1": {
+    "path": "/images/currencies/usd1-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250610/76797eac-19c6-4e63-9b1c-9494e07e616f.png",
+    "sha256": "d531893e074c3deaef503b87bf93fe736f621165d56dc949975c7cb83fe1c5af",
+    "identities": [
+      {
+        "symbol": "USD1",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+        "decimals": 18,
+        "identity": "World Liberty Financial USD / USD1",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      },
+      {
+        "symbol": "USD1",
+        "chain": "SOL",
+        "native": false,
+        "contract": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
+        "decimals": 6,
+        "identity": "World Liberty Financial USD / USD1",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol"
+        ]
+      }
+    ]
+  },
+  "USDC": {
+    "path": "/images/currencies/usdc-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/4cf7d633-92fb-4d37-80ed-458c7d1ea410.png",
+    "sha256": "1cb080bee7d509d8ec9e8eebbd89fd838c36fab0438dedf3d178158fff34eabe",
+    "identities": [
+      {
+        "symbol": "USDC",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
+        "identity": "USDCoin / USDC",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth",
+          "circle"
+        ]
+      },
+      {
+        "symbol": "USDC",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "decimals": 18,
+        "identity": "Binance Pegged USD Coin / Binance Bridged USDC (BNB Smart Chain)",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      },
+      {
+        "symbol": "USDC",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+        "decimals": 6,
+        "identity": "USDCoin / USDC",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      },
+      {
+        "symbol": "USDC",
+        "chain": "SOL",
+        "native": false,
+        "contract": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "decimals": 6,
+        "identity": "USD Coin / USDC",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "circle"
+        ]
+      }
+    ]
+  },
+  "USDE": {
+    "path": "/images/currencies/usde-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250909/3ebae70f-2547-4f77-b35e-f8de920a0e02.png",
+    "sha256": "69d74c396de21c22de2bb43c6e059ef480f4438c17a8c8f9ab9130cc11227070",
+    "identities": [
+      {
+        "symbol": "USDE",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "decimals": 18,
+        "identity": "Ethena USDe on Ethereum",
+        "sourceIds": [
+          "ethena",
+          "coingecko-eth"
+        ]
+      },
+      {
+        "symbol": "USDE",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34",
+        "decimals": 18,
+        "identity": "USDe / Ethena USDe",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc",
+          "ethena"
+        ]
+      },
+      {
+        "symbol": "USDE",
+        "chain": "SOL",
+        "native": false,
+        "contract": "DEkqHyPN7GMRJ5cArtQFAWefqbZb33Hyf6s5iCwjEonT",
+        "decimals": 9,
+        "identity": "USDe / Ethena USDe",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "ethena"
+        ]
+      }
+    ]
+  },
+  "USDS": {
+    "path": "/images/currencies/usds-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260327/2a9e4641-f4c7-4ebc-82d9-461b708f36e9.png",
+    "sha256": "0b389eb453d03368659e204653ecc204c1051b491184415064664c7404c6f7b3",
+    "identities": [
+      {
+        "symbol": "USDS",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
+        "decimals": 18,
+        "identity": "USDS Stablecoin / USDS",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      },
+      {
+        "symbol": "USDS",
+        "chain": "SOL",
+        "native": false,
+        "contract": "USDSwr9ApdHk5bvJKMjzff41FfuX8bSxdKcR81vTwcA",
+        "decimals": 6,
+        "identity": "USDS / USDS",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol"
+        ]
+      }
+    ]
+  },
+  "WBTC": {
+    "path": "/images/currencies/wbtc-catalog.png",
+    "source": "https://bin.bnbstatic.com/images/20200831/2cd9e66b-357d-41f7-a093-89d24bb012aa.png",
+    "sha256": "55fdbdbf15f9415a55996ec176f50420f289cb629f7b65335960b47874056a97",
+    "identities": [
+      {
+        "symbol": "WBTC",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        "decimals": 8,
+        "identity": "Wrapped BTC / Wrapped Bitcoin",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      },
+      {
+        "symbol": "WBTC",
+        "chain": "MATIC",
+        "native": false,
+        "contract": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+        "decimals": 8,
+        "identity": "Wrapped BTC / Polygon Bridged WBTC (Polygon POS)",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-poly"
+        ]
+      }
+    ]
+  },
+  "WIN": {
+    "path": "/images/currencies/win-catalog.png",
+    "source": "https://bin.bnbstatic.com/images/20191212/9e5470a4-ca68-469d-a78d-abdcabbf5c51.png",
+    "sha256": "07b930c5b4976c18099d442aaac825f44f69d54a963dbfdf783d6c21a370d5b6",
+    "identities": [
+      {
+        "symbol": "WIN",
+        "chain": "TRX",
+        "native": false,
+        "contract": "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7",
+        "decimals": 6,
+        "identity": "WIN TRC20 on TRON mainnet",
+        "sourceIds": [
+          "sun-cli",
+          "justlend"
+        ]
+      }
+    ]
+  },
+  "WLFI": {
+    "path": "/images/currencies/wlfi-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250901/f268a964-ba1a-4ac2-9ec0-6997ae9ca9e9.png",
+    "sha256": "15ab3399f0658228fcce73f03aeee94455d2e5ad026bc3e75f54a2525c5d6be2",
+    "identities": [
+      {
+        "symbol": "WLFI",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0xdA5e1988097297dCdc1f90D4dFE7909e847CBeF6",
+        "decimals": 18,
+        "identity": "World Liberty Financial / World Liberty Financial",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      }
+    ]
+  },
+  "XAUT": {
+    "path": "/images/currencies/xaut-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260326/95524eaf-76d3-4928-baab-1c87147e7c79.png",
+    "sha256": "720b77bc1a231187e2fa702cc61465fe67d9bcd4ec1c909eae3486b01ce3010a",
+    "identities": [
+      {
+        "symbol": "XAUT",
+        "chain": "ETH",
+        "native": false,
+        "contract": "0x68749665FF8D2d112Fa859AA293F07A622782F38",
+        "decimals": 6,
+        "identity": "Tether Gold / Tether Gold",
+        "sourceIds": [
+          "uniswap",
+          "coingecko-eth"
+        ]
+      }
+    ]
+  },
+  "XRP": {
+    "path": "/images/currencies/xrp-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/4766a9cc-8545-4c2b-bfa4-cad2be91c135.png",
+    "sha256": "0e7d0965ce52308846834de79ad8305ea31542444a1ba54888843fc0214418f4",
+    "identities": [
+      {
+        "symbol": "XRP",
+        "chain": "XRP",
+        "native": true,
+        "contract": null,
+        "decimals": 6,
+        "identity": "XRP",
+        "sourceIds": [
+          "xrp-native",
+          "binance-products"
+        ]
+      },
+      {
+        "symbol": "XRP",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+        "decimals": 18,
+        "identity": "XRP Token / Binance-Peg XRP",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      }
+    ]
+  },
+  "ZEC": {
+    "path": "/images/currencies/zec-catalog.png",
+    "source": "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/4d538dc7-6543-4bd0-ab9a-cfc37363cab8.png",
+    "sha256": "eef747ec1f7d594f80003a21812a0d500da2c4bb6b9e141e59e94f566b55650d",
+    "identities": [
+      {
+        "symbol": "ZEC",
+        "chain": "BSC",
+        "native": false,
+        "contract": "0x1Ba42e5193dfA8B03D15dd1B86a3113bbBEF8Eeb",
+        "decimals": 18,
+        "identity": "Zcash Token / Binance-Peg ZEC",
+        "sourceIds": [
+          "pancake",
+          "coingecko-bsc"
+        ]
+      },
+      {
+        "symbol": "ZEC",
+        "chain": "SOL",
+        "native": false,
+        "contract": "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS",
+        "decimals": 8,
+        "identity": "Zcash / OmniBridge Bridged Zcash (Solana)",
+        "sourceIds": [
+          "jupiter",
+          "coingecko-sol",
+          "zec-bridge"
+        ]
+      }
+    ]
+  },
+  "HK00700": {
+    "path": "/images/currencies/hk00700.png",
+    "source": "https://www.tencent.com/wp-content/themes/tencent-web/assets/favicon/apple-touch-icon.png",
+    "sha256": "a4f9bdeedcbc3851f15a234da08ed2bd34e84f384e597e59175677601106c924",
+    "securityCode": "00700"
+  },
+  "HK03690": {
+    "path": "/images/currencies/hk03690.ico",
+    "source": "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico",
+    "sha256": "a6f4dd99edf8c49563be4c90ed0b509adb6b890d1a3c35caaa6d799a21c022de",
+    "securityCode": "03690"
+  },
+  "HK01810": {
+    "path": "/images/currencies/hk01810.ico",
+    "source": "https://s01.mifile.cn/favicon.ico",
+    "sha256": "e59b4a96433a0b039f223dd98100b9b0edcda6fe7d96f74808bc5fda41a44ca7",
+    "securityCode": "01810"
+  },
+  "HK09618": {
+    "path": "/images/currencies/hk09618.ico",
+    "source": "https://ir.jd.com/sites/g/files/knoqqb53391/files/favicon%20%2820%29.ico",
+    "sha256": "99adfd5e001df9645a32518bafaedfff7746575bf239e1fe9a236ea9f94ed0d4",
+    "securityCode": "09618"
+  },
+  "HK09999": {
+    "path": "/images/currencies/hk09999.png",
+    "source": "https://ir.netease.com/sites/g/files/knoqqb53596/themes/site/nir_pid158/client/images/NetEase-logo.png",
+    "sha256": "4fc743ff6a48946ca63e0998a49c6e3eb806162c3d1da321f5fb67a41a2f7b3b",
+    "securityCode": "09999"
+  },
+  "HK01024": {
+    "path": "/images/currencies/hk01024.ico",
+    "source": "https://ir.kuaishou.com/sites/g/files/knoqqb81046/files/favicon.ico",
+    "sha256": "bf5395b95b48de26617dcc05a1cd826f0e29e643ef862569285127992c1e26f1",
+    "securityCode": "01024"
+  },
+  "HK01211": {
+    "path": "/images/currencies/hk01211.ico",
+    "source": "https://www.bydglobal.com/static_material/groupofficial/cn/icon/favicon.ico",
+    "sha256": "14c089ef01b1109ce9a0c55a35e23df23acb77a0a629357ecec3a87fd4d8e7b9",
+    "securityCode": "01211"
+  },
+  "HK00981": {
+    "path": "/images/currencies/hk00981.png",
+    "source": "https://www.smics.com/images/title-logo.png",
+    "sha256": "e0f266c795f8ee5d09b38d6bed6cfec8007005837ed44e81ab97972f5ed74d8b",
+    "securityCode": "00981"
+  },
+  "HK00388": {
+    "path": "/images/currencies/hk00388.png",
+    "source": "https://www.hkex.com.hk/assets/images/webclip.png",
+    "sha256": "fb0b3b74f3b27bbb57e1f686638503db10cf0b6778bd9bf91700b0be75a27f72",
+    "securityCode": "00388"
+  },
+  "HK01299": {
+    "path": "/images/currencies/hk01299.svg",
+    "source": "https://www.aia.com/content/dam/group-wise/images/system/icons/aia-logo-red.svg",
+    "sha256": "ca428097c5855f85bcdb95765ea58e8f1e6e5927f00ebb1983055e895a1eb9c1",
+    "securityCode": "01299"
+  },
+  "HK08379": {
+    "path": "/images/currencies/hk08379.png",
+    "source": "https://primeintelligence.com.hk/wp-content/uploads/2018/09/cropped-PC-192x192.png",
+    "sha256": "cb4adbe0f5d48250920f78cd5a2e92d880cb4b030a552b7011fe37c6e7748457",
+    "securityCode": "08379"
+  },
+  "HK09988": {
+    "path": "/images/currencies/hk09988.jpg",
+    "source": "https://static.alibabagroup.com/static/favicon.ico",
+    "sha256": "359ba97f797b1e19ae0525bf67e66e2e2d7e6cf384fe709583ad5111efb2a1b3",
+    "securityCode": "09988"
+  },
+  "HK00941": {
+    "path": "/images/currencies/hk00941.png",
+    "source": "https://companieslogo.com/img/orig/0941.HK-ca3d6380.png?t=1720244490",
+    "identitySource": "https://www.chinamobileltd.com/",
+    "securityCode": "00941",
+    "sha256": "d6734b4e180e0b364726dd93ba281382f85f1ab587b0a9b66b9df64dfe1136dd"
+  }
+}

@@ -1,0 +1,181 @@
+<app-layout>
+    <Head>
+        <meta name="description" content="">
+        <title>{{ market.data.name }} {{ $t('Market') }} {{ $t("· Deepro") }}</title>
+    </Head>
+
+    <div class="trade marker-inner marker-lite-inner dp-video-trade" :class="{'dp-video-trade--futures': futures}">
+        <div v-if="market" class="trade-intro">
+            <div>
+                <h2 class="trade-market-title" @click="openMarketSelector">
+                    {{ market.data.name }} {{ $t('Market') }}
+                </h2>
+            </div>
+
+            <div class="flex">
+                <button
+                    type="button"
+                    class="market-risk-btn"
+                    @click="showRiskModal = true"
+                    :title="$t('Risk Notice')"
+                >?</button>
+
+                <div>
+                    <span
+                        @click.stop="startFavoriteToggle(market.data)"
+                        class="pair-icon"
+                        :class="{'pair-icon__active': marketFavorited }"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.5793 1.65498C11.7761 1.3486 12.2239 1.3486 12.4207 1.65498L15.6448 6.67456C15.7125 6.77997 15.8173 6.85613 15.9385 6.88795L21.7087 8.40311C22.0609 8.49559 22.1993 8.92148 21.9687 9.20332L18.1911 13.8207C18.1118 13.9177 18.0717 14.0409 18.0789 14.166L18.421 20.122C18.4419 20.4856 18.0796 20.7488 17.7403 20.6166L12.1815 18.4507C12.0648 18.4052 11.9352 18.4052 11.8185 18.4507L6.2597 20.6166C5.92041 20.7488 5.55812 20.4856 5.579 20.122L5.92109 14.166C5.92827 14.0409 5.88824 13.9177 5.8089 13.8207L2.0313 9.20332C1.80072 8.92148 1.93911 8.49559 2.2913 8.40311L8.0615 6.88795C8.18268 6.85613 8.2875 6.77997 8.35521 6.67456L11.5793 1.65498Z" class="navigation-icon__color"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="ml-2" @click.stop="toggleChart">
+                    <svg
+                        class="pair-icon"
+                        :class="{'pair-icon__active': marketViewTab == 'chart' }"
+                        height="19"
+                        width="24"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 211.618 211.618"
+                        xml:space="preserve"
+                    >
+                        <path class="navigation-icon__color" d="M204.118,202.309H7.5c-4.142,0-7.5-3.357-7.5-7.5v-178c0-4.143,3.358-7.5,7.5-7.5s7.5,3.357,7.5,7.5v170.5h189.118c4.142,0,7.5,3.357,7.5,7.5S208.26,202.309,204.118,202.309z M188.854,93.754c-1.932-1.413-4.424-1.819-6.703-1.092l-47.875,15.254l-16.317-47.958c-0.74-2.176-2.437-3.892-4.604-4.656c-2.166-0.767-4.565-0.495-6.507,0.735L78.768,73.809L43.2,28.261c-1.971-2.523-5.325-3.519-8.352-2.476c-3.027,1.042-5.059,3.891-5.059,7.092v133.863c0,4.143,3.358,7.5,7.5,7.5h147.139c4.142,0,7.5-3.357,7.5-7.5V99.809C191.928,97.416,190.786,95.167,188.854,93.754z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <stock-asset-info :asset="stockAsset" />
+        <div class="trade-head__block-top">
+            <market-stats
+                :futures="futures"
+                :quotes="quotes"
+                :market="market.data"
+                :funding-rate="fundingRate"
+                :funding-interval-hours="fundingIntervalHours"
+                :next-funding-time="nextFundingTime"
+            ></market-stats>
+        </div>
+
+        <nav class="dp-trade-mode" :aria-label="$t('Trade')">
+            <Link :href="route('market.lite', market.data.name)" :class="{active: !futures}" :aria-current="!futures ? 'page' : null">{{ $t('Spot') }}</Link>
+            <Link v-if="market.data.has_futures" :href="route('futures-market.lite', market.data.name)" :class="{active: futures}" :aria-current="futures ? 'page' : null">{{ $t('Futures') }}</Link>
+            <button type="button" @click="toggleChart" :aria-expanded="marketViewTab === 'chart'">{{ marketViewTab === 'chart' ? $t('Hide chart') : $t('Show chart') }}</button>
+        </nav>
+        <div class="market-lite-chart-module" v-show="marketViewTab === 'chart'">
+            <div class="trade-head__right chart-height market-lite-chart-panel">
+                <market-chart :hong-kong="!!market.data.price_reference_product" ref="marketChartFrame" :src="chartUrl" :height="chartFrameHeight" :key="chartIteration" />
+            </div>
+        </div>
+        <div class="dp-trade-workspace">
+            <section class="dp-trade-ticket" :aria-label="$t('Order')">
+                <order-form v-if="!futures" active-tab="buy" :market="market.data" :fee="fee" order-type="limit"></order-form>
+                <futures-order-form v-else :fee="fee" :market="market.data" :futures-timeframe-enabled="futuresTimeframeEnabled"></futures-order-form>
+            </section>
+            <section class="dp-trade-book" :aria-label="$t('Orderbook')"><order-book :market="market.data"></order-book></section>
+        </div>
+
+        <orderbook-channel :market="market.data"></orderbook-channel>
+
+        <div class="trade-footer">
+            <div class="module-orderopen__navigation market-lite-order-tabs">
+                <div
+                    v-if="!futures"
+                    @click="setFirstTab('orders')"
+                    :class="{'module-orderopen__navigation-active': mobileFirstTab == 'orders'}"
+                    class="module-orderopen__navigation-title"
+                >
+                    <h4>
+                        {{ $t('Open Orders') }}
+                        <span v-if="spotOpenOrdersCount > 0" class="tab-count">({{ spotOpenOrdersCount }})</span>
+                    </h4>
+                </div>
+
+                <div
+                    v-if="futures"
+                    @click="setFirstTab('orders'), futuresTab = 'positions'"
+                    :class="{'module-orderopen__navigation-active': mobileFirstTab == 'orders' && futuresTab == 'positions'}"
+                    class="module-orderopen__navigation-title"
+                >
+                    <h4>
+                        {{ $t('Open Positions') }}
+                        <span v-if="futuresPositionsCount > 0" class="tab-count">({{ futuresPositionsCount }})</span>
+                    </h4>
+                </div>
+
+                <div
+                    v-if="futures"
+                    @click="setFirstTab('orders'), futuresTab = 'orders'"
+                    :class="{'module-orderopen__navigation-active': mobileFirstTab == 'orders' && futuresTab == 'orders'}"
+                    class="module-orderopen__navigation-title"
+                >
+                    <h4>
+                        {{ $t('Open Orders') }}
+                        <span v-if="futuresLimitOrdersCount > 0" class="tab-count">({{ futuresLimitOrdersCount }})</span>
+                    </h4>
+                </div>
+
+	                <div
+	                    v-if="!futures"
+	                    @click="setFirstTab('trades')"
+	                    :class="{'module-orderopen__navigation-active': mobileFirstTab == 'trades'}"
+	                    class="module-orderopen__navigation-title"
+	                >
+	                    <h4>{{ $t('Trades') }}</h4>
+	                </div>
+	
+	                <div
+	                    @click="goTradeRecords"
+	                    class="module-orderopen__navigation-title"
+	                >
+	                    <h4>{{ $t('Trade Records') }}</h4>
+	                </div>
+	            </div>
+
+            <div v-if="!futures && mobileFirstTab == 'trades'" class="trade-footer-tab">
+                <market-trades :market="market.data"></market-trades>
+            </div>
+
+            <div v-if="mobileFirstTab == 'orders'" class="trade-footer-tab trade-body__row mob-order-open">
+                <open-orders v-if="!futures" :futures="false" :market="market.data"></open-orders>
+                <futures-open-orders :tab="futuresTab" v-if="futures" :market="market.data"></futures-open-orders>
+            </div>
+        </div>
+
+        <!-- Market Selector Modal -->
+        <div v-if="showMarketSelector" class="market-selector-mask" @click="closeMarketSelector">
+            <div class="market-selector-modal" @click.stop>
+                <market-selector
+                    :current-market="market.data"
+                    :futures="futures"
+                    @close="closeMarketSelector"
+                ></market-selector>
+            </div>
+        </div>
+    </div>
+
+    <market-channel></market-channel>
+    <binance-socket :market="market.data" />
+
+    <div v-if="showRiskModal" class="risk-modal" @click.self="showRiskModal = false">
+        <div ref="riskDialog" class="risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">
+            <div class="risk-header">
+                <h4>{{ $t('Risk Notice') }}</h4>
+                <button class="risk-close" :aria-label="$t('Close')" @click="showRiskModal = false">×</button>
+            </div>
+
+            <div class="risk-body">
+                <p>{{ $t('Trading markets carry risks including volatility and potential loss of funds. Please read carefully before trading.') }}</p>
+                <p>{{ $t('Always manage your positions responsibly and do not exceed your risk tolerance.') }}</p>
+            </div>
+
+            <div class="risk-footer">
+                <button class="risk-confirm" @click="showRiskModal = false">{{ $t('I Understand') }}</button>
+            </div>
+        </div>
+    </div>
+</app-layout>

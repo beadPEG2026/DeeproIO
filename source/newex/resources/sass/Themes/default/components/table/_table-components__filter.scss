@@ -1,0 +1,340 @@
+
+/** table filter components start */
+.form-border {
+    border: 0px solid var(--border-line-color) !important;
+}
+.components-filter__form {
+    border: 1px solid var(--border-line-color);
+    margin: 1rem 0;
+    padding: 1.50rem;
+    max-width: 724px;
+    width: 100%;
+
+    .form-row {
+        .components-filter__item {
+            width: 100% !important;
+        }
+    }
+
+    .components-filter__row{
+        justify-content: space-between !important;
+        align-items: flex-start;
+        margin-bottom: 1.50rem;
+    }
+
+    /** item filter-block */
+    .components-filter__item {
+        width: 49%;
+        margin-right: 0;
+
+        input, select {
+            border: 1px solid var(--border-line-color);
+            background-color: transparent;
+            padding: 0.80rem;
+            font-size: var(--small-font__size);
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+            option {
+                outline: none;
+                background-color: var(--select-option);
+                border: var(--border-line-color);
+            }
+        }
+
+        label {
+            font-size: var(--default-font__size);
+        }
+
+        .filter-select {
+            padding: 0.90rem 1.5rem;
+            font-size: var(--default-font__size);
+            border: 1px solid var(--border-line-color);
+            background-color: transparent !important;
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+
+
+        }
+
+        .filter-select__option {
+            padding: 0.80rem;
+            color: var(--second-text-color);
+            background-color: var(--select-option);
+            border: 1px solid var(--border-line-color);
+        }
+
+        .filter-hover {
+            color: #fff;
+            background-color: var(--purple-second-color);
+        }
+
+        .filter-active {
+            background-color: var(--purple-second-color);
+        }
+
+        .bth-clear {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            top: 14px;
+        }
+
+    }
+    /* button */
+    .components-filter__button {
+        outline: 0px solid #F00;
+        display: block;
+        width: 100%;
+        padding: 1rem 0;
+
+        position: relative;
+        background-color: var(--purple-second-color);
+
+        &:hover {
+            background-color: var(--purple-color);
+        }
+    }
+}
+
+.components-filter {
+    margin-bottom: 5rem;
+
+    &__row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        align-items: flex-end;
+    }
+
+    /** item filter-block */
+    &__item {
+        width: 24%;
+        margin-right: 1rem;
+
+        input, select {
+            border: 1px solid var(--border-line-color);
+            background-color: transparent;
+            padding: 0.80rem;
+            font-size: var(--small-font__size);
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+            option {
+                outline: none;
+                background-color: var(--select-option);
+                border: var(--border-line-color);
+            }
+        }
+
+        label {
+            font-size: var(--default-font__size);
+        }
+
+        .filter-select {
+            padding: 0.90rem 1.5rem;
+            font-size: var(--default-font__size);
+            border: 1px solid var(--border-line-color);
+            background-color: transparent !important;
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+        }
+
+        .filter-select__option {
+            padding: 0.80rem;
+            color: var(--second-text-color);
+            background-color: var(--select-option);
+            border: 1px solid var(--border-line-color);
+        }
+
+        .filter-hover {
+            color: #fff;
+            background-color: var(--purple-second-color);
+        }
+
+        .filter-active {
+            background-color: var(--purple-second-color);
+        }
+
+        .bth-clear {
+            top: 14px;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            &:hover {
+                color: var(--white-color);
+                background-color: var(--purple-color);
+            }
+        }
+
+    }
+
+    &__item8 {
+        margin-right: 1rem;
+
+        input, select {
+            border: 1px solid var(--border-line-color);
+            background-color: transparent;
+            padding: 0.80rem;
+            font-size: var(--small-font__size);
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+            option {
+                outline: none;
+                background-color: var(--select-option);
+                border: var(--border-line-color);
+            }
+        }
+
+        label {
+            font-size: var(--default-font__size);
+        }
+
+        .filter-select {
+            border-radius: 9999px;
+            padding: 0.90rem 1.5rem;
+            font-size: var(--default-font__size);
+            border: 1px solid var(--border-line-color);
+            background-color: transparent !important;
+
+            &:focus {
+                border: 1px solid var(--yellow-color);
+                outline: none;
+                box-shadow: none;
+            }
+
+        }
+
+        .filter-select__option {
+            padding: 0.80rem;
+            color: var(--second-text-color);
+            background-color: var(--select-option);
+            border: 1px solid var(--border-line-color);
+        }
+
+        .filter-hover {
+            color: #fff;
+            background-color: var(--purple-second-color);
+        }
+
+        .filter-active {
+            background-color: var(--purple-second-color);
+        }
+
+        .bth-clear {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            top: 14px;
+
+            &:hover {
+                color: var(--white-color);
+                background-color: var(--purple-color);
+            }
+        }
+
+    }
+
+
+    /* button */
+    &__button {
+        outline: none;
+        display: block;
+        width: 100%;
+        padding: 1rem 0;
+
+        position: relative;
+        background-color: var(--purple-second-color);
+        border-radius: 9999px;
+        &:hover {
+            background-color: var(--purple-color);
+        }
+    }
+
+    // &__icon {
+
+    // }
+
+}
+/** table filter components start */
+
+
+
+
+/** table filter media screen start */
+@media screen and (max-width: 1000px) {
+
+    /** version 1 start */
+    .components-filter__form {
+        max-width: 100%;
+        width: 100%;
+    }
+    /** version 1 end */
+
+}
+/** table filter media screen end */
+
+
+/** table filter media screen start */
+@media screen and (max-width: 770px) {
+
+     /** version 2 start */
+     .components-filter {
+
+        &__row {
+            display: block;
+        }
+
+        &__item {
+            width: 100% !important;
+            margin-bottom: 1.20rem;
+        }
+
+    }
+    /** version 2 end */
+
+}
+/** table filter media screen end */
+
+
+/** table filter media screen start */
+@media screen and (max-width: 670px) {
+
+    /** version 1 start */
+    .components-filter__form {
+
+        .components-filter__row{
+            display: block;
+        }
+
+        .components-filter__item {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+
+    }
+    /** version 1 end */
+
+}
+/** table filter media screen end */

@@ -1,0 +1,100 @@
+<app-layout class="dp-trading-layout" :class="{'dp-ticket-active':!futures && mobileFirstTab==='trade' && ticketInView}">
+    <Head><title>{{ market.data.name }} {{ $t('Market') }} {{ $t("· Deepro") }}</title></Head>
+    <trade-category-nav :market="market.data" :futures="futures" />
+    <div class="dp-workbench" :class="{'dp-spot-workbench':!futures}" :data-panel="mobileFirstTab">
+        <div class="dp-workbench__summary dp-panel" :class="{'is-hk':market.data.price_reference_product}">
+            <market-stats :futures="futures" :quotes="quotes" :market="market.data" :funding-rate="fundingRate" :funding-interval-hours="fundingIntervalHours" :next-funding-time="nextFundingTime" />
+            <market-session-notice :market="market.data" />
+            <div class="dp-workbench__tools">
+                <button type="button" class="dp-market-directory-toggle" :aria-expanded="showMarkets" @click="showMarkets = !showMarkets">{{ $t('Markets') }}</button>
+                <button type="button" class="market-risk-btn" @click="showRiskModal = true" :title="$t('Risk Notice')" :aria-label="$t('Risk Notice')">?</button>
+            </div>
+        </div>
+        <section class="dp-workbench__chart dp-panel">
+            <nav class="dp-workbench__chart-tabs"><span>{{ $t('Chart') }}</span><a v-if="stockAsset" href="#stock-asset-details">{{ $t('Asset information') }}</a></nav>
+            <market-chart :hong-kong="!!market.data.price_reference_product" ref="marketChartFrame" :src="chartUrl" :height="iframeHeight" :key="chartIteration" />
+            <div id="stock-asset-details" v-if="stockAsset"><stock-asset-info :asset="stockAsset" /></div>
+        </section>
+        <nav class="dp-workbench__mobile-tabs" :aria-label="$t('Trade')">
+            <button v-for="tab in [{id:'orderbook',label:'Orderbook'},{id:'depth',label:'Depth'},{id:'trades',label:'Market Trades'},{id:'trade',label:'Trade'}]" :key="tab.id" type="button" :aria-pressed="String(mobileFirstTab === tab.id)" @click="setFirstTab(tab.id)">{{ $t(tab.label) }}</button>
+        </nav>
+        <section class="dp-workbench__book dp-panel" :data-view="bookView">
+            <nav class="dp-book-tabs"><button type="button" :aria-pressed="String(bookView==='orderbook')" @click="bookView='orderbook'">{{ $t('Orderbook') }}</button><button type="button" :aria-pressed="String(bookView==='depth')" @click="bookView='depth'">{{ $t('Depth') }}</button></nav>
+            <div class="dp-book-content"><order-book :market="market.data" /></div><market-depth :market="market.data" />
+        </section>
+        <section ref="tradeTicket" tabindex="-1" :aria-label="$t('Trade')" class="dp-workbench__ticket dp-panel" :class="{'is-futures': futures}">
+            <futures-order-form ref="tradeForm" v-if="futures" :fee="fee" :market="market.data" :futures-timeframe-enabled="futuresTimeframeEnabled" />
+            <order-form ref="tradeForm" v-else :fee="fee" :market="market.data" />
+        </section>
+        <aside class="dp-workbench__markets dp-panel" :class="{'is-open':showMarkets}"><market-directory :futures="futures" :current="market.data.name" @close="showMarkets=false" /></aside>
+        <section class="dp-workbench__trades dp-panel"><market-trades :market="market.data" /></section>
+        <section class="dp-workbench__orders dp-panel">
+                    <template v-if="!futures">
+
+                        <!-- module head start -->
+                        <div class="module-head">
+                            <div class="module-orderopen__navigation module-orderopen__navigation_v2">
+                                <div
+                                    @click="setActiveOrderTab('open')"
+                                    :class="{'module-orderopen__navigation-active' : activeOrderTab == 'open'}"
+                                    class="module-orderopen__navigation-title"
+                                >
+                                    <h4>
+                                        {{ $t('Open Orders') }}
+                                        <span v-if="spotOpenOrdersCount > 0" class="tab-count">({{ spotOpenOrdersCount }})</span>
+                                    </h4>
+                                </div>
+
+                                <div
+                                    @click="setActiveOrderTab('history')"
+                                    :class="{'module-orderopen__navigation-active' : activeOrderTab == 'history'}"
+                                    class="module-orderopen__navigation-title"
+                                >
+                                    <h4>{{ $t('Orders History') }}</h4>
+                                </div>
+
+                                <div
+                                    @click="setActiveOrderTab('trades')"
+                                    :class="{'module-orderopen__navigation-active' : activeOrderTab == 'trades'}"
+                                    class="module-orderopen__navigation-title"
+                                >
+                                    <h4>{{ $t('Trades') }}</h4>
+                                </div>
+
+                                <div
+                                    @click="goTradeRecords"
+                                    class="module-orderopen__navigation-title"
+                                >
+                                    <h4>{{ $t('Trade Records') }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- module head end -->
+
+                        <open-orders v-if="activeOrderTab == 'open'" :market="market.data"></open-orders>
+                        <orders-history v-if="activeOrderTab == 'history'" :market="market.data"></orders-history>
+                        <trades v-if="activeOrderTab == 'trades'" :market="market.data"></trades>
+                    </template>
+
+	                    <template v-if="futures">
+	                        <futures-open-orders
+	                            :market="market.data"
+	                            @trade-records="goTradeRecords"
+	                        ></futures-open-orders>
+	                    </template>
+
+        </section>
+        <market-channel /><orderbook-channel :market="market.data" /><binance-socket :market="market.data" />
+    </div>
+    <div class="dp-trade-dock">
+        <button v-if="sessionBlocked" type="button" disabled style="width:100%;background:var(--ui-highlight);color:var(--ui-muted);cursor:not-allowed">{{ $t(sessionLabel) }}</button>
+        <template v-else><button type="button" class="dp-trade-dock__buy" @click="openTicket('buy')">{{ $t('Buy') }} {{ market.data.base_currency }}</button><button type="button" class="dp-trade-dock__sell" @click="openTicket('sell')">{{ $t('Sell') }} {{ market.data.base_currency }}</button></template>
+    </div>
+    <div v-if="showRiskModal" class="risk-modal" @click.self="showRiskModal = false" @keydown.esc="showRiskModal=false">
+        <section ref="riskDialog" class="risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">
+            <div class="risk-header"><h4>{{ $t('Risk Notice') }}</h4><button type="button" class="risk-close" :aria-label="$t('Close')" @click="showRiskModal=false">×</button></div>
+            <div class="risk-body"><p>{{ $t('Trading markets carry risks including volatility and potential loss of funds. Please read carefully before trading.') }}</p><p>{{ $t('Always manage your positions responsibly and do not exceed your risk tolerance.') }}</p></div>
+            <div class="risk-footer"><button type="button" class="risk-confirm" @click="showRiskModal=false">{{ $t('I Understand') }}</button></div>
+        </section>
+    </div>
+</app-layout>

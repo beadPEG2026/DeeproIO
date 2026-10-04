@@ -1,0 +1,73 @@
+<app-layout>
+    <admin-reports-tab section="system_wallets"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("系统钱包") }}
+    </h1>
+    <div class="mb-5"><small>{{ $t("请注意：系统每 15 分钟同步一次所有钱包余额。") }}</small></div>
+
+    <div class="mb-6 flex justify-between flex-column items-center">
+        <search-filter v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset">
+            <label class="block text-gray-700">{{ $t("钱包类型：") }}</label>
+            <themed-select v-model="form.type" class="mt-1 w-full form-select rounded">
+                <option value="all">{{ $t("全部") }}</option>
+                <option value="coin">{{ $t("币种") }}</option>
+                <option value="fiat">{{ $t("法币") }}</option>
+            </themed-select>
+        </search-filter>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto overflow-y-hidden">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("余额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("最后同步时间") }}</th>
+            </tr>
+            <tr v-for="currency in currencies.data" :key="currency.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-4 flex items-left">
+                        <badge v-if="currency.type == 'coin'" class="mr-2" type="gray">
+                            {{ $t("币种") }}
+                        </badge>
+                        <badge v-if="currency.type == 'fiat'" class="mr-2" type="green">
+                            {{ $t("法币") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 items-left">
+                        <div><strong v-if="currency.networks.length != 0">{{ $t("主链：") }}</strong> {{ currency.wallet_balance }} {{ currency.symbol }}</div>
+                        <div v-for="network in currency.networks">
+
+                            <div v-if="network.slug == 'erc20'"><strong>{{ network.name }}:</strong> {{ currency.wallet_balance_erc }} {{ currency.symbol }}</div>
+                            <div v-if="network.slug == 'bep20'"><strong>{{ network.name }}:</strong> {{ currency.wallet_balance_bep }} {{ currency.symbol }}</div>
+                            <div v-if="network.slug == 'trc20'"><strong>{{ network.name }}:</strong> {{ currency.wallet_balance_trc }} {{ currency.symbol }}</div>
+                            <div v-if="network.slug == 'matic20'"><strong>{{ network.name }}:</strong> {{ currency.wallet_balance_matic }} {{ currency.symbol }}</div>
+                            <div v-if="network.slug == 'solspl'"><strong>{{ 'Solana SPL' }}:</strong> {{ currency.wallet_balance_sol }} {{ currency.symbol }}</div>
+                            <div v-if="network.slug == 'brc20'"><strong>{{ $t("锁定：") }}</strong> {{ currency.locked_balance }} {{ currency.symbol }}</div>
+                        </div>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex  items-left">
+                        <badge v-if="currency.wallet_balance_updated_at" type="green">
+                            {{ currency.wallet_balance_updated_at }}
+                        </badge>
+                        <badge v-else type="gray">
+                            {{ $t("尚未同步") }}
+                        </badge>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="currencies.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到钱包。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="currencies.links" />
+</app-layout>

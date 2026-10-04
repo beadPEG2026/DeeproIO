@@ -1,0 +1,5 @@
+{
+  "name": "horizon",
+  "script": "php artisan horizon",
+  "args": ""
+}

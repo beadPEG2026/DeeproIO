@@ -1,0 +1,192 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Merchant Dashboard') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('Dashboard')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white mb-6">
+            <div class="mobile-merchant-dashboard-top flex items-center justify-between">
+                <div class="row-1">
+                    <h1 class="text-2xl font-bold mb-2">{{ $t('Welcome back') }}, {{ merchant.business_name }}</h1>
+                    <p class="text-blue-100">{{ $t('Here is your business overview') }}</p>
+                </div>
+                <div class="row-2 flex items-center space-x-2">
+                    <span :class="['px-3 py-1 rounded-full text-sm font-medium', statusColor === 'green' ? 'bg-green-500' : statusColor === 'yellow' ? 'bg-yellow-500' : 'bg-red-500']">
+                        {{ merchant.status }}
+                    </span>
+                    <span v-if="isVerified" class="px-3 py-1 bg-green-500 rounded-full text-sm font-medium">
+                        ✓ {{ $t('Verified') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <!-- Total Volume -->
+            <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                <div class="flex items-center justify-between mb-4">
+                    <span class=" text-sm">{{ $t('Total Volume') }}</span>
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold ">{{ formatCurrency(stats.total_volume_usd) }}</div>
+                <div class="text-sm  mt-1">{{ $t('All time') }}</div>
+            </div>
+
+            <!-- Today's Volume -->
+            <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                <div class="flex items-center justify-between mb-4">
+                    <span class=" text-sm">{{ $t("Today's Volume") }}</span>
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold ">{{ formatCurrency(dailyVolume) }}</div>
+                <div class="text-sm  mt-1">
+                    {{ formatCurrency(limits.daily_remaining_usd) }} {{ $t('remaining') }}
+                </div>
+            </div>
+
+            <!-- Total Invoices -->
+            <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                <div class="flex items-center justify-between mb-4">
+                    <span class=" text-sm">{{ $t('Total Invoices') }}</span>
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold ">{{ formatNumber(stats.total_invoices) }}</div>
+                <div class="text-sm  mt-1">{{ formatNumber(stats.paid_invoices) }} {{ $t('paid') }}</div>
+            </div>
+
+            <!-- Conversion Rate -->
+            <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                <div class="flex items-center justify-between mb-4">
+                    <span class=" text-sm">{{ $t('Conversion Rate') }}</span>
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold ">{{ conversionRate }}%</div>
+                <div class="text-sm  mt-1">{{ $t('Paid invoices') }}</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Recent Invoices -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Quick Actions -->
+            <div class=" rounded-xl shadow-sm p-6 rounded-card">
+                <h3 class="text-lg font-semibold  mb-4">{{ $t('Quick Actions') }}</h3>
+                <div class="space-y-3">
+                    <button
+                        @click="createInvoice"
+                        class="w-full flex items-center justify-between p-4 border rounded-lg hover: transition-colors"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium ">{{ $t('Create Invoice') }}</span>
+                        </div>
+                        <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                    <a
+                        :href="route('merchant.settings.api-keys')"
+                        class="w-full flex items-center justify-between p-4 border rounded-lg hover: transition-colors"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium ">{{ $t('API Keys') }}</span>
+                        </div>
+                        <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a
+                        :href="route('merchant.docs')"
+                        class="w-full flex items-center justify-between p-4 border rounded-lg hover: transition-colors"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium ">{{ $t('API Documentation') }}</span>
+                        </div>
+                        <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Invoices -->
+            <div class="lg:col-span-2  rounded-xl shadow-sm p-6 rounded-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold ">{{ $t('Recent Invoices') }}</h3>
+                    <a :href="route('merchant.invoices')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        {{ $t('View All') }}
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full merchant-table">
+                        <thead>
+                            <tr class="text-left text-sm  border-b">
+                                <th class="pb-3 font-medium">{{ $t('Invoice') }}</th>
+                                <th class="pb-3 font-medium">{{ $t('Amount') }}</th>
+                                <th class="pb-3 font-medium">{{ $t('Status') }}</th>
+                                <th class="pb-3 font-medium">{{ $t('Date') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="invoice in recentInvoices"
+                                :key="invoice.id"
+                                @click="viewInvoice(invoice.id)"
+                                class="border-b last:border-0 cursor-pointer hover:"
+                            >
+                                <td class="py-4">
+                                    <span class="font-mono text-sm">{{ invoice.id.substring(0, 8) }}...</span>
+                                </td>
+                                <td class="py-4 font-medium">{{ formatCurrency(invoice.amount_usd) }}</td>
+                                <td class="py-4">
+                                    <span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusBadge(invoice.status).color === 'green' ? 'bg-green-100 text-green-800' : getStatusBadge(invoice.status).color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : getStatusBadge(invoice.status).color === 'red' ? 'bg-red-100 text-red-800' : 'bg-gray-100 ']">
+                                        {{ getStatusBadge(invoice.status).label }}
+                                    </span>
+                                </td>
+                                <td class="py-4  text-sm">{{ new Date(invoice.created_at).toLocaleDateString() }}</td>
+                            </tr>
+                            <tr v-if="!recentInvoices || recentInvoices.length === 0">
+                                <td colspan="4" class="py-8 text-center ">
+                                    {{ $t('No invoices yet') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

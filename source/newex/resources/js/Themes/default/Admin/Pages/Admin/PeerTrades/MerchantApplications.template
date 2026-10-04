@@ -1,0 +1,136 @@
+<app-layout>
+
+    <admin-top-menu section="peerMerchantApplications"></admin-top-menu>
+
+    <div class="mb-6 flex justify-between items-center">
+        <search-filter :filter="false" v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset">
+
+        </search-filter>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("用户信息") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("国家") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("证件") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提交时间") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+            <tr v-for="document in kycDocuments.data" :key="document.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ $t("姓名:") }} {{ document.user.first_name }} {{ document.user.last_name }}<br>
+                        {{ $t("邮箱:") }} {{ document.user.email }} <br>
+                        {{ $t("地址:") }} {{ document.address }} <br>
+                        {{ $t("城市:") }} {{ document.city }} <br>
+                        {{ $t("省/州:") }} {{ document.state }} <br>
+                        {{ $t("邮政编码:") }} {{ document.postal_code }} <br>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.country ? document.country.name : '' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <font-awesome-icon @click="showModal([document.file])" icon="external-link-alt" class="cursor-pointer" />
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge v-if="document.status == 'pending'" class="mr-2" type="orange">
+                            {{ $t("待审核") }}
+                        </badge>
+                        <badge v-if="document.status == 'approved'" class="mr-2" type="green">
+                            {{ $t("已通过") }}
+                        </badge>
+                        <badge v-if="document.status == 'rejected'" class="mr-2 cursor-pointer" type="red">
+                            <div @click="showReason(document)">
+                                <span class="mr-1">{{ $t("已拒绝") }}</span><font-awesome-icon icon="info-circle" />
+                            </div>
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.created_at }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span v-if="document.status == 'pending'" class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <t-button-green @click="approve(document)" class="mr-2">{{ $t("通过") }}</t-button-green>
+                        <t-button-red @click="reject(document)">{{ $t("拒绝") }}</t-button-red>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="kycDocuments.data.length === 0">
+                <td class="border-t px-6 py-4" colspan="100">{{ $t("没有找到任何证件。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="kycDocuments.links" />
+
+    <!-- Show User Document Modal -->
+    <jet-dialog-modal :show="showImage" @close="closeModal">
+        <template #title>
+            {{ $t("KYC 图片") }}
+        </template>
+        <template #content>
+            <div v-for="image in images">
+                <img v-if="image" width="100%" :src="image.url" />
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+    <!-- Show Rejection Reason Modal -->
+    <jet-dialog-modal :show="showReasonModal" @close="closeReasonModal">
+        <template #title>
+            {{ $t("拒绝原因") }}
+        </template>
+
+        <template #content>
+            <div v-html="rejectedReason"></div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeReasonModal">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+    <!-- Confirmation Modal -->
+    <jet-confirmation-modal :show="documentBeingReviewed">
+        <template #title>
+            {{ $t("确认操作") }}
+        </template>
+
+        <template #content>
+            <div v-if="selectedAction == 'approve'">{{ $t("确定要") }} {{ selectedAction }} {{ $t("该证件吗？") }}</div>
+
+            <div v-if="selectedAction == 'reject'" class="flex flex-wrap">
+                {{ $t("请填写拒绝原因") }}
+                <t-textarea v-model="rejectedReasonText" class="mt-5 w-full"></t-textarea>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="documentBeingReviewed = null">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-danger-button class="ml-2" @click.native="confirmAction">
+                {{ selectedAction }}
+            </jet-danger-button>
+        </template>
+    </jet-confirmation-modal>
+
+</app-layout>

@@ -1,0 +1,40 @@
+<div class="site-layout dp-auth-shell">
+  <div class="dp-platform-caption">{{ $t('Deepro · Digital asset exchange') }}</div>
+  <div class="dp-auth-atmosphere" aria-hidden="true">
+    <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <path v-for="n in 11" :key="n" :d="`M-100 ${470+n*34} L560 ${650+n*17} L1700 ${120+n*38}`" opacity=".24" />
+        <path d="M0 220H240L690 700H1600M180 1000L880 0M0 820H390L1160 210H1600" opacity=".42" />
+      </g>
+      <g fill="currentColor" opacity=".55"><circle cx="240" cy="220" r="3"/><circle cx="690" cy="700" r="3"/><circle cx="1160" cy="210" r="3"/></g>
+    </svg>
+  </div>
+  <header class="dp-auth-shell__header"><Link :href="route('home')" :aria-label="$t(&quot;Deepro&quot;)"><deepro-brand /></Link><div class="dp-auth-shell__controls"><Link :href="route('home')" class="dp-auth-shell__back">{{ $t('Back to Deepro') }} ↗</Link><details class="dp-auth-language" v-if="$page.props.lang_mode_enabled"><summary>{{ $t('Language') }} · {{ $i18n.locale === 'zh-cn' ? $t("简体中文") : $i18n.locale === 'zh-tw' ? $t("繁體中文") : $i18n.locale.toUpperCase() }}</summary><language-switcher /></details><theme-mode /></div></header>
+  <main class="dp-auth-shell__grid">
+    <aside class="dp-auth-visual dp-tech-surface">
+      <span class="dp-eyebrow">DEEPRO NETWORK</span><h1>{{ $t('Digital assets.') }}<br><span>{{ $t('One clear perspective.') }}</span></h1><p>{{ $t('Follow the markets. Manage your assets. Explore the UMI ecosystem.') }}</p>
+      <div class="dp-auth-network" aria-hidden="true">
+        <svg viewBox="0 0 600 340" fill="none" focusable="false">
+          <g class="dp-auth-network__grid" stroke="currentColor" stroke-width=".65">
+            <path v-for="n in 9" :key="'x'+n" :d="`M${20+n*40} ${190-n*18} l280 126`" />
+            <path v-for="n in 9" :key="'y'+n" :d="`M${30+n*35} ${194+n*15.75} l280 -126`" />
+          </g>
+          <g class="dp-auth-network__links" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round">
+            <path d="M80 132L205 76L426 175L300 232Z M205 76L458 72L530 138L426 175 M80 132L80 238L300 320L426 264L426 175 M300 232V320 M205 76V199L300 242 M458 72V196L426 264 M530 138V230L426 264 M80 238L205 199L426 264" />
+            <path d="M130 156V269M360 93V291M490 120V246M255 54V265" stroke-dasharray="3 6" opacity=".5" />
+          </g>
+          <g class="dp-auth-network__nodes" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M70 126L80 121L90 126V138L80 143L70 138Z M70 126L80 132L90 126M80 132V143 M286 273L300 266L314 273V289L300 296L286 289Z M286 273L300 280L314 273M300 280V296 M517 131L530 124L543 131V145L530 152L517 145Z M517 131L530 138L543 131M530 138V152 M452 68L458 65L464 68V75L458 78L452 75Z M452 68L458 72L464 68M458 72V78" />
+            <circle cx="80" cy="238" r="7"/><circle cx="426" cy="264" r="5"/>
+          </g>
+          <g fill="currentColor"><circle cx="205" cy="76" r="4.5"/><circle cx="205" cy="199" r="4.5"/><circle cx="426" cy="175" r="4.5"/><circle cx="300" cy="320" r="3"/></g>
+          <path class="dp-auth-network__mark" d="M301 170C287 151 279 146 268 146C250 146 242 158 242 170C242 184 254 193 267 193C280 193 289 181 301 165C313 149 322 146 332 146C348 146 358 158 358 170C358 184 347 193 333 193C323 193 316 186 310 180" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <span class="dp-auth-asset asset-umi">UMI</span><span class="dp-auth-asset asset-usdt">USDT</span><span class="dp-auth-asset asset-btc">BTC</span>
+      </div>
+      <div class="dp-auth-visual__features"><span>{{ $t('Spot & Futures') }}</span><span>{{ $t('Asset management') }}</span><span>{{ $t('UMI Ecosystem') }}</span></div>
+    </aside>
+    <section class="dp-auth-form"><slot></slot><p class="dp-auth-form__footnote">{{ $t('Keep your password and verification codes private.') }}</p></section>
+  </main><site-footer compact /><div :class="{'mobile-body': isMobile}"><portal-target name="modal" multiple></portal-target></div>
+    <bottom-menu v-if="isMobile" />
+</div>

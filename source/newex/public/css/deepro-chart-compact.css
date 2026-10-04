@@ -1,0 +1,17 @@
+/* Compact legend for our pinned TradingView build; desktop keeps native layout. */
+[data-name="legend"] {font-size:11px!important;max-width:calc(100% - 12px);margin:0 6px}
+[data-name="legend"] [class*="sources-"] {display:flex;flex-direction:row!important;flex-wrap:nowrap;gap:8px;overflow-x:auto;max-width:100%;scrollbar-width:none;pointer-events:auto}
+[data-name="legend"] [class*="sourcesWrapper-"] {max-width:100%;min-width:0}
+[data-name="legend-source-item"] {flex:0 0 auto!important;max-width:none!important;min-height:22px}
+[data-name="legend-source-item"] [class*="valuesWrapper-"] {flex:0 0 auto!important;max-width:none!important}
+[data-name="legend-source-item"] [class*="valuesAdditionalWrapper-"] {flex-wrap:nowrap!important}
+[data-name="legend-source-item"][data-deepro-average] [class*="titleWrapper-"] {font-size:0}
+[data-name="legend-source-item"][data-deepro-average] [class*="titleWrapper-"] [data-name="legend-source-title"] {display:none}
+[data-name="legend-source-item"][data-deepro-average]:before {content:attr(data-deepro-average);font-size:11px;color:#687481;align-self:center;margin-right:3px}
+html.theme-dark [data-name="legend-source-item"][data-deepro-average]:before {color:#a4b0bf}
+[data-name="legend"] [class*="toggler-"] {display:none!important}
+[data-name="legend-series-item"] [class*="valuesAdditionalWrapper-"] {display:flex;flex-wrap:wrap;gap:0 8px}
+[data-name="legend-series-item"] [class*="valuesWrapper-"] {max-width:100%!important}
+[data-name="legend-series-item"] [class*="valueItem-"] {font-size:11px}
+
+[data-name="legend-source-item"][data-deepro-average] [class*="noWrapWrapper-"] {display:none}

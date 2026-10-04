@@ -1,0 +1,130 @@
+
+
+/** input field start */
+.input-field {
+    margin-bottom: 2rem;
+
+    label {
+        display: block;
+
+        margin-bottom: 0.30rem;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        color: var(--second-text-color);
+    }
+
+    select {
+        width: 100%;
+        
+        margin: 0;
+        padding: 0.50rem 0;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        outline: none;
+        border: none;
+        border-bottom: 2px solid var(--border-line-color);
+        border-radius: 0 !important;
+        background-color: transparent;
+        transition: all 0.5s ease-out; 
+
+        color: var(--first-text-color);
+
+        &:hover {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+        }
+
+        &:focus {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+            box-shadow: none;
+
+        }
+
+        &:active {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);                
+        }
+    }
+
+    input {
+        width: 100%;
+        
+        margin: 0;
+        padding: 0.50rem 0;
+
+        font-weight: 500;
+        font-size: 0.90rem;
+
+        outline: none;
+        border: none;
+        border-bottom: 2px solid var(--border-line-color);
+        
+        background-color: transparent;
+        transition: all 0.5s ease-out; 
+
+        color: var(--first-text-color);
+        
+
+        &:hover {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+        }
+
+        &:focus {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);
+            box-shadow: none;
+
+        }
+
+        &:active {
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--purple-color);                
+        }
+        
+
+    }
+
+}
+
+
+.valid  {
+    .helper-text {
+        display: block;
+        margin-top: 0.50rem;
+        
+        font-weight: 500;
+        font-size: 0.90rem;
+        color: var(--green-color);
+    }
+    input {
+        border-bottom: 2px solid var(--green-color);
+    }
+}
+.invalid {
+    .helper-text {
+        display: block;
+        margin-top: 0.50rem;
+        
+        font-weight: 500;
+        font-size: 0.90rem;
+        color: var(--red-color);
+    }
+    input {
+        border-bottom: 2px solid var(--red-color);
+    }
+}
+/** input field end */
+
+

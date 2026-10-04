@@ -1,0 +1,305 @@
+<app-layout class="dp-transfer-page">
+    <Head>
+        <title>{{ $t('Transfer') }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="components-title">
+        <h2 class="text-center">{{ $t('Transfer between accounts') }}</h2>
+    </div>
+
+    <wallet-overview :page="'transfer'" />
+
+    <div id="transfer-container" class="table-components">
+        <div class="flex components-filter__item swap-inner rounded-lg flex flex-col mt-10 md:mt-0 relative">
+
+            <div class="pb-6 w-full">
+                <div class="transfer-account-row">
+                    <div class="transfer-account-col">
+                        <label class="form-label">{{ $t('From Account') }}</label>
+                        <themed-select
+                            v-model="form.from_account"
+                            @change="onFromAccountChange"
+                            class="transfer-select"
+                        >
+                            <option value="">{{ $t('Select From Account') }}</option>
+                            <option
+                                v-for="item in accountOptions"
+                                :key="'from-' + item.value"
+                                :value="item.value"
+                            >
+                                {{ item.label }}
+                            </option>
+                        </themed-select>
+                    </div>
+
+                    <div class="transfer-switch-wrap">
+                        <button
+                            type="button"
+                            class="transfer-switch-btn"
+                            @click="switchAccounts"
+                            :title="$t('Switch accounts')"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M7 7H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M13.5 3.5L17 7L13.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17 17H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M10.5 13.5L7 17L10.5 20.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="transfer-account-col">
+                        <label class="form-label">{{ $t('To Account') }}</label>
+                        <themed-select
+                            v-model="form.to_account"
+                            @change="onToAccountChange"
+                            class="transfer-select"
+                        >
+                            <option value="">{{ $t('Select To Account') }}</option>
+                            <option
+                                v-for="item in toAccountOptions"
+                                :key="'to-' + item.value"
+                                :value="item.value"
+                            >
+                                {{ item.label }}
+                            </option>
+                        </themed-select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 w-full transfer-coin-select-wrap">
+                <label for="text-input-16" class="form-label">{{ $t('Select coin:') }}</label>
+            </div>
+
+            <div class="pb-6 w-full transfer-coin-select-wrap">
+                <div class="transfer-coin-select-inner">
+                    <t-rich-user-select
+                        v-model="form.currency_id"
+                        :options="currencyOptions"
+                        v-on:change="onCurrencyChange"
+                        :placeholder="$t('Select')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template slot="label" slot-scope="{ option }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="swap-label flex items-stretch">
+                                        <currency-avatar :symbol="option.raw.symbol || option.raw.name" :src="option.raw.logo" />
+                                        <span class="pt-1 ml-5">{{ option.text }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template slot="option" slot-scope="{ option }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                        <currency-avatar :symbol="option.raw.symbol || option.raw.name" :src="option.raw.logo" />
+                                        <span class="pt-1 ml-5">{{ option.text }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+            </div>
+
+            <div class="pb-6 w-full">
+                <div>
+                    <text-user-input-badge
+                        @clickBadge="setMaxAmount()"
+                        :badge="$t('MAX')"
+                        @keyup.native="(e) => clearInput(e)"
+                        @keypress.native="(e) => handleInput(e)"
+                        @paste.prevent
+                        @drop.prevent
+                        v-model="form.amount"
+                        :label="$t('Amount')"
+                    />
+                </div>
+            </div>
+
+            <div class="pb-6 w-full">
+                <div class="swap-block cursor-pointer module-orderform__sell-currency">
+                    <span class="text-gray-500 mr-1">{{ $t('Available Balance') }}:</span>
+
+                    <span
+                        v-if="!processing_balance"
+                        @click="injectBalance"
+                        class="swap-wallet-balance"
+                    >
+                        {{ balance }}
+                    </span>
+
+                    <span
+                        v-if="!processing_balance && form.currency_id && currencies[form.currency_id]"
+                        class="ml-1"
+                    >
+                        {{ currencies[form.currency_id].name }}
+                    </span>
+
+                    <svg
+                        v-show="processing_balance"
+                        class="animate-spin ml-2 mr-2 h-4 w-4 inline"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div
+                class="pb-4 w-full transfer-direction-hint"
+                v-if="form.from_account && form.to_account"
+            >
+                {{ $t('Current direction') }}: {{ fromAccountLabel() }} → {{ toAccountLabel() }}
+            </div>
+
+            <div class="pb-2 w-full">
+                <div class="form-components__block">
+                    <div class="form-components__block-item block-button">
+                        <button
+                            @click="submitTransfer"
+                            :class="{ 'disabled': !$page.props.user && !($page.props.auth && $page.props.auth.user) }"
+                            class="form-components__block-button"
+                        >
+                            {{ $t(($page.props.user || ($page.props.auth && $page.props.auth.user)) ? 'Transfer' : 'Login to continue') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section v-if="umiStockTransfers.length" class="table-components p-5 mt-5 rounded-lg">
+        <h3 class="font-bold text-lg">UMI 股票份额划转</h3>
+        <p class="text-sm text-gray-500 my-3">以下份额已转入您的 HK08379 交易账户。</p>
+        <div v-for="receipt in umiStockTransfers" :key="receipt.id" class="flex justify-between gap-3 py-3 border-b border-gray-200 dark:border-gray-700">
+            <span>划转 #{{receipt.id}}<small class="block text-gray-500">{{String(receipt.created_at).slice(0,19)}}</small></span>
+            <strong>{{receipt.shares}} 份额</strong>
+        </div>
+        <a class="inline-block mt-4 font-bold" href="/umi-ecosystem/portfolio?tab=points">查看 UMI 股票权益 ›</a>
+    </section>
+
+    <div
+        v-if="showCommissionModal"
+        class="fixed inset-0 flex items-center justify-center px-4 dp-transfer-confirm"
+        style="z-index: 99999;"
+    >
+        <div
+            class="absolute inset-0 bg-black bg-opacity-60"
+            @click="cancelCommission"
+        ></div>
+
+        <div
+            class="relative w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden"
+            style="background: #171c2b; border: 1px solid rgba(255,255,255,0.08);"
+            @click.stop
+        >
+            <div class="px-6 py-5 border-b border-white border-opacity-10">
+                <h3 class="text-lg font-semibold text-white">
+                    {{ $t('Transfer fee confirmation') }}
+                </h3>
+            </div>
+
+            <div class="px-6 py-5 text-sm leading-7 text-gray-300">
+                <p class="mb-3">
+                    {{ $t('A transfer fee will be applied to this transfer.') }}
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('Transfer Amount') }}:
+                    <strong class="text-white">{{ transferAmountFormatted }}</strong>
+                    <span v-if="transferCurrencyName">
+                        {{ transferCurrencyName }}
+                    </span>
+                    <span class="ml-2">
+                        ({{ fromAccountLabel() }} → {{ toAccountLabel() }})
+                    </span>
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('Fee') }}:
+                    <strong class="text-white">{{ commissionPercent }}%</strong>
+                    <span v-if="form.amount">
+                        ({{ transferAmountFormatted }} × {{ commissionPercent }}% = {{ commissionAmountFormatted }}
+                        <span v-if="transferCurrencyName">
+                            {{ transferCurrencyName }}
+                        </span>)
+                    </span>
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('VIP') }}:
+                    <strong class="text-white">VIP{{ transferVipLevel }}</strong>
+                    <span class="ml-2">
+                        {{ $t('Discount') }}:
+                        <strong class="text-white">{{ transferFeeDiscountRateFormatted }}</strong>
+                    </span>
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('Refund Rate') }}:
+                    <strong class="text-green-400">{{ transferFeeRefundRateFormatted }}</strong>
+                </p>
+
+                <p v-if="transferFeeRefundAmount > 0" class="mb-2">
+                    {{ $t('Fee Refund') }}:
+                    <strong class="text-green-400">{{ transferFeeRefundAmountFormatted }}</strong>
+                    <span v-if="form.currency_id && currencies[form.currency_id]">
+                        {{ currencies[form.currency_id].name }}
+                    </span>
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('Actual Fee') }}:
+                    <strong class="text-yellow-400">{{ transferFeeActualAmountFormatted }}</strong>
+                    <span v-if="transferCurrencyName">
+                        {{ transferCurrencyName }}
+                    </span>
+                </p>
+
+                <p class="mb-2">
+                    {{ $t('Estimated Received') }}:
+                    <strong class="text-green-400">{{ transferEstimatedReceivedAmountFormatted }}</strong>
+                    <span v-if="transferCurrencyName">
+                        {{ transferCurrencyName }}
+                    </span>
+                </p>
+
+                <p class="mt-4 text-white">
+                    {{ $t('Do you agree to proceed?') }}
+                </p>
+            </div>
+
+            <div class="px-6 py-4 flex items-center justify-end gap-3" style="background: #111827;">
+                <button
+                    type="button"
+                    class="px-5 py-2 rounded-full text-white font-semibold"
+                    @click="cancelCommission"
+                >
+                    {{ $t('Cancel') }}
+                </button>
+
+                <button
+                    type="button"
+                    class="px-6 py-2 rounded-full text-white font-semibold"
+                    style="background: #243246;"
+                    :class="{ 'opacity-25': processing }"
+                    :disabled="processing"
+                    @click="confirmCommissionAgree"
+                >
+                    {{ $t('Agree and transfer') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

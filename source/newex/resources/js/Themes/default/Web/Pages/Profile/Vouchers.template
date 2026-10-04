@@ -1,0 +1,85 @@
+<jet-form-section>
+
+    <div class="form-container form-transactions form-vouchers_1">
+        <!-- form components start -->
+        <div class="form-components">
+            <div class="form-components__title"><h3>{{ $t('Vouchers') }}</h3></div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+                        <div class="components-filter__row">
+                            <text-user-input
+    placeholder=""
+    v-model="form.code"
+    :style="{ width: '100%' }"
+    class="components-filter__item"
+    :label="$t('Enter Voucher Code')"
+/>
+                        </div>
+                        <div class="components-filter__row mt-8">
+                            <div>
+                                <button @click.prevent="submit" class="flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">
+                                    <span class="components-filter__icon">
+                                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        {{ $t('Redeem') }}
+                                    </span>
+                                </button>
+                                <div class="mt-5" v-if="formResponse">{{ formResponse }}</div>
+
+
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <!-- form components end -->
+    </div>
+
+    <div class="form-container form-transactions form-vouchers_2">
+        <div class="form-components">
+            <div class="form-components__title"><h3>{{ $t('Voucher transactions') }}</h3></div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-text">
+                            <table class="w-full whitespace-no-wrap mob-table-vouchers">
+                                <tr class="text-left font-bold">
+                                    <th class="px-6 pt-6 pb-4">{{ $t('Date') }}</th>
+                                    <th class="px-6 pt-6 pb-4">{{ $t('Code') }}</th>
+                                    <th class="px-6 pt-6 pb-4">{{ $t('Amount') }}</th>
+                                </tr>
+                                <tr v-for="transaction in transactions" :key="transaction.code">
+                                    <td class="border-t">
+                                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                            {{ transaction.redeemed_at }}
+                                        </span>
+                                    </td>
+                                    <td class="border-t">
+                                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                            {{ transaction.code }}
+                                        </span>
+                                    </td>
+                                    <td class="border-t">
+                                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                            {{ transaction.amount }} {{ transaction.currency }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="transactions === null || transactions.length === 0">
+                                    <td class="border-t" colspan="100">
+                                        <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                            {{ $t('No voucher transactions found') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</jet-form-section>

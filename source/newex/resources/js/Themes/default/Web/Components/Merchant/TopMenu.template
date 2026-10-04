@@ -1,0 +1,31 @@
+<div>
+    <!-- tabs components start -->
+    <!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Merchant Dashboard') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <div class="tabs-components tabs">
+
+        <!-- tabs left start -->
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <a
+                    v-for="item in menuItems"
+                    :key="item.route"
+                    :href="route(item.route)"
+                    :class="[
+                        'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                        isActive(item.route)
+                            ? 'tabs-nav__active'
+                            : item.route
+                    ]"
+                    class="tabs-nav__item">
+                    <h4>{{ $t(item.label) }}</h4>
+                </a>
+            </div>
+        </div>
+        <!-- tabs left end -->
+    </div>
+</div>

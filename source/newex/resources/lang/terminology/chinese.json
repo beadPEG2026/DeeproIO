@@ -1,0 +1,545 @@
+{
+  "locales": [
+    "zh-cn",
+    "zh-tw"
+  ],
+  "description": "Retain proper names in Chinese UI; translate surrounding business text. Match catalog keys, never globally replace rendered Chinese text.",
+  "terms": [
+    {
+      "name": "Meme",
+      "sources": [
+        "Meme"
+      ]
+    },
+    {
+      "name": "Layer 1",
+      "sources": [
+        "Layer 1"
+      ]
+    },
+    {
+      "name": "Layer 2",
+      "sources": [
+        "Layer 2"
+      ]
+    },
+    {
+      "name": "Layer 3",
+      "sources": [
+        "Layer 3"
+      ]
+    },
+    {
+      "name": "DeFi",
+      "sources": [
+        "DeFi"
+      ]
+    },
+    {
+      "name": "CeFi",
+      "sources": [
+        "CeFi"
+      ]
+    },
+    {
+      "name": "GameFi",
+      "sources": [
+        "GameFi"
+      ]
+    },
+    {
+      "name": "SocialFi",
+      "sources": [
+        "SocialFi"
+      ]
+    },
+    {
+      "name": "DePIN",
+      "sources": [
+        "DePIN"
+      ]
+    },
+    {
+      "name": "RWA",
+      "sources": [
+        "RWA"
+      ]
+    },
+    {
+      "name": "NFT",
+      "sources": [
+        "NFT"
+      ]
+    },
+    {
+      "name": "Web3",
+      "sources": [
+        "Web3"
+      ]
+    },
+    {
+      "name": "DAO",
+      "sources": [
+        "DAO"
+      ]
+    },
+    {
+      "name": "DEX",
+      "sources": [
+        "DEX"
+      ]
+    },
+    {
+      "name": "CEX",
+      "sources": [
+        "CEX"
+      ]
+    },
+    {
+      "name": "DApp",
+      "sources": [
+        "DApp"
+      ]
+    },
+    {
+      "name": "PoW",
+      "sources": [
+        "PoW"
+      ]
+    },
+    {
+      "name": "PoS",
+      "sources": [
+        "PoS"
+      ]
+    },
+    {
+      "name": "AI",
+      "sources": [
+        "AI"
+      ]
+    },
+    {
+      "name": "Launchpad",
+      "sources": [
+        "Launchpad",
+        "Launchpads",
+        "launchpad",
+        "launchpads",
+        "發射平台"
+      ],
+      "exceptKeys": [
+        "Launchpad Risk Notice Content 2",
+        "Launchpad Risk Notice Content 3"
+      ]
+    },
+    {
+      "name": "Launchpool",
+      "sources": [
+        "Launchpool"
+      ]
+    },
+    {
+      "name": "Maker",
+      "sources": [
+        "Maker"
+      ]
+    },
+    {
+      "name": "Taker",
+      "sources": [
+        "Taker"
+      ]
+    },
+    {
+      "name": "APY",
+      "sources": [
+        "APY"
+      ]
+    },
+    {
+      "name": "APR",
+      "sources": [
+        "APR"
+      ]
+    },
+    {
+      "name": "ROI",
+      "sources": [
+        "ROI"
+      ]
+    },
+    {
+      "name": "TVL",
+      "sources": [
+        "TVL"
+      ]
+    },
+    {
+      "name": "KYC",
+      "sources": [
+        "KYC"
+      ]
+    },
+    {
+      "name": "AML",
+      "sources": [
+        "AML"
+      ]
+    },
+    {
+      "name": "VIP",
+      "sources": [
+        "VIP",
+        "Vip"
+      ]
+    },
+    {
+      "name": "API",
+      "sources": [
+        "API",
+        "Api"
+      ]
+    },
+    {
+      "name": "RPC",
+      "sources": [
+        "RPC"
+      ]
+    },
+    {
+      "name": "SDK",
+      "sources": [
+        "SDK"
+      ]
+    },
+    {
+      "name": "EVM",
+      "sources": [
+        "EVM"
+      ]
+    },
+    {
+      "name": "BSC",
+      "sources": [
+        "BSC"
+      ]
+    },
+    {
+      "name": "BEP",
+      "sources": [
+        "BEP"
+      ]
+    },
+    {
+      "name": "ERC",
+      "sources": [
+        "ERC"
+      ]
+    },
+    {
+      "name": "SPL",
+      "sources": [
+        "SPL"
+      ]
+    },
+    {
+      "name": "TRC",
+      "sources": [
+        "TRC"
+      ]
+    },
+    {
+      "name": "P2P",
+      "sources": [
+        "P2P"
+      ]
+    },
+    {
+      "name": "C2C",
+      "sources": [
+        "C2C"
+      ]
+    },
+    {
+      "name": "2FA",
+      "sources": [
+        "2FA"
+      ]
+    },
+    {
+      "name": "ETF",
+      "sources": [
+        "ETF"
+      ]
+    },
+    {
+      "name": "ICO",
+      "sources": [
+        "ICO"
+      ]
+    },
+    {
+      "name": "IDO",
+      "sources": [
+        "IDO"
+      ]
+    },
+    {
+      "name": "IEO",
+      "sources": [
+        "IEO"
+      ]
+    },
+    {
+      "name": "IPO",
+      "sources": [
+        "IPO"
+      ]
+    },
+    {
+      "name": "Bitcoin",
+      "sources": [
+        "Bitcoin"
+      ]
+    },
+    {
+      "name": "Ethereum",
+      "sources": [
+        "Ethereum"
+      ]
+    },
+    {
+      "name": "Solana",
+      "sources": [
+        "Solana"
+      ]
+    },
+    {
+      "name": "Polygon",
+      "sources": [
+        "Polygon"
+      ]
+    },
+    {
+      "name": "Avalanche",
+      "sources": [
+        "Avalanche"
+      ]
+    },
+    {
+      "name": "Arbitrum",
+      "sources": [
+        "Arbitrum"
+      ]
+    },
+    {
+      "name": "Optimism",
+      "sources": [
+        "Optimism"
+      ]
+    },
+    {
+      "name": "TRON",
+      "sources": [
+        "TRON"
+      ]
+    },
+    {
+      "name": "Tron",
+      "sources": [
+        "Tron"
+      ]
+    },
+    {
+      "name": "TronLink",
+      "sources": [
+        "TronLink"
+      ]
+    },
+    {
+      "name": "Binance",
+      "sources": [
+        "Binance"
+      ]
+    },
+    {
+      "name": "MEXC",
+      "sources": [
+        "MEXC"
+      ]
+    },
+    {
+      "name": "Bybit",
+      "sources": [
+        "Bybit"
+      ]
+    },
+    {
+      "name": "TradingView",
+      "sources": [
+        "TradingView"
+      ]
+    },
+    {
+      "name": "MetaMask",
+      "sources": [
+        "MetaMask"
+      ]
+    },
+    {
+      "name": "Trust Wallet",
+      "sources": [
+        "Trust Wallet"
+      ]
+    },
+    {
+      "name": "WalletConnect",
+      "sources": [
+        "WalletConnect"
+      ]
+    },
+    {
+      "name": "Mailgun",
+      "sources": [
+        "Mailgun"
+      ]
+    },
+    {
+      "name": "SMTP",
+      "sources": [
+        "SMTP"
+      ]
+    },
+    {
+      "name": "Stripe",
+      "sources": [
+        "Stripe"
+      ]
+    },
+    {
+      "name": "PayPal",
+      "sources": [
+        "PayPal"
+      ]
+    },
+    {
+      "name": "Google",
+      "sources": [
+        "Google"
+      ]
+    },
+    {
+      "name": "GitHub",
+      "sources": [
+        "GitHub"
+      ]
+    },
+    {
+      "name": "Telegram",
+      "sources": [
+        "Telegram"
+      ]
+    },
+    {
+      "name": "Discord",
+      "sources": [
+        "Discord"
+      ]
+    },
+    {
+      "name": "OpenAI",
+      "sources": [
+        "OpenAI"
+      ]
+    },
+    {
+      "name": "AWS",
+      "sources": [
+        "AWS"
+      ]
+    },
+    {
+      "name": "Deepro",
+      "sources": [
+        "Deepro"
+      ]
+    },
+    {
+      "name": "UMI",
+      "sources": [
+        "UMI"
+      ]
+    },
+    {
+      "name": "Ondo",
+      "sources": [
+        "Ondo"
+      ]
+    },
+    {
+      "name": "BNB Smart Chain",
+      "sources": [
+        "BNB Smart Chain"
+      ]
+    },
+    {
+      "name": "Binance Smart Chain",
+      "sources": [
+        "Binance Smart Chain"
+      ]
+    },
+    {
+      "name": "Ripple",
+      "sources": [
+        "Ripple"
+      ]
+    },
+    {
+      "name": "Sila ACH",
+      "sources": [
+        "Sila ACH"
+      ]
+    },
+    {
+      "name": "IBAN",
+      "sources": [
+        "IBAN"
+      ]
+    },
+    {
+      "name": "BIC",
+      "sources": [
+        "BIC"
+      ]
+    },
+    {
+      "name": "SWIFT",
+      "sources": [
+        "SWIFT"
+      ]
+    },
+    {
+      "name": "TX",
+      "sources": [
+        "TX",
+        "Tx"
+      ]
+    },
+    {
+      "name": "UID",
+      "sources": [
+        "UID"
+      ]
+    },
+    {
+      "name": "Gas",
+      "sources": [
+        "Gas"
+      ],
+      "exceptKeys": [
+        "Utility bill e.g., electricity, water, gas, sewerage"
+      ]
+    }
+  ]
+}

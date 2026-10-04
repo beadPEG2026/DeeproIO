@@ -1,0 +1,146 @@
+<div>
+    <!-- Generate API Token -->
+    <jet-form-section @submitted="createApiToken">
+        <div class="form-container api-tokens">
+            <!-- form components start -->
+            <div class="form-components">
+
+                <div class="form-components__title"><h2>{{ $t('Create API Token') }}</h2></div>
+                <div class="form-components__body">
+                    <div class="form-components__input-text">
+
+                        <div class="form-components__block">
+                            <div class="form-components__block-item block-text">
+                                <p>{{ $t('API tokens allow third-party services to authenticate with our application on your behalf.') }}</p>
+                            </div>
+                        </div>
+                        <div class="form-components__block">
+                            <div class="input-field" :class="{'invalid': createApiTokenForm.errors.name}">
+                                <label for="input_name">{{ $t('Name') }}</label>
+                                <input autocomplete="new-password"  v-model="createApiTokenForm.name" type="text" id="input_name">
+                                <span v-if="createApiTokenForm.errors.name" class="helper-text">{{ createApiTokenForm.errors.name }}</span>
+                            </div>
+                        </div>
+                        <div class="form-components__block" v-if="availablePermissions.length > 0">
+                            <div class="block-checkbox__group">
+                                <div v-for="permission in availablePermissions" :key="permission" class="form-components__block-item block-checkbox">
+                                    <jet-checkbox :value="permission" v-model="createApiTokenForm.permissions"/>
+                                    <label class="form-components__block-label">{{ $t(permission) }} <small>({{ permission }})</small></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-components__block">
+                            <div class="form-components__block-item block-button">
+                                <button :class="{ 'opacity-75': createApiTokenForm.processing }" :disabled="createApiTokenForm.processing" class="form-components__block-button">
+                                    {{ $t('Create') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-components__table">
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-title">
+                            <h3>{{ $t('Manage API Tokens') }}</h3>
+                        </div>
+                        <div class="form-components__block-item block-text">
+                            <p>{{ $t('You may delete any of your existing tokens if they are no longer needed.') }}</p>
+                        </div>
+                    </div>
+                    <div v-if="tokens.length > 0" class="form-components__table-list">
+                        <table class="mob-table-api">
+                            <tbody>
+                            <tr v-for="token in tokens" :key="token.id">
+                                <td>
+                                    <span>
+                                        {{ token.name }}
+                                        <div class="text-sm text-gray-400" v-if="token.last_used_ago">
+                                            {{ $t('Last used') }} {{ token.last_used_ago }}
+                                        </div>
+                                    </span>
+                                </td>
+                                <td><a @click.stop="manageApiTokenPermissions(token)" v-if="availablePermissions.length > 0" href="#" class="components-label">{{ $t('Permissions') }}</a></td>
+                                <td><a @click.stop="confirmApiTokenDeletion(token)" href="#" class="components-label label-red">{{ $t('Delete') }}</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Token Value Modal -->
+        <jet-dialog-modal :show="displayingToken" @close="displayingToken = false">
+            <template #title>
+                {{ $t('API Token') }}
+            </template>
+
+            <template #content>
+                <div>
+                    {{ $t("Please copy your new API token. For your security, it won't be shown again.") }}
+                </div>
+
+                <div class="mt-4 bg-gray-100 px-4 py-2 rounded font-mono text-sm text-gray-500" v-if="$page.props.session.token">
+                    {{ $page.props.session.token }}
+                </div>
+            </template>
+
+            <template #footer>
+                <jet-secondary-button @click.native="displayingToken = false">
+                    {{ $t('Close') }}
+                </jet-secondary-button>
+            </template>
+        </jet-dialog-modal>
+
+        <!-- API Token Permissions Modal -->
+        <jet-dialog-modal :show="managingPermissionsFor" @close="managingPermissionsFor = null">
+            <template #title>
+               {{ $t('API Token Permissions') }}
+            </template>
+
+            <template #content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="permission in availablePermissions" :key="permission">
+                        <label class="flex items-center">
+                            <jet-checkbox :value="permission" v-model="updateApiTokenForm.permissions"/>
+                            <span class="ml-2 text-sm text-gray-600">{{ $t(permission) }} <small>({{ permission }})</small></span>
+                        </label>
+                    </div>
+                </div>
+            </template>
+
+            <template #footer>
+                <jet-secondary-button @click.native="managingPermissionsFor = null">
+                    {{ $t('Nevermind') }}
+                </jet-secondary-button>
+
+                <jet-button class="ml-2" @click.native="updateApiToken" :class="{ 'opacity-25': updateApiTokenForm.processing }" :disabled="updateApiTokenForm.processing">
+                    {{ $t('Save') }}
+                </jet-button>
+            </template>
+        </jet-dialog-modal>
+
+        <!-- Delete Token Confirmation Modal -->
+        <jet-confirmation-modal :show="apiTokenBeingDeleted" @close="apiTokenBeingDeleted = null">
+            <template #title>
+                {{ $t('Delete API Token') }}
+            </template>
+
+            <template #content>
+                {{ $t('Are you sure you would like to delete this API token?') }}
+            </template>
+
+            <template #footer>
+                <jet-secondary-button @click.native="apiTokenBeingDeleted = null">
+                    {{ $t('Nevermind') }}
+                </jet-secondary-button>
+
+                <jet-danger-button class="ml-2" @click.native="deleteApiToken" :class="{ 'opacity-25': deleteApiTokenForm.processing }" :disabled="deleteApiTokenForm.processing">
+                    {{ $t('Delete') }}
+                </jet-danger-button>
+            </template>
+        </jet-confirmation-modal>
+
+    </jet-form-section>
+</div>

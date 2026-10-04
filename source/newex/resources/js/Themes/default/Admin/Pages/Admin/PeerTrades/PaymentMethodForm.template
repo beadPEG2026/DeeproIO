@@ -1,0 +1,88 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.peerPaymentMethods')">{{ $t("支付方式") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input v-model="form.title" :error="errors.title" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;名称&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用支付方式") }}</label>
+                    <t-toggle v-model="form.status" />
+                    <div class="text-red-600 mb-3" v-if="errors.status">
+                        {{ errors.status }}
+                    </div>
+                </div>
+
+                <div class="mt-1 block w-full pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("徽章颜色") }}</label>
+                    <themed-select v-model="form.color" :error="errors.color" class="w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" :label="$t(&quot;Badge Color&quot;)">
+                        <option value="l-green">{{ $t("浅绿色") }}</option>
+                        <option value="green">{{ $t("绿色") }}</option>
+                        <option value="d-green">{{ $t("深绿色") }}</option>
+                        <option value="l-red">{{ $t("浅红色") }}</option>
+                        <option value="red">{{ $t("红色") }}</option>
+                        <option value="d-red">{{ $t("深红色") }}</option>
+                        <option value="l-yellow">{{ $t("浅黄色") }}</option>
+                        <option value="yellow">{{ $t("黄色") }}</option>
+                        <option value="d-yellow">{{ $t("深黄色") }}</option>
+                        <option value="l-gray">{{ $t("浅灰色") }}</option>
+                        <option value="gray">{{ $t("灰色") }}</option>
+                        <option value="d-gray">{{ $t("深灰色") }}</option>
+                        <option value="l-orange">{{ $t("浅橙色") }}</option>
+                        <option value="orange">{{ $t("橙色") }}</option>
+                        <option value="d-orange">{{ $t("深橙色") }}</option>
+                        <option value="l-brown">{{ $t("浅棕色") }}</option>
+                        <option value="brown">{{ $t("棕色") }}</option>
+                        <option value="d-brown">{{ $t("深棕色") }}</option>
+                        <option value="l-purple">{{ $t("浅紫色") }}</option>
+                        <option value="purple">{{ $t("紫色") }}</option>
+                        <option value="d-purple">{{ $t("深紫色") }}</option>
+                        <option value="l-pink">{{ $t("浅粉色") }}</option>
+                        <option value="pink">{{ $t("粉色") }}</option>
+                        <option value="d-pink">{{ $t("深粉色") }}</option>
+                    </themed-select>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("法币") }}</div>
+                </div>
+
+                <div class="mb-16">
+                    <div class="text-red-600 mb-3" v-if="errors.currencies">
+                        {{ errors.currencies }}
+                    </div>
+
+                    <div v-if="currencies" v-for="currency in currencies" class="pr-6 pb-2 w-full lg:w-ful">
+                        <t-checkbox :id="'label' + currency.id" name="networks" v-model="form.currencies" :value="currency.id" />
+                        <label :for="'label' + currency.id" @click="setCurrency(currency)" class="ml-4 form-label mr-2 d-inline-block">
+                            {{ currency.name }} ({{ currency.symbol }})
+                        </label>
+                    </div>
+
+                    <div v-else class="text-red-500">
+                        {{ $t('没有法币') }}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">
+                    {{ $t("删除支付方式") }}
+                </button>
+
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

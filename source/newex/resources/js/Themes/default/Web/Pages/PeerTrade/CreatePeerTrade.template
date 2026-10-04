@@ -1,0 +1,501 @@
+<app-layout>
+
+    <Head>
+        <title>{{ $t('Create P2P Ad')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <top-menu :label="$t(isEdit ? 'Edit Your Buy Order' : 'Edit Your Sell Order')"></top-menu>
+
+    <!-- components title end -->
+    <div id="p2p-post-create" class="p2p-post-create-mob">
+        <div class="p2p-create-steps p2p-create-steps-mob">
+            <div class="p2p-steps-step" data-status="process">
+                <div class="p2p-steps-step-inner">
+                    <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Set Type &amp; Price')}}</div>
+                    <div class="p2p-steps-step-marker" :class="{'active': step >= 1}" data-class="step_marker_row">
+                        <span data-bn-type="text" data-class="step_marker_number" class="p2p-create-step-marker-label">1</span>
+                    </div>
+                </div>
+            </div>
+            <div data-status-line="wait" class="p2p-steps-line"></div>
+            <div class="p2p-steps-step" data-status="wait">
+                <div class="p2p-steps-step-inner">
+                    <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Set Total Amount &amp; Payment Method')}}</div>
+                    <div class="p2p-steps-step-marker"  :class="{'active': step >= 2}" data-class="step_marker_row">
+                        <span data-bn-type="text" data-class="step_marker_number" class="p2p-create-step-marker-label p2p-create-step-marker-label-extra">2</span>
+                    </div>
+                </div>
+            </div>
+            <div data-status-line="wait" class="p2p-steps-line"></div>
+            <div class="p2p-steps-step" data-status="wait">
+                <div class="p2p-steps-step-inner">
+                    <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Set Remarks &amp; Automatic Response')}}</div>
+                    <div class="p2p-steps-step-marker"  :class="{'active': step >= 3}" data-class="step_marker_row">
+                        <span data-bn-type="text" data-class="step_marker_number" class="p2p-create-step-marker-label-extra">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p2p-post-wrapper">
+
+            <div v-if="step <= 2 && !isEdit" class="table-components">
+                <div class="filter-group">
+                    <div class="filter-top-group">
+                        <div class="filter-top-left">
+                            <div class="mb-2">{{ $t('I want to')}}</div>
+                            <div class="filter-button-group">
+                                <div @click="setType('buy')" :class="{'active' : form.side != 'sell'}" class="filter-button-items filter-button-left-group">{{ $t('Buy')}}</div>
+                                <div @click="setType('sell')" :class="{'active' : form.side == 'sell'}" class="filter-button-items filter-button-right-group">{{ $t('Sell')}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full p2p-post-tab-content">
+
+                <div v-if="step == 1">
+                    <div class="components-filter mt-10">
+                        <div class="flex w-full lg:w-1/2">
+                            <div class="components-filter__item">
+                                <label>{{ $t('Asset') }}</label>
+                                <t-rich-user-select
+                                    :options="coins"
+                                    v-model="form.coin"
+                                    :readonly="isEdit"
+                                    :disabled="isEdit"
+                                    :placeholder="$t('Select currency')"
+                                    value-attribute="symbol"
+                                    text-attribute="symbol"
+                                    :clearable="false"
+                                >
+                                    <template
+                                        slot="label"
+                                        slot-scope="{ className, option, query }"
+                                    >
+                                        <div class="flex">
+                                            <div class="flex flex-col">
+                                                <div class="swap-label flex items-stretch">
+                                                    <img :src="option.raw.logo" width="32" />
+                                                    <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template
+                                        slot="option"
+                                        slot-scope="{ className, option, query }"
+                                    >
+                                        <div class="flex">
+                                            <div class="flex flex-col">
+                                                <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                                    <img :src="option.raw.logo" width="32" />
+                                                    <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </t-rich-user-select>
+                            </div>
+                            <svg width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="p2p-asset-arrow mt-3"><path fill-rule="evenodd" clip-rule="evenodd" d="M21 11.999l-7.071-7.071-1.768 1.768 4.055 4.054H2.999v2.5h13.216l-4.054 4.053 1.768 1.768L21 12v-.001z" fill="currentColor"></path></svg>
+                            <div class="components-filter__item">
+                                <label>{{ $t('with Fiat') }}</label>
+                                <t-rich-user-select
+                                    :options="fiats"
+                                    v-model="form.fiat"
+                                    :readonly="isEdit"
+                                    :disabled="isEdit"
+                                    :placeholder="$t('Select fiat currency')"
+                                    value-attribute="symbol"
+                                    text-attribute="symbol"
+                                    :clearable="false"
+                                >
+                                    <template
+                                        slot="label"
+                                        slot-scope="{ className, option, query }"
+                                    >
+                                        <div class="flex">
+                                            <div class="flex flex-col">
+                                                <div class="swap-label flex items-stretch">
+                                                    <img :src="option.raw.logo" width="32" />
+                                                    <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template
+                                        slot="option"
+                                        slot-scope="{ className, option, query }"
+                                    >
+                                        <div class="flex">
+                                            <div class="flex flex-col">
+                                                <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                                    <img :src="option.raw.logo" width="32" />
+                                                    <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </t-rich-user-select>
+                            </div>
+                        </div>
+                        <span v-if="errors.assets" class="form-error__text">{{ errors.assets }}</span>
+                    </div>
+                    <div v-if="isEdit" class="components-filter mt-10">
+                        <div class="flex w-full lg:w-1/2">
+                            {{ $t('Assets not editable during post edit.')}}
+                        </div>
+                    </div>
+
+                    <template v-if="form.fiat && form.coin">
+                        <div class="form-components__block">
+                            <div class="form-components__block-item block-title">
+                                <h3>{{ $t('Price Type') }}</h3>
+                            </div>
+                            <div class="p2p-field-width mt-8">
+                                <div class="input-radio">
+                                    <t-radio id="p2p-fixed" name="document" v-model="form.type" value="fixed" />
+                                    <label for="p2p-fixed">{{ $t('Fixed Price') }}</label>
+                                </div>
+                                <div class="ml-8 input-radio">
+                                    <t-radio id="p2p-floated" name="document" v-model="form.type" value="float"/>
+                                    <label for="p2p-floated">{{ $t('Floated Price') }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-10">
+                            <div class="components-filter__row">
+                                <div v-if="form.type == 'fixed'" class="components-filter__item">
+                                    <label>{{ $t('Fixed Price') }}</label>
+                                    <vue-number placeholder="0.00" v-model="form.fixed_price" v-bind="numericValue()" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200"></vue-number>
+                                    <span v-if="errors.fixed_price" class="form-error__text">{{ errors.fixed_price }}</span>
+                                </div>
+                                <div v-if="form.type == 'float'" class="components-filter__item">
+                                    <label>{{ $t('Floating Price Margin') }}</label>
+                                    <div class="custom-input-group relative">
+                                        <vue-number placeholder="0.00" v-model="form.floated_price" v-bind="numericValue()" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200"></vue-number>
+                                        <span class="absolute">%</span>
+                                    </div>
+                                    <div v-if="errors.floated_price">
+                                        <span class="form-error__text">{{ errors.floated_price }}</span>
+                                    </div>
+                                    <div class="flex mt-5">
+                                        <div class="">
+                                            <div data-bn-type="text" class="bold mr-2">{{ $t('Pricing formula:')}}</div>
+                                        </div>
+                                        <div data-bn-type="text" class="">{{ $t('Market Price')}} * {{ form.floated_price }}% ≈ {{ calculatedPrice }} {{ form.fiat }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-components__block">
+                            <div class="flex">
+                                <div class="p2p-result-price-group">
+                                    <div>{{ $t('Your Price:') }}</div>
+                                    <p>{{ calculatedPrice }} {{ form.fiat }}</p>
+                                </div>
+                                <div class="ml-16 p2p-result-price-group">
+                                    <div>{{ $t('Highest Order Price:') }}</div>
+
+                                    <template v-if="form.side == 'buy'">
+                                        <p>{{ lowestOrderPrice }} {{ form.fiat }}</p>
+                                    </template>
+                                    <template v-else>
+                                        <p>{{ highestOrderPrice }} {{ form.fiat }}</p>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div v-if="step == 2">
+                    <div class="components-filter mt-10">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item">
+                                <label>{{ $t('Total amount') }}</label>
+
+                                <div class="custom-input-group relative">
+                                    <vue-number placeholder="0.00" v-model="form.amount" v-bind="cryptoNumericValue()" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200"></vue-number>
+                                    <div class="mt-1 opacity-60">≈ {{ convertToQuoteRate(form.amount) }} {{ form.fiat }}</div>
+                                    <span class="absolute">{{ form.coin }}</span>
+                                </div>
+
+                                <span v-if="errors.amount" class="form-error__text">{{ errors.amount }}</span>
+
+                                <div v-if="form.side == 'sell'" class="mt-2">{{ $t('Available:')}} <span @click="setAmount()" class="cursor-pointer font-bold text-yellow">{{ calculatedFee }} {{ form.coin }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="components-filter">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item flex gap-4 flex-col-mob">
+                                <div class="pb-2 w-full lg:w-1/2">
+                                    <label>{{ $t('Minimum amount') }}</label>
+
+                                    <div class="custom-input-group relative">
+                                        <vue-number placeholder="0.00" v-model="form.min_amount" v-bind="numericValue()" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200"></vue-number>
+                                        <div class="mt-1 opacity-60">≈ {{ convertToBaseRate(form.min_amount) }} {{ form.coin }}</div>
+                                        <span class="absolute">{{ form.fiat }}</span>
+                                    </div>
+
+                                    <span v-if="errors.min_amount" class="form-error__text">{{ errors.min_amount }}</span>
+                                </div>
+                                <div class="pb-2 w-full lg:w-1/2">
+                                    <label>{{ $t('Maximum amount') }}</label>
+
+                                    <div class="custom-input-group relative">
+                                        <vue-number placeholder="0.00" v-model="form.max_amount" v-bind="numericValue()" class="filter-select w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200"></vue-number>
+                                        <div class="mt-1 opacity-60">≈ {{ convertToBaseRate(form.max_amount) }} {{ form.coin }}</div>
+
+                                        <span class="absolute">{{ form.fiat }}</span>
+                                    </div>
+
+                                    <span v-if="errors.max_amount" class="form-error__text">{{ errors.max_amount }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="components-filter">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item">
+                                <label>{{ $t('Payment Time Limit') }}</label>
+                                <t-rich-user-select
+                                    :options="[{'id': '15', 'name': '15 min'},{'id': '30', 'name': '30 min'}, {'id': '45', 'name': '45 min'}, {'id': '60', 'name': '1 hr'}, {'id': '120', 'name': '2 hr'}, {'id': '180', 'name': '3 hr'}, {'id': '360', 'name': '6 hr'}]"
+                                    v-model="form.timeframe"
+                                    :placeholder="$t('Select period')"
+                                    value-attribute="id"
+                                    text-attribute="name"
+                                    :clearable="false"
+                                    :hideSearchBox="true"
+                                >
+                                    <template
+                                        slot="label"
+                                        slot-scope="{ className, option, query }"
+                                    >
+                                        <div class="flex">
+                                            <div class="flex flex-col">
+                                                <span>{{ option.text }}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </t-rich-user-select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="components-filter">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item components-filter__item-v2 components-filter__item-mob">
+                                <label class="block mb-8">{{ $t('Payment Method') }}</label>
+
+                                <div :class="{'flex flex-wrap flex-col-mob flex-col-mob-mb': form.side == 'buy', 'components-filter__item': form.side == 'sell'}">
+
+                                    <template v-if="form.side == 'buy'">
+                                        <div v-if="userMethods" v-for="method in userMethods" @click="deleteMethod(method.id)"  class="btn-add btn-add-label">
+                                            {{ method.name }}
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-ew2l8i">
+                                                <path d="M6.697 4.575L4.575 6.697 9.88 12l-5.304 5.303 2.122 2.122L12 14.12l5.303 5.304 2.122-2.122L14.12 12l5.304-5.303-2.122-2.122L12 9.88 6.697 4.575z" fill="currentColor"></path>
+                                            </svg>
+                                        </div>
+
+                                        <div @click="openMethods" class="btn-add btn-add-mob">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-164cs52">
+                                                <path d="M13.5 3h-3v7.5H3v3h7.5V21h3v-7.5H21v-3h-7.5V3z" fill="currentColor"></path>
+                                            </svg><span>{{ $t('Add')}}</span>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+
+                                        <div class="">
+                                            <div v-if="userPaymentMethods" class="checkbox-select-group" v-for="method in userPaymentMethods">
+                                                <label class="">
+                                                    <div class="flex items-center justify-between p2p-payment-method-card-mini-head">
+                                                        <span class="ml-2 text-sm text-gray-600 flex">
+                                                            <div class="p2p-payment-item">
+                                                                <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                                                {{ method.name }}
+                                                            </div>
+                                                        </span>
+                                                        <div class="action-link" @click="deleteMethod(method.id)">
+                                                            {{ $t('Delete') }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="p2p-payment-method-card p2p-payment-method-card-mini p2p-payment-method-card-no-border">
+                                                        <div v-for="fields in method.fields" class="p2p-payment-method-card-element ">
+                                                            <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                                                            <div class="p2p-payment-method-card-right">
+                                                                {{ fields.content }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+
+                                            <div class="max-width-200">
+                                                <div @click="openMethods" class="btn-add">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="css-164cs52">
+                                                        <path d="M13.5 3h-3v7.5H3v3h7.5V21h3v-7.5H21v-3h-7.5V3z" fill="currentColor"></path>
+                                                    </svg><span>{{ $t('Add')}}</span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </template>
+
+                                </div>
+
+                                <div class="slogan-text-bottom">{{ $t('Select up to 5 methods')}}</div>
+
+                                <span v-if="errors.payment_method" class="form-error__text">{{ errors.payment_method }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="step >= 3">
+
+                    <div class="components-filter__item mt-20 components-filter__item-multiple">
+                        <label>{{ $t('Select Region(s) Availability') }}</label>
+                        <t-rich-user-select
+                            :options="regions"
+                            v-model="form.regions"
+                            :placeholder="$t('All Regions')"
+                            value-attribute="id"
+                            text-attribute="name"
+                            :multiple="true"
+                            :clearable="false"
+                        >
+                        </t-rich-user-select>
+                    </div>
+
+                    <div class="components-filter mt-10">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item relative">
+                                <label>{{ $t('Remarks (Optional)') }}</label>
+                                    <textarea maxlength="1000" :placeholder="$t('Please do not include any crypto-related words, such as crypto, P2P, C2C, BTC, USDT, ETH etc.')" type="text" v-model="form.remarks" class="filter-select filter-textarea w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                                    <div v-if="form.remarks" class="textarea-counter">{{ form.remarks.length }} / 1000</div>
+                                    <div v-else class="textarea-counter">0 / 1000</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="components-filter mt-10">
+                        <div class="components-filter__row">
+                            <div class="components-filter__item relative">
+                                <label>{{ $t('Auto Reply (Optional)') }}</label>
+                                <textarea maxlength="1000" :placeholder="$t('Auto reply message will be sent to the counterparty once the order is created')" type="text" v-model="form.auto_reply" class="filter-select filter-textarea w-full rounded flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                                <div v-if="form.auto_reply" class="textarea-counter">{{ form.auto_reply.length }} / 1000</div>
+                                <div v-else class="textarea-counter">0 / 1000</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="p2p-post-next-btn flex">
+                    <div v-if="((step > 1) && (step <= 3))" class="btn-wrapper btn-wrapper-first">
+                        <t-button-green @click.stop="previousStep()" class="components-filter__button components-filter__button-v2 mt-8 py-2 px-6 prev-button">
+                        <span class="components-filter__icon">
+                            <template>
+                                {{ $t('Previous') }}
+                            </template>
+                        </span>
+                        </t-button-green>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <t-button-green @click.stop="nextStep()" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <template v-if="step >= 3">
+                                <template v-if="isEdit">
+                                    {{ $t('Save') }}
+                                </template>
+                                <template v-else>
+                                    {{ $t('Post Ad') }}
+                                </template>
+                            </template>
+                            <template v-else>
+                                {{ $t('Next') }}
+                            </template>
+                        </span>
+                        </t-button-green>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <jet-dialog-modal :show="showMethods" @close="closeMethods">
+            <template #title>
+                {{ $t('Select Payment Methods')}}
+            </template>
+            <template #content>
+                <div class="payment-method-wrapper-modal">
+
+                    <template v-if="form.side == 'buy'">
+
+                        <div v-if="methods" v-for="method in methods">
+                            <label class="checkbox-select-group flex items-center justify-between">
+                                <span class="ml-2 text-sm text-gray-600 flex">
+                                    <div class="payment-method-title">
+                                        <div class="p2p-payment-item">
+                                            <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                            {{ method.name }}
+                                        </div>
+                                    </div>
+                                </span>
+                                <jet-checkbox :disabled="selectMethodDisabled && !selectedMethods.includes(method.id)"  :value="method.id" v-model="selectedMethods"/>
+                            </label>
+                        </div>
+
+                    </template>
+                    <template v-else>
+
+                        <div class="checkbox-select-group" v-if="paymentMethods" v-for="method in paymentMethods">
+                            <label class="">
+                                <div class="flex items-center justify-between p2p-payment-method-card-mini-head">
+                                    <span class="ml-2 text-sm text-gray-600 flex">
+                                        <div class="p2p-payment-item">
+                                            <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                            {{ method.name }}
+                                        </div>
+                                    </span>
+                                    <jet-checkbox :disabled="selectMethodDisabled && !selectedMethods.includes(method.id)"  :value="method.id" v-model="selectedMethods"/>
+                                </div>
+                                <div class="p2p-payment-method-card p2p-payment-method-card-mini">
+                                    <div v-for="fields in method.fields" class="p2p-payment-method-card-element ">
+                                        <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                                        <div class="p2p-payment-method-card-right">
+                                            {{ fields.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                    </template>
+
+                </div>
+
+            </template>
+            <template #footer>
+                <div class="w-full flex flex-end">
+                <div @click="confirmMethods" class="btn-add">
+                    <span>{{ $t('Confirm')}}</span>
+                </div>
+                </div>
+            </template>
+        </jet-dialog-modal>
+    </div>
+</app-layout>

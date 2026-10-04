@@ -1,0 +1,265 @@
+<app-layout>
+    <Head>
+        <title>{{ pageTitle }} {{ staking.currency_symbol }}{{ $page.props.staking_type == 1 ? ' - USDT' : '' }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="staking-detail">
+        <!-- Back Button -->
+        <div class="staking-detail__back">
+            <Link :href="route('stakings', { staking_type: $page.props.staking_type })" class="staking-detail__back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                {{ backText }}
+            </Link>
+        </div>
+
+        <div class="staking-detail__grid">
+            <!-- Left Column - Info -->
+            <div class="staking-detail__info">
+                <!-- Coin Header -->
+                <div class="staking-detail__header">
+                    <img
+                        :src="$page.props.staking_type == 1 && staking.currencyd && staking.currencyd.file ? staking.currencyd.file.url : staking.currency_logo"
+                        :alt="$page.props.staking_type == 1 ? staking.currencyd.symbol : staking.currency_symbol"
+                        class="staking-detail__logo"
+                    />
+
+                    <div class="staking-detail__coin">
+                        <h1>{{ $page.props.staking_type == 1 ? staking.currencyd.symbol : staking.currency_symbol }}</h1>
+                        <span>{{ $page.props.staking_type == 1 ? staking.currencyd.name : staking.currency }}</span>
+                    </div>
+                </div>
+
+                <!-- APY Cards -->
+                <div class="staking-detail__apy-grid">
+                    <div
+                        v-for="{reward,days} in periods"
+                        :key="days"
+                        class="staking-detail__apy-card" role="button" tabindex="0" :aria-pressed="activeDays == days" @keydown.enter.prevent="setRange(days, reward)" @keydown.space.prevent="setRange(days, reward)"
+                        :class="{'staking-detail__apy-card--selected': activeDays == days}"
+                        @click="setRange(days, reward)"
+                    >
+                        <div class="staking-detail__apy-days">
+                            {{ days }} {{ days == 1 ? $t('day') : $t('days') }}
+                        </div>
+
+                        <div class="staking-detail__apy-value">
+                            <template v-if="$page.props.staking_type == 1">
+                                {{ reward }}% - {{ staking.rewards_percentage_a }}%
+                            </template>
+                            <template v-else>
+                                {{ Number(reward).toFixed(5) }}%
+                            </template>
+                        </div>
+
+                        <div class="staking-detail__apy-label">{{ $t('Period return') }}</div>
+                        <small v-if="$page.props.staking_type != 1">{{ $t("Estimated APR (simple)") }} {{ annualizedRate(reward, days) }}%</small>
+                    </div>
+                </div>
+
+                <p>{{ $t("Simple APR = period return × 365 ÷ days; estimates do not imply compounded or guaranteed returns.") }}</p>
+                <section v-if="staking.subscription &amp;&amp; staking.subscription.funded_term" class="dp-term-rules">
+                    <p>{{ $i18n.locale.startsWith('zh') ? '从现货账户申购，按平台业务时区次日 00:00 起息。应计收益每天更新，尚未到账；本金与全期收益在到期结算任务完成后返还现货账户。' : 'Subscribe from spot. Accrual starts at 00:00 the next day in the platform business timezone. Accrued rewards update daily and are not yet credited; principal and full-term rewards return to spot after the maturity settlement run.' }} {{ $page.props.timezone }} {{ $i18n.locale.startsWith('zh') ? '（适用当地夏令时）' : '(local daylight saving time applies)' }}</p>
+                    <p>{{ $t('Early redemption returns principal only and forfeits all rewards for this position. No early redemption fee.') }}</p>
+                    <p v-if="staking.subscription.reward_funding === 'platform'">{{ $t('Deepro pays rewards to your spot account at maturity.') }}</p>
+                    <p v-else>{{ $t('Rewards are paid from a dedicated Deepro operating reserve. New subscriptions pause when the reserve is insufficient.') }}</p>
+                    <p v-if="!staking.subscription.ready" class="dp-term-pending">{{ $t('Coming soon. Product terms are available to review.') }}</p>
+                </section>
+                <!-- Details -->
+                <div class="staking-detail__details">
+                    <div class="staking-detail__detail-item">
+                        <span class="staking-detail__detail-label">{{ $t('Coin') }}</span>
+                        <span class="staking-detail__detail-value">
+                            {{ $page.props.staking_type == 1 ? staking.currencyd.name : staking.currency }}
+                        </span>
+                    </div>
+
+                    <div class="staking-detail__detail-item">
+                        <span class="staking-detail__detail-label">
+                            {{ $page.props.staking_type == 1 ? 'Quote Currency' : $t('Symbol') }}
+                        </span>
+
+                        <span class="staking-detail__detail-value">
+                            {{ $page.props.staking_type == 1 ? staking.currencyd.symbol : staking.currency_symbol }}
+                        </span>
+                    </div>
+
+                    <div class="staking-detail__detail-item">
+                        <span class="staking-detail__detail-label">{{ minLabel }}</span>
+                        <span class="staking-detail__detail-value">{{ staking.min_amount }} {{ staking.currency_symbol }}</span>
+                    </div>
+
+                    <div class="staking-detail__detail-item">
+                        <span class="staking-detail__detail-label">{{ maxLabel }}</span>
+                        <span class="staking-detail__detail-value">{{ staking.max_amount }} {{ staking.currency_symbol }}</span>
+                    </div>
+
+                    <template v-if="$page.props.staking_type == 1">
+                        <div class="staking-detail__detail-item">
+                            <span class="staking-detail__detail-label">{{ $t("Quantitative Trading") }}</span>
+                            <span class="staking-detail__detail-value">{{ staking.Introduction }}</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right Column - Calculator -->
+            <div class="staking-detail__calculator">
+                <div class="staking-detail__calc-card">
+                    <div class="staking-detail__calc-title">
+                        <h2>{{ calculatorTitle }}</h2>
+
+                        <button
+                            type="button"
+                            class="staking-detail__risk-icon"
+                            :title="$t('Risk Notice')"
+                            @click.prevent="showRiskModal = true"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 10V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 7H12.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Risk Notice Modal -->
+                    <div
+                        v-if="showRiskModal"
+                        class="staking-detail__risk-modal"
+                        @click.self="showRiskModal = false"
+                    >
+                        <div ref="riskDialog" class="staking-detail__risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">
+                            <div class="staking-detail__risk-header">
+                                <h3>{{ $t('Risk Notice') }}</h3>
+
+                                <button
+                                    type="button"
+                                    class="staking-detail__risk-close" :aria-label="$t('Close')"
+                                    @click.prevent="showRiskModal = false"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <div class="staking-detail__risk-body">
+                                <p>{{ $t('Risk Notice Content 1') }}</p>
+                                <p>{{ $t('Risk Notice Content 2') }}</p>
+                                <p>{{ $t('Risk Notice Content 3') }}</p>
+                                <p>{{ $t('Risk Notice Content 4') }}</p>
+                            </div>
+
+                            <div class="staking-detail__risk-footer">
+                                <button
+                                    type="button"
+                                    class="staking-detail__risk-confirm"
+                                    @click.prevent="showRiskModal = false"
+                                >
+                                    {{ $t('I Understand') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance Info -->
+                    <div class="staking-detail__balance">
+                        <span class="staking-detail__balance-label">{{ $t('Available Balance') }}</span>
+
+                        <span class="staking-detail__balance-value">
+                            <template v-if="$page.props.user">{{ balance }}</template>
+                            <template v-else>0.00</template>
+                            {{ staking.currency_symbol }}
+                        </span>
+                    </div>
+
+                    <!-- Period Selection -->
+                    <div class="staking-detail__field">
+                        <label>{{ $t('Select Period') }}</label>
+
+                        <div class="staking-detail__period-btns">
+                            <button
+                                v-for="{reward,days} in periods"
+                                :key="days"
+                                @click.prevent="setRange(days, reward)"
+                                class="staking-detail__period-btn"
+                                :class="{'staking-detail__period-btn--active': activeDays == days}"
+                            >
+                                {{ days }}{{ $t('D') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Amount Input -->
+                    <div class="staking-detail__field">
+                        <label>{{ $t('Amount') }}</label>
+
+                        <div class="staking-detail__input-wrapper">
+                            <input
+                                type="text"
+                                v-model="form.amount"
+                                @keyup="(e) => clearInput(e)"
+                                @keypress="(e) => handleInput(e)"
+                                @paste.prevent
+                                @drop.prevent
+                                placeholder="0.00"
+                                class="staking-detail__input"
+                            />
+
+                            <span class="staking-detail__input-suffix">{{ staking.currency_symbol }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="staking-detail__summary">
+                        <div class="staking-detail__summary-item">
+                            <span>{{ $t('Estimated Interest') }}</span>
+                            <span class="staking-detail__summary-value staking-detail__summary-value--highlight">
+                                {{ calculatedReward || '0.00' }} {{ staking.currency_symbol }}
+                            </span>
+                        </div>
+
+                        <div class="staking-detail__summary-item">
+                            <span>{{ $t('Value Date') }}</span>
+                            <span class="staking-detail__summary-value">{{ valueDate }}</span>
+                        </div>
+
+                        <div class="staking-detail__summary-item">
+                            <span>{{ $t('Redemption Date') }}</span>
+                            <span class="staking-detail__summary-value">{{ redemptionDate }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button
+                        @click.prevent="submit"
+                        class="staking-detail__submit"
+                        :disabled="sending || (staking.subscription &amp;&amp; !staking.subscription.ready)"
+                    >
+                        <svg
+                            v-show="sending"
+                            class="staking-detail__spinner"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+
+                        <template v-if="staking.subscription &amp;&amp; !staking.subscription.ready">{{ $t("Coming soon") }}</template>
+                        <template v-else-if="$page.props.user">
+                            {{ actionText }} {{ staking.currency_symbol }}
+                        </template>
+
+                        <template v-else>
+                            {{ loginActionText }}
+                        </template>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

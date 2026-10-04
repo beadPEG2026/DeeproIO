@@ -1,0 +1,11 @@
+{
+  "counter_id": "ST/HK/8379",
+  "currency": "HKD",
+  "timestamp": "1790669284",
+  "latency": true,
+  "available_levels": ["Delay"],
+  "unit": 10000,
+  "trade_status": 108,
+  "bid_depths": [{"price_level": 1, "count": "1", "volume": "30000", "price": "0.103"}],
+  "ask_depths": [{"price_level": 1, "count": "1", "volume": "10000", "price": "0.114"}]
+}

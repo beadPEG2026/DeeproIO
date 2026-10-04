@@ -1,0 +1,74 @@
+<div class="market-selector">
+    <div class="market-selector__header">
+        <div class="market-selector__title">{{ $t('Select Market') }}</div>
+        <div class="market-selector__close" @click="$emit('close')">×</div>
+    </div>
+
+    <div class="market-selector__search">
+        <input
+            v-model="keyword"
+            type="text"
+            :placeholder="$t('Search Coin Name')"
+        >
+    </div>
+
+    <div class="market-selector__tabs">
+        <div
+            class="market-selector__tab"
+            :class="{ 'market-selector__tab--active': tab === 'all' }"
+            @click="tab = 'all'"
+        >
+            {{ currentTabText }}
+        </div>
+
+        <div
+            class="market-selector__tab"
+            :class="{ 'market-selector__tab--active': tab === 'favorites' }"
+            @click="tab = 'favorites'"
+        >
+            {{ $t('Favorites') }}
+        </div>
+    </div>
+
+    <div class="market-selector__list" :key="refreshKey">
+        <div
+            v-for="market in filteredMarkets"
+            :key="market.id"
+            class="market-selector__item"
+            @click="selectMarket(market)"
+        >
+            <div class="market-selector__left">
+                <div class="market-selector__favorite" @click.stop="toggleSelectorFavorite(market)">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            :class="{ 'market-selector__favorite--active': isFavorite(market.name) }"
+                            d="M11.5793 1.65498C11.7761 1.3486 12.2239 1.3486 12.4207 1.65498L15.6448 6.67456C15.7125 6.77997 15.8173 6.85613 15.9385 6.88795L21.7087 8.40311C22.0609 8.49559 22.1993 8.92148 21.9687 9.20332L18.1911 13.8207C18.1118 13.9177 18.0717 14.0409 18.0789 14.166L18.421 20.122C18.4419 20.4856 18.0796 20.7488 17.7403 20.6166L12.1815 18.4507C12.0648 18.4052 11.9352 18.4052 11.8185 18.4507L6.2597 20.6166C5.92041 20.7488 5.55812 20.4856 5.579 20.122L5.92109 14.166C5.92827 14.0409 5.88824 13.9177 5.8089 13.8207L2.0313 9.20332C1.80072 8.92148 1.93911 8.49559 2.2913 8.40311L8.0615 6.88795C8.18268 6.85613 8.2875 6.77997 8.35521 6.67456L11.5793 1.65498Z"
+                        />
+                    </svg>
+                </div>
+
+                <div class="market-selector__logo">
+                    <img :src="market.base_currency_logo" alt="">
+                </div>
+
+                <div class="market-selector__name">
+                    {{ market.base_currency }}-{{ market.quote_currency }}
+                </div>
+            </div>
+
+            <div class="market-selector__right">
+                <div class="market-selector__price">{{ market.last }}</div>
+                <div
+                    class="market-selector__change"
+                    :class="{ 'color-buy': market.change > 0, 'color-sell': market.change < 0 }"
+                >
+                    {{ market.change }}%
+                </div>
+            </div>
+        </div>
+
+        <div v-if="filteredMarkets.length === 0" class="market-selector__empty">
+            {{ $t('No markets found.') }}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('孤立支付') }}</title>
+    </Head>
+
+    <div class="p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('孤立支付') }}</h1>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-white rounded-lg p-4">
+                <p class="text-2xl font-bold text-yellow-600">{{ stats.pending }}</p>
+                <p class="text-sm text-gray-500">{{ $t('待处理') }}</p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+                <p class="text-2xl font-bold text-gray-800">${{ Number(stats.total_pending_usd || 0).toLocaleString() }}</p>
+                <p class="text-sm text-gray-500">{{ $t('总价值') }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('交易') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('金额') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('原因') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('状态') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('检测时间') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('操作') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr v-for="payment in orphanPayments.data" :key="payment.id" class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="font-mono text-sm">{{ payment.txn_hash.substring(0, 16) }}...</div>
+                            <div class="text-sm text-gray-500">{{ payment.currency.symbol }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium">{{ payment.amount_crypto }}</div>
+                            <div class="text-sm text-gray-500">${{ Number(payment.amount_usd || 0).toFixed(2) }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">{{ payment.orphan_reason }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span :class="['px-2 py-1 rounded text-xs', payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800']">{{ payment.status }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(payment.detected_at).toLocaleString() }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button v-if="payment.status === 'pending'" @click="openResolve(payment)" class="text-blue-600 hover:text-blue-800">{{ $t('处理') }}</button>
+                            <span v-else class="text-green-600">{{ $t('已处理') }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center" v-if="orphanPayments.links">
+            <nav class="flex space-x-2">
+                <a v-for="link in orphanPayments.links" :key="link.label" :href="link.url" v-html="link.label" :class="['px-3 py-2 rounded', link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100']"></a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Resolve Modal -->
+    <div v-if="showResolveModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="font-semibold text-lg mb-4">{{ $t('处理孤立支付') }}</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('处理方式') }}</label>
+                    <themed-select v-model="resolveForm.resolution" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="credit_merchant">{{ $t('记入商户账户') }}</option>
+                        <option value="refund">{{ $t('退款给发送方') }}</option>
+                        <option value="keep">{{ $t('保留（平台收益）') }}</option>
+                    </themed-select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('备注') }}</label>
+                    <textarea v-model="resolveForm.notes" class="w-full px-4 py-2 border rounded-lg" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showResolveModal = false" class="px-4 py-2 border rounded-lg">{{ $t('取消') }}</button>
+                <button @click="resolvePayment" :disabled="processing" class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ $t('处理') }}</button>
+            </div>
+        </div>
+    </div>
+</app-layout>

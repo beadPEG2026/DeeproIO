@@ -1,0 +1,20 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'io.deepro.app'
+    compileSdk 35
+    defaultConfig { applicationId 'io.deepro.app'; minSdk 26; targetSdk 35; versionCode 2; versionName '1.0.1' }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('DEEPRO_ANDROID_KEYSTORE') ?: '/nonexistent/signing-required.p12')
+            storePassword System.getenv('DEEPRO_ANDROID_STORE_PASS')
+            keyAlias 'deepro-release'
+            keyPassword System.getenv('DEEPRO_ANDROID_STORE_PASS')
+        }
+    }
+    buildFeatures { buildConfig true }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+        debug { applicationIdSuffix '.debug' }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}

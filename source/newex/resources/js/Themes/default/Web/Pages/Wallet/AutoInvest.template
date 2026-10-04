@@ -1,0 +1,1482 @@
+<app-layout>
+    <div class="dp-earn py-8 pt-0">
+        <div
+            class="rounded-3xl border bordered-dark overflow-hidden"
+            style="background: var(--ui-surface); border-color: var(--ui-line);"
+        >
+            <div class="p-5 md:p-6">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div class="max-w-4xl">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h2 class="text-2xl md:text-3xl text-gray-100 tracking-wide">
+                                {{ $t('Quant Allocation Console') }}
+                            </h2>
+
+                            <span
+                                class="px-3 py-1 rounded-full text-sm"
+                                :style="autoInvest.funding ? 'background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);' : 'background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);'"
+                            >
+                                {{ $t(autoInvestDisplayStatus) }}
+                            </span>
+                        </div>
+
+                        <div class="text-base text-gray-500 mt-3 leading-7">
+                            {{ $t('Allocate available trading assets into rule-based quant strategies with clear yield range, risk controls, margin support and order-level settlement.') }}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 ml-auto">
+                        <div class="hidden md:block text-right">
+                            <div class="text-sm text-gray-500">
+                                {{ $t('Available to invest') }}
+                            </div>
+                            <div class="text-xl text-gray-100 mt-1">
+                                {{ formattedAutoInvestMaxAmount }} {{ autoInvestDisplaySymbol }}
+                            </div>
+                        </div>
+
+                        <label
+                            class="relative inline-flex items-center shrink-0"
+                            style="width: 54px; height: 30px;"
+                            :style="autoInvestSaving ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;'"
+                        >
+                            <input
+                                type="checkbox"
+                                v-model="autoInvest.funding"
+                                :disabled="autoInvestSaving"
+                                @change="onToggleAutoInvest"
+                                class="absolute inset-0 w-full h-full opacity-0 z-10"
+                                :style="autoInvestSaving ? 'cursor: not-allowed;' : 'cursor: pointer;'"
+                            >
+
+                            <span
+                                class="absolute inset-0 rounded-full transition-all duration-200 pointer-events-none"
+                                :style="autoInvest.funding
+                                    ? 'background: var(--ui-field); border:1px solid var(--ui-line); box-shadow: 0 8px 18px rgba(99, 102, 241, 0.28);'
+                                    : 'background: var(--ui-field); border:1px solid var(--ui-line);'"
+                            ></span>
+
+                            <span
+                                class="absolute rounded-full bg-white transition-all duration-200 pointer-events-none"
+                                :style="autoInvest.funding
+                                    ? 'width: 22px; height: 22px; left: 27px; top: 4px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);'
+                                    : 'width: 22px; height: 22px; left: 4px; top: 4px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);'"
+                            ></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-6">
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">
+                            {{ $t('Asset') }}
+                        </div>
+                        <div class="text-2xl text-gray-100 mt-2">
+                            {{ autoInvestDisplaySymbol }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">
+                            {{ $t('Term') }}
+                        </div>
+                        <div class="text-2xl text-gray-100 mt-2">
+                            {{ selectedInvestOption.days }} {{ $t('Days') }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">
+                            {{ $t('Daily Yield Range') }}
+                        </div>
+                        <div class="text-2xl text-indigo-300 mt-2">
+                            {{ selectedInvestOption.dailyRateLabel }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">
+                            {{ $t('Total Yield Range') }}
+                        </div>
+                        <div class="text-2xl text-green-400 mt-2">
+                            {{ selectedInvestOption.totalRateLabel }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- old introduction content merged start -->
+        <div
+            class="mt-5 rounded-3xl border bordered-dark p-5"
+            style="background: var(--ui-field); border-color: var(--ui-line);"
+        >
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="max-w-4xl">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="text-xl text-gray-100">
+                            {{ $t('About Auto Invest') }}
+                        </div>
+
+                        <span
+                            class="px-3 py-1 rounded-full text-xs font-semibold text-indigo-300"
+                            style="background: var(--ui-field); border:1px solid var(--ui-line);"
+                        >
+                            {{ $t('Multiple orders supported') }}
+                        </span>
+                    </div>
+
+                    <div class="text-sm text-gray-500 mt-2 leading-7">
+                        {{ $t('Auto Invest creates independent earning orders for idle assets. Flexible plans use flexible daily yield ranges, fixed plans use fixed daily yield ranges, and each order settles once per day at 00:00. Estimated total yield is shown as daily yield multiplied by the selected period.') }}
+                    </div>
+
+                    <div class="text-sm text-gray-500 mt-2 leading-7">
+                        {{ $t('Rules and common questions are placed here to keep this page clean.') }}
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-sm transition"
+                        style="background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);"
+                        @click="openAutoInvestInfoModal('overview')"
+                    >
+                        {{ $t('Overview') }}
+                    </button>
+
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-sm transition"
+                        style="background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);"
+                        @click="openAutoInvestInfoModal('faq')"
+                    >
+                        {{ $t('FAQ') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
+            <div
+                class="rounded-3xl border bordered-dark p-5"
+                style="background: var(--ui-field); border-color: var(--ui-line);"
+            >
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="text-xl text-gray-100">
+                        {{ $t('Trading Margin Support') }}
+                    </div>
+
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold text-emerald-300"
+                        style="background: var(--ui-field); border:1px solid var(--ui-line);"
+                    >
+                        {{ $t('Earn while supporting trades') }}
+                    </span>
+                </div>
+
+                <div class="text-sm text-gray-500 mt-2 leading-7">
+                    {{ $t('Your Auto Invest assets can continue generating yield while also being used as trading margin support.') }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                    <div class="rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                        <div class="text-xs text-gray-500 mb-1">{{ $t('Step 1') }}</div>
+                        <div class="text-sm text-gray-100">{{ $t('Available Funds First') }}</div>
+                        <div class="text-xs text-gray-500 mt-2 leading-5">
+                            {{ $t('When you open a position, the system will first use your available trading funds.') }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                        <div class="text-xs text-gray-500 mb-1">{{ $t('Step 2') }}</div>
+                        <div class="text-sm text-gray-100">{{ $t('Auto Invest Margin Support') }}</div>
+                        <div class="text-xs text-gray-500 mt-2 leading-5">
+                            {{ $t('If available funds are insufficient, eligible Auto Invest assets may provide margin support.') }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                        <div class="text-xs text-gray-500 mb-1">{{ $t('Step 3') }}</div>
+                        <div class="text-sm text-gray-100">{{ $t('Unused Assets Keep Earning') }}</div>
+                        <div class="text-xs text-gray-500 mt-2 leading-5">
+                            {{ $t('The unused part of your Auto Invest assets will continue generating yield.') }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                        <div class="text-xs text-gray-500 mb-1">{{ $t('Step 4') }}</div>
+                        <div class="text-sm text-gray-100">{{ $t('Automatic Reallocation') }}</div>
+                        <div class="text-xs text-gray-500 mt-2 leading-5">
+                            {{ $t('After the trade is closed, assets will be automatically reallocated.') }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                    <div class="text-sm text-gray-100 mb-1">
+                        {{ $t('Profit and Loss Deduction Rule') }}
+                    </div>
+
+                    <div class="text-xs text-gray-500 leading-6">
+                        {{ $t('Trading profits will increase your available assets. Trading losses will be deducted from trading account funds first, and then from pledged Auto Invest funds if the trading account balance is insufficient.') }}
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="rounded-3xl border bordered-dark p-5"
+                style="background: var(--ui-field); border-color: var(--ui-line);"
+            >
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div class="max-w-3xl">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="text-xl text-gray-100">
+                                {{ $t('Yield Source') }}
+                            </div>
+
+                            <span
+                                class="px-3 py-1 rounded-full text-xs font-semibold text-yellow-300"
+                                style="background: var(--ui-field); border:1px solid var(--ui-line);"
+                            >
+                                {{ $t('Deepro AI Quant Yield Pool') }}
+                            </span>
+                        </div>
+
+                        <div class="text-sm text-gray-500 mt-2 leading-7">
+                            {{ $t('Auto Invest yield is mainly generated through Deepro AI quantitative strategies, including market-neutral allocation, liquidity optimization, spread capture, and risk-controlled rebalancing across eligible digital assets.') }}
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-sm transition"
+                        style="background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);"
+                        @click="openAutoInvestYieldSourceModal"
+                    >
+                        {{ $t('View Yield Source') }}
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                    <div
+                        v-for="item in autoInvestYieldSourceItems"
+                        :key="'intro-source-' + item.title"
+                        class="rounded-2xl border bordered-dark p-4"
+                        style="background: var(--ui-field);"
+                    >
+                        <div class="text-xs text-gray-500 mb-1">
+                            {{ $t(item.label) }}
+                        </div>
+
+                        <div class="text-sm text-gray-100">
+                            {{ $t(item.title) }}
+                        </div>
+
+                        <div class="text-xs text-gray-500 mt-2 leading-5">
+                            {{ $t(item.shortText) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-4 flex flex-wrap items-center justify-between gap-3" style="background: var(--ui-field);">
+                    <div>
+                        <div class="text-sm text-gray-100 mb-1">
+                            {{ $t('VIP Settlement Boost') }}
+                        </div>
+
+                        <div class="text-xs text-gray-500 leading-5">
+                            {{ $t('Membership level rewards may increase the final settlement return for eligible Auto Invest earnings.') }}
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500 mb-1">
+                            {{ $t('Current Boost') }}
+                        </div>
+
+                        <div class="text-[11px] text-gray-500 mb-1">
+                            {{ $t('Current VIP Level') }}{{ $t(": VIP") }}{{ currentUserVipLevel || 0 }}
+                        </div>
+
+                        <div class="text-lg font-bold text-indigo-400">
+                            {{ currentVipYieldBoostLabel }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- old introduction content merged end -->
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-5">
+            <div class="xl:col-span-4 xl:order-2">
+                <div class="rounded-3xl border bordered-dark p-5 sticky top-4"
+                     style="background: var(--ui-field); border-color: var(--ui-line);">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-xl text-gray-100">
+                                {{ $t('Allocation Ticket') }}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">
+                                {{ $t('Configure the order and confirm the plan.') }}
+                            </div>
+                        </div>
+
+                        <div class="px-3 py-1 rounded-full text-sm text-indigo-300"
+                             style="background: var(--ui-field); border:1px solid var(--ui-line);">
+                            {{ $t(selectedInvestTypeOption.shortTitle || selectedInvestTypeOption.title) }}
+                        </div>
+                    </div>
+
+                    <div v-if="!autoInvest.funding" class="mt-5 rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-base text-gray-100">
+                            {{ $t('Enable Auto Invest to create a new allocation ticket.') }}
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2 leading-6">
+                            {{ $t('Existing orders will remain active and can be viewed in the portfolio ledger.') }}
+                        </div>
+                    </div>
+
+                    <div v-if="autoInvest.funding" class="mt-5 space-y-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="text-sm text-gray-500">
+                                    {{ $t('Asset and Amount') }}
+                                </div>
+                                <div class="text-sm text-gray-400">
+                                    {{ $t('Available') }} {{ formattedAutoInvestMaxAmount }} {{ autoInvestDisplaySymbol }}
+                                </div>
+                            </div>
+
+                            <div
+                                class="rounded-2xl border bordered-dark overflow-visible"
+                                style="background: var(--ui-field); border-color: var(--ui-line);"
+                            >
+                                <div class="flex items-center h-16">
+                                    <div
+                                        ref="autoInvestTokenDropdown"
+                                        class="relative h-full flex items-center px-3"
+                                        style="min-width: 132px; border-right:1px solid rgba(148,163,184,0.14);"
+                                    >
+                                        <button
+                                            type="button"
+                                            @click.stop="toggleAutoInvestTokenDropdown"
+                                            class="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-left"
+                                            style="background: var(--ui-field); border:1px solid var(--ui-line);"
+                                        >
+                                            <span class="text-lg text-gray-100 truncate">
+                                                {{ autoInvestDisplaySymbol }}
+                                            </span>
+                                            <svg class="w-4 h-4 text-gray-400 transition shrink-0"
+                                                 :style="autoInvestTokenDropdownVisible ? 'transform: rotate(180deg);' : ''"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <div
+                                            v-if="autoInvestTokenDropdownVisible"
+                                            class="absolute left-0 top-[62px] z-[9999] w-80 rounded-2xl overflow-hidden shadow-2xl"
+                                            style="background: var(--ui-field); border:1px solid var(--ui-line); backdrop-filter: blur(14px);"
+                                        >
+                                            <div class="max-h-72 overflow-y-auto py-1">
+                                                <button
+                                                    v-for="option in autoInvestWalletOptions"
+                                                    :key="option.key"
+                                                    type="button"
+                                                    @click.stop="selectAutoInvestSymbol(option.symbol)"
+                                                    class="w-full flex items-center justify-between gap-3 px-3 py-3 text-left transition hover:bg-indigo-500/10"
+                                                    :style="String(option.symbol).toUpperCase() === String(autoInvestDisplaySymbol).toUpperCase() ? 'background: var(--ui-field);' : ''"
+                                                >
+                                                    <div class="text-base text-gray-100">
+                                                        {{ option.symbol }}
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div
+                                                            class="text-base"
+                                                            :class="Number(option.availableAmount || 0) > 0 ? 'text-indigo-300' : 'text-gray-500'"
+                                                        >
+                                                            {{ formatAmountInputValue(option.availableAmount) || '0' }}
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ option.symbol }}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input
+                                        type="text"
+                                        v-model="autoInvest.amount"
+                                        @input="onAmountInput"
+                                        :placeholder="$t('Please enter investment amount')"
+                                        class="flex-1 h-full px-4 bg-transparent text-2xl outline-none placeholder-gray-600"
+                                        style="min-width:0;"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        @click="fillMaxAutoInvestAmount"
+                                        :disabled="autoInvestSaving || autoInvestMaxAmount <= 0"
+                                        class="mx-3 rounded-xl px-4 py-2.5 text-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        style="background: var(--ui-field); color:var(--ui-text);"
+                                    >
+                                        MAX
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">
+                                {{ $t('Yield Mode') }}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <button
+                                    v-for="item in investTypeOptions"
+                                    :key="item.value"
+                                    type="button"
+                                    @click="selectInvestType(item.value)"
+                                    :disabled="autoInvestSaving"
+                                    class="rounded-2xl border bordered-dark p-4 text-left transition"
+                                    :style="autoInvest.type === item.value ? 'background: var(--ui-highlight); border-color: var(--ui-focus);' : 'background: var(--ui-field); border-color: var(--ui-line);'"
+                                >
+                                    <div class="text-base text-gray-100">
+                                        {{ $t(item.shortTitle || item.title) }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 mt-1 leading-5">
+                                        {{ $t(item.tag) }}
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">
+                                {{ $t('Term') }}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <button
+                                    v-for="item in investOptions"
+                                    :key="item.days"
+                                    type="button"
+                                    @click="selectInvestDays(item.days)"
+                                    class="rounded-2xl border bordered-dark p-4 text-left transition"
+                                    :style="Number(autoInvest.days) === Number(item.days) ? 'background: var(--ui-highlight); border-color: var(--ui-focus);' : 'background: var(--ui-field); border-color: var(--ui-line);'"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-xl text-gray-100">
+                                            {{ item.days }} {{ $t('Days') }}
+                                        </div>
+                                        <div
+                                            class="w-3 h-3 rounded-full"
+                                            :style="Number(autoInvest.days) === Number(item.days) ? 'background: var(--ui-field);' : 'background: var(--ui-field);'"
+                                        ></div>
+                                    </div>
+
+                                    <div class="text-sm text-gray-500 mt-2">
+                                        {{ item.totalRateLabel }}
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">
+                                {{ $t('Ticket Preview') }}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mt-3">
+                                <div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ $t('Amount') }}
+                                    </div>
+                                    <div class="text-xl text-gray-100 mt-1">
+                                        {{ formatAmountInputValue(normalizedAutoInvestAmount) || '0' }} {{ autoInvestDisplaySymbol }}
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-500">
+                                        {{ $t('Yield Range') }}
+                                    </div>
+                                    <div class="text-xl text-green-400 mt-1">
+                                        {{ selectedInvestOption.totalRateLabel }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-sm text-gray-500 mt-3 leading-6">
+                                {{ $t('The final allocation will follow available balance, selected term, strategy score and risk band.') }}
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="w-full rounded-2xl px-5 py-4 text-base transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            style="background: var(--ui-field); color:var(--ui-text);"
+                            :disabled="!canConfirmAutoInvest"
+                            @click="openAutoInvestRiskModal"
+                        >
+                            {{ $t(confirmAutoInvestButtonText) }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-8 space-y-5 xl:order-1">
+                <div class="rounded-3xl border bordered-dark p-5"
+                     style="background: var(--ui-field); border-color: var(--ui-line);">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <div class="text-xl text-gray-100 tracking-wide">
+                                {{ $t('Strategy Matrix') }}
+                            </div>
+                            <div class="text-base text-gray-500 mt-2 leading-7">
+                                {{ $t('Verified strategy performance is not available yet. No historical return, win rate or ranking is shown.') }}
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div
+                        v-if="autoInvestStrategyCards.length"
+                        class="mt-5 rounded-3xl border bordered-dark p-5"
+                        style="background: var(--ui-surface); border-color: var(--ui-line);"
+                    >
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-stretch">
+                            <div class="lg:col-span-2">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-sm text-gray-500">
+                                        {{ $t('Primary Allocation') }}
+                                    </div>
+                                    <div class="px-2.5 py-1 rounded-full text-sm text-purple-300" style="background: var(--ui-field); border:1px solid var(--ui-line);">
+                                        {{ $t('Score') }} {{ autoInvestStrategyCards[0].confidenceScore || 86 }}
+                                    </div>
+                                </div>
+
+                                <div class="text-3xl text-gray-100 mt-2">
+                                    {{ autoInvestStrategyCards[0].symbol }}
+                                </div>
+
+                                <div class="text-sm text-gray-500 mt-2 flex items-center gap-2 flex-wrap">
+                                    <span>{{ $t(autoInvestStrategyCards[0].type) }}</span>
+                                    <span>·</span>
+                                    <span :style="'color:' + autoInvestStrategyCards[0].color">{{ $t(autoInvestStrategyCards[0].sideLabel) }}</span>
+                                    <span>{{ autoInvestStrategyCards[0].leverage }}x</span>
+                                    <span>{{ autoInvestStrategyCards[0].executionStyle || 'TWAP' }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 mt-5">
+                                    <div class="rounded-2xl border bordered-dark p-3"
+                                         style="background: var(--ui-field);">
+                                        <div class="text-sm text-gray-500">
+                                            {{ $t('PnL') }} {{ $t("(USD)") }}
+                                        </div>
+                                        <div class="text-2xl mt-2" :style="'color:' + autoInvestStrategyCards[0].color">
+                                            {{ formatStrategyMoney(autoInvestStrategyCards[0].pnl) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="rounded-2xl border bordered-dark p-3 text-right"
+                                         style="background: var(--ui-field);">
+                                        <div class="text-sm text-gray-500">
+                                            {{ $t('Return') }}
+                                        </div>
+                                        <div class="text-2xl mt-2" :style="'color:' + autoInvestStrategyCards[0].color">
+                                            {{ autoInvestStrategyCards[0].roiLabel }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+                                    <div class="rounded-2xl border bordered-dark p-3" style="background: var(--ui-field);">
+                                        <div class="text-gray-500">{{ $t('Win Rate') }}</div>
+                                        <div class="text-gray-100 mt-1">{{ autoInvestStrategyCards[0].winRate || '68.5' }}%</div>
+                                    </div>
+                                    <div class="rounded-2xl border bordered-dark p-3 text-right" style="background: var(--ui-field);">
+                                        <div class="text-gray-500">{{ $t('Sharpe') }}</div>
+                                        <div class="text-gray-100 mt-1">{{ autoInvestStrategyCards[0].sharpe || '1.82' }}</div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="mt-4 w-full rounded-2xl px-4 py-3 text-sm"
+                                    style="background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);"
+                                    @click="openAutoInvestStrategyModal(autoInvestStrategyCards[0])"
+                                >
+                                    {{ $t('Open Strategy Sheet') }}
+                                </button>
+                            </div>
+
+                            <div class="lg:col-span-3 rounded-2xl border bordered-dark p-3"
+                                 style="background: var(--ui-field);">
+                                <svg viewBox="0 0 560 210" class="w-full h-64" preserveAspectRatio="none">
+                                    <text x="16" y="24" fill="rgba(203,213,225,0.62)" font-size="12">100.0%</text>
+                                    <text x="16" y="69" fill="rgba(203,213,225,0.62)" font-size="12">50.0%</text>
+                                    <text x="16" y="114" fill="rgba(203,213,225,0.62)" font-size="12">0.0%</text>
+                                    <text x="16" y="159" fill="rgba(203,213,225,0.62)" font-size="12">-50.0%</text>
+
+                                    <line x1="72" x2="542" y1="20" y2="20" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+                                    <line x1="72" x2="542" y1="65" y2="65" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+                                    <line x1="72" x2="542" y1="110" y2="110" stroke="rgba(148,163,184,0.18)" stroke-width="1" stroke-dasharray="3 4" />
+                                    <line x1="72" x2="542" y1="155" y2="155" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+
+                                    <g
+                                        v-for="segment in autoInvestStrategyCards[0].detailLineSegments"
+                                        :key="autoInvestStrategyCards[0].id + '-featured-line-' + segment.key"
+                                    >
+                                        <line
+                                            :x1="segment.x1"
+                                            :y1="segment.y1"
+                                            :x2="segment.x2"
+                                            :y2="segment.y2"
+                                            :stroke="segment.color"
+                                            stroke-width="1.45"
+                                            stroke-linecap="round"
+                                        />
+                                    </g>
+                                </svg>
+
+                                <div class="grid grid-cols-3 gap-3 mt-3 text-sm">
+                                    <div>
+                                        <div class="text-gray-500">{{ $t('Risk Band') }}</div>
+                                        <div class="text-gray-100 mt-1">{{ $t(autoInvestStrategyCards[0].riskLevel || 'Balanced') }}</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-gray-500">{{ $t('Volatility') }}</div>
+                                        <div class="text-gray-100 mt-1">{{ autoInvestStrategyCards[0].volatility || '12.4' }}%</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-gray-500">{{ $t('Rebalance') }}</div>
+                                        <div class="text-gray-100 mt-1">{{ autoInvestStrategyCards[0].rebalanceCycle || '12H' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-5">
+                        <button
+                            v-for="strategy in autoInvestStrategyCards.slice(1)"
+                            :key="strategy.id"
+                            type="button"
+                            class="text-left rounded-2xl border p-4 transition"
+                            :style="'background: var(--ui-field); border-color:' + strategy.borderColor + ';'"
+                            @click="openAutoInvestStrategyModal(strategy)"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="text-xl text-gray-100">
+                                        {{ strategy.symbol }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 mt-1">
+                                        {{ $t(strategy.type) }} · {{ strategy.executionStyle || 'TWAP' }}
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-500">
+                                        {{ $t('Score') }}
+                                    </div>
+                                    <div class="text-xl mt-1 text-purple-300">
+                                        {{ strategy.confidenceScore || 82 }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <svg viewBox="0 0 168 62" class="w-full h-16" preserveAspectRatio="none">
+                                    <line x1="0" x2="168" y1="6" y2="6" stroke="rgba(148,163,184,0.12)" stroke-width="1" stroke-dasharray="2 3" />
+                                    <line x1="0" x2="168" y1="24" y2="24" stroke="rgba(148,163,184,0.12)" stroke-width="1" stroke-dasharray="2 3" />
+                                    <line x1="0" x2="168" y1="42" y2="42" stroke="rgba(148,163,184,0.18)" stroke-width="1" stroke-dasharray="2 3" />
+                                    <line x1="0" x2="168" y1="58" y2="58" stroke="rgba(148,163,184,0.10)" stroke-width="1" stroke-dasharray="2 3" />
+
+                                    <g
+                                        v-for="segment in strategy.lineSegments"
+                                        :key="strategy.id + '-mini-line-' + segment.key"
+                                    >
+                                        <line
+                                            :x1="segment.x1"
+                                            :y1="segment.y1"
+                                            :x2="segment.x2"
+                                            :y2="segment.y2"
+                                            :stroke="segment.color"
+                                            stroke-width="1.35"
+                                            stroke-linecap="round"
+                                        />
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mt-3 text-sm">
+                                <div>
+                                    <div class="text-gray-500">{{ $t('Return') }}</div>
+                                    <div class="mt-1" :style="'color:' + strategy.color">{{ strategy.roiLabel }}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-gray-500">{{ $t('MDD') }}</div>
+                                    <div class="mt-1 text-gray-200">{{ strategy.maxDrawdown }}%</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-gray-500">{{ $t('Win Rate') }}</div>
+                                    <div class="mt-1 text-gray-200">{{ strategy.winRate || '66.2' }}%</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    v-if="shouldShowAutoInvestEarnings"
+                    class="rounded-3xl border bordered-dark p-5"
+                    style="background: var(--ui-field); border-color: var(--ui-line);"
+                >
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <div class="text-xl text-gray-100">
+                                {{ $t('Portfolio Ledger') }}
+                            </div>
+                            <div class="text-base text-gray-500 mt-2 leading-7">
+                                {{ $t('Active orders are grouped by settlement status, principal, used margin and maturity date.') }}
+                            </div>
+                        </div>
+
+                        <div class="px-3 py-1 rounded-full text-sm text-green-300"
+                             style="background: var(--ui-field); border:1px solid var(--ui-line);">
+                            {{ autoInvestOrders.length }} {{ $t('Active Orders') }}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mt-5">
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field); border-color: var(--ui-line);">
+                            <div class="text-sm text-gray-500">{{ $t('Current Quant Available Amount') }}</div>
+                            <div class="text-2xl text-gray-100 mt-2 whitespace-nowrap">
+                                {{ formatMoney(autoInvestEarningPrincipal) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Amount currently available for quant earnings') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Futures Margin Used') }}</div>
+                            <div class="text-2xl text-gray-100 mt-2 whitespace-nowrap">
+                                {{ formatMoney(autoInvestUsedMargin) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Auto Invest funds occupied by futures') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Quant Earnings') }}</div>
+                            <div class="text-2xl mt-2 whitespace-nowrap" :class="Number(backendAutoInvestEarnings.quant_current_earnings || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                {{ formatSignedMoney(backendAutoInvestEarnings.quant_current_earnings || 0) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Income generated by Auto Invest') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Futures P/L') }}</div>
+                            <div class="text-2xl mt-2 whitespace-nowrap" :class="Number(backendAutoInvestEarnings.futures_total_profit !== undefined ? backendAutoInvestEarnings.futures_total_profit : (backendAutoInvestEarnings.futures_pnl || 0)) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                {{ formatSignedMoney(backendAutoInvestEarnings.futures_total_profit !== undefined ? backendAutoInvestEarnings.futures_total_profit : (backendAutoInvestEarnings.futures_pnl || 0)) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Futures total P/L including fees and funding fees') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Flexible Redeemable Amount') }}</div>
+                            <div class="text-2xl text-gray-100 mt-2 whitespace-nowrap">
+                                {{ formatMoney(autoInvestFlexibleRedeemableAmount) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Current flexible orders redeemable') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Fixed Redeemable Amount') }}</div>
+                            <div class="text-2xl text-gray-100 mt-2 whitespace-nowrap">
+                                {{ formatMoney(autoInvestFixedRedeemableAmount) }} USDT
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Matured fixed orders redeemable') }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border bordered-dark p-4"
+                             style="background: var(--ui-field);">
+                            <div class="text-sm text-gray-500">{{ $t('Latest Date') }}</div>
+                            <div class="text-2xl text-gray-100 mt-2">
+                                {{ formatAutoInvestDate(autoInvestChartSummary.latestDate) }}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">{{ $t('Latest settlement date') }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field); border-color: var(--ui-line);">
+                        <div class="text-sm text-gray-300">{{ $t('Quant Settlement Note') }}</div>
+                        <div class="text-sm text-gray-500 mt-1 leading-6">
+                            {{ $t('Futures profits are credited to the trading account. Futures losses are deducted from the oldest Auto Invest orders first.') }}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 rounded-2xl border bordered-dark p-5"
+                         style="background: var(--ui-field); border-color: var(--ui-line);">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                            <div class="max-w-2xl">
+                                <div class="text-sm text-gray-100">{{ $t('VIP Earnings Breakdown') }}</div>
+                                <div class="text-sm text-gray-500 mt-2 leading-6">{{ $t('Base Auto Invest earnings plus eligible VIP settlement boost.') }}</div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2 text-sm shrink-0">
+                                <span class="px-3 py-1.5 rounded-full text-indigo-300 border border-indigo-400/20" style="background: var(--ui-field);">
+                                    {{ $t('Current VIP Level') }}{{ $t(": VIP") }}{{ currentUserVipLevel || 0 }}
+                                </span>
+                                <span class="px-3 py-1.5 rounded-full text-emerald-300 border border-emerald-400/20" style="background: var(--ui-field);">
+                                    {{ $t('VIP Boost Rate') }} {{ formatPercentValue(autoInvestVipBoostRate) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5 text-sm">
+                            <div class="rounded-xl border bordered-dark p-4"
+                                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                                <div class="text-gray-500 mb-2">{{ $t('Base Quant Earnings') }}</div>
+                                <div class="text-gray-100 whitespace-nowrap">
+                                    {{ formatSignedMoney(autoInvestBaseCurrentEarnings) }} USDT
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl border bordered-dark p-4"
+                                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                                <div class="text-gray-500 mb-2">{{ $t('VIP Boost Earnings') }}</div>
+                                <div class="whitespace-nowrap" :class="Number(autoInvestVipCurrentBonus || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ formatSignedMoney(autoInvestVipCurrentBonus) }} USDT
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl border bordered-dark p-4"
+                                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                                <div class="text-gray-500 mb-2">{{ $t('Final Quant Earnings') }}</div>
+                                <div class="whitespace-nowrap" :class="Number(autoInvestQuantCurrentEarnings || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ formatSignedMoney(autoInvestQuantCurrentEarnings) }} USDT
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="autoInvestOrders.length" class="mt-5 space-y-4">
+                        <div
+                            v-for="order in autoInvestOrders"
+                            :key="'order-' + (order.order_id || order.id || order.order_no)"
+                            class="rounded-2xl border bordered-dark p-5 md:p-6"
+                            style="background: var(--ui-field); border-color: var(--ui-line);"
+                        >
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm"
+                                              :class="isFlexibleOrder(order) ? 'bg-green-500/15 text-green-400' : 'bg-indigo-500/15 text-indigo-300'">
+                                            {{ $t(getOrderTypeLabel(order)) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-slate-700/50 text-gray-200">
+                                            {{ getAutoInvestOrderSymbol(order) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="text-xs uppercase tracking-wide text-gray-500">{{ $t('Order') }}</div>
+                                    <div class="text-gray-100 mt-2 break-all leading-6">
+                                        {{ order.order_no || order.order_id || order.id || '-' }}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="w-full md:w-auto px-5 py-2.5 rounded-xl text-sm transition text-center border shrink-0"
+                                    :class="canRedeemOrder(order) ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-400 hover:border-emerald-400' : 'bg-slate-700/60 border-slate-600 text-gray-300 cursor-not-allowed'"
+                                    :disabled="!canRedeemOrder(order)"
+                                    @click="redeemAutoInvestOrder(order)"
+                                >
+                                    {{ $t(orderRedeemButtonText(order)) }}
+                                </button>
+                            </div>
+
+                            <div class="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="rounded-2xl border bordered-dark p-5"
+                                     style="background: var(--ui-field); border-color: var(--ui-line);">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <div class="text-sm text-gray-500">{{ $t('Invested Principal') }}</div>
+                                            <div class="mt-2 text-base text-gray-100 leading-6">
+                                                {{ formatMoney(getAutoInvestOrderPrincipalAmount(order)) }}
+                                                <span class="text-gray-400">{{ getAutoInvestOrderSymbol(order) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 space-y-3 text-sm">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <span class="text-gray-500">{{ $t('Earning Principal') }}</span>
+                                            <span class="text-gray-100 text-right">
+                                                {{ formatMoney(getAutoInvestOrderEarningAmount(order)) }} {{ getAutoInvestOrderSymbol(order) }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between gap-4">
+                                            <span class="text-gray-500">{{ $t('Futures Margin Used') }}</span>
+                                            <span class="text-gray-100 text-right">
+                                                {{ formatMoney(getAutoInvestOrderUsedMarginAmount(order)) }} {{ getAutoInvestOrderSymbol(order) }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between gap-4">
+                                            <span class="text-gray-500">{{ $t('Futures P/L') }}</span>
+                                            <span class="text-right" :class="Number(order.futures_total_profit_usd !== undefined ? order.futures_total_profit_usd : (order.futures_pnl_usd || 0)) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                                {{ formatSignedMoney(order.futures_total_profit_usd !== undefined ? order.futures_total_profit_usd : (order.futures_pnl_usd || 0)) }} USDT
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-2xl border bordered-dark p-5"
+                                     style="background: var(--ui-field); border-color: var(--ui-line);">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <div class="text-sm text-gray-500">{{ $t('Quant Earnings') }}</div>
+                                            <div class="mt-2 text-base" :class="Number(getAutoInvestOrderQuantEarningsUsd(order) || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                                {{ formatSignedMoney(getAutoInvestOrderQuantEarningsUsd(order)) }} USDT
+                                            </div>
+                                        </div>
+
+                                        <div class="text-right shrink-0">
+                                            <div class="text-sm text-gray-500">{{ $t('Current Yield') }}</div>
+                                            <div class="mt-2 text-gray-100">
+                                                {{ formatPercentValue(getAutoInvestOrderYieldPercent(order)) }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 space-y-3 text-sm">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <span class="text-gray-500">{{ $t('Base Quant Earnings') }}</span>
+                                            <span class="text-right" :class="Number(getAutoInvestOrderBaseCurrentEarningsUsd(order) || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                                {{ formatSignedMoney(getAutoInvestOrderBaseCurrentEarningsUsd(order)) }} USDT
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between gap-4">
+                                            <span class="text-gray-500">{{ $t('VIP Boost') }}</span>
+                                            <span class="text-right" :class="Number(getAutoInvestOrderVipCurrentBonusUsd(order) || 0) >= 0 ? 'text-green-400' : 'text-red-400'">
+                                                {{ formatSignedMoney(getAutoInvestOrderVipCurrentBonusUsd(order)) }} USDT
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 rounded-2xl border bordered-dark p-4"
+                                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                    <div class="flex items-center justify-between md:block">
+                                        <div class="text-gray-500">VIP</div>
+                                        <div class="text-violet-300 md:mt-1">VIP{{ getAutoInvestOrderVipLevel(order) || 0 }}</div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between md:block">
+                                        <div class="text-gray-500">{{ $t('VIP Boost Rate') }}</div>
+                                        <div class="text-emerald-300 md:mt-1">{{ formatPercentValue(getAutoInvestOrderVipBoostRate(order)) }}</div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between md:block">
+                                        <div class="text-gray-500">{{ $t('Starting Time') }}</div>
+                                        <div class="text-gray-100 md:mt-1">{{ formatAutoInvestDate(order.start_at || order.started_at || order.created_at) }}</div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between md:block">
+                                        <div class="text-gray-500">{{ $t('Maturity Date') }}</div>
+                                        <div class="text-gray-100 md:mt-1">{{ formatAutoInvestDate(order.maturity_date || order.matured_at) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl border bordered-dark p-5"
+                     style="background: var(--ui-field); border-color: var(--ui-line);">
+                    <div class="text-xl text-gray-100">
+                        {{ $t('Quant Framework') }}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-5">
+                        <div
+                            v-for="item in autoInvestYieldSourceItems"
+                            :key="item.title"
+                            class="rounded-2xl border bordered-dark p-4"
+                            style="background: var(--ui-field);"
+                        >
+                            <div class="text-sm text-gray-500 mb-2">
+                                {{ $t(item.label) }}
+                            </div>
+                            <div class="text-base text-gray-100">
+                                {{ $t(item.title) }}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2 leading-6">
+                                {{ $t(item.shortText) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div
+            v-if="showAutoInvestYieldSourceModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+            style="background: var(--ui-field); backdrop-filter: blur(8px);"
+            @click.self="closeAutoInvestYieldSourceModal"
+        >
+            <div
+                class="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl border bordered-dark p-5"
+                style="background: var(--ui-field); border-color: var(--ui-line);"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-xl text-gray-100">
+                            {{ $t('AI Quant Yield Source') }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 mt-2 leading-6">
+                            {{ $t('How this yield is generated') }}
+                        </div>
+                    </div>
+
+                    <button type="button" class="text-gray-500 hover:text-gray-200" @click="closeAutoInvestYieldSourceModal">
+                        ×
+                    </button>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-4" style="background: var(--ui-field);">
+                    <div class="text-lg font-bold text-yellow-400">
+                        {{ $t('Deepro AI Quantitative Yield Engine') }}
+                    </div>
+
+                    <div class="text-sm text-gray-500 mt-3 leading-7">
+                        {{ $t('The system uses AI-assisted quantitative models to scan eligible markets, identify short-term pricing inefficiencies, allocate liquidity, and rebalance positions under predefined risk controls. The displayed return is an estimated strategy return and may be adjusted according to actual settlement records.') }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                    <div
+                        v-for="item in autoInvestYieldSourceItems"
+                        :key="'modal-source-' + item.title"
+                        class="rounded-2xl border bordered-dark p-4"
+                        style="background: var(--ui-field);"
+                    >
+                        <div class="text-xs text-indigo-400 font-semibold mb-2">
+                            {{ $t(item.label) }}
+                        </div>
+
+                        <div class="text-sm text-gray-100 mb-2">
+                            {{ $t(item.title) }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 leading-7">
+                            {{ $t(item.detailText) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border bordered-dark p-4 mt-5" style="background: var(--ui-field);">
+                    <div class="text-sm text-gray-100 mb-3">
+                        {{ $t('Membership Level Settlement Boost') }}
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div
+                            v-for="item in vipYieldBoostOptions"
+                            :key="'vip-boost-' + item.level"
+                            class="rounded-xl border bordered-dark p-3 text-center"
+                            :style="Number(currentUserVipLevel) === Number(item.level) ? 'background: var(--ui-highlight); border-color: var(--ui-focus); color:var(--ui-text);' : 'background: var(--ui-field);'"
+                        >
+                            <div class="text-xs text-gray-500 mb-1">
+                                {{ $t('Level') }} {{ item.level }}
+                            </div>
+
+                            <div class="text-lg font-bold">
+                                +{{ item.boost }}%
+                            </div>
+
+                            <div class="text-xs text-gray-500 mt-1">
+                                {{ $t('Settlement Boost') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-gray-500 leading-6 mt-3">
+                        {{ $t('VIP boost is applied to eligible Auto Invest settlement earnings. Final rewards are subject to account level, plan rules, and actual platform settlement records.') }}
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border p-4 mt-5" style="background: var(--ui-field); border-color: var(--ui-line);">
+                    <div class="text-sm text-red-300 mb-2">
+                        {{ $t('Risk Reminder') }}
+                    </div>
+
+                    <div class="text-sm text-gray-500 leading-7">
+                        {{ $t('AI Quant strategies do not guarantee fixed profits. Market volatility, liquidity changes, hedging costs, and abnormal market conditions may affect the final settlement return.') }}
+                    </div>
+                </div>
+
+                <div class="mt-5 flex justify-end">
+                    <button
+                        type="button"
+                        class="px-5 py-2 rounded-xl text-sm"
+                        style="background: var(--ui-field); color:var(--ui-text);"
+                        @click="closeAutoInvestYieldSourceModal"
+                    >
+                        {{ $t('I understand') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showAutoInvestInfoModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+            style="background: var(--ui-field); backdrop-filter: blur(8px);"
+            @click.self="closeAutoInvestInfoModal"
+        >
+            <div
+                class="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl border bordered-dark p-5"
+                style="background: var(--ui-field); border-color: var(--ui-line);"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-xl text-gray-100">
+                            {{ $t('About Auto Invest') }}
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2 leading-6">
+                            {{ $t('Rules and common questions are placed here to keep this page clean.') }}
+                        </div>
+                    </div>
+
+                    <button type="button" class="text-gray-500 hover:text-gray-200" @click="closeAutoInvestInfoModal">
+                        ×
+                    </button>
+                </div>
+
+                <div class="mt-5 flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-sm border"
+                        :style="autoInvestInfoTab === 'overview' ? 'background: var(--ui-highlight); border-color: var(--ui-focus); color:var(--ui-text);' : 'background: var(--ui-field); border-color: var(--ui-line); color:var(--ui-text);'"
+                        @click="setAutoInvestInfoTab('overview')"
+                    >
+                        {{ $t('Overview') }}
+                    </button>
+
+                    <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-sm border"
+                        :style="autoInvestInfoTab === 'faq' ? 'background: var(--ui-highlight); border-color: var(--ui-focus); color:var(--ui-text);' : 'background: var(--ui-field); border-color: var(--ui-line); color:var(--ui-text);'"
+                        @click="setAutoInvestInfoTab('faq')"
+                    >
+                        {{ $t('FAQ') }}
+                    </button>
+                </div>
+
+                <div v-if="autoInvestInfoTab === 'overview'" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                    <div
+                        v-for="item in autoInvestOverviewItems"
+                        :key="'overview-' + item.title"
+                        class="rounded-2xl border bordered-dark p-4"
+                        style="background: var(--ui-field);"
+                    >
+                        <div class="text-sm text-gray-100 mb-2">
+                            {{ $t(item.title) }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 leading-7">
+                            {{ $t(item.text) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else class="mt-5">
+                    <div
+                        v-for="item in autoInvestFaqSections"
+                        :key="'faq-' + item.key"
+                        class="rounded-2xl border bordered-dark mb-3 overflow-hidden"
+                        style="background: var(--ui-field);"
+                    >
+                        <button
+                            type="button"
+                            class="w-full px-4 py-4 flex items-center justify-between gap-3 text-left"
+                            @click="toggleAutoInvestFaq(item.key)"
+                        >
+                            <span class="text-sm text-gray-100">
+                                {{ $t(item.title) }}
+                            </span>
+
+                            <span class="text-gray-500" :style="isAutoInvestFaqOpen(item.key) ? 'transform: rotate(180deg);' : ''">
+                                ⌃
+                            </span>
+                        </button>
+
+                        <div
+                            v-if="isAutoInvestFaqOpen(item.key)"
+                            class="px-4 pb-4 text-gray-500"
+                        >
+                            <p
+                                v-for="line in item.content"
+                                :key="'faq-line-' + line"
+                                class="text-sm mb-3 last:mb-0 leading-7"
+                            >
+                                {{ $t(line) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex justify-end">
+                    <button
+                        type="button"
+                        class="px-5 py-2 rounded-xl text-sm"
+                        style="background: var(--ui-field); color:var(--ui-text);"
+                        @click="closeAutoInvestInfoModal"
+                    >
+                        {{ $t('I understand') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showAutoInvestRiskModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+            style="background: var(--ui-field); backdrop-filter: blur(8px);"
+            @click.self="closeAutoInvestRiskModal"
+        >
+            <div class="w-full max-w-lg rounded-3xl border bordered-dark p-5"
+                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-xl text-gray-100">
+                            {{ $t(confirmBoxTitle) }}
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2 leading-6">
+                            {{ $t(confirmBoxDescription) }}
+                        </div>
+                    </div>
+
+                    <button type="button" class="text-gray-500 hover:text-gray-200" @click="closeAutoInvestRiskModal">
+                        ×
+                    </button>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-4"
+                     style="background: var(--ui-field);">
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <div class="text-gray-500">{{ $t('Amount') }}</div>
+                            <div class="text-gray-100 mt-1">{{ formatAmountInputValue(normalizedAutoInvestAmount) || '0' }} {{ autoInvestDisplaySymbol }}</div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-gray-500">{{ $t('Period') }}</div>
+                            <div class="text-gray-100 mt-1">{{ selectedInvestOption.days }} {{ $t('Days') }}</div>
+                        </div>
+
+                        <div>
+                            <div class="text-gray-500">{{ $t('Mode') }}</div>
+                            <div class="text-gray-100 mt-1">{{ $t(selectedInvestTypeOption.title) }}</div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-gray-500">{{ $t('Estimated Yield') }}</div>
+                            <div class="text-green-400 mt-1">{{ selectedInvestOption.totalRateLabel }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex flex-wrap gap-3 justify-end">
+                    <button type="button" class="px-4 py-2 rounded-xl text-sm border bordered-dark text-gray-300" @click="closeAutoInvestRiskModal">
+                        {{ $t('Cancel') }}
+                    </button>
+
+                    <button type="button" class="px-5 py-2 rounded-xl text-sm"
+                            style="background: var(--ui-field); color:var(--ui-text);"
+                            @click="acceptAutoInvestRisk">
+                        {{ $t('Confirm and Start') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showAutoInvestStrategyModal && selectedAutoInvestStrategy"
+            class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+            style="background: var(--ui-field); backdrop-filter: blur(8px);"
+            @click.self="closeAutoInvestStrategyModal"
+        >
+            <div class="w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl border bordered-dark p-5"
+                 style="background: var(--ui-field); border-color: var(--ui-line);">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div class="text-3xl text-gray-100">
+                            {{ selectedAutoInvestStrategy.symbol }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 mt-2 flex items-center gap-2 flex-wrap">
+                            <span>{{ $t(selectedAutoInvestStrategy.name) }}</span>
+                            <span>·</span>
+                            <span>{{ $t(selectedAutoInvestStrategy.type) }}</span>
+                            <span>·</span>
+                            <span :style="'color:' + selectedAutoInvestStrategy.color">{{ $t(selectedAutoInvestStrategy.sideLabel) }}</span>
+                            <span>{{ selectedAutoInvestStrategy.leverage }}x</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="text-gray-500 hover:text-gray-200" @click="closeAutoInvestStrategyModal">
+                        ×
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-5">
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">{{ $t('Current PnL') }}</div>
+                        <div class="text-2xl mt-2" :style="'color:' + selectedAutoInvestStrategy.color">
+                            {{ formatStrategyMoney(selectedAutoInvestStrategy.pnl) }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">{{ $t('Return') }}</div>
+                        <div class="text-2xl mt-2" :style="'color:' + selectedAutoInvestStrategy.color">
+                            {{ selectedAutoInvestStrategy.roiLabel }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">{{ $t('Runtime') }}</div>
+                        <div class="text-2xl text-gray-100 mt-2">
+                            {{ selectedAutoInvestStrategy.runtime }}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4"
+                         style="background: var(--ui-field);">
+                        <div class="text-sm text-gray-500">{{ $t('MDD') }}</div>
+                        <div class="text-2xl text-gray-100 mt-2">
+                            {{ selectedAutoInvestStrategy.maxDrawdown }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-3"
+                     style="background: var(--ui-field);">
+                    <svg viewBox="0 0 560 210" class="w-full h-60" preserveAspectRatio="none">
+                        <text x="16" y="24" fill="rgba(203,213,225,0.62)" font-size="12">100.0%</text>
+                        <text x="16" y="69" fill="rgba(203,213,225,0.62)" font-size="12">50.0%</text>
+                        <text x="16" y="114" fill="rgba(203,213,225,0.62)" font-size="12">0.0%</text>
+                        <text x="16" y="159" fill="rgba(203,213,225,0.62)" font-size="12">-50.0%</text>
+
+                        <line x1="72" x2="542" y1="20" y2="20" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+                        <line x1="72" x2="542" y1="65" y2="65" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+                        <line x1="72" x2="542" y1="110" y2="110" stroke="rgba(148,163,184,0.18)" stroke-width="1" stroke-dasharray="3 4" />
+                        <line x1="72" x2="542" y1="155" y2="155" stroke="rgba(148,163,184,0.16)" stroke-width="1" stroke-dasharray="3 4" />
+
+                        <g
+                            v-for="segment in selectedAutoInvestStrategy.detailLineSegments"
+                            :key="selectedAutoInvestStrategy.id + '-detail-line-' + segment.key"
+                        >
+                            <line
+                                :x1="segment.x1"
+                                :y1="segment.y1"
+                                :x2="segment.x2"
+                                :y2="segment.y2"
+                                :stroke="segment.color"
+                                stroke-width="1.45"
+                                stroke-linecap="round"
+                            />
+                        </g>
+
+                        <text x="72" y="202" fill="rgba(203,213,225,0.7)" font-size="12">
+                            {{ selectedAutoInvestStrategy.startLabel }}
+                        </text>
+                        <text x="488" y="202" fill="rgba(203,213,225,0.7)" font-size="12">
+                            {{ selectedAutoInvestStrategy.endLabel }}
+                        </text>
+                    </svg>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-5">
+                    <div class="rounded-2xl border bordered-dark p-4">
+                        <div class="text-sm text-gray-500">{{ $t('Price Difference') }}</div>
+                        <div class="text-xl text-gray-100 mt-2">{{ selectedAutoInvestStrategy.feeRate }}%</div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4">
+                        <div class="text-sm text-gray-500">{{ $t('Target per Order') }}</div>
+                        <div class="text-xl text-gray-100 mt-2">{{ selectedAutoInvestStrategy.perTarget }}%</div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4">
+                        <div class="text-sm text-gray-500">{{ $t('Max CA Orders') }}</div>
+                        <div class="text-xl text-gray-100 mt-2">{{ selectedAutoInvestStrategy.caOrders }}</div>
+                    </div>
+
+                    <div class="rounded-2xl border bordered-dark p-4">
+                        <div class="text-sm text-gray-500">{{ $t('First Order Ratio') }}</div>
+                        <div class="text-xl text-gray-100 mt-2">{{ selectedAutoInvestStrategy.firstOrderRatio }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-2xl border bordered-dark p-4"
+                     style="background: var(--ui-field);">
+                    <div class="text-xl text-gray-100 mb-3">
+                        {{ $t('Strategy Introduction') }}
+                    </div>
+
+                    <div
+                        v-for="line in selectedAutoInvestStrategy.description"
+                        :key="line"
+                        class="text-sm text-gray-500 leading-7 mb-2 last:mb-0"
+                    >
+                        {{ line }}
+                    </div>
+                </div>
+
+                <div class="mt-5 flex justify-end">
+                    <button type="button" class="px-5 py-2 rounded-xl text-sm"
+                            style="background: var(--ui-field); color:var(--ui-text); border:1px solid var(--ui-line);"
+                            @click="copyAutoInvestStrategy(selectedAutoInvestStrategy)">
+                        {{ $t('Copy Strategy') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

@@ -1,0 +1,502 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.currencies')">{{ $t("币种") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <trashed-message v-if="isEdit && currency.deleted_at" class="mb-6" @restore="restore">
+        {{ $t("该币种已被删除。") }}
+    </trashed-message>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input v-model="form.name" :error="errors.name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;名称&quot;)" />
+
+                <text-input v-model="form.decimals" :readonly="bscAsset" :error="errors.decimals" class="pr-6 pb-4 lg:w-1/2" :label="$t(&quot;小数位数&quot;)" />
+
+                <text-input v-model="form.symbol" :readonly="bscAsset" :error="errors.symbol" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;符号&quot;)" />
+
+                <select-input v-model="form.asset_category" :error="errors.asset_category" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('Asset classification')">
+                    <option v-if="!currency || !currency.asset_reference" value="crypto">{{ $t('数字货币') }}</option>
+                    <option v-if="currency && currency.asset_reference" value="stock">{{ $t('股票代币') }}</option>
+                    <option v-if="currency && currency.asset_reference" value="etf">{{ $t('ETF 代币') }}</option>
+                </select-input>
+                <text-input v-model="form.asset_issuer" :error="errors.asset_issuer" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('Asset issuer')" maxlength="120" />
+                <text-input v-model="form.asset_unit" :error="errors.asset_unit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('Token unit')" maxlength="32" />
+                <div class="pr-6 pb-8 w-full">
+                    <p>{{ $t('Asset settings are shared. Pause deposits and withdrawals below; pause trading in the market settings.') }}</p>
+                    <Link :href="route('admin.stock-tokens')">{{ $t('Stock quick listing') }}</Link>
+                </div>
+                <template v-if="bscAsset">
+                    <div class="pr-6 pb-8 w-full lg:w-1/2"><label class="form-label block mb-3">{{ $t('市场展示') }}</label><t-toggle v-model="form.asset_display_enabled" /><div class="text-red-600">{{ errors.asset_display_enabled }}</div></div>
+                    <select-input v-model="form.asset_chart_interval" :error="errors.asset_chart_interval" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t('默认 K 线')">
+                        <option v-for="interval in ['1m','5m','15m','1h','4h','1d']" :key="interval" :value="interval">{{ interval }}</option>
+                    </select-input>
+                    <p class="pr-6 pb-8 w-full">{{ $t('This asset supports BSC (BEP20) only') }}</p>
+                </template>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("币种状态") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("币种可见性") }}</label>
+                    <t-toggle v-model="form.status" />
+                    <div class="text-red-600 mb-3" v-if="errors.status">
+                        {{ errors.status }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许充值") }}</label>
+                    <t-toggle v-model="form.deposit_status" />
+                    <div class="text-red-600 mb-3" v-if="errors.deposit_status">
+                        {{ errors.deposit_status }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为稳定币？") }}</label>
+                    <t-toggle v-model="form.is_stable" />
+                    <div class="text-red-600 mb-3" v-if="errors.is_stable">
+                        {{ errors.is_stable }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否带 Memo？") }}</label>
+                    <t-toggle v-model="form.has_payment_id" />
+                    <div class="text-red-600 mb-3" v-if="errors.has_payment_id">
+                        {{ errors.has_payment_id }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许提现") }}</label>
+                    <t-toggle v-model="form.withdraw_status" />
+                    <div class="text-red-600 mb-3" v-if="errors.withdraw_status">
+                        {{ errors.withdraw_status }}
+                    </div>
+                </div>
+
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("网络") }}</div>
+                    <div>
+                    <empty-column></empty-column>
+
+                        <select-input v-model="form.type" :error="errors.type" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;类型&quot;)">
+                            <option value="coin">{{ $t("数字货币") }}</option>
+                            <option value="fiat">{{ $t("法币") }}</option>
+                        </select-input>
+
+                        <div v-if="form.type == 'coin'" class="pr-6 pb-2 w-full lg:w-1/2">
+                            <label class="form-label block mr-2 mb-3">{{ $t("是否为代币？") }}</label>
+                            <t-toggle v-model="form.is_token" />
+                            <div class="text-red-600 mb-3" v-if="errors.is_token">
+                                {{ errors.is_token }}
+                            </div>
+                        </div>
+                        <br/>
+
+                        <div class="text-red-600 mb-3" v-if="errors.networks">
+                            {{ errors.networks }}
+                        </div>
+
+                        <div v-for="network in selectableNetworks" v-if="form.type == network.type" class="pr-6 pb-2 w-full lg:w-1/2">
+                            <label @click="setNetwork(network)"  class="form-label mr-2 d-inline-block"><network-icon :network-id="network.id" :name="network.name"/>{{ network.name }}<small v-if="networkRouteKind(network.id)"> · {{ $t(networkRouteKind(network.id)) }}</small></label>
+                            <t-checkbox name="networks" v-model="form.networks" :value="network.id" />
+                        </div>
+
+                        <div class="bg-gray-200 mt-5 p-5 rounded" v-if="form.networks.includes(1) || form.networks.includes(3) || form.networks.includes(6) || form.networks.includes(8) || form.networks.includes(16) || form.networks.includes(21) || form.networks.includes(97)">
+                            <div v-if="form.networks.includes(1)" class="">{{ $t("Coinpayments 币种") }}</div>
+                            <t-rich-select v-if="form.networks.includes(1)"
+                                       :options="coinpaymentCoins"
+                                       v-model="coinpaymentSelected"
+                                       placeholder="将币种绑定到当前币种"
+                                       value-attribute="symbol"
+                                       text-attribute="name"
+                                       class="pr-6 pb-8 w-full"
+                            >
+                                <template
+                                    slot="label"
+                                    slot-scope="{ className, option, query }"
+                                >
+                                    <div class="flex">
+                                        <div class="flex flex-col">
+                                            <span>{{ option.value }} - {{ option.text }}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template
+                                    slot="option"
+                                    slot-scope="{ index, isHighlighted, isSelected, className, option, query }"
+                                >
+                                    <div :class="className">
+                                        <div class="flex flex-col w-full ml-2 text-gray-800">
+                                            <span class="text-sm leading-tight text-gray-700"><strong>{{ option.value }}</strong>
+                                                - {{ option.text }}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </t-rich-select>
+                            <div v-if="errors.alt_symbol" class="form-error text-red-400">{{ errors.alt_symbol }}</div>
+
+                            <text-input v-if="form.networks.includes(1)" v-model="form.coinpayments_description" :error="errors.coinpayments_description" class="pr-6 pb-10 w-full" :label="$t(&quot;Coinpayments 网络名称&quot;)" />
+
+                            <div v-if="form.networks.includes(3) || form.networks.includes(6) || form.networks.includes(8) || form.networks.includes(8) || form.networks.includes(16) || form.networks.includes(21) || form.networks.includes(97)" class="mb-5 text-red-500"> {{ $t("重要提示：请仔细填写 SYMBOL、CONTRACT 字段。任何错误都可能导致充值、提现以及币种金额异常。") }}</div>
+
+                            <text-input v-if="form.networks.includes(3)" v-model="form.contract" :error="errors.contract" class="pr-6 pb-4 w-full" :label="$t(&quot;ERC-20 合约地址&quot;)" />
+                            <text-input v-if="form.networks.includes(6)" v-model="form.bep_contract" :readonly="bscAsset" :error="errors.bep_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;BEP-20 合约地址&quot;)" />
+                            <text-input v-if="form.networks.includes(8)" v-model="form.trc_contract" :error="errors.trc_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;TRC-20 合约地址&quot;)" />
+                            <text-input v-if="form.networks.includes(21)" v-model="form.sol_contract" :error="errors.sol_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;Solana SPL Mint 地址&quot;)" />
+
+                            <text-input v-if="form.networks.includes(16)" v-model="form.matic_contract" :error="errors.matic_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;POL-20 合约地址&quot;)" />
+                            <text-input v-if="form.networks.includes(25)" v-model="form.xlayer_contract" :error="errors.xlayer_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;X Layer 合约地址&quot;)" />
+                            <text-input v-if="form.networks.includes(97)" v-model="form.custom_contract" :error="errors.custom_contract" class="pr-6 pb-4 w-full" :label="$t(&quot;CUSTOMTOKEN 代币合约地址&quot;)" />
+
+                            <text-input v-model="form.decimals" :error="errors.decimals" class="pr-6 pb-4 w-full" :label="$t(&quot;小数位数&quot;)" />
+
+                            <text-input v-if="form.networks.includes(3) || form.networks.includes(6) || form.networks.includes(8) || form.networks.includes(21) || form.networks.includes(16) || form.networks.includes(97)" v-model="form.symbol" :error="errors.symbol" class="pr-6 pb-4 w-full" :label="$t(&quot;符号&quot;)" />
+
+                        </div>
+                    </div>
+                    <div class="border mt-5 p-5 rounded" v-if="form.networks.includes(4)">
+
+                        <text-input v-model="form.decimals" :error="errors.decimals" class="mb-5 pr-6 pb-4 w-full lg:w-1/2" :label="$t(&quot;小数位数&quot;)" />
+
+                        <div class="pr-6 pb-8 w-full lg:w-1/2">
+                            <label class="form-label block mr-2 mb-3">{{ $t("启用银行转账") }}</label>
+                            <t-toggle v-model="form.bank_status" />
+                            <div v-if="errors.bank_status" class="form-error text-red-400">{{ errors.bank_status }}</div>
+                        </div>
+
+                        <select-input v-if="form.bank_status" v-model="form.bank_account" :error="errors.bank_account" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;银行账户&quot;)">
+                            <option v-for="account in bankAccounts" :value="account.id">{{ account.name }}</option>
+                        </select-input>
+
+                        <div class="pr-6 pb-8 w-full lg:w-1/2">
+                            <label class="form-label block mr-2 mb-3">{{ $t("启用信用卡支付") }}</label>
+                            <t-toggle v-model="form.cc_status" />
+                            <div v-if="errors.cc_status" class="form-error text-red-400">{{ errors.cc_status }}</div>
+                        </div>
+
+                        <text-input v-if="form.cc_status" v-model="form.cc_exchange_rate" :error="errors.cc_exchange_rate" class="pr-6 pb-4 w-full" :label="$t(&quot;汇率&quot;)" />
+                        <small v-if="form.cc_status"><i>{{ $t("该汇率用于获取相对于 USD 的换算比例。如果当前币种是 USD，请将值设为") }} <strong>1</strong>{{ $t("，表示") }} <strong>{{ $t("1:1 比例") }}</strong>{{ $t("（例如 EUR 可设置为") }} <strong>1.17</strong>{{ $t("，表示 1:1.17 比例）。该换算比例是必填项，这样你才能通过 Stripe API 以 USD（美元）金额向用户收费。") }}</i></small>
+                    </div>
+
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("充值与提现规则") }}</div>
+                </div>
+
+                <text-input v-model="form.min_deposit" :error="errors.min_deposit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小充值金额&quot;)" />
+
+                <text-input v-if="form.networks.includes(4) || form.networks.includes(12)" v-model="form.max_deposit" :error="errors.max_deposit" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大充值金额&quot;)" />
+
+                <text-input v-model="form.min_withdraw" :error="errors.min_withdraw" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小提现金额&quot;)" />
+
+                <text-input v-model="form.max_withdraw" :error="errors.max_withdraw" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大提现金额&quot;)" />
+
+                <text-input v-if="!form.networks.includes(4)" v-model="form.min_deposit_confirmation" :error="errors.min_deposit_confirmation" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;充值网络确认数&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("禁用的充值网络") }}</div>
+                    <div>
+                        <empty-column></empty-column>
+                        <div v-for="network in networks" class="pr-6 pb-2 w-full lg:w-1/2">
+                            <label @click="setNetwork(network)"  class="form-label mr-2 d-inline-block"><network-icon :network-id="network.id" :name="network.name"/>{{ network.name }}</label>
+                            <t-checkbox name="disabled_deposit_networks" v-model="form.disabled_deposit_networks" :value="network.id" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("禁用的提现网络") }}</div>
+                    <div>
+                        <empty-column></empty-column>
+
+                        <div v-for="network in networks" class="pr-6 pb-2 w-full lg:w-1/2">
+                            <label  class="form-label mr-2 d-inline-block"><network-icon :network-id="network.id" :name="network.name"/>{{ network.name }}</label>
+                            <t-checkbox name="disabled_withdrawal_networks" v-model="form.disabled_withdrawal_networks" :value="network.id" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("充值手续费") }}</div>
+
+                    <p>{{ $t("如果手续费设置为浮动（%）形式，固定手续费将被忽略。") }}</p>
+                    <p>{{ $t("如果浮动（%）手续费为 0，则使用固定手续费。") }}</p>
+                </div>
+                <text-input v-if="!form.networks.includes(3) && !form.networks.includes(6) && !form.networks.includes(8) && !form.networks.includes(16)" v-model="form.deposit_fee" :error="errors.deposit_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;通用充值手续费 (%)&quot;)" />
+                <text-input v-if="!form.networks.includes(3) && !form.networks.includes(6) && !form.networks.includes(8) && !form.networks.includes(16)" v-model="form.deposit_fee_fixed" :error="errors.deposit_fee_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;通用固定充值手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(3)" v-model="form.deposit_fee_erc" :error="errors.deposit_fee_erc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;ERC20 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(3)" v-model="form.deposit_fee_erc_fixed" :error="errors.deposit_fee_erc_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;ERC20 固定充值手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(6)" v-model="form.deposit_fee_bep" :error="errors.deposit_fee_bep" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;BEP20 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(6)" v-model="form.deposit_fee_bep_fixed" :error="errors.deposit_fee_bep_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;BEP20 固定充值手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(8)" v-model="form.deposit_fee_trc" :error="errors.deposit_fee_trc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;TRC20 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(8)" v-model="form.deposit_fee_trc_fixed" :error="errors.deposit_fee_trc_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;TRC20 固定充值手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(16)" v-model="form.deposit_fee_matic" :error="errors.deposit_fee_matic" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;POL20 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(25)" v-model="form.deposit_fee_xlayer" :error="errors.deposit_fee_xlayer" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;X Layer 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(16)" v-model="form.deposit_fee_matic_fixed" :error="errors.deposit_fee_matic_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;POL20 固定充值手续费&quot;)" />
+                <text-input v-if="form.networks.includes(25)" v-model="form.deposit_fee_xlayer_fixed" :error="errors.deposit_fee_xlayer_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;X Layer 固定充值手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(21)" v-model="form.deposit_fee_sol" :error="errors.deposit_fee_sol" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Solana SPL 充值手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(21)" v-model="form.deposit_fee_sol_fixed" :error="errors.deposit_fee_sol_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Solana SPL 固定充值手续费&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("提现手续费") }}</div>
+
+                    <p>{{ $t("如果手续费设置为浮动（%）形式，固定手续费将被忽略。") }}</p>
+                    <p>{{ $t("如果浮动（%）手续费为 0，则使用固定手续费。") }}</p>
+                </div>
+                <text-input v-model="form.withdraw_fee" :error="errors.withdraw_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;通用提现手续费 (%)&quot;)" />
+                <text-input v-model="form.withdraw_fee_fixed" :error="errors.withdraw_fee" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;固定提现手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(3)" v-model="form.withdraw_fee_erc" :error="errors.withdraw_fee_erc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;ERC20 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(3)" v-model="form.withdraw_fee_erc_fixed" :error="errors.withdraw_fee_erc_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;ERC20 固定提现手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(6)" v-model="form.withdraw_fee_bep" :error="errors.withdraw_fee_bep" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;BEP20 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(6)" v-model="form.withdraw_fee_bep_fixed" :error="errors.withdraw_fee_bep_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;BEP20 固定提现手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(8)" v-model="form.withdraw_fee_trc" :error="errors.withdraw_fee_trc" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;TRC20 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(8)" v-model="form.withdraw_fee_trc_fixed" :error="errors.withdraw_fee_trc_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;TRC20 固定提现手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(16)" v-model="form.withdraw_fee_matic" :error="errors.withdraw_fee_matic" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;POL20 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(25)" v-model="form.withdraw_fee_xlayer" :error="errors.withdraw_fee_xlayer" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;X Layer 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(16)" v-model="form.withdraw_fee_matic_fixed" :error="errors.withdraw_fee_matic_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;POL20 固定提现手续费&quot;)" />
+                <text-input v-if="form.networks.includes(25)" v-model="form.withdraw_fee_xlayer_fixed" :error="errors.withdraw_fee_xlayer_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;X Layer 固定提现手续费&quot;)" />
+
+                <text-input v-if="form.networks.includes(21)" v-model="form.withdraw_fee_sol" :error="errors.withdraw_fee_sol" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Solana SPL 提现手续费 (%)&quot;)" />
+                <text-input v-if="form.networks.includes(21)" v-model="form.withdraw_fee_sol_fixed" :error="errors.withdraw_fee_sol_fixed" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Solana SPL 固定提现手续费&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("P2P 设置") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("P2P 可用") }}</label>
+                    <t-toggle v-model="form.is_p2p" />
+                    <div class="text-red-600 mb-3" v-if="errors.is_p2p">
+                        {{ errors.is_p2p }}
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap w-full" v-if="form.is_p2p && form.type == 'coin'">
+
+                    <text-input v-model="form.p2p_min_order_amount" :error="errors.p2p_min_order_amount" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;P2P 最小订单金额&quot;)" />
+
+                    <text-input v-model="form.p2p_max_order_amount" :error="errors.p2p_max_order_amount" class="pr-6 pb-4 lg:w-1/2" :label="$t(&quot;P2P 最大订单金额&quot;)" />
+
+                    <text-input v-model="form.p2p_maker_buy_fee" :error="errors.p2p_maker_buy_fee" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;P2P Maker 买入处理费 (%)&quot;)" />
+
+                    <text-input v-model="form.p2p_maker_sell_fee" :error="errors.p2p_maker_sell_fee" class="pr-6 pb-4 lg:w-1/2" :label="$t(&quot;P2P Maker 卖出处理费 (%)&quot;)" />
+
+                    <text-input v-model="form.p2p_taker_buy_fee" :error="errors.p2p_taker_buy_fee" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;P2P Taker 买入处理费 (%)&quot;)" />
+
+                    <text-input v-model="form.p2p_taker_sell_fee" :error="errors.p2p_taker_sell_fee" class="pr-6 pb-4 lg:w-1/2" :label="$t(&quot;P2P Taker 卖出处理费 (%)&quot;)" />
+
+                    <div class="flex w-full">
+                        <small>
+                        {{ $t("- “Maker” 指发布 P2P 广告来买入或卖出加密货币的交易者。") }}
+                        </small>
+                    </div>
+
+                    <div class="flex w-full mb-10">
+                        <small>
+                            {{ $t("- Taker 指对 P2P 买卖广告下单的用户。") }}
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("商户收单设置") }}</div>
+                    <p class="text-gray-500 text-sm mb-4">{{ $t("配置此币种用于商户收单模块（商户支付网关）。") }}</p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用商户收单") }}</label>
+                    <t-toggle v-model="form.is_merchant" />
+                    <div class="text-red-600 mb-3" v-if="errors.is_merchant">
+                        {{ errors.is_merchant }}
+                    </div>
+                    <small class="text-gray-500">{{ $t("允许商户使用该币种收款") }}</small>
+                </div>
+
+                <div class="flex flex-wrap w-full" v-if="form.is_merchant && form.type == 'coin'">
+                    <text-input v-model="form.merchant_fee_percent" :error="errors.merchant_fee_percent" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;商户处理费 (%)&quot;)" />
+
+                    <text-input v-model="form.merchant_confirmations" :error="errors.merchant_confirmations" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;所需确认数&quot;)" />
+
+                    <text-input v-model="form.merchant_min_amount_usd" :error="errors.merchant_min_amount_usd" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;最小账单金额 (USD)&quot;)" />
+
+                    <text-input v-model="form.merchant_max_amount_usd" :error="errors.merchant_max_amount_usd" class="pr-6 pb-8 lg:w-1/2" :label="$t(&quot;最大账单金额 (USD)&quot;)" />
+
+                    <div class="pr-6 pb-8 w-full">
+                        <label class="form-label block mr-2 mb-3">{{ $t("商户收单启用的网络") }}</label>
+                        <p class="text-gray-500 text-sm mb-3">{{ $t("选择商户可用于接收该币种付款的网络。仅会显示当前币种已经启用的网络。") }}</p>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div v-for="network in networks" :key="network.id" class="pr-6 pb-2 w-full lg:w-1/2 inline-block" v-if="form.networks.includes(network.id)">
+                                <label class="form-label mr-2 d-inline-block cursor-pointer"><network-icon :network-id="network.id" :name="network.name"/>{{ network.name }}<small v-if="networkRouteKind(network.id)"> · {{ $t(networkRouteKind(network.id)) }}</small></label>
+                                <t-checkbox name="merchant_enabled_networks" v-model="form.merchant_enabled_networks" :value="network.id" />
+                            </div>
+                            <div v-if="!form.networks || form.networks.length === 0" class="text-gray-500 text-sm">
+                                {{ $t("当前币种尚未启用任何网络。请先在上方“网络”部分启用网络。") }}
+                            </div>
+                        </div>
+                        <div class="text-red-600 mb-3" v-if="errors.merchant_enabled_networks">
+                            {{ errors.merchant_enabled_networks }}
+                        </div>
+                    </div>
+
+                    <div class="flex w-full mb-5">
+                        <small class="text-gray-500">
+                            <strong>{{ $t("处理费：") }}</strong>{{ $t("每笔商户账单支付收取的百分比费用。") }}<br>
+                            <strong>{{ $t("确认数：") }}</strong>{{ $t("支付被视为完成前所需的区块链确认次数。") }}<br>
+                            <strong>{{ $t("最小/最大金额：") }}</strong>{{ $t("该币种对应的 USD 账单金额限制。") }}<br>
+                            <strong>{{ $t("启用网络：") }}</strong>{{ $t("平台将监听这些网络上的商户充值。充值将通过平台现有的区块链监听器处理。") }}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Unlimit 买入设置（On-Ramp）") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div v-if="form.type === 'coin'">
+                        <label class="form-label block mr-2 mb-3">{{ $t("允许的法币交易对（用于购买该加密货币）") }}</label>
+                        <div class="bg-gray-50 p-4 rounded">
+                            <div v-if="fiats && fiats.length" class="grid grid-cols-2 gap-2">
+                                <div v-for="fiat in fiats" :key="fiat.id" class="flex items-center">
+                                    <t-checkbox name="allowed_buy_fiats" v-model="form.allowed_buy_fiats" :value="fiat.symbol.toUpperCase()" />
+                                    <span class="ml-2">{{ fiat.symbol.toUpperCase() }} - {{ fiat.name }}</span>
+                                </div>
+                            </div>
+                            <div v-else class="text-gray-500 text-sm">{{ $t("未找到法币。请先创建法币。") }}</div>
+                        </div>
+                        <div class="text-red-600 mb-3" v-if="errors.allowed_buy_fiats">{{ errors.allowed_buy_fiats }}</div>
+                    </div>
+
+                    <div v-if="form.type === 'fiat'" class="mt-4">
+                        <label class="form-label block mr-2 mb-3">{{ $t("允许该法币用于 Buy Crypto") }}</label>
+                        <t-toggle v-model="form.allowed_buy_fiat" />
+                        <div class="text-red-600 mb-3" v-if="errors.allowed_buy_fiat">{{ errors.allowed_buy_fiat }}</div>
+                    </div>
+                </div>
+
+                <!-- Unlimit Sell (Off-Ramp) Settings -->
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("Unlimit 卖出设置（Off-Ramp）") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div v-if="form.type === 'coin'">
+                        <label class="form-label block mr-2 mb-3">{{ $t("允许该加密货币用于 Sell Crypto") }}</label>
+                        <t-toggle v-model="form.allowed_sell_crypto" />
+                        <div class="text-red-600 mb-3" v-if="errors.allowed_sell_crypto">{{ errors.allowed_sell_crypto }}</div>
+
+                        <div class="mt-4" v-if="form.allowed_sell_crypto">
+                            <label class="form-label block mr-2 mb-3">{{ $t("允许的法币交易对（用于卖出该加密货币）") }}</label>
+                            <div class="bg-gray-50 p-4 rounded">
+                                <div v-if="fiats && fiats.length" class="grid grid-cols-2 gap-2">
+                                    <div v-for="fiat in fiats" :key="'sell-'+fiat.id" class="flex items-center">
+                                        <t-checkbox name="allowed_sell_fiats" v-model="form.allowed_sell_fiats" :value="fiat.symbol.toUpperCase()" />
+                                        <span class="ml-2">{{ fiat.symbol.toUpperCase() }} - {{ fiat.name }}</span>
+                                    </div>
+                                </div>
+                                <div v-else class="text-gray-500 text-sm">{{ $t("未找到法币。请先创建法币。") }}</div>
+                            </div>
+                            <div class="text-red-600 mb-3" v-if="errors.allowed_sell_fiats">{{ errors.allowed_sell_fiats }}</div>
+                        </div>
+                    </div>
+
+                    <div v-if="form.type === 'fiat'" class="mt-4">
+                        <label class="form-label block mr-2 mb-3">{{ $t("允许该法币用于 Sell Crypto（作为结算币种）") }}</label>
+                        <t-toggle v-model="form.allowed_sell_fiat" />
+                        <div class="text-red-600 mb-3" v-if="errors.allowed_sell_fiat">{{ errors.allowed_sell_fiat }}</div>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("币种 Logo") }}</div>
+                </div>
+
+                <div id="file-uploader-form">
+                    <strong class="text-sm">{{ $t("强烈建议使用以下图片属性：") }}</strong><br>
+                    <div class="d-block mb-5 mt-5 text-sm">
+                        {{ $t("宽度：40px") }}<br>
+                        {{ $t("高度：40px") }}<br>
+                        {{ $t("背景：透明") }}<br>
+                        {{ $t("类型：圆角") }}
+                    </div>
+
+                    <VueFileAgent
+                        class="profile-pic-upload-block"
+                        ref="fileUploadForm"
+                        :multiple="false"
+                        :deletable="false"
+                        :meta="false"
+                        :compact="true"
+                        :accept="'image/*'"
+                        :helpText="'将图片拖拽到这里'"
+                        :errorText="{
+                              type: '请选择一张图片',
+                            }"
+                        v-model="currencyLogo"
+                        @select="onSelect($event)"
+                        @upload="onUpload($event)"
+                    >
+                        <template v-slot:before-outer>
+                        </template >
+                        <template v-slot:after-outer>
+                            <div :title="$t(&quot;after-outer&quot;)">
+                                <div class="mb-4">
+                                    <small>{{ $t("允许的类型：") }}<strong>{{ $t("jpg, png。") }}</strong></small>
+                                    <small>{{ $t("最大文件大小：") }}<strong>1MB</strong></small>
+                                </div>
+                                <div class="drop-help-text">
+                                    <p class="text-success">{{ $t("释放文件即可上传！") }}</p>
+                                </div>
+                                <button type="button" class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none" :class="[uploaded ? 'btn-danger' : 'btn-secondary']" v-if="currencyLogo" @click="removePic()">{{ $t("移除") }}</button>
+                                <div class="clearfix"></div>
+                            </div>
+                        </template >
+                    </VueFileAgent>
+                    <div v-if="errors.file_id" class="form-error text-red-400">{{ errors.file_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full mt-10">
+                        <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("社交链接") }}</div>
+                </div>
+                <div class="pr-6 pb-8 w-full">
+                    <text-input v-model="form.social_discord" :error="errors.social_discord" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;Discord&quot;)" />
+                    <text-input v-model="form.social_twitter" :error="errors.social_twitter" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;X（原 Twitter）&quot;)" />
+                    <text-input v-model="form.social_website" :error="errors.social_website" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;网站&quot;)" />
+                </div>
+            </div>
+
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center mt-10">
+                <button v-if="isEdit && !currency.deleted_at" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除币种") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                    <svg v-show="sending" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

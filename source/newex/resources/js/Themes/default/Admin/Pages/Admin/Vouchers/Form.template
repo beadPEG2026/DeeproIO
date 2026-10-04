@@ -1,0 +1,64 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.vouchers')">{{ $t("代金券") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("代金券信息") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("币种：") }}</label>
+                    <t-rich-select
+                        :options="currencies"
+                        v-model="form.currency_id"
+                        placeholder="选择币种"
+                        value-attribute="id"
+                        text-attribute="symbol"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.currency_id" class="form-error text-red-400">{{ errors.currency_id }}</div>
+                </div>
+
+                <text-input v-model="form.code" :error="errors.code" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;代金券代码&quot;)" />
+
+                <text-input v-model="form.amount" :error="errors.amount" class="pr-6 pr-6 pb-20 w-full lg:w-1/2" :label="$t(&quot;金额&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("代金券是否已兑换？") }}</label>
+                    <t-toggle v-model="form.is_redeemed" />
+
+                    <jet-input-error :message="errors.is_redeemed" class="mt-2" />
+                </div>
+
+            </div>
+            <div class="mt-20 px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除代金券") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div v-if="isEdit" class="bg-white rounded shadow overflow-hidden lg:w-1/2 mt-10 p-10">
+        <div class="pr-6 pb-8 w-full">
+            <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("已兑换用户") }}</div>
+        </div>
+        <div v-for="voucher in voucherUsers" class="">
+            <b>{{ $t("用户：") }}</b> {{ voucher.user.email }}, <b>{{ $t("兑换时间：") }}</b> {{ voucher.created_at }}
+        </div>
+    </div>
+</app-layout>

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "entry_sha256": "78efaecbc2d89b235089aee88c176ec40744f6f7bc5256457c616d26884ed1dc",
+  "pages": {
+    "Home/Home": [
+      "/frontend/js/chunks/page-Home-Home-vue.2a7be8c4b3e0.js"
+    ],
+    "Market/Market": [
+      "/frontend/js/chunks/page-Market-Market-vue.c88deebeef2a.js"
+    ],
+    "Market/Markets": [
+      "/frontend/js/chunks/page-Market-Markets-vue.823bb78aa4d7.js"
+    ],
+    "MarketLite/Market": [
+      "/frontend/js/chunks/page-MarketLite-Market-vue.bcb1b1ba2c84.js"
+    ],
+    "MarketLite/Markets": [
+      "/frontend/js/chunks/page-MarketLite-Markets-vue.d333dca093af.js"
+    ],
+    "Explore/Stocks": [
+      "/frontend/js/chunks/page-Explore-Stocks-vue.1da2c9a90dab.js"
+    ]
+  }
+}

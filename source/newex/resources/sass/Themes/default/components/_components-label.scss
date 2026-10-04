@@ -1,0 +1,34 @@
+
+/** components label start */
+.components-label {
+    display: inline-block;
+    padding: 0.20rem 0.70rem;
+    width: 120px;
+    text-align: center;
+    font-size: var(--small-font__size);
+    border-radius: 9999px;
+    background-color: var(--border-line-color);
+    color: var(--second-text-color);
+}
+
+.label-red {
+    background-color: rgba(238, 40, 68, 0.16);
+    color: var(--red-color);
+
+    span {
+        cursor: pointer;
+        color: var(--red-color) !important;
+    }
+}
+
+.label-green {
+    background-color: rgba(34, 158, 107, 0.16);
+    color: var(--green-color);
+}
+
+.label-orange {
+    background-color: rgba(225, 167, 54, 0.16);
+    color: var(--yellow-color);
+}
+
+/** components label end */

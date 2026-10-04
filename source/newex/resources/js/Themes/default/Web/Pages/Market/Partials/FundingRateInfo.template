@@ -1,0 +1,23 @@
+<div class="funding-rate-info" v-if="fundingRate">
+    <div class="funding-rate-info__header">
+        <span class="funding-rate-info__label">{{ $t('Funding Rate') }}</span>
+        <span class="funding-rate-info__rate" :class="`funding-rate-info__rate--${fundingRateColor}`">
+            {{ fundingRateDisplay }}
+        </span>
+    </div>
+    <div class="funding-rate-info__details">
+        <div class="funding-rate-info__interval">
+            {{ $t('Every') }} {{ fundingIntervalHours }}h
+        </div>
+        <div class="funding-rate-info__timer">
+            <span class="funding-rate-info__timer-label">{{ $t('Next Funding') }}:</span>
+            <span class="funding-rate-info__timer-value">{{ timeRemaining }}</span>
+        </div>
+    </div>
+    <div class="funding-rate-info__description" v-if="fundingRateColor === 'positive'">
+        {{ $t('Long positions pay short positions') }}
+    </div>
+    <div class="funding-rate-info__description" v-else-if="fundingRateColor === 'negative'">
+        {{ $t('Short positions pay long positions') }}
+    </div>
+</div>

@@ -1,0 +1,19 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+A001 = {isa = PBXProject; attributes = {LastUpgradeCheck = 2600;}; buildConfigurationList = A010; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = A002; productRefGroup = A003; projectDirPath = ""; projectRoot = ""; targets = (A004);};
+A002 = {isa = PBXGroup; children = (A005,A006,A003); sourceTree = "<group>";};
+A003 = {isa = PBXGroup; children = (A007); name = Products; sourceTree = "<group>";};
+A004 = {isa = PBXNativeTarget; buildConfigurationList = A011; buildPhases = (A008,A009); buildRules = (); dependencies = (); name = Deepro; productName = Deepro; productReference = A007; productType = "com.apple.product-type.application";};
+A005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deepro/AppDelegate.swift; sourceTree = "<group>";};
+A006 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Deepro/Info.plist; sourceTree = "<group>";};
+A007 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Deepro.app; sourceTree = BUILT_PRODUCTS_DIR;};
+A008 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A012); runOnlyForDeploymentPostprocessing = 0;};
+A009 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0;};
+A012 = {isa = PBXBuildFile; fileRef = A005;};
+A010 = {isa = XCConfigurationList; buildConfigurations = (A013,A014); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+A011 = {isa = XCConfigurationList; buildConfigurations = (A015,A016); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+A013 = {isa = XCBuildConfiguration; name = Debug; buildSettings = {SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SWIFT_VERSION = 5.0; DEBUG_INFORMATION_FORMAT = dwarf;};};
+A014 = {isa = XCBuildConfiguration; name = Release; buildSettings = {SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SWIFT_VERSION = 5.0; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; SWIFT_COMPILATION_MODE = wholemodule;};};
+A015 = {isa = XCBuildConfiguration; name = Debug; buildSettings = {PRODUCT_BUNDLE_IDENTIFIER = io.deepro.app; PRODUCT_NAME = "$(TARGET_NAME)"; INFOPLIST_FILE = Deepro/Info.plist; TARGETED_DEVICE_FAMILY = "1,2"; CODE_SIGN_STYLE = Automatic; SWIFT_OPTIMIZATION_LEVEL = "-Onone";};};
+A016 = {isa = XCBuildConfiguration; name = Release; buildSettings = {PRODUCT_BUNDLE_IDENTIFIER = io.deepro.app; PRODUCT_NAME = "$(TARGET_NAME)"; INFOPLIST_FILE = Deepro/Info.plist; TARGETED_DEVICE_FAMILY = "1,2"; CODE_SIGN_STYLE = Automatic; SWIFT_OPTIMIZATION_LEVEL = "-O";};};
+}; rootObject = A001; }

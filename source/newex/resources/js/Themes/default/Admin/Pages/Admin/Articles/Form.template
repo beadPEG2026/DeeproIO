@@ -1,0 +1,281 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.articles')">{{ $t("文章") }}</Link>
+        - {{ subTitle }}
+    </h1>
+
+    <trashed-message v-if="isEdit && article.deleted_at" class="mb-6" @restore="restore">
+        {{ $t("该文章已被删除。") }}
+    </trashed-message>
+
+    <div class="bg-white rounded shadow overflow-hidden lg:w-4/5">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.title"
+                    :error="errors.title || errors.name"
+                    class="pr-6 pb-8 w-full"
+                    label="标题"
+                />
+
+                <div class="pr-6 pb-8 w-full">
+                    <loading-button @click.native="generateSlug()" class="btn-indigo ml-auto" type="button">
+                        {{ $t("生成 slug") }}
+                    </loading-button>
+                </div>
+
+                <text-input
+                    v-model="form.slug"
+                    :error="errors.slug"
+                    class="pr-6 pb-8 w-full"
+                    label="Slug"
+                />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("分类：") }}</label>
+                    <t-rich-select
+                        :options="categories"
+                        v-model="form.category_id"
+                        placeholder="选择分类"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.category_id" class="form-error text-red-400">{{ errors.category_id }}</div>
+                </div>
+
+                <text-input
+                    v-model="form.visibility_referral_user_id"
+                    :error="errors.visibility_referral_user_id"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="邀请链根用户 UID（含本人及全部下级可见）"
+                />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("IP 可见范围：") }}</label>
+                    <themed-select v-model="form.visibility_country" class="form-select w-full rounded">
+                        <option :value="null">{{ $t("所有国家") }}</option>
+                        <option value="ES">{{ $t("仅西班牙（ES）IP") }}</option>
+                    </themed-select>
+                    <div v-if="errors.visibility_country" class="form-error text-red-400">
+                        {{ errors.visibility_country }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-2 mb-4 pb-4 font-medium">{{ $t("首页弹窗") }}</div>
+                    <div class="mb-5">
+                        <label class="form-label block mr-2 mb-3">{{ $t("在首页显示为弹窗") }}</label>
+                        <t-toggle v-model="form.homepage_popup_enabled" />
+                        <div class="text-red-600 mb-3" v-if="errors.homepage_popup_enabled">
+                            {{ errors.homepage_popup_enabled }}
+                        </div>
+                    </div>
+
+                    <text-input
+                        v-model="form.homepage_popup_excluded_countries"
+                        :error="errors.homepage_popup_excluded_countries"
+                        class="w-full"
+                        label="弹窗排除国家代码"
+                        placeholder="例如：CN,SG,ES；留空表示不排除"
+                    />
+                    <div class="text-sm text-gray-500 mt-2">
+                        {{ $t("使用逗号分隔的 ISO 两位国家代码。命中排除国家 IP 的访客不会看到首页弹窗。") }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label d-block mb-2">{{ $t("默认正文") }}</label>
+                    <quill-editor
+                        v-model="form.body"
+                        height="250"
+                    />
+                    <div v-if="errors.body" class="form-error text-red-500">{{ errors.body }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-4 pb-4 font-medium">{{ $t("多语言内容") }}</div>
+
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button
+                            v-for="lang in articleLanguages"
+                            :key="lang.slug"
+                            type="button"
+                            class="px-4 py-2 rounded text-sm border focus:outline-none"
+                            :class="activeLanguageSlug === lang.slug ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                            @click="setActiveLanguage(lang.slug)"
+                        >
+                            {{ lang.name }}
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded p-5">
+                        <div class="flex flex-wrap justify-between items-center mb-4">
+                            <div>
+                                <div class="text-lg font-bold text-gray-700">
+                                    {{ activeLanguage.name }}
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">
+                                    {{ $t("当前语言字段：") }}{{ getLangTitleField(activeLanguage.slug) }} / {{ getLangBodyField(activeLanguage.slug) }}
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-800 focus:outline-none"
+                                @click="copyDefaultToActiveLanguage"
+                            >
+                                {{ $t("复制默认标题和正文") }}
+                            </button>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="form-label d-block mb-2">{{ activeLanguage.name }} {{ $t("标题") }}</label>
+                            <input
+                                v-model="form[getLangTitleField(activeLanguage.slug)]"
+                                type="text"
+                                class="form-input w-full"
+                                :placeholder="activeLanguage.name + ' 标题'"
+                            />
+                            <div
+                                v-if="getError(getLangTitleField(activeLanguage.slug))"
+                                class="form-error text-red-500 mt-2"
+                            >
+                                {{ getError(getLangTitleField(activeLanguage.slug)) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label d-block mb-2">{{ activeLanguage.name }} {{ $t("正文") }}</label>
+                            <quill-editor
+                                :key="'editor-' + activeLanguage.slug"
+                                v-model="form[getLangBodyField(activeLanguage.slug)]"
+                                height="250"
+                            />
+                            <div
+                                v-if="getError(getLangBodyField(activeLanguage.slug))"
+                                class="form-error text-red-500 mt-2"
+                            >
+                                {{ getError(getLangBodyField(activeLanguage.slug)) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("文章状态") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("文章可见性") }}</label>
+                    <t-toggle v-model="form.status" />
+                    <div class="text-red-600 mb-3" v-if="errors.status">
+                        {{ errors.status }}
+                    </div>
+
+                    <label class="form-label block mr-2 mb-3">{{ $t("文章推荐") }}</label>
+                    <t-toggle v-model="form.featured" />
+                    <div class="text-red-600 mb-3" v-if="errors.featured">
+                        {{ errors.featured }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("文章图片") }}</div>
+                </div>
+
+                <div id="file-uploader-form">
+                    <strong class="text-sm">{{ $t("强烈建议使用以下图片属性：") }}</strong><br>
+                    <div class="d-block mb-5 mt-5 text-sm">
+                        {{ $t("宽度：400px") }}<br>
+                        {{ $t("高度：175px") }}<br>
+                    </div>
+
+                    <VueFileAgent
+                        class="profile-pic-upload-block"
+                        ref="fileUploadForm"
+                        :multiple="false"
+                        :deletable="false"
+                        :meta="false"
+                        :compact="true"
+                        :accept="'image/*'"
+                        :helpText="'将图片拖拽到这里'"
+                        :errorText="{
+                              type: '请选择一张图片',
+                            }"
+                        v-model="articleLogo"
+                        @select="onSelect($event)"
+                        @upload="onUpload($event)"
+                    >
+                        <template v-slot:before-outer>
+                        </template>
+
+                        <template v-slot:after-outer>
+                            <div :title="$t(&quot;after-outer&quot;)">
+                                <div class="mb-4">
+                                    <small>{{ $t("允许的类型：") }}<strong>{{ $t("jpg, png。") }}</strong></small>
+                                    <small>{{ $t("最大文件大小：") }}<strong>1MB</strong></small>
+                                </div>
+                                <div class="drop-help-text">
+                                    <p class="text-success">{{ $t("释放文件即可上传！") }}</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none"
+                                    :class="[uploaded ? 'btn-danger' : 'btn-secondary']"
+                                    v-if="articleLogo"
+                                    @click="removePic()"
+                                >
+                                    {{ $t("移除") }}
+                                </button>
+                                <div class="clearfix"></div>
+                            </div>
+                        </template>
+                    </VueFileAgent>
+                    <div v-if="errors.file_id" class="form-error text-red-400">{{ errors.file_id }}</div>
+                </div>
+            </div>
+
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center mt-10">
+                <button
+                    v-if="isEdit && !article.deleted_at"
+                    class="focus:outline-none text-red-600 hover:underline"
+                    tabindex="-1"
+                    type="button"
+                    @click="destroy"
+                >
+                    {{ $t("删除文章") }}
+                </button>
+
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">
+                    <svg
+                        v-show="sending"
+                        class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

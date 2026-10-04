@@ -1,0 +1,97 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('商户') }}</title>
+    </Head>
+
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{{ $t('商户') }}</h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input v-model="form.search" type="text" :placeholder="$t('按名称或邮箱搜索')" class="px-4 py-2 border rounded-lg" @keyup.enter="applyFilters" />
+                <themed-select v-model="form.status" class="px-4 py-2 border rounded-lg" @change="applyFilters">
+                    <option value="">{{ $t('全部状态') }}</option>
+                    <option value="active">{{ $t('启用') }}</option>
+                    <option value="pending">{{ $t('待审核') }}</option>
+                    <option value="suspended">{{ $t('已暂停') }}</option>
+                </themed-select>
+                <themed-select v-model="form.verification_status" class="px-4 py-2 border rounded-lg" @change="applyFilters">
+                    <option value="">{{ $t('全部认证状态') }}</option>
+                    <option value="verified">{{ $t('已认证') }}</option>
+                    <option value="pending">{{ $t('待审核') }}</option>
+                    <option value="rejected">{{ $t('已拒绝') }}</option>
+                </themed-select>
+                <button @click="resetFilters" class="px-4 py-2 border rounded-lg hover:bg-gray-50">{{ $t('重置') }}</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-gray-800">{{ stats.total || 0 }}</p>
+                <p class="text-sm text-gray-500">{{ $t('总数') }}</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-green-600">{{ stats.active || 0 }}</p>
+                <p class="text-sm text-gray-500">{{ $t('启用') }}</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-yellow-600">{{ stats.pending || 0 }}</p>
+                <p class="text-sm text-gray-500">{{ $t('待审核') }}</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-red-600">{{ stats.suspended || 0 }}</p>
+                <p class="text-sm text-gray-500">{{ $t('已暂停') }}</p>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('商户') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('状态') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('认证状态') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('交易额') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('加入时间') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('操作') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr v-for="merchant in merchants.data" :key="merchant.id" class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-800">{{ merchant.business_name }}</div>
+                            <div class="text-sm text-gray-500">{{ merchant.business_email }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusBadge(merchant.status)]">{{ merchant.status }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span :class="['px-2 py-1 rounded-full text-xs font-medium', getVerificationBadge(merchant.verification_status)]">{{ merchant.verification_status }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium">${{ Number(merchant.total_volume_usd || 0).toLocaleString() }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {{ new Date(merchant.created_at).toLocaleDateString() }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a :href="route('admin.merchant.merchants.show', merchant.id)" class="text-blue-600 hover:text-blue-800">{{ $t('查看') }}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center" v-if="merchants.links">
+            <nav class="flex space-x-2">
+                <a v-for="link in merchants.links" :key="link.label" :href="link.url" v-html="link.label" :class="['px-3 py-2 rounded', link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100']"></a>
+            </nav>
+        </div>
+    </div>
+</app-layout>

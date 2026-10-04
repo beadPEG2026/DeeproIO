@@ -1,0 +1,55 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="wallet_adjustments"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("钱包调整记录") }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("备注") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="r in records.data" :key="r.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ r.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="$page.props.mode == 'readonly'">{{ $t("演示模式隐藏") }}</template>
+                        <template v-else>{{ r.user && r.user.email }} {{ $t("(ID:") }} {{ r.user && r.user.id }})</template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ r.currency && r.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ r.amount }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ r.note }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ r.created_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="records.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到调整记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="records.links" />
+</app-layout>

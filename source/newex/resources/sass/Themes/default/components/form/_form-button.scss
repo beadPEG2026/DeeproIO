@@ -1,0 +1,149 @@
+
+
+.btn {
+    position: relative;
+    display: inline-block;
+    font-size: 0.90rem;
+
+    text-decoration: none;
+    padding: 0.70rem 1.50rem;
+
+    color: var(--white-color);
+    background-color: var(--purple-color);
+
+    border: 1px solid var(--purple-color);
+    border-radius: 9999px;
+
+    outline: none;
+
+    &:hover {
+        background-color: var(--purple-second-color);
+    }
+
+    &:focus {
+        outline: none;
+        background-color: var(--purple-second-color);
+    }
+
+    &:active {
+        outline: none;
+        background-color: var(--purple-color);
+    }
+
+    &-text {
+        font-size: 0.90rem;
+    }
+
+}
+
+.bth-sm {
+    font-size: 0.70rem;
+    padding: 0.30rem 0.60rem;
+}
+
+.bth-lg {
+    font-size: 1.20rem;
+    padding: 1rem 2.50rem;
+}
+
+.btn-block {
+    margin: 0.50rem 0;
+    display: block;
+    width: 100%;
+}
+
+.btn-white {
+    color: var(--second-text-color);
+    background-color: var(--white-color);
+
+    border: 1px solid var(--border-line-color);
+
+    &:hover {
+        background-color: var(--rows-color);
+    }
+
+    &:focus {
+        outline: none;
+        background-color: var(--rows-color);
+    }
+
+    &:active {
+        outline: none;
+        background-color: var(--body-color);
+    }
+}
+
+
+.btn-red {
+
+    color: var(--white-color);
+    background-color: var(--red-color);
+
+    border: 1px solid var(--red-color);
+
+    &:hover {
+        background-color: var(--red-second-color);
+    }
+
+    &:focus {
+        outline: none;
+        background-color: var(--red-second-color);
+    }
+
+    &:active {
+        outline: none;
+        background-color: var(--red-color);
+    }
+}
+
+
+
+.btn-loading {
+    padding: 0.70rem 2rem;
+
+    &::after {
+        content: "";
+        width: 16px;
+        height: 16px;
+        //background-color: var(--white-color);
+        position: absolute;
+        top: 0;
+        right: 0.50rem;
+        bottom: 0;
+        margin: auto 0;
+
+        border: 2px solid transparent;
+        border-top-color: var(--white-color);
+        border-radius: 50%;
+        animation: btn-loading-spinner 1s ease infinite;
+
+    }
+}
+
+.btn-warning {
+    display: block;
+
+    width: 100px;
+    padding: 0.40rem 0;
+
+    font-size: 0.80rem;
+    color: var(--yellow-color);
+    border: 1px solid var(--yellow-color);
+    border-radius: 9999px;
+    outline: none;
+    transition: all 0.5s ease-out;
+
+    &:hover {
+        background-color: var(--yellow-color);
+        color: var(--white-color);
+    }
+}
+
+@keyframes btn-loading-spinner {
+    from {
+        transform: rotate(0turn);
+    }
+    to {
+        transform: rotate(1turn);
+    }
+}

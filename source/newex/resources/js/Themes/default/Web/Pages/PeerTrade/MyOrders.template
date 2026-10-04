@@ -1,0 +1,455 @@
+<app-layout>
+
+    <Head>
+        <title>{{ $t('My P2P Orders')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+<top-menu :label="$t('Orders')"></top-menu>
+
+<div class="components-filter components-filter-mob">
+    <div class="flex flex-wrap">
+        <div class="w-full flex justify-between flex-col-mob flex-col-desktop">
+            <div class="components-filter__item">
+                <label>{{ $t('Currency:') }}</label>
+                <t-rich-user-select
+                    :options="currencies.data"
+                    v-model="form.coin"
+                    :placeholder="$t('Select coin')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+            <div class="components-filter__item">
+                <label>{{ $t('Fiat Currency:') }}</label>
+                <t-rich-user-select
+                    :options="fiatCurrencies.data"
+                    v-model="form.fiat"
+                    :placeholder="$t('Select fiat')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+            <div class="w-full lg:w-1/2 components-filter__item8">
+                <label>{{ $t('Status')}}</label>
+                <t-rich-user-select
+                    :options="statuses"
+                    v-model="form.status"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="false"
+                    :hideSearchBox="true"
+                >
+                </t-rich-user-select>
+            </div>
+
+            <div class="w-full lg:w-1/2 components-filter__item8">
+                <label>{{ $t('Type')}}</label>
+                <t-rich-user-select
+                    :options="types"
+                    v-model="form.type"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="false"
+                    :hideSearchBox="true"
+                >
+                </t-rich-user-select>
+            </div>
+
+            <div class="w-full lg:w-1/2 components-filter__item components-filter__picker">
+                <label class="form-label d-block">{{ $t('Date:') }}</label>
+                <t-datepicker
+                    :range="true"
+                    :placeholder="$t('Select Period')"
+                    v-model="form.date"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                />
+            </div>
+
+            <div class="w-full lg:w-1/2 components-filter__item">
+                <text-user-input :placeholder="$t('Search Order ID')" v-model="form.order_id" :label="$t('Order ID')" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- table components start -->
+<div class="table-components">
+
+    <!-- tables start -->
+    <div class="table-div table-div-desktop">
+        <!-- thead start -->
+        <div class="table-div-head">
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Order Number') }}</div>
+                        <div>{{ $t('Type/Coin') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Fiat amount') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Price') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Crypto amount') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Counterparty') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Status') }}</div>
+                    </span>
+                </div>
+            </div>
+            <div style="width: 18%" class="table-div-head-column">
+                <div class="table-sort__value">
+                    <span class="">
+                        <div>{{ $t('Operation') }}</div>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- thead end -->
+        <!-- tbody start -->
+        <div class="table-div-body">
+            <div class="table-div-body-rows" v-for="(order, key) in orders.data">
+                <div class="table-div-body-rows-inner table-div-body-rows-inner-tiny">
+                    <div style="width: 18%" class="table-div-body-column">
+
+                        <div class="table-div-body-column-container">
+                            <div class="mb-1 div-items-center">
+                                <div :class="{'font-500 color-buy': order.type == 'buy', 'font-500 color-sell': order.type == 'sell'}">{{ order.type == 'buy' ? 'Buy' : 'Sell' }} {{ order.baseSymbol }}</div>
+                            </div>
+                            <div class=" flex">
+                                {{ order.short_id }}
+                                <div @click="doCopy(order.id)" class="copy-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect class="list-text__icon-color" x="1" y="2" width="17" height="16" rx="2"/>
+                                        <path class="list-text__icon-color" d="M18 4H18.4C19.8999 4 20.6498 4 21.1756 4.38197C21.3454 4.50533 21.4947 4.65464 21.618 4.82443C22 5.35016 22 6.10011 22 7.6V18.4C22 19.8999 22 20.6498 21.618 21.1756C21.4947 21.3454 21.3454 21.4947 21.1756 21.618C20.6498 22 19.9012 22 18.404 22C15.5371 22 11.3886 22 7.59963 22C6.09998 22 5.35016 22 4.82443 21.618C4.65464 21.4947 4.50533 21.3454 4.38197 21.1756C4 20.6498 4 19.8999 4 18.4V18"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div style="width: 18%" class="table-div-body-column">
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center mb-1 font-500">{{ order.quote_amount }} {{ order.quoteSymbol }}</div>
+                        </div>
+                    </div>
+                    <div style="width: 18%" class="table-div-body-column">
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center mb-1 font-500">{{ order.price }} {{ order.quoteSymbol }}</div>
+                        </div>
+                    </div>
+                    <div style="width: 18%" class="table-div-body-column">
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center mb-1">{{ order.amount }} {{ order.baseSymbol }}</div>
+                        </div>
+                    </div>
+                    <div style="width: 18%" class="table-div-body-column">
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center mb-1">
+
+                                    <template v-if="$page.props.user.nickname == order.user.name">
+                                        <Link class="action-link" :href="route('p2p.profile', order.seller.referral_code)">
+                                            {{ order.seller.name }}
+                                        </Link>
+                                    </template>
+                                    <template v-else>
+                                        <Link class="action-link" :href="route('p2p.profile', order.user.referral_code)">
+                                            {{ order.user.name }}
+                                        </Link>
+                                    </template>
+
+                                    <div class="ml-1">
+                                        <Link as="div" :href="route('p2p.my-order', order.id)" class="action-link">
+                                            <svg class="chat-icon" width="20" height="20" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path  d="M160 826.88 273.536 736H800a64 64 0 0 0 64-64V256a64 64 0 0 0-64-64H224a64 64 0 0 0-64 64v570.88zM296 800 147.968 918.4A32 32 0 0 1 96 893.44V256a128 128 0 0 1 128-128h576a128 128 0 0 1 128 128v416a128 128 0 0 1-128 128H296z"/><path d="M352 512h320q32 0 32 32t-32 32H352q-32 0-32-32t32-32zm0-192h320q32 0 32 32t-32 32H352q-32 0-32-32t32-32z"/></svg>
+                                        </Link>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="width: 18%" class="table-div-body-column">
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center font-500 mb-1">
+                                <div class="flex">
+                                    <template v-if="order.status == 'payment_pending'">
+                                        {{ $t('Pending Payment') }}
+
+                                        <div class="flex-icon-orange">
+                                            {{ $t('1') }}
+                                        </div>
+                                    </template>
+                                    <template v-else-if="order.status == 'appealed_by_counterparty'">
+                                        {{ $t('Appeal In Progress') }}
+
+                                        <div class="flex-icon-orange">
+                                            {{ $t('1') }}
+                                        </div>
+                                    </template>
+                                    <template v-else-if="order.status == 'confirm_transfer'">
+                                        {{ $t('Pending Release') }}
+
+                                        <div class="flex-icon-orange">
+                                            {{ $t('1') }}
+                                        </div>
+                                    </template>
+                                    <template v-else-if="order.status == 'cancelled_by_owner'">
+                                        {{ $t('Cancelled By Owner') }}
+                                    </template>
+                                    <template v-else-if="order.status == 'cancelled_by_counterparty'">
+                                        {{ $t('Cancelled by Counterparty') }}
+                                    </template>
+                                    <template v-else-if="order.status == 'cancelled_by_system'">
+                                        {{ $t('Cancelled by System') }}
+                                    </template>
+                                    <template v-else-if="order.status == 'completed'">
+                                        {{ $t('Completed')}}
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="div-items-center">{{ order.created_at }}</div>
+                        </div>
+                    </div>
+                    <div style="width: 18%" class="table-div-body-column">
+
+                        <div class="table-div-body-column-container">
+                            <div class="div-items-center font-500 mb-1">
+                                <Link as="div" :href="route('p2p.my-order', order.id)" class="action-link">{{ $t('View')}}</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- tbody end -->
+        <!-- tfood start -->
+        <div class="table-div-footer">
+            <div class="table-div-footer-rows">
+                <div class="table-div-footer-column">
+                    <div v-if="orders.data.length === 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No ads found.') }}</span>
+                    </div>
+                    <pagination :links="orders.meta.links" />
+                </div>
+            </div>
+        </div>
+        <!-- tfood end -->
+    </div>
+    <!-- tables end -->
+
+    <!-- tables start -->
+    <div class="table-div table-div-mobile">
+        <!-- tbody start -->
+        <div class="table-div-body">
+            <div class="table-div-body-rows" v-for="(order, key) in orders.data">
+                <div class="table-div-body-rows-inner">
+                    <div class="table-div-body-column">
+
+                        <div class="table-div-body-column-container">
+                            <div class="left bigger-text flex justify-between w-full">
+                                <span :class="{'font-500 color-buy': order.type == 'buy', 'font-500 color-sell': order.type == 'sell'}">{{ order.type == 'buy' ? 'Buy' : 'Sell' }} {{ order.baseSymbol }}</span>
+                                <span class="underline">{{ order.id }}</span>
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Fiat amount') }}</span>
+                            </div>
+                            <div class="right">
+                                {{ order.quote_amount }} {{ order.quoteSymbol }}
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Price')}}</span>
+                            </div>
+                            <div class="right">
+                                {{ order.price }} {{ order.quoteSymbol }}
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Crypto amount') }}</span>
+                            </div>
+                            <div class="right">
+                                {{ order.amount }} {{ order.baseSymbol }}
+                            </div>
+                        </div>
+
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Counterparty') }}</span>
+                            </div>
+                            <div class="right">
+                                <template v-if="$page.props.user.nickname == order.user.name">
+                                    <Link class="action-link" :href="route('p2p.profile', order.seller.referral_code)">
+                                        {{ order.seller.name }}
+                                    </Link>
+                                </template>
+                                <template v-else>
+                                    <Link class="action-link" :href="route('p2p.profile', order.user.referral_code)">
+                                        {{ order.user.name }}
+                                    </Link>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Status')}}</span>
+                            </div>
+                            <div class="right flex">
+                                <template v-if="order.status == 'payment_pending'">
+                                    {{ $t('Pending Payment') }}
+
+                                    <div class="flex-icon-orange">
+                                        {{ $t('1') }}
+                                    </div>
+                                </template>
+                                <template v-else-if="order.status == 'appealed_by_counterparty'">
+                                    {{ $t('Appeal In Progress') }}
+
+                                    <div class="flex-icon-orange">
+                                        {{ $t('1') }}
+                                    </div>
+                                </template>
+                                <template v-else-if="order.status == 'confirm_transfer'">
+                                    {{ $t('Pending Release') }}
+
+                                    <div class="flex-icon-orange">
+                                        {{ $t('1') }}
+                                    </div>
+                                </template>
+                                <template v-else-if="order.status == 'cancelled_by_owner'">
+                                    {{ $t('Cancelled By Owner') }}
+                                </template>
+                                <template v-else-if="order.status == 'cancelled_by_system'">
+                                    {{ $t('Cancelled by System') }}
+                                </template>
+                                <template v-else-if="order.status == 'cancelled_by_counterparty'">
+                                    {{ $t('Cancelled by Counterparty') }}
+                                </template>
+                                <template v-else-if="order.status == 'completed'">
+                                    {{ $t('Completed')}}
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Created Time:')}}</span>
+                            </div>
+                            <div class="right">
+                                <div class="grayed-text">{{ order.created_at }}</div>
+                            </div>
+                        </div>
+
+                        <div class="table-div-body-column-container">
+                            <div class="left">
+                                <span class="opacity-80">{{ $t('Actions')}}</span>
+                            </div>
+                            <div class="right">
+                                <div class="div-items-center font-500 mb-1">
+                                    <Link as="div" :href="route('p2p.my-order', order.id)" class="action-link">{{ $t('View')}}</Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- tbody end -->
+        <!-- tfood start -->
+        <div class="table-div-footer">
+            <div class="table-div-footer-rows">
+                <div class="table-div-footer-column">
+                    <div v-if="orders.data.length === 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No ads found.') }}</span>
+                    </div>
+                    <pagination :links="orders.meta.links" />
+                </div>
+            </div>
+        </div>
+        <!-- tfood end -->
+    </div>
+    <!-- tables end -->
+
+</div>
+<!-- table components end -->
+
+
+</app-layout>

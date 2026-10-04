@@ -1,0 +1,239 @@
+<div>
+    <div class="tabs tabs-root">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div
+                    v-if="!referrer && isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/wallets/system')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'system_wallets'}"
+                >
+                    <h4>{{ $t("钱包") }}</h4>
+                </div>
+
+                <div
+                    v-if="!referrer && isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/finances')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'finances'}"
+                >
+                    <h4>{{ $t("财务") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin && isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/deposits')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'deposits'}"
+                >
+                    <h4>{{ $t("充值 / 提现") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFullFinance && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/trades')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'trades'}"
+                >
+                    <h4>{{ $t("交易记录") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFullFinance && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/launchpad-transactions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'launchpads'}"
+                >
+                    <h4>{{ $t("Launchpad") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFinanceOrderReports && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/staking-transactions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'staking'}"
+                >
+                    <h4>{{ $t("质押") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFinanceOrderReports && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/auto-invest-orders')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'auto_invest_orders'}"
+                >
+                    <h4>{{ $t("量化订单") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeOpenFutures && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/futures/open')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'futures_active'}"
+                >
+                    <h4>{{ $t("开仓中订单") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeOpenFutures && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/futures/history')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'futures_history'}"
+                >
+                    <h4>{{ $t("历史订单") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFullFinance && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/funding-fee-distributions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'funding_fee_distributions'}"
+                >
+                    <h4>{{ $t("资金费") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFeeRefunds && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/fee-refunds')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'fee_refunds'}"
+                >
+                    <h4>{{ $t("手续费返现") }}</h4>
+                </div>
+
+                <divv-if="$uiFeatures.binaryOptions && (canSeeFullFinance && !isDepositWithdrawalSection)"
+                    @click="setReport('/exchange-control-panel/reports/options')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'options'}"
+                >
+                    <h4>{{ $t("期权") }}</h4>
+                </div>
+
+                <div
+                    v-if="canSeeFullFinance && !isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/lending-transactions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'lending'}"
+                >
+                    <h4>{{ $t("借贷") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin && isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/referral-transactions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'referrals'}"
+                >
+                    <h4>{{ $t("推荐奖励") }}</h4>
+                </div>
+
+                <div
+                    v-if="!referrer && isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/compliance')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'compliance'}"
+                >
+                    <h4>{{ $t("合规审计") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin && isDepositWithdrawalSection"
+                    @click="setReport('/exchange-control-panel/reports/bonuses')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'bonuses'}"
+                >
+                    <h4>{{ $t("充值奖励") }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs tabs-children" v-if="isSuperAdmin && isDepositWithdrawalSection">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div
+                    @click="setReport('/exchange-control-panel/reports/deposits')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'deposits'}"
+                >
+                    <h4>{{ $t("充值") }}</h4>
+                </div>
+
+                <div
+                    @click="setReport('/exchange-control-panel/reports/withdrawals')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'withdrawals'}"
+                >
+                    <h4>{{ $t("提现") }}</h4>
+                </div>
+
+                <div
+                    @click="setReport('/exchange-control-panel/reports/fiat-deposits')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'fiat_deposits'}"
+                >
+                    <h4>{{ $t("法币充值") }}</h4>
+                </div>
+
+                <div
+                    @click="setReport('/exchange-control-panel/reports/fiat-withdrawals')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'fiat_withdrawals'}"
+                >
+                    <h4>{{ $t("法币提现") }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs tabs-children" v-if="isWalletSection">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div
+                    v-if="isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/wallets/system')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'system_wallets'}"
+                >
+                    <h4>{{ $t("系统钱包") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/wallets')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'wallets'}"
+                >
+                    <h4>{{ $t("用户钱包") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/transfer-commissions')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'transfer_commissions'}"
+                >
+                    <h4>{{ $t("钱包转账手续费") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/wallet-adjustments')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'wallet_adjustments'}"
+                >
+                    <h4>{{ $t("钱包调整") }}</h4>
+                </div>
+
+                <div
+                    v-if="isSuperAdmin"
+                    @click="setReport('/exchange-control-panel/reports/wallet-balance-logs')"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'wallet_balance_logs'}"
+                >
+                    <h4>{{ $t("資金明細") }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

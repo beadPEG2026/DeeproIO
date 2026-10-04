@@ -1,0 +1,130 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.languages')">{{ $t("语言") }}</Link>
+        - {{ language.name }} {{ $t("翻译字符串") }}
+    </h1>
+
+    <div class="mb-6 flex justify-between items-center">
+        <search-filter :filter="false" v-model="searchForm.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset"></search-filter>
+    </div>
+
+    <div class="mb-6 flex justify-between items-center">
+        <button-link @click.native="toggleTranslation(false)" type="indigo" class="mr-5">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新翻译") }}</span>
+        </button-link>
+
+        <button-link type="green" @click.native="syncLanguage()" :class="{ 'opacity-25': syncing }">
+            <svg v-show="syncing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>{{ syncing ? $t("同步中...") : $t("同步")}}</span>
+        </button-link>
+    </div>
+
+    <div class="mb-5">
+        <small><strong class="text-red-500">{{ $t("重要提示：") }}</strong> {{ $t("完成翻译后请记得点击") }} <strong>{{ $t("同步") }}</strong> {{ $t("按钮。") }}</small>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("键") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("内容") }}</th>
+            </tr>
+
+            <tr v-for="translation in translations.data" :key="translation.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ translation.key }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ format_string(translation.content, 150) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+
+                        <button-link type="indigo" @click.native="toggleTranslation(translation)">
+                            <span>{{ $t("编辑") }}</span>
+                        </button-link>
+
+                        <div class="mr-5"></div>
+
+                        <button-link type="red" @click.native="destroyTranslation(translation)">
+                            <span>{{ $t("删除") }}</span>
+                        </button-link>
+
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="translations.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到翻译。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="translations.links" />
+
+    <jet-dialog-modal :show="showModal" @close="closeModal">
+        <template #title>
+            {{ modalTitle }}
+        </template>
+
+        <template #content>
+            <div class="mt-4">
+
+                <label class="form-label block mr-2 mb-3">{{ $t("键") }}</label>
+
+                <small class="mb-2">
+                    {{ $t("* 仅允许小写字母、短横线、下划线、点，例如：message.title, page_content") }}
+                </small>
+
+                <jet-input
+                        type="text"
+                        class="mt-1 block w-full"
+                        placeholder="键"
+                        ref="createTranslationKey"
+                        v-model="form.key"
+                />
+
+                <jet-input-error :message="form.errors.key" class="mt-2" />
+
+                <label class="form-label block mt-5 mr-2 mb-3">{{ $t("内容") }}</label>
+
+                <jet-input
+                        type="text"
+                        class=" block w-full"
+                        placeholder="内容"
+                        ref="createTranslationContent"
+                        v-model="form.content"
+                />
+
+                <jet-input-error :message="form.errors.content" class="mt-2" />
+
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-button
+                    class="ml-2"
+                    @click.native="submitTranslation"
+                    :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing">
+
+                {{ actionButtonTitle }}
+
+            </jet-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

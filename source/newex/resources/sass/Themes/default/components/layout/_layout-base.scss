@@ -1,0 +1,123 @@
+
+/** base start */
+.base-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+
+    /** left start */
+    &__left {
+        width: 50%;
+        min-height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background-image: url("/images/bg-home.png");
+        background-size: cover;
+
+        background-color: var(--ui-text);
+
+        &-content {
+            position: relative;
+
+            max-width: 600px;
+            width: 100%;
+
+            padding-left: 1rem;
+            color: var(--white-color);
+            font-weight: 400;
+        }
+
+        &-logo {
+            width: 200px;
+            display: block;
+
+            margin-bottom: 6rem;
+
+            img {
+                width: 100%;
+            }
+        }
+
+        &-title {
+            h1 {
+                margin-bottom: 1rem;
+                font-size: 3rem;
+
+                .typer-text {
+                    color: var(--yellow-color) !important;
+                }
+
+                .typer-cursor {
+                    color: var(--yellow-color) !important;
+                }
+            }
+
+            p {
+                font-size: 1.5rem;
+            }
+        }
+
+
+    }
+    /** left end */
+
+
+    /** right start */
+    &__right {
+        width: 50%;
+        min-height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+
+        &-content {
+            max-width: 470px;
+            width: 100%;
+        }
+
+    }
+    /** right end */
+
+
+}
+/** base end */
+
+
+
+/** base media screen start */
+@media screen and (max-width: 1100px) {
+
+
+    /** base start */
+    .base-container {
+        /** left start */
+        &__left {
+            display: none;
+        }
+        /** left end */
+
+
+        /** right start */
+        &__right {
+            width: 100%;
+            padding: 2rem;
+
+
+            &-content {
+                max-width: 90%;
+            }
+
+        }
+        /** right end */
+
+    }
+    /** base end */
+
+
+}
+/** base media screen end */

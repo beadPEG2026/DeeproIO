@@ -1,0 +1,74 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("订单申诉 #") }}{{ appeal.id }}</h1>
+    <div class="bg-white rounded shadow lg:w-1/2">
+        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+            <div class="pr-6 pb-8 w-full">
+                <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("订单信息") }}</div>
+            </div>
+
+            <div class="pr-6 pb-8 w-full">
+
+                <div class="mb-2">
+                    {{ $t("订单号：") }}
+                    <strong>
+                        {{ appeal.id }}
+                    </strong>
+                </div>
+            </div>
+
+            <span class="mt-10 flex gap-10 focus:text-indigo-500">
+                <nav-button class="mr-5" type="red" @click.native="moderate('accept')">
+                    <span>{{ $t("接受申诉") }}</span>
+                </nav-button>
+                <nav-button class="mr-2" type="indigo" @click.native="moderate('decline')">
+                    <span>{{ $t("拒绝申诉") }}</span>
+                </nav-button>
+            </span>
+
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow lg:w-1/2 mt-20">
+        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+            <div class="pr-6 pb-8 w-full">
+                <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("订单聊天") }}</div>
+            </div>
+
+            <div class="pr-6 pb-8 w-full">
+
+                <div class="chat-component">
+                    <div class="relative flex items-center p-3 chat-header">
+
+                    </div>
+
+                    <div class="relative chat-dialog h-full w-full p-6 pr-1 overflow-y-auto">
+                        <vue-scroll ref="chatScroll" :ops="scrollOps">
+                            <ul class="space-y-2">
+                                <li v-if="messages" v-for="chat in messages" class="flex" :class="{'justify-start': chat.is_author, 'justify-end mr-5': !chat.is_author}">
+                                    <div class="place-self-end" :class="{'text-left': chat.is_author, 'text-right': !chat.is_author}">
+                                        <div class="px-5 py-2 rounded-2xl max-w-md" :class="{'bg-blue-50 text-green-900 rounded-tl-none': chat.is_author, 'bg-indigo-500 text-white rounded-tr-none': !chat.is_author}">
+                                            <span class="chat-message-text whitespace-pre-wrap break-words">{{ chat.message }}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </vue-scroll>
+                    </div>
+
+                    <form @submit.prevent="addMessage">
+                        <div class="flex items-center justify-between w-full p-3 chat-footer">
+                        <textarea ref="message" @keyup="textAreaAdjust" v-model="message" type="text" :placeholder="$t('输入消息...')"
+                                  class="chat-message-input"
+                                  name="message" required />
+                            <svg class="btn-icon" @keyup.enter="addMessage" @click="addMessage" width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.5003 12H5.41872M5.24634 12.7972L4.24158 15.7986C3.69128 17.4424 3.41613 18.2643 3.61359 18.7704C3.78506 19.21 4.15335 19.5432 4.6078 19.6701C5.13111 19.8161 5.92151 19.4604 7.50231 18.7491L17.6367 14.1886C19.1797 13.4942 19.9512 13.1471 20.1896 12.6648C20.3968 12.2458 20.3968 11.7541 20.1896 11.3351C19.9512 10.8529 19.1797 10.5057 17.6367 9.81135L7.48483 5.24303C5.90879 4.53382 5.12078 4.17921 4.59799 4.32468C4.14397 4.45101 3.77572 4.78336 3.60365 5.22209C3.40551 5.72728 3.67772 6.54741 4.22215 8.18767L5.24829 11.2793C5.34179 11.561 5.38855 11.7019 5.407 11.8459C5.42338 11.9738 5.42321 12.1032 5.40651 12.231C5.38768 12.375 5.34057 12.5157 5.24634 12.7972Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</app-layout>

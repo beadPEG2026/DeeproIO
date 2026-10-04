@@ -1,0 +1,109 @@
+<!-- MODULE ORDEROPEN START -->
+<div class="module module-orderopen">
+    <div class="module-container">
+
+        <!-- module head start -->
+        <div class="module-head">
+
+            <div class="module-orderopen__navigation">
+                <div  class="module-orderopen__navigation-title module-orderopen__navigation-active"><h4>{{ $t('Open Positions') }}</h4></div>
+            </div>
+        </div>
+        <!-- module head start -->
+
+        <!-- module body start -->
+        <div class="module-body">
+
+            <!-- module orderopen table start -->
+            <div class="module-orderopen__table">
+
+                <div class="module-orderopen__table-title table-title">
+                    <div class="table-title__name">{{ $t('Market') }}</div>
+                    <div class="table-title__name">{{ $t('Position') }}</div>
+                    <div class="table-title__name">{{ $t('Enter Price') }}</div>
+                    <div class="table-title__name">{{ $t('Amount') }}</div>
+                    <div class="table-title__name">{{ $t('Duration') }}</div>
+                    <div class="table-title__name">{{ $t('Status') }}</div>
+                    <div class="table-title__name">{{ $t('Remaining Time') }}</div>
+                    <div class="table-title__name">{{ $t('Starting Time') }}</div>
+                </div>
+
+                <div v-if="orders" v-for="order in orders" class="module-orderopen__table-list table-list">
+                    <div class="table-list__item">
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Market') }}</span>
+                            {{ market.name }}
+                        </div>
+                        <div :class="{'color-sell' : order.type == 'sell', 'color-buy': order.type == 'buy'}" class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Side') }}</span>
+                            {{ order.type == 'buy' ? 'Buy Long' : 'Sell Short'}}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Price') }}</span>
+                            {{ decimal_format(order.price, market.quote_precision, market.quote_currency_type) }} {{ market.quote_currency }}
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Amount') }}</span>
+                            {{ decimal_format(order.amount, market.quote_precision) }} {{ market.quote_currency }}
+                        </div>
+
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Duration') }}</span>
+                            {{ order.period_text }}s
+                        </div>
+
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Status') }}</span>
+                            {{ order.status }}
+                        </div>
+
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Remaining Time') }} </span>
+                            <span v-if="order.status === 'scheduled'">-</span>
+                            <span v-else>{{ order.remaining }}s</span>
+                        </div>
+                        <div class="table-list__item-value">
+                            <span class="table-list__subtitle">{{ $t('Starting Time') }}</span>
+                            <span v-if="order.status === 'scheduled' && order.start_at">{{ humanizeCountdown(order.start_at) }}</span>
+                            <span v-else>{{ $t('Started') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- module orderopen table end -->
+
+            <!-- module orderopen login start -->
+            <div v-if="!$page.props.user" class="module-orderopen__login">
+                <div class="module-orderopen__login-text">
+                    <Link :href="route('login')">{{ $t('Log In') }}</Link>
+                    {{ $t('or') }}
+                    <Link :href="route('register')">{{ $t('Register Now') }}</Link>
+                    {{ $t('to trade') }}
+                </div>
+            </div>
+            <!-- module orderopen login end -->
+
+            <!-- module orderopen notfont start -->
+            <div v-if="$page.props.user && orders && orders.length == 0" class="module-orderopen__notfont">
+                <span class="module-orderopen__notfont-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="module-orderopen__notfont-icon__color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                        <line class="module-orderopen__notfont-icon__color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                        <line class="module-orderopen__notfont-icon__color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                        <line class="module-orderopen__notfont-icon__color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                        <rect class="module-orderopen__notfont-icon__color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                        <line class="module-orderopen__notfont-icon__color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                    </svg>
+                </span>
+                <span class="module-orderopen__notfont-text">
+                    {{ $t('No Positions Found.') }}
+                </span>
+            </div>
+            <!-- module orderopen notfont end -->
+        </div>
+        <!-- module body end -->
+    </div>
+</div>
+<!-- MODULE ORDEROPEN END -->
+

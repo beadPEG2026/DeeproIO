@@ -1,0 +1,4 @@
+<template><dl class="ops-fields"><div v-for="(value,key) in record" :key="key"><dt>{{ $t(key) }}</dt><dd v-if="value && typeof value==='object'"><details><summary>{{ $t('Details') }}</summary><ops-fields :record="value"/></details></dd><dd v-else>{{ display(value,key) }}</dd></div></dl></template>
+<script>
+export default {name:'OpsFields',props:{record:[Object,Array]},methods:{display(value,key){if(value===null||value===undefined||value==='')return '—';if(typeof value==='boolean')return this.$t(value?'Yes':'No');if(String(key).endsWith('_at')){const text=String(value);const normalized=/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(text)?text.replace(' ','T')+'Z':text;const d=new Date(normalized);if(!isNaN(d.getTime()))return d.toLocaleString()+' ('+Intl.DateTimeFormat().resolvedOptions().timeZone+')'}return typeof value==='string'?this.$t(value):value}}};
+</script>

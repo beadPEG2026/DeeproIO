@@ -1,0 +1,58 @@
+<jet-action-section>
+
+    <div class="form-container delete-account">
+        <!-- form components start -->
+        <div class="form-components">
+
+            <div class="form-components__title"><h3>{{ $t('Delete Account') }}</h3></div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-text">
+                            <p class="mb-5">{{ $t('Permanently delete your account.') }}</p>
+                        </div>
+                        <div class="form-components__block-item block-text">
+                            <p>{{ $t('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}</p>
+                        </div>
+                    </div>
+                    <div class="form-components__block">
+                        <button @click.stop="confirmUserDeletion" :disabled="form.processing" :class="{ 'opacity-75': form.processing }" class="btn btn-red btn-block">{{ $t('Delete account') }}</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <!-- form components end -->
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <jet-dialog-modal :show="confirmingUserDeletion" @close="closeModal">
+        <template #title>
+            {{ $t('Delete Account') }}
+        </template>
+
+        <template #content>
+            {{ $t('Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
+
+            <div class="mt-4">
+                <jet-input type="password" class="mt-1 block w-3/4" :placeholder="$t('Password')"
+                            ref="password"
+                            v-model="form.password"
+                            @keyup.enter.native="deleteUser" />
+
+                <jet-input-error :message="form.errors.password" class="mt-2" />
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t('Nevermind') }}
+            </jet-secondary-button>
+
+            <jet-danger-button class="ml-2" @click.native="deleteUser" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                {{ $t('Delete Account') }}
+            </jet-danger-button>
+        </template>
+    </jet-dialog-modal>
+</jet-action-section>

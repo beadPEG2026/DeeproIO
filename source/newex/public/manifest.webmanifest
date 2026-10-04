@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Deepro",
+  "short_name": "Deepro",
+  "description": "Deepro digital asset exchange",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6faf7",
+  "theme_color": "#eff8ef",
+  "icons": [
+    {
+      "src": "/images/deepro-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "chain": "Polygon",
+    "file": "polygon.svg",
+    "source": "https://raw.githubusercontent.com/0xPolygon/polygon-token-assets/main/assets/brandAssets/polygon_icon_white_on_gradient_circle.svg",
+    "sha256": "8e9eb15b89f8318a89968a47b48bff62d4fae1c5e277c0778e13129ee2e13f08"
+  },
+  {
+    "chain": "X Layer",
+    "file": "xlayer.svg",
+    "source": "https://github.com/okx/xlayer-docs/blob/main/media-kit/XLayer-logo-kit.zip",
+    "archive_path": "XL/PROFILE ICON W- BACKGROUND/SVG/XLayer_Profile_WhenLessThan40px_White.svg",
+    "sha256": "f837468b7de4079c832bcd8d410d0c4cb90002f9e8f331e32a2e2b72a399eb88"
+  },
+  {
+    "chain": "xrp",
+    "file": "xrp.png",
+    "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ripple/info/logo.png",
+    "sha256": "11110d0ef1946d0c2eb9c140631daabbda798a09c9bb9d70875d5773a987848f"
+  },
+  {
+    "chain": "ton",
+    "file": "ton.png",
+    "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png",
+    "sha256": "6434e8d6e515f65e422e8583cd96f6bffe18904e6a4babb140fb6d542ea4488a"
+  }
+]

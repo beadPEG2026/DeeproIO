@@ -1,0 +1,83 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("交易市场") }}</h1>
+
+    <market-presentation-settings/>
+    <div class="mb-6 flex justify-between items-center">
+        <search-filter :filter="false" v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset">
+        </search-filter>
+
+        <nav-button-link :href="route('admin.markets.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新市场") }}</span>
+        </nav-button-link>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("基础货币") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("计价货币") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("基础精度") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("计价精度") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+            </tr>
+
+            <tr v-for="market in markets.data" :key="market.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.markets.edit', market.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ market.name }}
+                    </Link>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ market.base_currency.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ market.quote_currency.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ market.base_precision }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ market.quote_precision }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+
+                        <badge class="mr-2" v-if="market.deleted_at" :type="red">
+                            {{ $t("已删除") }}
+                        </badge>
+
+                        <badge class="mr-2" v-if="!market.deleted_at" :type="market.status ? 'green' : 'gray'">
+                            {{ market.status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+
+                        <badge v-if="!market.deleted_at" :type="market.trade_status ? 'green' : 'red'">
+                            {{ market.trade_status ? $t("可交易") : $t("不可交易") }}
+                        </badge>
+
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="markets.data.length === 0">
+                <td class="border-t px-6 py-4" colspan="100">{{ $t("没有找到交易市场。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="markets.links" />
+</app-layout>

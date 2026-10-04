@@ -1,0 +1,85 @@
+<app-layout>
+
+<top-menu :label="$t(id ? 'Edit payment method' : 'Add payment method')"></top-menu>
+
+<div v-if="!id" class="form-search flex flex-wrap -m-4">
+        <div class="form-search__container w-full full-block-fields">
+            <div class="form-search__result xl:w-1/2 md:w-1/2 w-full p-4">
+
+                <div class="box-tip">
+                    <div class="box-tip-wrapper">
+                        <div class="box-tip-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 21a9 9 0 100-18 9 9 0 000 18zm-1.25-5.5V18h2.5v-2.5h-2.5zm0-9.5v7h2.5V6h-2.5z" fill="currentColor"></path></svg>
+                        </div>
+                        <div class="box-tip-text">
+                            <div>
+                                {{ $t('Tips: The added payment method will be shown to the buyer during the transaction to accept fiat transfers. Please ensure that the information is correct, real, and matches your KYC information.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-search__result-block components-filter__item">
+                    <div class="form-search__result-title">{{ $t('Payment Method') }}</div>
+                    <t-rich-user-select
+                        v-model="activeMethod"
+                        :options="methods"
+                        v-on:change="changeMethod"
+                        :placeholder="$t('Select payment method')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="false"
+                    >
+                    </t-rich-user-select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div v-else class="form-search flex flex-wrap -m-4">
+        <div class="form-search__container w-full full-block-fields">
+            <div class="form-search__result xl:w-1/2 md:w-1/2 w-full p-4">
+                {{ paymentMethod.name }}
+            </div>
+        </div>
+    </div>
+    <div v-if="activeMethod || id"  class="form-search flex flex-wrap -m-4">
+        <div class="form-search__result form-search__result-p2p xl:w-1/2 md:w-1/2 w-full p-4">
+
+            <form @submit.prevent="submit">
+
+                <div v-for="field in fields" class="form-search__result-block">
+                    <div class="components-filter__item">
+                    <label class="form-label">{{ $t(field.name) }} <template v-if="!field.required">{{ $t('(Optional)')}}</template></label>
+                    <input v-model="form[field.id]" :placeholder="field.name" type="text" class="border-gray-200 focus:border-gray-300 focus:ring focus:ring-gray-200 focus:ring-opacity-10 rounded mt-2 block w-full" />
+                    </div>
+                </div>
+                <div class="components-filter__row">
+                    <div class="components-filter__item">
+                        <div class="p2p-tab-two-rows">
+
+                            <t-button-gray @click.prevent="cancel()" class="components-filter__button components-filter__button-gray py-3 px-5" :class="{ 'opacity-75': sending }">
+                            <span class="components-filter__icon">
+                                <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ $t('Cancel') }}
+                            </span>
+                            </t-button-gray>
+                            <t-button-green @click="" class="components-filter__button py-3 px-5" :class="{ 'opacity-75': sending }">
+                                <span class="components-filter__icon">
+                                    <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ $t('Confirm') }}
+                                </span>
+                            </t-button-green>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</app-layout>

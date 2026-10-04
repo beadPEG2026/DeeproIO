@@ -1,0 +1,432 @@
+<app-layout>
+
+    <!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Transactions') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="withdrawals"></reports-tab>
+
+    <div class="components-filter">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <label>{{ $t('Currency:') }}</label>
+                <t-rich-user-select
+                    :options="currencies.data"
+                    v-model="form.currency"
+                    :placeholder="$t('Select currency')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <text-user-input v-model="form.txn" :label="$t('Txn ID')" />
+            </div>
+
+            <div class="components-filter__item">
+                <label>{{ $t('Status:') }}</label>
+                <t-rich-user-select
+                    :options="[{'id': '', 'name': $t('All')},{'id': 'completed', 'name': $t('Completed')}, {'id': 'confirmed_provider', 'name': $t('Completed')}, {'id': 'pending', 'name': $t('Pending')}, {'id': 'rejected', 'name': $t('Rejected')}, {'id': 'failed', 'name': $t('Failed')}]"
+                    v-model="form.status"
+                    :placeholder="$t('Select status')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                    <span class="components-filter__icon">
+                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ $t('Search') }}
+                    </span>
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-withdrawals">
+            <!-- thead start -->
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('ID') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Status') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Amount') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Network') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Address') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Hash') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Confirms') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr
+                v-for="withdrawal in withdrawals.data"
+                :key="withdrawal.withdrawal_id || withdrawal.id"
+                class="cursor-pointer"
+                @click="openWithdrawalDetail(withdrawal)"
+            >
+                <td>
+                    <div class="table-list__subtitle">{{ $t('ID') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getWithdrawalIdText(withdrawal, 14) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="getStatusClass(withdrawal)">
+                            {{ getStatusLabel(withdrawal) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ formatAmount(withdrawal.amount, withdrawal.symbol) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Network') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <network-icon :network-id="withdrawal.network_id" :name="getNetworkName(withdrawal)"/>{{ getNetworkName(withdrawal) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ getAddressLabel(withdrawal) }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ format_string(getDisplayAddress(withdrawal), 22) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Hash') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getHashText(withdrawal, 12) }}
+
+                            <a
+                                v-if="withdrawal.explorer"
+                                @click.stop=""
+                                target="_blank"
+                                :href="withdrawal.explorer"
+                                class="list-text__icon"
+                            >
+                                <svg-icon icon="link" classname="list-text__icon-color"></svg-icon>
+                            </a>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Confirms') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ withdrawal.confirms || 0 }}</div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ formatLocalDateTime(withdrawal.created_at) }}</div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="withdrawals.data.length === 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No withdrawals found.') }}</span>
+                    </div>
+                    <pagination :links="withdrawals.meta.links" />
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+    </div>
+    <!-- table components end -->
+
+    <!-- withdrawal detail modal start -->
+    <div
+        v-if="showWithdrawalDetailModal && selectedWithdrawal"
+        class="fixed inset-0 flex items-center justify-center px-4"
+        style="z-index: 99999;"
+    >
+        <div
+            class="absolute inset-0"
+            style="background: rgba(0, 0, 0, 0.74);"
+            @click="closeWithdrawalDetail"
+        ></div>
+
+        <div
+            class="relative w-full max-w-2xl rounded-2xl overflow-hidden"
+            style="background: #080b12; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 80px rgba(0,0,0,0.45); max-height: 90vh; overflow-y: auto;"
+            @click.stop
+        >
+            <div class="flex items-center justify-between px-6 py-5" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button
+                    type="button"
+                    class="text-white"
+                    style="font-size: 28px; line-height: 1;"
+                    @click="closeWithdrawalDetail"
+                >
+                    ‹
+                </button>
+
+                <h3 class="text-white font-bold text-xl">
+                    {{ $t('Withdrawal Details') }}
+                </h3>
+
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between mb-7">
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <div
+                                class="flex items-center justify-center rounded-full mr-3"
+                                style="width: 48px; height: 48px; background: rgba(255,255,255,0.08);"
+                            >
+                                <img
+                                    v-if="selectedWithdrawal.logo"
+                                    :src="selectedWithdrawal.logo"
+                                    style="width: 34px; height: 34px; border-radius: 50%;"
+                                />
+                                <span v-else class="text-white text-sm font-bold">
+                                    {{ selectedWithdrawal.symbol }}
+                                </span>
+                            </div>
+
+                            <div>
+                                <div class="text-white font-bold text-2xl">
+                                    {{ getWithdrawalTitle(selectedWithdrawal) }}
+                                </div>
+
+                                <div class="mt-1" style="color: #8d93a6;">
+                                    {{ selectedWithdrawal.currency || selectedWithdrawal.symbol }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex items-center">
+                        <div
+                            class="components-label"
+                            :class="getStatusClass(selectedWithdrawal)"
+                            style="min-width: 120px; height: 26px; display: flex; align-items: center; justify-content: center; padding: 0 18px; line-height: 1;"
+                        >
+                            {{ getStatusLabel(selectedWithdrawal) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 15px;">
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Status') }}</span>
+                        <span style="color: #ffffff;">{{ getStatusLabel(selectedWithdrawal) }}</span>
+                    </div>
+
+                    <div class="flex items-start justify-between gap-5">
+                        <span style="color: #8d93a6;">{{ getAddressLabel(selectedWithdrawal) }}</span>
+
+                        <span style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;">
+                            {{ getDisplayAddress(selectedWithdrawal) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Network') }}</span>
+                        <span style="color: #ffffff;"><network-icon :network-id="selectedWithdrawal.network_id" :name="getNetworkName(selectedWithdrawal)"/>{{ getNetworkName(selectedWithdrawal) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Network Fee') }}</span>
+                        <span style="color: #ffffff;">{{ getFeeText(selectedWithdrawal) }}</span>
+                    </div>
+
+                    <div class="flex items-start justify-between gap-5">
+                        <span style="color: #8d93a6;">{{ $t('Blockchain TX ID') }}</span>
+
+                        <span style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;">
+                            {{ getHashText(selectedWithdrawal, 24) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Confirms') }}</span>
+                        <span style="color: #ffffff;">{{ selectedWithdrawal.confirms || 0 }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Submitted Time') }}</span>
+                        <span style="color: #ffffff;">{{ formatLocalDateTime(selectedWithdrawal.created_at) }}</span>
+                    </div>
+
+                    <div class="flex items-start justify-between gap-5">
+                        <span style="color: #8d93a6;">{{ $t('Reference ID') }}</span>
+
+                        <span style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;">
+                            {{ getWithdrawalIdText(selectedWithdrawal, 24) }}
+                        </span>
+                    </div>
+
+                    <div
+                        v-if="selectedWithdrawal.rejected_reason"
+                        class="flex items-start justify-between gap-5"
+                    >
+                        <span style="color: #8d93a6;">{{ $t('Rejected Reason') }}</span>
+
+                        <span style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;">
+                            {{ selectedWithdrawal.rejected_reason }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="height: 1px; background: rgba(255,255,255,0.10); margin: 26px 0;"></div>
+
+                <h4 class="text-white font-bold text-lg mb-5">
+                    {{ $t('Withdrawal Details') }}
+                </h4>
+
+                <div style="padding-bottom: 6px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Amount') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                {{ formatAmount(selectedWithdrawal.amount, selectedWithdrawal.symbol) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Network') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                <network-icon :network-id="selectedWithdrawal.network_id" :name="getNetworkName(selectedWithdrawal)"/>{{ getNetworkName(selectedWithdrawal) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="color: #8d93a6; font-size: 13px;">{{ $t('Fee') }}</div>
+                            <div class="mt-1" style="color: #ffffff;">
+                                {{ getFeeText(selectedWithdrawal) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3" style="color: #8d93a6;">
+                        {{ formatLocalDateTime(selectedWithdrawal.created_at) }}
+                    </div>
+                </div>
+
+                <button
+                    v-if="canOpenExplorer(selectedWithdrawal)"
+                    type="button"
+                    class="w-full mt-6 py-4 px-6 rounded-full font-bold"
+                    style="background: linear-gradient(90deg, #6f6bff 0%, #5e7bff 100%); color: #ffffff; font-size: 16px;"
+                    @click="openExplorer(selectedWithdrawal)"
+                >
+                    {{ getExplorerButtonText(selectedWithdrawal) }}
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- withdrawal detail modal end -->
+
+</app-layout>

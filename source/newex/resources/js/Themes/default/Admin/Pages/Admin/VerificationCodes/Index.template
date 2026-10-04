@@ -1,0 +1,92 @@
+<app-layout>
+    <div class="max-w-4xl">
+        <h1 class="mb-8 font-bold text-3xl">{{ $t("验证码状态") }}</h1>
+
+        <div class="bg-white rounded shadow overflow-hidden">
+            <div class="p-8">
+                <div class="mb-6">
+                    <div class="font-semibold text-xl text-gray-800">{{ $t("查询验证码状态") }}</div>
+                    <div class="text-sm text-gray-500 mt-2">
+                        {{ $t("仅查询验证码是否有效及过期时间，不显示验证码内容。") }}
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm mb-2">{{ $t("邮箱或手机号") }}</label>
+                        <input
+                            v-model="form.account"
+                            @keyup.enter="queryCode"
+                            type="text"
+                            class="w-full form-input rounded"
+                            placeholder="例如 user@example.com 或 +60123456789"
+                        />
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <button
+                            type="button"
+                            class="h-10 px-5 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                            :disabled="loading"
+                            @click="queryCode"
+                        >
+                            {{ loading ? $t("查询中...") : $t("查询") }}
+                        </button>
+
+                        <button
+                            type="button"
+                            class="h-10 px-5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            @click="reset"
+                        >
+                            {{ $t("重置") }}
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="errorMessage" class="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {{ errorMessage }}
+                </div>
+
+                <div v-if="result" class="mt-6 border rounded overflow-hidden">
+                    <div class="bg-gray-50 px-5 py-3 font-semibold text-gray-700">
+                        {{ $t("查询结果") }}
+                    </div>
+
+                    <div class="p-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div class="text-gray-500">{{ $t("类型") }}</div>
+                                <div class="mt-1 font-medium">
+                                    {{ result.type === 'phone' ? $t("短信验证码") : (result.type === 'email' ? $t("邮箱验证码") : '-') }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="text-gray-500">{{ $t("账号") }}</div>
+                                <div class="mt-1 font-medium">
+                                    {{ result.account || form.account || '-' }}
+                                </div>
+                            </div>
+
+                            <div v-if="result.created_at">
+                                <div class="text-gray-500">{{ $t("生成时间") }}</div>
+                                <div class="mt-1 font-medium">{{ result.created_at }}</div>
+                            </div>
+
+                            <div v-if="result.expires_at">
+                                <div class="text-gray-500">{{ $t("过期时间") }}</div>
+                                <div class="mt-1 font-medium">{{ result.expires_at }}</div>
+                            </div>
+                        </div>
+
+                        <div v-if="hasCode" class="mt-6">{{ $t("验证码仍在有效期内") }}</div>
+
+                        <div v-else class="mt-6 text-gray-500">
+                            {{ $t("当前没有有效验证码，可能已经过期，或者用户还没有发送验证码。") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

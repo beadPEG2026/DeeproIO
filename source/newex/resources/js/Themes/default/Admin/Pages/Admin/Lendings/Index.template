@@ -1,0 +1,52 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("借贷") }}</h1>
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.lendings.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新借贷") }}</span>
+        </nav-button-link>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("货币") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+            <tr v-for="lending in lendings.data" :key="lending.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.lendings.edit', lending.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        <img width="25" :src="lending.currency.file.url" class="mr-3" /> {{ lending.currency.name }} ({{ lending.currency.symbol }})
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge v-if="lending.status == 'active'" class="mr-2" type="green">
+                            {{ $t("启用") }}
+                        </badge>
+                        <badge v-if="lending.status == 'sold'" class="mr-2" type="orange">
+                            {{ $t("已售罄") }}
+                        </badge>
+                        <badge v-if="lending.status == 'hidden'" class="mr-2" type="gray">
+                            {{ $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <nav-button-link class="mr-2" type="red" :href="route('admin.lendings.edit', lending.id)">
+                            <span>{{ $t("编辑") }}</span>
+                        </nav-button-link>
+                        <nav-button-link class="mr-2" type="indigo" :href="route('admin.lendings.collaterals', lending.id)">
+                            <span>{{ $t("抵押资产") }}</span>
+                        </nav-button-link>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="lendings.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到借贷。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="lendings.links" />
+</app-layout>

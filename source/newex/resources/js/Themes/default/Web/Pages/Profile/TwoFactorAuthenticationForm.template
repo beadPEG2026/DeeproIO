@@ -1,0 +1,215 @@
+<jet-action-section>
+    <div class="form-container two-factor">
+        <!-- form components start -->
+        <div class="form-components">
+
+            <div class="form-components__title"><h3>{{ $t('Two Factor Authentication') }}</h3></div>
+            <div class="form-components__body">
+                <div class="form-components__input-text">
+
+                    <div class="form-components__block">
+                        <div class="form-components__block-item block-text pb-5">
+                            <p>{{ $t('Add additional security to your account using two factor authentication.') }}</p>
+                        </div>
+
+                        <div class="form-components__block-item block-text pt-5 pb-5 ">
+                            <p class="text-green-500" v-if="twoFactorEnabled">{{ $t('You have enabled two factor authentication.') }}</p>
+                            <p class="text-orange-500" v-else-if="confirming">{{ $t('Scan the QR code and enter the verification code to finish enabling two factor authentication.') }}</p>
+                            <p class="text-red-500" v-else>{{ $t('You have not enabled two factor authentication.') }}</p>
+                        </div>
+
+                        <div v-if="!showingTwoFactorSetup" class="form-components__block-item block-text">
+                            <p>{{ $t("When two factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone's Google Authenticator application.") }}</p>
+                        </div>
+                    </div>
+                    <div v-if="showingTwoFactorSetup" class="form-components__block">
+                        <div class="form-components__block-item block-text">
+                            <p v-if="confirming">{{ $t("Scan the following QR code using your phone's authenticator application, then enter the generated verification code below.") }}</p>
+                            <p v-else>{{ $t("Two factor authentication is now enabled. Scan the following QR code using your phone's authenticator application.") }}</p>
+                        </div>
+                        <div v-if="qrCodeLoading" class="form-components__block-item block-text mb-5">
+                            <p>{{ $t('Loading QR code...') }}</p>
+                        </div>
+                        <div v-if="qrCodeError" class="form-components__block-item block-text mb-5">
+                            <p class="text-red-500">{{ qrCodeError }}</p>
+                            <button @click="showQrCode" type="button" class="form-components__block-button mt-2">{{ $t('Reload QR code') }}</button>
+                        </div>
+                        <div v-if="qrCode" class="form-components__block-item mb-5">
+                            <div class="mt-4 dark:p-4 dark:w-56  d-table" v-html="qrCode">
+                            </div>
+                        </div>
+                        <div v-if="qrText" class="form-components__block-item mb-5">
+                            <p>{{ $t('If you are unable to scan the QR code, you can manually enter this code into your application:') }}</p>
+                            <div class="block-qr-bg  mt-2 p-4 rounded text-center font-mono text-lg">
+                                {{ qrText }}
+                            </div>
+                        </div>
+                        <div v-if="confirming" class="form-components__block-item mb-5">
+    <div
+        class="mt-4"
+        style="
+            width: 100%;
+            max-width: 420px;
+            padding: 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+            border: 1px solid rgba(255,255,255,.10);
+            box-shadow: 0 18px 45px rgba(0,0,0,.20);
+        "
+    >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <div
+                style="
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(245, 186, 65, .16);
+                    border: 1px solid rgba(245, 186, 65, .28);
+                    flex: 0 0 auto;
+                "
+            >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3L5 6V11C5 15.5 7.9 19.7 12 21C16.1 19.7 19 15.5 19 11V6L12 3Z" stroke="#F5BA41" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M9.5 12L11.2 13.7L14.8 10.1" stroke="#F5BA41" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div>
+                <label
+                    for="two-factor-confirmation-code"
+                    class="d-block"
+                    style="
+                        margin: 0;
+                        font-size: 15px;
+                        line-height: 1.35;
+                        font-weight: 700;
+                        color: rgba(255,255,255,.92);
+                    "
+                >
+                    {{ $t('Authenticator verification code') }}
+                </label>
+
+                <p
+                    style="
+                        margin: 4px 0 0;
+                        font-size: 12px;
+                        line-height: 1.45;
+                        color: rgba(255,255,255,.58);
+                    "
+                >
+                    {{ $t('Enter the 6-digit code shown in your authenticator app.') }}
+                </p>
+            </div>
+        </div>
+
+        <div style="position: relative;">
+            <input
+                id="two-factor-confirmation-code"
+                v-model="confirmationCode"
+                @input="normalizeConfirmationCode"
+                @keyup.enter="confirmTwoFactorAuthentication"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="6"
+                autocomplete="one-time-code"
+                :class="{ 'border-red-500': confirmationErrorMessage }"
+                :placeholder="$t('000000')"
+                style="
+                    width: 100%;
+                    height: 58px;
+                    padding: 0 18px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255,255,255,.14);
+                    outline: none;
+                    background: rgba(12, 16, 28, .72);
+                    color: rgba(255,255,255,.96);
+                    font-size: 24px;
+                    font-weight: 800;
+                    letter-spacing: 10px;
+                    text-align: center;
+                    box-shadow:
+                        inset 0 1px 0 rgba(255,255,255,.06),
+                        0 10px 24px rgba(0,0,0,.18);
+                    transition: all .2s ease;
+                "
+                onfocus="this.style.borderColor='rgba(245,186,65,.75)';this.style.boxShadow='0 0 0 4px rgba(245,186,65,.12), inset 0 1px 0 rgba(255,255,255,.06), 0 10px 24px rgba(0,0,0,.18)'"
+                onblur="this.style.borderColor='rgba(255,255,255,.14)';this.style.boxShadow='inset 0 1px 0 rgba(255,255,255,.06), 0 10px 24px rgba(0,0,0,.18)'"
+            />
+
+            <div
+                style="
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 7px;
+                    margin-top: 10px;
+                    padding: 0 6px;
+                    pointer-events: none;
+                "
+            >
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+                <span style="height: 3px; flex: 1; border-radius: 99px; background: rgba(245,186,65,.45);"></span>
+            </div>
+        </div>
+
+        <p
+            v-if="confirmationErrorMessage"
+            class="text-red-500 mt-3"
+            style="
+                margin-bottom: 0;
+                font-size: 13px;
+                line-height: 1.45;
+            "
+        >
+            {{ confirmationErrorMessage }}
+        </p>
+    </div>
+</div>
+
+                    </div>
+
+                    <div v-if="showingTwoFactorSetup" class="form-components__block">
+                        <jet-confirms-password @confirmed="regenerateRecoveryCodes" v-if="false">
+                            <button v-if="recoveryCodes.length > 0" type="button" class="btn btn-white">{{ $t('Regenerate recovery codes') }}</button>
+                        </jet-confirms-password>
+
+                        <jet-confirms-password @confirmed="showRecoveryCodes" v-if="false">
+                            <button v-if="recoveryCodes.length === 0" type="button" class="btn btn-white">{{ $t('Show recovery codes') }}</button>
+                        </jet-confirms-password>
+
+                        <button
+                            v-if="confirming"
+                            @click="confirmTwoFactorAuthentication"
+                            :class="{ 'opacity-75': !canConfirmTwoFactorAuthentication }"
+                            :disabled="!canConfirmTwoFactorAuthentication"
+                            type="button"
+                            class="form-components__block-button"
+                        >{{ $t('Confirm') }}</button>
+
+                        <jet-confirms-password @confirmed="disableTwoFactorAuthentication">
+                            <button :class="{ 'opacity-75': disabling }" :disabled="disabling" type="button" class="btn btn-red ml-2">{{ $t(confirming ? 'Cancel' : 'Disable') }}</button>
+                        </jet-confirms-password>
+
+                    </div>
+                    <div v-if="!showingTwoFactorSetup" class="form-components__block">
+                        <div class="form-components__block-item block-button">
+                            <jet-confirms-password @confirmed="enableTwoFactorAuthentication">
+                                <button class="form-components__block-button" :class="{ 'opacity-75': enabling }" :disabled="enabling">{{ $t('Enable') }}</button>
+                            </jet-confirms-password>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <!-- form components end -->
+    </div>
+</jet-action-section>

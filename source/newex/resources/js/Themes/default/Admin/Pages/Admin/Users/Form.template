@@ -1,0 +1,597 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.users')">{{ $t("用户") }}</Link>
+        -
+        <template v-if="!form.email">
+            {{ form.wallet_id }}
+        </template>
+        <template v-else>
+            {{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : form.email }}
+        </template>
+    </h1>
+
+    <p v-if="($page.props.adminRoutes || []).includes('admin.operations.users')" class="mb-4"><Link :href="route('admin.operations.user', {user:model.id})">{{ $t('User service overview') }} ↗</Link></p>
+    <div class="tabs">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <Link
+                    :href="route('admin.users.edit', model.id)"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item tabs-nav__active"
+                    as="div"
+                >
+                    {{ $t("基本信息") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.wallets')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    :class="{'tabs-nav__active': section == 'general'}"
+                    as="div"
+                >
+                    {{ $t("钱包") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.kyc.documents')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("KYC 文档") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.deposits')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("数字货币充值") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.deposits.fiat')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("法币充值") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.withdrawals')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("数字货币提现") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.withdrawals.fiat')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("法币提现") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.trades')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("交易记录") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.referral-transactions')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("推荐收益") }}
+                </Link>
+
+                <Link
+                    :href="route('admin.reports.options')"
+                    :data="{ referrer: model.id }"
+                    class="tabs-nav__item"
+                    as="div"
+                >
+                    {{ $t("期权") }}
+                </Link>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow lg:w-1/2 mb-5">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+
+                <div v-if="isEdit" class="pr-6 pb-8 w-full">
+                    <div class="mb-2">
+                        {{ $t("姓名：") }}
+                        <strong>
+                            <template v-if="!form.email">
+                                {{ form.wallet_id }}
+                            </template>
+                            <template v-else>
+                                {{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : form.name }}
+                            </template>
+                        </strong>
+                    </div>
+
+                    <div class="mb-2">
+                        {{ $t("邮箱：") }}
+                        <strong>
+                            {{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : form.email }}
+                        </strong>
+                    </div>
+
+                    <div class="mb-2">
+                        {{ $t("手机号：") }}
+
+                        <template v-if="isSuperAdmin">
+                            <text-input
+                                v-model="form.phone"
+                                type="text"
+                                class="w-full mt-2"
+                                autocomplete="off"
+                                placeholder="请输入手机号"
+                            />
+                            <div class="text-red-600 mt-2" v-if="errors.phone">
+                                {{ errors.phone }}
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <strong>
+                                {{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : (form.phone || '') }}
+                            </strong>
+                        </template>
+                    </div>
+
+                    <div class="mb-2">
+                        {{ $t("VIP等级：") }}
+                        <strong>VIP {{ form.vip || 0 }}</strong>
+                        <span
+                            class="ml-2 text-xs px-2 py-1 rounded"
+                            :class="Number(form.is_vip_update) === 1 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                        >
+                            {{ Number(form.is_vip_update) === 1 ? $t("已手动修改") : $t("未手动修改") }}
+                        </span>
+                    </div>
+
+                    <div class="mb-2" v-if="form.nickname">
+                        {{ $t("用户昵称：") }}
+                        <strong>{{ form.nickname }}</strong>
+                    </div>
+
+                    <div class="mb-2" v-if="form.leader_nickname">
+                        {{ $t("组长昵称：") }}
+                        <strong>{{ form.leader_nickname }}</strong>
+                    </div>
+
+                    <div class="mb-2">
+                        {{ $t("注册时间：") }}
+                        <strong>
+                            {{ form.created_at }}
+                        </strong>
+                    </div>
+
+                    <div class="mt-4" v-if="canImpersonate">
+                        <button
+                            type="button"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                            :disabled="impersonating"
+                            @click="impersonateUser"
+                        >
+                            {{ impersonating ? $t("正在模拟登录...") : $t("模拟登录该用户") }}
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2">
+                            {{ $t("仅超级管理员可用，不能模拟自己或超级管理员账号。") }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("用户已停用") }}</label>
+                    <t-toggle v-model="form.deactivated" />
+                    <div class="text-red-600 mb-3" v-if="errors.deactivated">
+                        {{ errors.deactivated }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("冻结提款") }}</label>
+                    <t-toggle v-model="form.withdrawal_disabled" />
+                    <div class="text-red-600 mb-3" v-if="errors.withdrawal_disabled">
+                        {{ errors.withdrawal_disabled }}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        {{ $t("开启后，该用户将不能提交新的提款申请。") }}
+                    </p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("KYC 已认证") }}</label>
+                    <t-toggle v-model="form.kyc_verified" />
+                    <div class="text-red-600 mb-3" v-if="errors.kyc_verified">
+                        {{ errors.kyc_verified }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("邮箱已验证") }}</label>
+                    <t-toggle v-model="form.email_verified" />
+                    <div class="text-red-600 mb-3" v-if="errors.email_verified">
+                        {{ errors.email_verified }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("禁止 P2P") }}</label>
+                    <t-toggle v-model="form.p2p_trade_ban" />
+                    <div class="text-red-600 mb-3" v-if="errors.p2p_trade_ban">
+                        {{ errors.p2p_trade_ban }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("免除划转手续费（交易账户 -> 现货账户）") }}</label>
+                    <t-toggle v-model="form.excluded_from_transfer_fee" />
+                    <div class="text-red-600 mb-3" v-if="errors.excluded_from_transfer_fee">
+                        {{ errors.excluded_from_transfer_fee }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("余额不统计") }}</label>
+                    <t-toggle v-model="form.is_t" />
+                    <div class="text-red-600 mb-3" v-if="errors.is_t">
+                        {{ errors.is_t }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("用户昵称") }}</label>
+                    <text-input
+                        v-model="form.nickname"
+                        type="text"
+                        class="w-full"
+                        autocomplete="off"
+                        placeholder="例如：Tom、A01、马来西亚客户"
+                    />
+                    <div class="text-red-600 mb-3" v-if="errors.nickname">
+                        {{ errors.nickname }}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        {{ $t("该昵称用于后台用户列表展示。为空时列表不显示昵称。") }}
+                    </p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("VIP 等级") }}</label>
+
+                    <template v-if="isSuperAdmin">
+                        <text-input
+                            v-model.number="form.vip"
+                            type="number"
+                            min="0"
+                            max="8"
+                            step="1"
+                            class="w-full"
+                            autocomplete="off"
+                            placeholder="请输入 VIP 等级，例如 0-8"
+                        />
+
+                        <div class="text-red-600 mb-3" v-if="errors.vip">
+                            {{ errors.vip }}
+                        </div>
+
+                        <p class="text-xs text-gray-500 mt-2">
+                            {{ $t("只有超级管理员可以修改 VIP。修改成功后，系统会把 is_vip_update 标记为 1。") }}
+                        </p>
+
+                        <p
+                            class="text-xs mt-2"
+                            :class="Number(form.is_vip_update) === 1 ? 'text-green-600' : 'text-gray-400'"
+                        >
+                            {{ $t("当前状态：") }}{{ Number(form.is_vip_update) === 1 ? $t("已手动修改过 VIP") : $t("未手动修改 VIP") }}
+                        </p>
+                    </template>
+
+                    <template v-else>
+                        <div class="rounded bg-gray-50 border border-gray-200 px-3 py-2 text-gray-700">
+                            VIP {{ form.vip || 0 }}
+                        </div>
+
+                        <p class="text-xs text-gray-500 mt-2">
+                            {{ $t("只有超级管理员可以修改 VIP 等级。") }}
+                        </p>
+                    </template>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-4 pb-4 font-medium mt-4">{{ $t("安全设置") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-4 pb-4 font-medium mt-4">{{ $t("修改密码") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("新密码") }}</label>
+
+                    <div class="flex items-center gap-2">
+                        <text-input
+                            v-model="form.password"
+                            type="text"
+                            class="w-full"
+                            autocomplete="new-password"
+                            placeholder="不填写则不修改密码"
+                        />
+
+                        <button
+                            type="button"
+                            class="px-3 py-2 rounded bg-indigo-600 text-white text-sm hover:bg-indigo-700 whitespace-nowrap"
+                            @click="generateRandomPassword"
+                        >
+                            {{ $t("随机8位") }}
+                        </button>
+                    </div>
+
+                    <div class="text-red-600 mb-3" v-if="errors.password">
+                        {{ errors.password }}
+                    </div>
+
+                    <p class="text-xs text-gray-500 mt-2">
+                        {{ $t("点击“随机8位”会生成新的 8 位数字密码，保存后立即生效。") }}
+                    </p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <p class="text-sm text-gray-500">
+                        {{ $t("不填写则不修改密码。") }}
+                    </p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-4 pb-4 font-medium mt-4">{{ $t("修改推荐人") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("推荐人邮箱") }}</label>
+                    <text-input
+                        v-model="form.tjremail"
+                        type="email"
+                        class="w-full"
+                        autocomplete="off"
+                    />
+                    <div class="text-red-600 mb-3" v-if="errors.tjremail">
+                        {{ errors.tjremail }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <p class="text-sm text-gray-500">
+                        {{ $t("不填邮箱不更改推荐人。") }}
+                    </p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("双重身份验证（2FA）") }}</label>
+
+                    <div class="flex items-center">
+                        <span v-if="twoFactorEnabled" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mr-4">
+                            {{ $t("已启用") }}
+                        </span>
+
+                        <span v-else class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 mr-4">
+                            {{ $t("未启用") }}
+                        </span>
+
+                        <button
+                            v-if="twoFactorEnabled"
+                            type="button"
+                            @click="disable2fa"
+                            :disabled="disabling2fa"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                        >
+                            {{ disabling2fa ? $t("正在禁用...") : $t("禁用 2FA") }}
+                        </button>
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-2">
+                        <template v-if="twoFactorEnabled">
+                            {{ $t("该用户已启用双重身份验证。禁用后，用户需要重新设置。") }}
+                        </template>
+                        <template v-else>
+                            {{ $t("该用户尚未启用双重身份验证。") }}
+                        </template>
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="!form.deleted" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除用户") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded shadow lg:w-2/3 mt-10">
+        <form @submit.prevent="submitRoles">
+            <div class="p-8 flex flex-wrap">
+                <div class="w-full">
+                    <div class="font-weight-bold text-xl border-b mb-4 pb-4 font-medium">{{ $t("身份角色") }}</div>
+
+                    <div class="mb-4 rounded-lg bg-indigo-50 border border-indigo-100 px-4 py-3">
+                        <div class="text-sm text-indigo-700">
+                            {{ $t("目前身份：") }}
+                            <strong>{{ currentRoleName }}</strong>
+                        </div>
+                        <div class="text-xs text-indigo-500 mt-1">
+                            {{ $t("身份角色只能選擇一種：總後台、後台、組長、業務員。") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label
+                        v-for="role in roleOptions"
+                        :key="role.value"
+                        class="block cursor-pointer rounded-xl border p-4 transition"
+                        :class="roleType === role.value ? 'border-indigo-500 bg-indigo-50 shadow-sm' : 'border-gray-200 bg-white hover:border-indigo-300'"
+                    >
+                        <div class="flex items-start">
+                            <input
+                                type="radio"
+                                class="mt-1 mr-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                name="role_type"
+                                :value="role.value"
+                                v-model="roleType"
+                            />
+
+                            <div>
+                                <div class="font-bold text-gray-800">
+                                    {{ role.title }}
+                                </div>
+
+                                <div class="text-sm text-gray-500 mt-1 leading-relaxed">
+                                    {{ role.desc }}
+                                </div>
+
+                                <div class="text-xs text-gray-400 mt-2">
+                                    {{ $t("role：") }}{{ role.value }}
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div v-if="roleType === 'user_leader'" class="w-full mt-6 rounded-xl border border-indigo-100 bg-indigo-50 p-5">
+                    <label class="form-label block mr-2 mb-3 font-bold text-gray-700">{{ $t("组长昵称") }}</label>
+                    <text-input
+                        v-model="form.leader_nickname"
+                        type="text"
+                        class="w-full"
+                        autocomplete="off"
+                        placeholder="例如：A组组长、亚洲区组长、Tom 团队"
+                    />
+                    <div class="text-red-600 mt-2" v-if="errors.leader_nickname">
+                        {{ errors.leader_nickname }}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        {{ $t("该昵称用于后台分组、组别筛选或团队展示。为空时默认使用用户昵称，若都为空则不显示。") }}
+                    </p>
+                </div>
+
+                <div class="w-full text-red-600 mt-3" v-if="errors.role_type">
+                    {{ errors.role_type }}
+                </div>
+
+                <div class="w-full mt-10">
+                    <div class="font-weight-bold text-xl border-b mb-4 pb-4 font-medium">{{ $t("功能權限") }}</div>
+
+                    <div class="mb-4 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 flex flex-wrap items-center gap-3">
+                        <div class="text-sm text-gray-600 flex-1">
+                            {{ $t("勾選後，該使用者登入後台時，只會看到已授權的功能入口。") }}
+                            <span class="text-indigo-600 font-medium">{{ $t("總後台身份預設擁有全部功能。") }}</span>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="px-3 py-2 rounded bg-indigo-600 text-white text-sm hover:bg-indigo-700"
+                            @click="selectAllPermissions"
+                        >
+                            {{ $t("全選") }}
+                        </button>
+
+                        <button
+                            type="button"
+                            class="px-3 py-2 rounded bg-gray-200 text-gray-700 text-sm hover:bg-gray-300"
+                            @click="clearAllPermissions"
+                        >
+                            {{ $t("清空") }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full space-y-6">
+                    <div
+                        v-for="group in permissionGroups"
+                        :key="group.title"
+                        class="rounded-xl border border-gray-200 overflow-hidden"
+                    >
+                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                            <div>
+                                <div class="font-bold text-gray-800">
+                                    {{ group.title }}
+                                </div>
+                                <div class="text-xs text-gray-400 mt-1">
+                                    {{ $t("已選") }} {{ group.permissions.filter(item => functionPermissions[item.key]).length }} / {{ group.permissions.length }}
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="px-3 py-2 rounded text-sm"
+                                :class="isGroupChecked(group) ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'"
+                                @click="togglePermissionGroup(group)"
+                            >
+                                {{ isGroupChecked(group) ? $t("取消本組") : $t("選擇本組") }}
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                            <label
+                                v-for="permission in group.permissions"
+                                :key="permission.key"
+                                class="flex items-start p-4 border-b md:border-r border-gray-100 cursor-pointer hover:bg-indigo-50"
+                                :class="functionPermissions[permission.key] ? 'bg-indigo-50' : 'bg-white'"
+                            >
+                                <input
+                                    type="checkbox"
+                                    class="mt-1 mr-3 text-indigo-600 border-gray-300 focus:ring-indigo-500 rounded"
+                                    v-model="functionPermissions[permission.key]"
+                                />
+
+                                <div>
+                                    <div class="font-semibold text-gray-800">
+                                        {{ permission.title }}
+                                    </div>
+
+                                    <div class="text-sm text-gray-500 mt-1">
+                                        {{ permission.desc }}
+                                    </div>
+
+                                    <div class="text-xs text-gray-400 mt-2">
+                                        {{ permission.key }}
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full text-red-600 mt-3" v-if="errors.permissions">
+                    {{ errors.permissions }}
+                </div>
+            </div>
+
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <loading-button :loading="sendingRoles" class="btn-indigo ml-auto" type="submit">
+                    {{ $t("更新角色與權限") }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

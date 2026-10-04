@@ -1,0 +1,8 @@
+html {
+    border: 1px solid #363a45;
+    border-radius: 3px;
+    box-sizing: border-box;
+    height: 100%;
+    position: relative;
+    width: 100%;
+}

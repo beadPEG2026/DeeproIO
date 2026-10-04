@@ -1,0 +1,17 @@
+<app-layout>
+    <Head>
+        <title>{{ page.title }}</title>
+        <meta name="description" content="">
+    </Head>
+    <div class="table-components page-section">
+
+        <!-- components title start -->
+        <!-- components title end -->
+
+        <div class="min-h-screen page-section-content">
+            <div v-html="cleanMessage" class="w-full mt-10 prose"></div>
+        </div>
+
+    </div>
+
+</app-layout>

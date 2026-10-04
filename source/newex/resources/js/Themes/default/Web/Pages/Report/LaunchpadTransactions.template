@@ -1,0 +1,115 @@
+<app-layout>
+
+    <!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Launchpad Transactions') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="launchpads"></reports-tab>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-launchpad-transactions">
+
+            <!-- thead start -->
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Name') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Amount') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Claimed') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr v-for="transaction in transactions.data" :key="transaction.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Name') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ transaction.name }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ transaction.amount }} {{ transaction.currency }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="{'label-green': transaction.is_credited, 'label-orange': !transaction.is_credited}">
+                            {{ transaction.is_credited ? 'Credited' : 'Pending' }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ transaction.created_at }}</div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="transactions.data.length === 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                        <span class="table-result__notfound-text">{{ $t('No transactions found.') }}</span>
+                    </div>
+                    <pagination :links="transactions.meta.links" />
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+
+    </div>
+    <!-- table components end -->
+
+
+</app-layout>

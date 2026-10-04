@@ -1,0 +1,242 @@
+<app-layout>
+    <Head>
+        <title>{{ launchpad.name }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="launchpad-detail">
+        <!-- Back Button -->
+        <div class="launchpad-detail__back">
+            <Link :href="route('launchpads')" class="launchpad-detail__back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                {{ $t('Back to Launchpads') }}
+            </Link>
+        </div>
+
+        <div class="launchpad-detail__grid">
+            <!-- Left Column - Info -->
+            <div class="launchpad-detail__info">
+                <!-- Header -->
+                <div class="launchpad-detail__header">
+                    <img :src="launchpad.currency_logo" :alt="launchpad.currency_symbol" class="launchpad-detail__logo" />
+                    <div class="launchpad-detail__coin">
+                        <h1>{{ launchpad.name }}</h1>
+                        <span>{{ launchpad.currency_symbol }}</span>
+                    </div>
+                    <div class="launchpad-detail__status" :class="{
+                        'launchpad-detail__status--active': launchpad.status == 'open',
+                        'launchpad-detail__status--upcoming': launchpad.status == 'pending',
+                        'launchpad-detail__status--closed': launchpad.status == 'closed'
+                    }">
+                        <template v-if="launchpad.status == 'open'">{{ $t('Active') }}</template>
+                        <template v-if="launchpad.status == 'pending'">{{ $t('Upcoming') }}</template>
+                        <template v-if="launchpad.status == 'closed'">{{ $t('Closed') }}</template>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="launchpad-detail__progress-section">
+                    <div class="launchpad-detail__progress-header">
+                        <span>{{ $t('Fundraising Progress') }}</span>
+                        <span class="launchpad-detail__progress-percent">{{ launchpad.filled }}%</span>
+                    </div>
+                    <div class="launchpad-detail__progress-bar">
+                        <div class="launchpad-detail__progress-fill" :style="{ width: launchpad.filled + '%' }"></div>
+                    </div>
+                    <div class="launchpad-detail__progress-values">
+                        <div class="launchpad-detail__progress-value">
+                            <span class="launchpad-detail__progress-label">{{ $t('Raised') }}</span>
+                            <span>{{ launchpad.raised_amount }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__progress-value">
+                            <span class="launchpad-detail__progress-label">{{ $t('Hard Cap') }}</span>
+                            <span>{{ launchpad.hard_cap }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Token Details -->
+                <div class="launchpad-detail__details">
+                    <h3>{{ $t('Token Details') }}</h3>
+                    <div class="launchpad-detail__details-grid">
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Token') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.currency }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Symbol') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.currency_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Payment Asset') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.network }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Sale Price') }}</span>
+                            <span class="launchpad-detail__detail-value launchpad-detail__detail-value--highlight">{{ launchpad.rate }} {{ launchpad.currency_symbol }} / {{ launchpad.network_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Soft Cap') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.soft_cap }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Hard Cap') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.hard_cap }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Min Buy') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.min_buy }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                        <div class="launchpad-detail__detail-item">
+                            <span class="launchpad-detail__detail-label">{{ $t('Max Buy') }}</span>
+                            <span class="launchpad-detail__detail-value">{{ launchpad.max_buy }} {{ launchpad.network_symbol }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="launchpad-detail__description" v-if="launchpad.description">
+                    <h3>{{ $t('About') }}</h3>
+                    <div class="launchpad-detail__description-content" v-html="launchpad.description"></div>
+                </div>
+            </div>
+
+            <!-- Right Column - Buy Form -->
+            <div class="launchpad-detail__buy">
+                <div class="launchpad-detail__buy-card">
+                    <div class="launchpad-detail__buy-title">
+                        <h2>{{ $t('Participate') }}</h2>
+                
+                        <button
+                            type="button"
+                            class="launchpad-detail__risk-icon"
+                            :title="$t('Risk Notice')"
+                            @click.prevent="showRiskModal = true"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 10V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 7H12.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                
+                    <!-- Risk Notice Modal -->
+                    <div
+                        v-if="showRiskModal"
+                        class="launchpad-detail__risk-modal"
+                        @click.self="showRiskModal = false"
+                    >
+                        <div ref="riskDialog" class="launchpad-detail__risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">
+                            <div class="launchpad-detail__risk-header">
+                                <h3>{{ $t('Risk Notice') }}</h3>
+                
+                                <button
+                                    type="button"
+                                    class="launchpad-detail__risk-close" :aria-label="$t('Close')"
+                                    @click.prevent="showRiskModal = false"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                
+                            <div class="launchpad-detail__risk-body">
+                                <p>{{ $t('Launchpad Risk Notice Content 1') }}</p>
+                                <p>{{ $t('Launchpad Risk Notice Content 2') }}</p>
+                                <p>{{ $t('Launchpad Risk Notice Content 3') }}</p>
+                                <p>{{ $t('Launchpad Risk Notice Content 4') }}</p>
+                            </div>
+                
+                            <div class="launchpad-detail__risk-footer">
+                                <button
+                                    type="button"
+                                    class="launchpad-detail__risk-confirm"
+                                    @click.prevent="showRiskModal = false"
+                                >
+                                    {{ $t('I Understand') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="launchpad-detail__rate">
+                        <span class="launchpad-detail__rate-label">{{ $t('Token Price') }}</span>
+                        <span class="launchpad-detail__rate-value">1 {{ launchpad.network_symbol }} = {{ launchpad.rate }} {{ launchpad.currency_symbol }}</span>
+                    </div>
+
+                    <template v-if="launchpad.status == 'open'">
+                        <template v-if="$page.props.user">
+                            <div v-if="!state" class="launchpad-detail__cta">
+                                <button @click="state = true" class="launchpad-detail__buy-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                                        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                                    </svg>
+                                    {{ $t('Buy') }} {{ launchpad.currency_symbol }}
+                                </button>
+                            </div>
+
+                            <div v-else class="launchpad-detail__form">
+                                <div class="launchpad-detail__field">
+                                    <label>{{ $t('Amount in') }} {{ launchpad.network_symbol }}</label>
+                                    <div class="launchpad-detail__input-wrapper">
+                                        <input type="text" v-model="form.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent placeholder="0.00" class="launchpad-detail__input" />
+                                        <span class="launchpad-detail__input-suffix">{{ launchpad.network_symbol }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="launchpad-detail__receive" v-if="form.amount">
+                                    <span>{{ $t('You will receive') }}</span>
+                                    <span class="launchpad-detail__receive-value">≈ {{ (parseFloat(form.amount || 0) * parseFloat(launchpad.rate)).toFixed(4) }} {{ launchpad.currency_symbol }}</span>
+                                </div>
+
+                                <button @click.prevent="submit" class="launchpad-detail__submit" :disabled="sending">
+                                    <svg v-show="sending" class="launchpad-detail__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ $t('Buy') }} {{ launchpad.currency_symbol }}
+                                </button>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <div class="launchpad-detail__login">
+                                <p>{{ $t('Please login to participate in this launchpad') }}</p>
+                                <button @click="login" class="launchpad-detail__login-btn">
+                                    {{ $t('Login to Invest') }}
+                                </button>
+                            </div>
+                        </template>
+                    </template>
+
+                    <template v-else-if="launchpad.status == 'pending'">
+                        <div class="launchpad-detail__upcoming">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <p>{{ $t('This launchpad is coming soon') }}</p>
+                            <span>{{ $t('Start Date') }}: {{ launchpad.start_time }}</span>
+                        </div>
+                    </template>
+
+                    <template v-else>
+                        <div class="launchpad-detail__closed">
+                            <div class="text-center w-full">
+                            <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            </div>
+                            <div>{{ $t('This launchpad has ended') }}</div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

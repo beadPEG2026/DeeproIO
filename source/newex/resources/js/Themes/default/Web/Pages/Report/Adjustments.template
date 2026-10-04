@@ -1,0 +1,42 @@
+<app-layout>
+    <div class="components-title">
+        <h2>{{ $t('Transactions') }}</h2>
+    </div>
+    <reports-tab section="adjustments"></reports-tab>
+
+    <div class="table-components">
+        <table class="tables mob-table-referral-transactions">
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Currency') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Amount') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Note') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Date') }}</span></div></th>
+            </tr>
+            </thead>
+            <tbody class="table-list">
+            <tr v-for="r in records.data" :key="r.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Currency') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ r.currency && r.currency.symbol ? r.currency.symbol : '' }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ r.amount }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Note') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ r.note }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ r.created_at }}</div></div>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot class="table-result">
+
+            </tfoot>
+        </table>
+    </div>
+</app-layout>

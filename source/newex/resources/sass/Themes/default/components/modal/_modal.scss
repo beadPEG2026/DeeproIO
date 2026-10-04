@@ -1,0 +1,48 @@
+body.dark {
+    .site-layout {
+        .vue-portal-target {
+            word-break: break-word;
+            .transition-all {
+                .absolute {
+                    background-color: var(--blue-dark-second-color);
+                }
+            }
+
+            .modal-container {
+
+                .text-lg {
+                    color: var(--yellow-color);
+                }
+
+                background-color: var(--blue-dark-thir-color);
+
+                div.bg-gray-100 {
+                    background-color: var(--purple-third-color);
+
+
+                    .modal-secondary-button {
+                        text-transform: capitalize;
+                        background: var(--purple-second-color);
+                        border: 0;
+                        color: var(--white-color);
+                    }
+                }
+            }
+        }
+
+        .modal-change-password {
+            background: var(--blue-dark-thir-color);
+            border-color: var(--third-text-color);
+            --tw-ring-opacity: 0;
+        }
+
+        .modal-change-password-confirm {
+            background: var(--fourth-text-color);
+            --tw-border-opacity: 0;
+        }
+    }
+}
+
+.vue-portal-target {
+    word-break: break-word;
+}

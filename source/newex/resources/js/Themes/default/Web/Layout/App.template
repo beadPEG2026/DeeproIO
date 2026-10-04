@@ -1,0 +1,622 @@
+<div class="site-layout wrapper dp-site flex flex-col min-h-screen" :class="{'dp-umi-shell': umiSection, 'dp-route-trade': isMarketPage, 'dp-wallet-flow-layout': walletFlow, 'dp-route-home': $page.url.split('?')[0] === '/', 'dp-route-wallet': isUrl('wallets'), 'dp-route-profile': isUrl('user') || isUrl('profile'), 'dp-route-markets': isUrl('markets'), 'dp-route-umi': isUrl('umi')}">
+
+    <brand-caption v-if="$page.url.split('?')[0] !== '/'" />
+    <site-hub v-if="hub" :initial="hub" @close="hub=''" />
+    <welcome-splash v-if="showWelcome" @close="showWelcome=false" />
+    <home-header v-if="$page.url.split('?')[0] === '/'" />
+    <!-- thead start -->
+    <header v-if="!umiSection" class="header-section header z-10 noselect" :class="{'mobile-body': isCompactNav}">
+        <div class="header__row">
+                <!-- header row left start -->
+                <div class="header__row-left hidden-in-desktop">
+                    <button type="button" @click="hub='profile'" class="left-header-icon" :aria-label="$t('Profile')">
+                        <span class="header-dropdown__icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="header-dropdown__icon-color" d="M19 20.9375L18.8893 20.344C18.4165 17.809 18.1801 16.5415 17.3314 15.8473C16.4827 15.1531 15.0708 15.1745 12.2471 15.2174C12.1005 15.2197 11.9553 15.2208 11.8122 15.2208C11.7758 15.2208 11.7392 15.2208 11.7025 15.2206C8.68652 15.2082 7.17853 15.2021 6.31968 15.9687C5.46084 16.7353 5.31141 18.0979 5.01255 20.8231L5 20.9375"/>
+                                <path class="header-dropdown__icon-color" d="M8.5 9.5625C8.5 7.6295 10.067 6.0625 12 6.0625V6.0625C13.933 6.0625 15.5 7.6295 15.5 9.5625V10.0625C15.5 11.7194 14.1569 13.0625 12.5 13.0625V13.0625H11.5V13.0625C9.84315 13.0625 8.5 11.7194 8.5 10.0625V9.5625Z"/>
+                                <circle class="header-dropdown__icon-color" cx="12" cy="12" r="11.5"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                <div class="header__row-left">
+                    <!-- header logo start -->
+                    <div class="header-logo">
+                        <button type="button" @click="hub='profile'" :aria-label="$t('Profile')"><deepro-brand /></button>
+                    </div>
+
+                    <span class="dp-header-title">{{ headerTitle }}</span>
+                    <!-- header nav start -->
+                    <div :class="{'active': menuToggled}" class="header-nav">
+
+                        <nav class="gxhead-nav" :aria-label="$t('Navigation menu')">
+                            <ul class="gxhead-navlist">
+<li class="gxhead-item"><Link :href="route('umi.portfolio')" :class="['gxhead-link', 'deepro-ecosystem-link', { active: route().current('umi.*') }]">{{ $t('UMI Ecosystem') }}</Link></li>
+<li class="gxhead-item"><Link :href="route('stocks')" class="gxhead-link">{{ $t('Stock Tokens') }}</Link></li>
+                                <li class="gxhead-item gxhead-has-children" @mouseenter="navOpen='markets'" @mouseleave="leaveNav($event)" @focusout="leaveNav($event)" @keydown.esc.stop.prevent="closeNav($event)">
+                                    <button type="button" id="nav-markets-trigger" @click="navOpen = navOpen === 'markets' ? '' : 'markets'" :class="['gxhead-link', { 'active': route().current('markets.*') }]"  :aria-expanded="String(navOpen === 'markets')" aria-controls="nav-markets-links">{{ marketNavigationTitle }}</button>
+                                    <ul class="gxhead-submenu" id="nav-markets-links" :style="{display: navOpen === 'markets' ? 'block' : 'none'}">
+                                        <li class="gxhead-subitem">
+                                            <Link :href="route('markets.spot')" :class="['gxhead-sublink', { 'active': route().current('markets.spot') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                                                {{ $t('Spot') }}
+                                            </Link>
+                                        </li>
+                                        <li class="gxhead-subitem">
+                                            <Link :href="route('markets.futures')" :class="['gxhead-sublink', { 'active': route().current('markets.futures') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                                {{ $t('Futures') }}
+                                            </Link>
+                                        </li>
+                                        <li class="gxhead-subitem">
+                                            <Link v-if="$uiFeatures.binaryOptions" :href="route('markets.options')" :class="['gxhead-sublink', { 'active': route().current('markets.options') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                                                {{ $t('Options') }}
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="gxhead-item gxhead-has-children" @mouseenter="navOpen='trade'" @mouseleave="leaveNav($event)" @focusout="leaveNav($event)" @keydown.esc.stop.prevent="closeNav($event)">
+                                    <button type="button" id="nav-trade-trigger" @click="navOpen = navOpen === 'trade' ? '' : 'trade'"  :class="['gxhead-link', { 'active': route().current('swap') || route().current('orders') }]"  :aria-expanded="String(navOpen === 'trade')" aria-controls="nav-trade-links">{{ $t('Trade') }}</button>
+                                    <ul class="gxhead-submenu" id="nav-trade-links" :style="{display: navOpen === 'trade' ? 'block' : 'none'}">
+                                        <li class="gxhead-subitem">
+                                            <Link v-if="$uiFeatures.swap" :href="route('swap')" :class="['gxhead-sublink', { 'active': route().current('swap') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                                                {{ $t('Swap') }}
+                                            </Link>
+                                        </li>
+
+                                        <li class="gxhead-subitem">
+                                            <Link :href="route('orders')" :class="['gxhead-sublink', { 'active': route().current('orders') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                                {{ $t('Orders') }}
+                                            </Link>
+                                        </li>
+                                        <li class="gxhead-subitem">
+                                            <Link :href="route('reports.trades')" :class="['gxhead-sublink', { 'active': route().current('reports.trades') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                                {{ $t('Transactions') }}
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="gxhead-item gxhead-has-children" @mouseenter="navOpen='earn'" @mouseleave="leaveNav($event)" @focusout="leaveNav($event)" @keydown.esc.stop.prevent="closeNav($event)">
+                                    <button type="button" id="nav-earn-trigger"
+    @click="navOpen = navOpen === 'earn' ? '' : 'earn'"
+    :class="[
+        'gxhead-link',
+        {
+            'active':
+                ($page.url && $page.url.indexOf('/wallets/auto-invest') === 0)
+                || ($page.url && $page.url.indexOf('/copy-trading') === 0)
+                || route().current('stakings')
+                || route().current('launchpads')
+                || route().current('lendings')
+                || route().current('lending')
+        }
+    ]"
+
+    :aria-expanded="String(navOpen === 'earn')" aria-controls="nav-earn-links"
+>
+    {{ $t('Earn') }}
+</button>
+                                    <ul class="gxhead-submenu" id="nav-earn-links" :style="{display: navOpen === 'earn' ? 'block' : 'none'}">
+                                        <li class="gxhead-subitem">
+                                            <Link
+                                                :href="'/wallets/auto-invest'"
+                                                :class="[
+                                                    'gxhead-sublink',
+                                                    { 'active': $page.url && $page.url.indexOf('/wallets/auto-invest') === 0 }
+                                                ]"
+
+                                            >
+                                                <svg
+                                                    class="gxhead-sublink-icon"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="18"
+                                                    height="18"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.5"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                >
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <path d="M8 12.5C8.8 10.5 10.2 9.5 12 9.5C13.8 9.5 15.2 10.5 16 12.5"></path>
+                                                    <path d="M7.5 15.5H16.5"></path>
+                                                    <path d="M12 6.5V8"></path>
+                                                    <path d="M12 16V17.5"></path>
+                                                </svg>
+
+                                                {{ $t('Deepro Earn') }}
+                                            </Link>
+                                        </li>
+                                         <li class="gxhead-subitem">
+                                            <Link
+                                                :href="route('stakings', { staking_type: 0 })"
+                                                :class="[
+                                                    'gxhead-sublink',
+                                                    { 'active': route().current('stakings') && String(route().params.staking_type) === '0' }
+                                                ]"
+                                            >
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                                                    <line x1="12" y1="6" x2="12" y2="8"></line>
+                                                    <line x1="12" y1="16" x2="12" y2="18"></line>
+                                                </svg>
+                                                {{ $t('Staking') }}
+                                            </Link>
+                                        </li>
+
+
+
+<li class="gxhead-subitem">
+    <Link
+        href="/copy-trading"
+        :class="[
+            'gxhead-sublink',
+            { 'active': $page.url && $page.url.indexOf('/copy-trading') === 0 }
+        ]"
+
+    >
+        <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4h10"></path>
+            <path d="M8 12h8"></path>
+            <path d="M12 8v8"></path>
+        </svg>
+
+        {{ $t('Copy Trading') }}
+    </Link>
+</li>
+                                        <li v-if="$page.props.lending" class="gxhead-subitem">
+                                            <Link :href="route('lendings')" :class="['gxhead-sublink', { 'active': route().current('lending') }]">
+                                                <svg class="gxhead-sublink-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                                {{ $t('Lending') }}
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                </li>
+<li class="gxhead-item gxhead-has-children" @mouseenter="navOpen='resources'" @mouseleave="leaveNav($event)" @focusout="leaveNav($event)" @keydown.esc.stop.prevent="closeNav($event)">
+    <button type="button" id="nav-resources-trigger"
+        @click="navOpen = navOpen === 'resources' ? '' : 'resources'"
+        :class="[
+            'gxhead-link',
+            {
+                'active':
+                    route().current('articles') ||
+                    route().current('articles.*') ||
+                    route().current('support') ||
+                    $page.url === '/faq'
+            }
+        ]"
+
+        :aria-expanded="String(navOpen === 'resources')" aria-controls="nav-resources-links"
+    >
+        {{ $t('Resources') }}
+    </button>
+
+    <ul class="gxhead-submenu" id="nav-resources-links" :style="{display: navOpen === 'resources' ? 'block' : 'none'}">
+        <li class="gxhead-subitem">
+            <Link :href="route('articles')" class="gxhead-sublink">
+                <svg
+                    class="gxhead-sublink-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+
+                {{ $t('Articles') }}
+            </Link>
+        </li>
+
+        <li class="gxhead-subitem">
+            <Link :href="route('support')" class="gxhead-sublink">
+            <svg
+                class="gxhead-sublink-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M4 12a8 8 0 0 1 16 0"></path>
+                <path d="M4 12v4a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 2"></path>
+                <path d="M20 12v4a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2"></path>
+                <path d="M17 18c0 1.1-.9 2-2 2h-3"></path>
+                <path d="M12 20h-1"></path>
+            </svg>
+
+                {{ $t('Support Center') }}
+            </Link>
+        </li>
+
+        <li class="gxhead-subitem">
+            <Link href="/faq" class="gxhead-sublink">
+                <svg
+                    class="gxhead-sublink-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
+                    <path d="M12 17h.01"></path>
+                </svg>
+
+                {{ $t('FAQ') }}
+            </Link>
+        </li>
+    </ul>
+</li>
+                                <li class="gxhead-item">
+                                    <Link :href="route('wallets.new')" :class="['gxhead-link', { 'active': route().current('wallets.*') || route().current('wallets') }]">{{ $t('Wallets') }}</Link>
+                                </li>
+                                <li v-if="$page.props.unlim_status" class="gxhead-item">
+                                    <a v-if="$uiFeatures.bankPayout" @click.prevent="showBuyCryptoModal" href="#" class="gxhead-link">{{ $t('Buy Crypto') }}</a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <div class="mt-5" v-if="isCompactNav">
+                            <div>
+                                <div class="header-dropdown__row">
+                                    <div class="header-dropdown__list" :class="{'active': true}">
+                                        <div class="header-dropdown__list-info">
+                                            <p v-if="$page.props.user" class="email">{{ $page.props.user.email ? $t($page.props.user.email) : $page.props.user.name }}</p>
+                                            <p v-if="!$page.props.user" class="email">{{ $t('Guest') }}</p>
+                                        </div>
+                                        <Link v-if="!$page.props.user" as="a" :href="route('login')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18.14 21.6198C17.26 21.8798 16.22 21.9998 15 21.9998H8.99998C7.77998 21.9998 6.73999 21.8798 5.85999 21.6198C6.07999 19.0198 8.74998 16.9697 12 16.9697C15.25 16.9697 17.92 19.0198 18.14 21.6198Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15 2H9C4 2 2 4 2 9V15C2 18.78 3.14 20.85 5.86 21.62C6.08 19.02 8.75 16.97 12 16.97C15.25 16.97 17.92 19.02 18.14 21.62C20.86 20.85 22 18.78 22 15V9C22 4 20 2 15 2ZM12 14.17C10.02 14.17 8.42 12.56 8.42 10.58C8.42 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58C15.58 12.56 13.98 14.17 12 14.17Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15.58 10.58C15.58 12.56 13.98 14.17 12 14.17C10.02 14.17 8.41998 12.56 8.41998 10.58C8.41998 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Login') }}</div>
+                                        </Link>
+
+
+                                        <Link v-if="$page.props.user" as="a" :href="route('profile.show')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18.14 21.6198C17.26 21.8798 16.22 21.9998 15 21.9998H8.99998C7.77998 21.9998 6.73999 21.8798 5.85999 21.6198C6.07999 19.0198 8.74998 16.9697 12 16.9697C15.25 16.9697 17.92 19.0198 18.14 21.6198Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15 2H9C4 2 2 4 2 9V15C2 18.78 3.14 20.85 5.86 21.62C6.08 19.02 8.75 16.97 12 16.97C15.25 16.97 17.92 19.02 18.14 21.62C20.86 20.85 22 18.78 22 15V9C22 4 20 2 15 2ZM12 14.17C10.02 14.17 8.42 12.56 8.42 10.58C8.42 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58C15.58 12.56 13.98 14.17 12 14.17Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15.58 10.58C15.58 12.56 13.98 14.17 12 14.17C10.02 14.17 8.41998 12.56 8.41998 10.58C8.41998 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('User Dashboard') }}</div>
+                                        </Link>
+                                        <Link as="a" :href="route('reports.referral-transactions')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="10" cy="8" r="3" stroke="white" stroke-width="1.5"/>
+                                                    <path d="M4 20c0-3.5 3-6 6-6s6 2.5 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                                    <path d="M16 6h4v4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M20 6l-6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">
+                                                {{ $t('Referrals') }}
+                                            </div>
+                                        </Link>
+                                        <Link as="a" :href="route('wallets')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g clip-path="url(#clip0_1003_5963)">
+                                                        <path class="header-dropdown__icon-color" d="M25.2409 4.95839C25.09 3.01066 23.458 1.47168 21.4723 1.47168H3.7812C1.69624 1.47168 0 3.16792 0 5.25288V22.7477C0 24.8326 1.69624 26.5289 3.7812 26.5289H24.2189C26.3038 26.5289 28.0001 24.8326 28.0001 22.7477V8.59806C28 6.86732 26.8307 5.40551 25.2409 4.95839ZM3.7812 3.23808H21.4724C22.4336 3.23808 23.2392 3.91489 23.4391 4.81691H3.7812C3.04092 4.81691 2.3502 5.03159 1.7664 5.40076V5.25288C1.7664 4.14193 2.67025 3.23808 3.7812 3.23808ZM24.2188 24.7625H3.7812C2.67025 24.7625 1.7664 23.8586 1.7664 22.7477V8.59806C1.7664 7.4871 2.67025 6.58326 3.7812 6.58326H24.2189C25.3298 6.58326 26.2337 7.4871 26.2337 8.59806V11.6803H20.6018C18.3701 11.6803 16.5544 13.496 16.5544 15.7278C16.5544 17.9595 18.3701 19.7752 20.6018 19.7752H26.2336V22.7477C26.2336 23.8586 25.3298 24.7625 24.2188 24.7625ZM26.2336 18.0088H20.6018C19.3441 18.0088 18.3208 16.9855 18.3208 15.7278C18.3208 14.47 19.3441 13.4467 20.6018 13.4467H26.2336V18.0088Z"/>
+                                                        <path class="header-dropdown__icon-color" d="M20.9295 16.714C21.4374 16.714 21.8491 16.3024 21.8491 15.7945C21.8491 15.2867 21.4374 14.875 20.9295 14.875C20.4217 14.875 20.01 15.2867 20.01 15.7945C20.01 16.3024 20.4217 16.714 20.9295 16.714Z"/>
+                                                    </g>
+                                                    <defs>
+                                                            <clipPath id="clip0_1003_5963">
+                                                            <rect width="28" height="28" fill="white"/>
+                                                        </clipPath>
+                                                    </defs>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Wallets') }}</div>
+                                        </Link>
+
+                                        <Link as="a" :href="route('orders')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g clip-path="url(#clip0_434_17062)">
+                                                        <path d="M12.37 8.87988H17.62" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M6.38 8.87988L7.13 9.62988L9.38 7.37988" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M12.37 15.8799H17.62" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M6.38 15.8799L7.13 16.6299L9.38 14.3799" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </g>
+                                                    <defs>
+                                                        <clipPath id="clip0_434_17062">
+                                                            <rect width="24" height="24" fill="white"/>
+                                                        </clipPath>
+                                                    </defs>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Orders') }}</div>
+                                        </Link>
+
+                                        <Link as="a" :href="route('reports.trades')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M6.72827 19.7C7.54827 18.82 8.79828 18.89 9.51828 19.85L10.5283 21.2C11.3383 22.27 12.6483 22.27 13.4583 21.2L14.4683 19.85C15.1883 18.89 16.4383 18.82 17.2583 19.7C19.0383 21.6 20.4883 20.97 20.4883 18.31V7.04C20.4883 3.01 19.5483 2 15.7683 2H8.20828C4.42828 2 3.48828 3.01 3.48828 7.04V18.3C3.49828 20.97 4.95827 21.59 6.72827 19.7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M9.25 10H14.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Transactions') }}</div>
+                                        </Link>
+
+                                        <Link v-if="$page.props.user && $page.props.merchant" as="a" :href="route('merchant.dashboard')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M3.01001 11.22V15.71C3.01001 20.2 4.81001 22 9.30001 22H14.69C19.18 22 20.98 20.2 20.98 15.71V11.22" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M12 12C13.83 12 15.18 10.51 15 8.68L14.34 2H9.67L9 8.68C8.82 10.51 10.17 12 12 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M18.31 12C20.33 12 21.81 10.36 21.61 8.35L21.33 5.6C20.97 3 19.97 2 17.35 2H14.3L15 9.01C15.17 10.66 16.66 12 18.31 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M5.64 12C7.29 12 8.78 10.66 8.94 9.01L9.16 6.8L9.64 2H6.59C3.97 2 2.97 3 2.61 5.6L2.34 8.35C2.14 10.36 3.62 12 5.64 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M12 17C10.33 17 9.5 17.83 9.5 19.5V22H14.5V19.5C14.5 17.83 13.67 17 12 17Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Merchant') }}</div>
+                                        </Link>
+
+                                        <Link v-if="$page.props.user && $page.props.user.admin" as="a" :href="route('admin.dashboard')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18.14 21.6198C17.26 21.8798 16.22 21.9998 15 21.9998H8.99998C7.77998 21.9998 6.73999 21.8798 5.85999 21.6198C6.07999 19.0198 8.74998 16.9697 12 16.9697C15.25 16.9697 17.92 19.0198 18.14 21.6198Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15 2H9C4 2 2 4 2 9V15C2 18.78 3.14 20.85 5.86 21.62C6.08 19.02 8.75 16.97 12 16.97C15.25 16.97 17.92 19.02 18.14 21.62C20.86 20.85 22 18.78 22 15V9C22 4 20 2 15 2ZM12 14.17C10.02 14.17 8.42 12.56 8.42 10.58C8.42 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58C15.58 12.56 13.98 14.17 12 14.17Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M15.58 10.58C15.58 12.56 13.98 14.17 12 14.17C10.02 14.17 8.41998 12.56 8.41998 10.58C8.41998 8.60002 10.02 7 12 7C13.98 7 15.58 8.60002 15.58 10.58Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Admin Dashboard') }}</div>
+                                        </Link>
+                                        <Link v-if="$page.props.user" as="button" :href="route('logout')" method="post" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon logout-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M17.44 14.62L20 12.06L17.44 9.5" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M9.76001 12.0596H19.93" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M11.76 20C7.34001 20 3.76001 17 3.76001 12C3.76001 7 7.34001 4 11.76 4" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">{{ $t('Logout') }}</div>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="$page.props.lang_mode_enabled" class="theme-switcher">
+                                <h3 class="pt-5 pb-5">{{ $t('Switch language:') }}</h3>
+                                <div class="header-dropdown__list" :class="{'active': true}">
+                                    <language-switcher></language-switcher>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- header nav end -->
+
+                </div>
+                <!-- header row left end -->
+
+            <!-- header section navigation right start -->
+            <div class="header__row-right">
+                <!-- header btn start -->
+                <button type="button" @click.stop="menuToggled = !menuToggled" @keydown.esc="menuToggled = false" :aria-expanded="String(menuToggled)" :aria-label="$t('Main navigation')" class="header-btn mt-2">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <!-- header btn end -->
+
+                <!-- header button start -->
+                <div v-if="!$page.props.user && !isCompactNav" class="header-dropdown__button">
+                            <span class="header-dropdown__icon">
+                                <Link :href="route('login')">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="header-dropdown__icon-color" d="M19 20.9375L18.8893 20.344C18.4165 17.809 18.1801 16.5415 17.3314 15.8473C16.4827 15.1531 15.0708 15.1745 12.2471 15.2174C12.1005 15.2197 11.9553 15.2208 11.8122 15.2208C11.7758 15.2208 11.7392 15.2208 11.7025 15.2206C8.68652 15.2082 7.17853 15.2021 6.31968 15.9687C5.46084 16.7353 5.31141 18.0979 5.01255 20.8231L5 20.9375"/>
+                                        <path class="header-dropdown__icon-color" d="M8.5 9.5625C8.5 7.6295 10.067 6.0625 12 6.0625V6.0625C13.933 6.0625 15.5 7.6295 15.5 9.5625V10.0625C15.5 11.7194 14.1569 13.0625 12.5 13.0625V13.0625H11.5V13.0625C9.84315 13.0625 8.5 11.7194 8.5 10.0625V9.5625Z"/>
+                                        <circle class="header-dropdown__icon-color" cx="12" cy="12" r="11.5"/>
+                                    </svg>
+                                    </Link>
+                            </span>
+                </div>
+                <!-- header button end -->
+
+                <!-- header dropdown start -->
+                <div v-if="$page.props.user && !isCompactNav"
+                     @mouseover="isCompactNav ? null : showingUserProfileDropdown = true"
+                     @mouseleave="showingUserProfileDropdown = false"
+                     @click.stop.prevent="showingUserProfileDropdown = !showingUserProfileDropdown"
+                     class="header-dropdown">
+                    <div class="header-dropdown__row">
+                        <!-- header dropdown button start -->
+                        <div class="header-dropdown__button">
+                                <span class="header-dropdown__icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="header-dropdown__icon-color" d="M19 20.9375L18.8893 20.344C18.4165 17.809 18.1801 16.5415 17.3314 15.8473C16.4827 15.1531 15.0708 15.1745 12.2471 15.2174C12.1005 15.2197 11.9553 15.2208 11.8122 15.2208C11.7758 15.2208 11.7392 15.2208 11.7025 15.2206C8.68652 15.2082 7.17853 15.2021 6.31968 15.9687C5.46084 16.7353 5.31141 18.0979 5.01255 20.8231L5 20.9375"/>
+                                        <path class="header-dropdown__icon-color" d="M8.5 9.5625C8.5 7.6295 10.067 6.0625 12 6.0625V6.0625C13.933 6.0625 15.5 7.6295 15.5 9.5625V10.0625C15.5 11.7194 14.1569 13.0625 12.5 13.0625V13.0625H11.5V13.0625C9.84315 13.0625 8.5 11.7194 8.5 10.0625V9.5625Z"/>
+                                        <circle class="header-dropdown__icon-color" cx="12" cy="12" r="11.5"/>
+                                    </svg>
+                                </span>
+                        </div>
+                        <!-- header dropdown button end -->
+                        <!-- header dropdown list start -->
+                        <div class="header-dropdown__list" :class="{'active': showingUserProfileDropdown}">
+                            <div class="header-dropdown__list-info">
+                                <p>{{ $t('User:') }}</p>
+                                <p class="email">{{ $page.props.user.email ? $t($page.props.user.email) : $page.props.user.name }}</p>
+                            </div>
+                            <Link as="a" :href="route('profile.show')" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="header-dropdown__list-color" d="M4.40334 17.3222C4.44 16.9879 4.45832 16.8208 4.48127 16.7015C4.75983 15.2543 5.93043 14.2799 7.40422 14.2686C7.52566 14.2677 7.71526 14.2816 8.09447 14.3095C9.27227 14.3959 10.599 14.4667 11.7854 14.4667C13.0237 14.4667 14.3969 14.3896 15.5907 14.298C15.9564 14.27 16.1392 14.256 16.2581 14.2563C17.6545 14.2601 18.7825 15.1264 19.1463 16.4745C19.1773 16.5893 19.2069 16.748 19.2661 17.0653V17.0653C19.3314 17.4153 19.364 17.5902 19.3767 17.7324C19.524 19.3759 18.3162 20.8298 16.6735 20.9865C16.5314 21 16.3534 21 15.9975 21L11.7854 21H7.69989C7.37599 21 7.21405 21 7.08163 20.9882C5.50997 20.8487 4.31503 19.5155 4.34763 17.938C4.35038 17.8051 4.36803 17.6441 4.40334 17.3222V17.3222Z"/>
+                                        <path class="header-dropdown__list-color" d="M8 7C8 4.79086 9.79086 3 12 3V3C14.2091 3 16 4.79086 16 7V7.57143C16 9.46498 14.465 11 12.5714 11V11H11.4286V11C9.53502 11 8 9.46498 8 7.57143V7Z"/>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('User Dashboard') }}</div>
+                            </Link>
+                            <Link as="a" :href="route('reports.referral-transactions')" class="settings-dropdown__list-link">
+                                            <div class="header-dropdown__list-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="10" cy="8" r="3" stroke="white" stroke-width="1.5"/>
+                                                    <path d="M4 20c0-3.5 3-6 6-6s6 2.5 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                                    <path d="M16 6h4v4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M20 6l-6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="header-dropdown__list-title">
+                                                {{ $t('Referrals') }}
+                                            </div>
+                            </Link>
+                            <Link as="a" :href="route('orders')" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_434_17062)">
+                                            <path d="M12.37 8.87988H17.62" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M6.38 8.87988L7.13 9.62988L9.38 7.37988" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M12.37 15.8799H17.62" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M6.38 15.8799L7.13 16.6299L9.38 14.3799" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_434_17062">
+                                                <rect width="24" height="24" fill="white"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('Orders') }}</div>
+                            </Link>
+
+                            <Link as="a" :href="route('reports.trades')" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6.72827 19.7C7.54827 18.82 8.79828 18.89 9.51828 19.85L10.5283 21.2C11.3383 22.27 12.6483 22.27 13.4583 21.2L14.4683 19.85C15.1883 18.89 16.4383 18.82 17.2583 19.7C19.0383 21.6 20.4883 20.97 20.4883 18.31V7.04C20.4883 3.01 19.5483 2 15.7683 2H8.20828C4.42828 2 3.48828 3.01 3.48828 7.04V18.3C3.49828 20.97 4.95827 21.59 6.72827 19.7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.25 10H14.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('Transactions') }}</div>
+                            </Link>
+
+                            <Link as="a" v-if="$page.props.merchant" :href="route('merchant.dashboard')" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3.01001 11.22V15.71C3.01001 20.2 4.81001 22 9.30001 22H14.69C19.18 22 20.98 20.2 20.98 15.71V11.22" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 12C13.83 12 15.18 10.51 15 8.68L14.34 2H9.67L9 8.68C8.82 10.51 10.17 12 12 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M18.31 12C20.33 12 21.81 10.36 21.61 8.35L21.33 5.6C20.97 3 19.97 2 17.35 2H14.3L15 9.01C15.17 10.66 16.66 12 18.31 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5.64 12C7.29 12 8.78 10.66 8.94 9.01L9.16 6.8L9.64 2H6.59C3.97 2 2.97 3 2.61 5.6L2.34 8.35C2.14 10.36 3.62 12 5.64 12Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 17C10.33 17 9.5 17.83 9.5 19.5V22H14.5V19.5C14.5 17.83 13.67 17 12 17Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('Merchant') }}</div>
+                            </Link>
+
+                            <Link v-if="$page.props.user && $page.props.user.admin" as="a" :href="route('admin.dashboard')" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M17.9718 11.6855H6.65753C5.96323 11.6855 5.40039 12.2484 5.40039 12.9427V20.4855C5.40039 21.1798 5.96323 21.7427 6.65753 21.7427H17.9718C18.6661 21.7427 19.229 21.1798 19.229 20.4855V12.9427C19.229 12.2484 18.6661 11.6855 17.9718 11.6855Z" class="header-dropdown__list-color"/>
+                                        <path d="M16.338 11.6855L8.29232 11.6855C8.02559 11.6855 7.76978 11.5825 7.58118 11.3992C7.39257 11.2158 7.28661 10.9671 7.28661 10.7078L7.28661 7.77444C7.28661 6.47782 7.8164 5.23432 8.75944 4.31747C9.70248 3.40063 10.9815 2.88555 12.3152 2.88555C12.9755 2.88555 13.6294 3.012 14.2395 3.25769C14.8496 3.50338 15.404 3.8635 15.8709 4.31747C16.814 5.23432 17.3437 6.47782 17.3437 7.77444L17.3437 10.7078C17.3437 10.9671 17.2378 11.2158 17.0492 11.3992C16.8606 11.5825 16.6048 11.6855 16.338 11.6855V11.6855Z" class="header-dropdown__list-color"/>
+                                        <path d="M12.3145 17.3438L12.3145 19.2295" class="header-dropdown__list-color"/>
+                                        <path d="M12.3145 16.0859L12.3145 16.7145" class="header-dropdown__list-color"/>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('Admin Dashboard') }}</div>
+                            </Link>
+
+                            <Link as="button" :href="route('logout')" method="post" class="settings-dropdown__list-link">
+                                <div class="header-dropdown__list-icon logout-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 17H5.66667C5.22464 17 4.80072 16.8361 4.48816 16.5444C4.17559 16.2527 4 15.857 4 15.4444V4.55556C4 4.143 4.17559 3.74733 4.48816 3.45561C4.80072 3.16389 5.22464 3 5.66667 3H9" class="header-dropdown__list-color"/>
+                                        <path d="M14 14L18 10L14 6" class="header-dropdown__list-color"/>
+                                        <path d="M18 10H9" class="header-dropdown__list-color"/>
+                                    </svg>
+                                </div>
+                                <div class="header-dropdown__list-title">{{ $t('Logout') }}</div>
+                            </Link>
+                        </div>
+                        <!-- header dropdown list end -->
+                    </div>
+                </div>
+
+                <div v-if="!isCompactNav && $page.props.lang_mode_enabled"
+                    @mouseover="isCompactNav ? null : showingLanguageDropdown = true"
+                    @mouseleave="showingLanguageDropdown = false"
+                    @click.stop.prevent="showingLanguageDropdown = !showingLanguageDropdown"
+                    class="header-dropdown language-dropdown" role="button" tabindex="0" :aria-label="$t('Language')" :aria-expanded="showingLanguageDropdown" @keydown.enter.prevent="showingLanguageDropdown = !showingLanguageDropdown" @keydown.escape="showingLanguageDropdown = false">
+                    <div class="header-dropdown__row">
+                        <!-- header dropdown button start -->
+                        <div class="header-dropdown__button">
+                                <span class="header-dropdown__icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23Z" class="header-dropdown__icon-color"/>
+                                        <path d="M1 12H23" class="header-dropdown__icon-color"/>
+                                        <path d="M12 1C14.5013 4.01219 15.9228 7.92124 16 12C15.9228 16.0788 14.5013 19.9878 12 23C9.49872 19.9878 8.07725 16.0788 8 12C8.07725 7.92124 9.49872 4.01219 12 1V1Z" class="header-dropdown__icon-color"/>
+                                    </svg>
+                                </span>
+                        </div>
+                        <!-- header dropdown button end -->
+                        <!-- header dropdown list start -->
+                        <div class="header-dropdown__list" :class="{'active': showingLanguageDropdown}">
+                            <language-switcher></language-switcher>
+                        </div>
+                        <!-- header dropdown list end -->
+                    </div>
+                </div>
+
+                <!-- mode start -->
+                <theme-mode v-if="$page.props.theme_mode_enabled"></theme-mode>
+                <!-- mode end -->
+            </div>
+            <!-- header section navigation right end -->
+        </div>
+    </header>
+    <!-- thead end -->
+
+    <!-- MAIN START -->
+    <main class="main-section main flex-grow" :class="{'header-main': isHomePage}">
+
+        <div class="main__system-messages">
+            <socket />
+        </div>
+
+        <div class="main__container">
+            <div :class="{'max-w-screen-2xl mx-auto': true, 'mobile-body': isMobile}">
+                <umi-return-link v-if="!umiSection"/><slot></slot>
+            </div>
+        </div>
+
+        <!-- Modal Portal -->
+        <div :class="{'mobile-body': isMobile}">
+            <portal-target name="modal" multiple></portal-target>
+        </div>
+    </main>
+    <!-- MAIN END -->
+
+    <!-- section footer start -->
+    <site-footer v-if="!isMobile && !walletFlow && !umiSection" compact :time="time" :connection="$page.props.live_conenction" />
+
+    <bottom-menu v-if="isMobile && showBottomMenu"></bottom-menu>
+    <on-ramp-swap v-if="$uiFeatures.bankPayout && ($page.props.unlim_status)"></on-ramp-swap>
+</div>

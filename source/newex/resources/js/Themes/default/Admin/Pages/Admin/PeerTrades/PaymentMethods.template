@@ -1,0 +1,49 @@
+<app-layout>
+
+    <admin-top-menu section="peerPaymentMethods"></admin-top-menu>
+
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("支付方式") }}</h1>
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.peerPaymentMethods.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新支付方式") }}</span>
+        </nav-button-link>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+            <tr v-for="paymentMethod in paymentMethods.data" :key="paymentMethod.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.peerPaymentMethods.edit', paymentMethod.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ paymentMethod.title }}
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" :type="paymentMethod.status ? 'green' : 'gray'">
+                            {{ paymentMethod.status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <nav-button-link class="mr-2" type="red" :href="route('admin.peerPaymentMethods.edit', paymentMethod.id)">
+                            <span>{{ $t("编辑支付方式") }}</span>
+                        </nav-button-link>
+                        <nav-button-link class="mr-2" type="indigo" :href="route('admin.peerPaymentFields', paymentMethod.id)">
+                            <span>{{ $t("表单字段") }}</span>
+                        </nav-button-link>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="paymentMethods.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到支付方式。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="paymentMethods.links" />
+</app-layout>

@@ -1,0 +1,360 @@
+<app-layout>
+
+    <Head>
+        <title>{{ $t('P2P Order Appeal')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+<top-menu :label="$t('Appeal Process')"></top-menu>
+
+<div class="table-components">
+    <div class="p2p-order-view p2p-order-mob flex w-full">
+        <div class="lg:w-2/3 w-full">
+
+            <div class="appeal-container">
+
+                <div class="p2p-create-steps p2p-create-steps-mob">
+                    <div data-status="process" class="p2p-steps-step p2p-steps-step-np">
+                        <div class="p2p-steps-step-inner">
+                            <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Appeal Submitted')}}</div>
+                            <div :class="{'active': stage == 1}" data-class="step_marker_row" class="p2p-steps-step-marker active"><span
+                                data-bn-type="text" data-class="step_marker_number"
+                                class="p2p-create-step-marker-label">1</span></div>
+                        </div>
+                    </div>
+                    <div data-status-line="wait" class="p2p-steps-line p2p-steps-line-np"></div>
+                    <div data-status="wait" class="p2p-steps-step p2p-steps-step-np">
+                        <div class="p2p-steps-step-inner">
+                            <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Negotiate with Counterparty')}}</div>
+                            <div :class="{'active': stage > 1 }"  data-class="step_marker_row" class="p2p-steps-step-marker"><span data-bn-type="text"
+                                                                                                  data-class="step_marker_number"
+                                                                                                  class="p2p-create-step-marker-label p2p-create-step-marker-label-extra">2</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-status-line="wait" class="p2p-steps-line p2p-steps-line-np"></div>
+                    <div data-status="wait" class="p2p-steps-step p2p-steps-step-np">
+                        <div class="p2p-steps-step-inner">
+                            <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('CS Review') }}</div>
+                            <div :class="{'active': stage > 1 }" data-class="step_marker_row" class="p2p-steps-step-marker"><span data-bn-type="text"
+                                                                                                  data-class="step_marker_number"
+                                                                                                  class="p2p-create-step-marker-label-extra">3</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div data-status-line="wait" class="p2p-steps-line p2p-steps-line-np"></div>
+                    <div data-status="wait" class="p2p-steps-step p2p-steps-step-np">
+                        <div class="p2p-steps-step-inner">
+                            <div data-bn-type="text" class="p2p-steps-step-marker-text">{{ $t('Appeal Complete') }}</div>
+                            <div :class="{'active': stage == 4 }" data-class="step_marker_row" class="p2p-steps-step-marker"><span data-bn-type="text"
+                                                                                                  data-class="step_marker_number"
+                                                                                                  class="p2p-create-step-marker-label-extra">4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appeal-container-item">
+                    <div class="mt-2 text-yellow">
+                        <Link as="div" :href="route('p2p.my-order', order.id)" class="action-link">{{ $t('> Back To Order')}}</Link>
+                    </div>
+
+                    <div class="mt-5 appeal-container-item-details">
+
+                        <div class="appeal-description">
+                            <div><strong>{{ $t('Order ID: ')}}</strong> {{ order.id }}</div>
+                            <div class="mt-2"><strong>{{ $t('Order Created Date:')}}</strong> {{ order.created_at }}</div>
+                            <div class="mt-2"><strong>{{ $t('Order Appealed Date:')}}</strong> {{ order.appealed_at }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="order.status == 'appealed_by_counterparty' && isReviewer && order.appeal_stage != 'moderated'" class="appeal-container-item">
+                    <div class="appeal-container-item-user flex">
+                        <span class="pt-2 block block-title-app">{{ $t('CS Review Message')}}</span>
+                    </div>
+                    <div class="appeal-container-item-details">
+
+                        <textarea class="appeal-textarea" v-model="appealReviewMessage"></textarea>
+
+                        <div class="mt-4 mb-4">
+                            <div class="input-radio">
+                                <t-radio id="turn-fixed" name="turn" v-model="appealReviewTurn" value="complainant" />
+                                <label for="turn-fixed">{{ $t("Complainant's turn to reply") }}</label>
+                            </div>
+                            <div class="mt-4 input-radio">
+                                <t-radio id="turn-floated" name="turn" v-model="appealReviewTurn" value="defendant"/>
+                                <label for="turn-floated">{{ $t("Defendant's turn to reply") }}</label>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-10">
+                            <t-button-green @click.stop="submitReview()" class="components-filter__button components-filter__button-w-200 mt-8 py-2 px-6">{{ $t('Submit Review')}}</t-button-green>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="order.status == 'appealed_by_counterparty' && (order.appeal_stage == 'pending' || order.appeal_stage == 'responded') && isInitiator" class="appeal-container-item">
+                    <div class="appeal-container-item-user flex">
+                        <span class="pt-2 block block-title-app">{{ $t('Pending Response from respondent.')}}</span>
+                    </div>
+                    <div class="appeal-container-item-details">
+
+                        <div class="appeal-description">
+                            <div>{{ $t('1. If both parties have reached an agreement, you can cancel the appeal and proceed to complete the trade.')}}</div>
+                            <div>{{ $t('2. If the respondent does not respond in time, CS will get involved and arbitrade.')}}</div>
+                        </div>
+
+                        <div class="mt-10">
+                            <t-button-green @click.stop="cancelAppeal()" class="components-filter__button components-filter__button-w-200 components-filter__button-cancel mt-8 py-2 px-6">{{ $t('Cancel Appeal')}}</t-button-green>
+                        </div>
+
+                        <div class="mt-5">{{ $t('OR')}}</div>
+
+                        <div class="appeal-container-item-details">
+                            <div>
+                                <t-button-green @click.stop="respondAppeal()" class="components-filter__button components-filter__button-w-200 mt-4 py-2 px-6">{{ $t('Add extra notes to Appeal')}}</t-button-green>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="order.status == 'appealed_by_counterparty' && order.appeal_stage == 'pending' && !isInitiator" class="appeal-container-item">
+                    <div class="appeal-container-item-user flex">
+                        <span class="pt-2 block block-title-app">{{ $t('Respond to Appeal.')}}</span>
+                    </div>
+                    <div class="appeal-container-item-details">
+
+                        <div class="appeal-description">
+                            <div>{{ $t('1. Provide proofs of payment and be descriptive as much as possible.')}}</div>
+                            <div>{{ $t('2. If you do not respond in time, CS will get involved and arbitrade.')}}</div>
+                        </div>
+
+                        <div class="mt-10">
+                            <t-button-green @click.stop="respondAppeal()" class="components-filter__button components-filter__button-w-200 mt-8 py-2 px-6">{{ $t('Respond to Appeal')}}</t-button-green>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-for="appeal in appeals" class="appeal-container-item" :class="{'review-active': appeal.type == 'review', 'system-active': appeal.type == 'system'}">
+                    <div class="appeal-container-item-date">
+                        {{ appeal.created_at }}
+                    </div>
+                    <div class="appeal-container-item-user flex">
+                        <div class="items-start relative inline-flex mr-2">
+
+                            <template v-if="appeal.type == 'review'">
+                                <div class="review-active-logo">
+                                    <svg version="1.1" viewBox="0 0 30 30" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M15,26v2c2.342,0,4.202-0.853,5.623-2H15z"/><path d="M5,16v2c0,2.5,2,3,2,3  s2,6,8,6" style="fill:none;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;"/><path d="M26,17h-3c0-6.24-3-9-3-9c-3,7-13,2-13,9H4c0,0,0-0.118,0-4C4,6,10,2,15,2c4,0,5,2,5,2c4,0,6,5,6,9V17z"/><path d="M15.5,21c-0.176,0-0.824,0-1,0c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5c0.176,0,0.824,0,1,0  c0.828,0,1.5-0.672,1.5-1.5S16.328,21,15.5,21z"/><path d="M16,23h5c2.209,0,4-1.791,4-4  v-3" style="fill:none;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;"/><path d="M25,20h-2v-5h2c1.105,0,2,0.895,2,2v1C27,19.105,26.105,20,25,20z"/></svg>
+                                </div>
+                                <span class="pt-2 block ml-2">{{ $t('Customer Support') }}</span>
+                            </template>
+
+                            <template v-if="appeal.type == 'message'">
+                                <div aria-hidden="true" class="bg-white rounded-full shadow absolute offline-badge" :class="{'online-badge': appeal.user.is_online}"></div>
+
+                                <img src="/images/chat-default.png" width="42" height="42" class="rounded-full" />
+                                <span class="pt-2 block ml-2">{{ appeal.user.name }}</span>
+                            </template>
+
+                            <template v-if="appeal.type == 'system'">
+                                <div class="system-active-logo ">
+                                    <svg height="42" version="1.1" viewBox="0 0 20 20" width="20px" xmlns="http://www.w3.org/2000/svg" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" xmlns:xlink="http://www.w3.org/1999/xlink"><title/><desc/><defs/><g fill="none" fill-rule="evenodd" id="Page-1" stroke="none" stroke-width="1"><g fill="#000000" id="Core" transform="translate(-2.000000, -212.000000)"><g id="error" transform="translate(2.000000, 212.000000)"><path d="M10,0 C4.5,0 0,4.5 0,10 C0,15.5 4.5,20 10,20 C15.5,20 20,15.5 20,10 C20,4.5 15.5,0 10,0 L10,0 Z M11,15 L9,15 L9,13 L11,13 L11,15 L11,15 Z M11,11 L9,11 L9,5 L11,5 L11,11 L11,11 Z" id="Shape"/></g></g></g></svg>
+                                </div>
+                                <span class="pt-2 block ml-2">{{ $t('System Message') }}</span>
+                            </template>
+                        </div>
+
+                    </div>
+                    <div class="appeal-container-item-details">
+
+                        <div v-if="appeal.type == 'message'" class="appeal-label">
+                            {{ $t('Comment') }}
+                        </div>
+
+                        <div class="appeal-description">
+                            <template v-if="appeal.type == 'system'">
+                                <template v-if="appeal.status == 'cancelled_by_owner'">
+                                    {{ $t('Complainant has cancelled the appeal')}}
+                                </template>
+                            </template>
+                            <template v-else>
+                                {{ appeal.content }}
+                            </template>
+
+                        </div>
+
+                        <div v-if="appeal.type == 'message'" class="appeal-label mt-4">
+                            {{ $t('Attachments') }}
+                        </div>
+
+                        <div class="appeal-description">
+                            <div v-for="attachment in appeal.attachments">
+                                <template v-if="attachment.type == 'image'">
+                                    <div class="attachments-container attachment-image">
+                                        <div class="">
+                                            <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M224 128L224 0H48C21.49 0 0 21.49 0 48v416C0 490.5 21.49 512 48 512h288c26.51 0 48-21.49 48-48V160h-127.1C238.3 160 224 145.7 224 128zM96 224c17.67 0 32 14.33 32 32S113.7 288 96 288S64 273.7 64 256S78.33 224 96 224zM318.1 439.5C315.3 444.8 309.9 448 304 448h-224c-5.9 0-11.32-3.248-14.11-8.451c-2.783-5.201-2.479-11.52 .7949-16.42l53.33-80C122.1 338.7 127.1 336 133.3 336s10.35 2.674 13.31 7.125L160 363.2l45.35-68.03C208.3 290.7 213.3 288 218.7 288s10.35 2.674 13.31 7.125l85.33 128C320.6 428 320.9 434.3 318.1 439.5zM256 0v128h128L256 0z"/></svg>
+                                        </div>
+                                        <div class="attachment-link"><a :href="attachment.path" target="_blank">{{ $t('Download')}}</a></div>
+                                    </div>
+                                </template>
+                                <template v-if="attachment.type == 'document'">
+                                    <div class="attachments-container attachment-image">
+                                        <div class="">
+                                            <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M184 208c0-4.406-3.594-8-8-8S168 203.6 168 208c0 2.062 .2969 23.31 9.141 50.25C179.1 249.6 184 226.2 184 208zM256 0v128h128L256 0zM80 422.4c0 9.656 10.47 11.97 14.38 6.375C99.27 421.9 108.8 408 120.1 388.6c-14.22 7.969-27.25 17.31-38.02 28.31C80.75 418.3 80 420.3 80 422.4zM224 128L224 0H48C21.49 0 0 21.49 0 48v416C0 490.5 21.49 512 48 512h288c26.51 0 48-21.49 48-48V160h-127.1C238.3 160 224 145.7 224 128zM292 312c24.26 0 44 19.74 44 44c0 24.67-18.94 44-43.13 44c-5.994 0-11.81-.9531-17.22-2.805c-20.06-6.758-38.38-15.96-54.55-27.39c-23.88 5.109-45.46 11.52-64.31 19.1c-14.43 26.31-27.63 46.15-36.37 58.41C112.1 457.8 100.8 464 87.94 464C65.92 464 48 446.1 48 424.1c0-11.92 3.74-21.82 11.18-29.51c16.18-16.52 37.37-30.99 63.02-43.05c11.75-22.83 21.94-46.04 30.33-69.14C136.2 242.4 136 208.4 136 208c0-22.05 17.95-40 40-40c22.06 0 40 17.95 40 40c0 24.1-7.227 55.75-8.938 62.63c-1.006 3.273-2.035 6.516-3.082 9.723c7.83 14.46 17.7 27.21 29.44 38.05C263.1 313.4 284.3 312.1 287.6 312H292zM156.5 354.6c17.98-6.5 36.13-11.44 52.92-15.19c-12.42-12.06-22.17-25.12-29.8-38.16C172.3 320.6 164.4 338.5 156.5 354.6zM292.9 368C299 368 304 363 304 356.9C304 349.4 298.6 344 292 344H288c-.3438 .0313-16.83 .9687-40.95 4.75c11.27 7 24.12 13.19 38.84 18.12C288 367.6 290.5 368 292.9 368z"/></svg>
+                                        </div>
+                                        <div class="attachment-link"><a :href="attachment.path" target="_blank">{{ $t('Download')}}</a></div>
+                                    </div>
+                                </template>
+                                <template v-if="attachment.type == 'video'">
+                                    <div class="attachments-container attachment-image">
+                                        <div class="">
+                                            <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M256 0v128h128L256 0zM224 128L224 0H48C21.49 0 0 21.49 0 48v416C0 490.5 21.49 512 48 512h288c26.51 0 48-21.49 48-48V160h-127.1C238.3 160 224 145.7 224 128zM224 384c0 17.67-14.33 32-32 32H96c-17.67 0-32-14.33-32-32V288c0-17.67 14.33-32 32-32h96c17.67 0 32 14.33 32 32V384zM320 284.9v102.3c0 12.57-13.82 20.23-24.48 13.57L256 376v-80l39.52-24.7C306.2 264.6 320 272.3 320 284.9z"/></svg>
+                                        </div>
+                                        <div class="attachment-link"><a :href="attachment.path" target="_blank">{{ $t('Download')}}</a></div>
+                                    </div>
+                                </template>
+                                <template v-if="attachment.type == 'file'">
+                                    <div class="attachments-container attachment-image">
+                                        <div class="">
+                                            <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M256 0v128h128L256 0zM224 128L224 0H48C21.49 0 0 21.49 0 48v416C0 490.5 21.49 512 48 512h288c26.51 0 48-21.49 48-48V160h-127.1C238.3 160 224 145.7 224 128zM272 416h-160C103.2 416 96 408.8 96 400C96 391.2 103.2 384 112 384h160c8.836 0 16 7.162 16 16C288 408.8 280.8 416 272 416zM272 352h-160C103.2 352 96 344.8 96 336C96 327.2 103.2 320 112 320h160c8.836 0 16 7.162 16 16C288 344.8 280.8 352 272 352zM288 272C288 280.8 280.8 288 272 288h-160C103.2 288 96 280.8 96 272C96 263.2 103.2 256 112 256h160C280.8 256 288 263.2 288 272z"/></svg>
+                                        </div>
+                                        <div class="attachment-link"><a :href="attachment.path" target="_blank">{{ $t('Download')}}</a></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="lg:w-1/3 w-full">
+            <chat :order="order"></chat>
+        </div>
+    </div>
+</div>
+
+    <!-- Confirmation Modal -->
+    <jet-confirmation-modal :show="cancelAppealModal">
+        <template #title>
+            {{ $t('Cancel Appeal')}}
+        </template>
+
+        <template #content>
+            <div>
+
+                <div class="mt-10">{{ $t('1. Once the appeal is cancelled, user can proceed to complete the order. Cancelling the appeal will not result in cancellation for the order itself')}}</div>
+
+                <div class="mt-2 mb-5">{{ $t('2. You can file another appeal if you encounter another issue in the future.')}}</div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="cancelAppealModal = null">
+                {{ $t('Cancel') }}
+            </jet-secondary-button>
+
+            <jet-danger-button class="ml-2" @click.native="cancelAppealConfirm">
+                {{ $t('Confirm') }}
+            </jet-danger-button>
+        </template>
+    </jet-confirmation-modal>
+
+    <jet-dialog-modal :max-width="'6xl'" :show="showAppealOrder" @close="showAppealOrder = null">
+        <template #title>
+            {{ $t('Respond To Appeal') }}
+        </template>
+        <template #content>
+            <div class="p2pmodal flex-col">
+                <div class="p2pmodal-information p2pmodal-information-warning">
+                    <div class="p2pmodal-information-item">
+                        <div class="p2pmodal-information-item-icon">
+                            1
+                        </div>
+                        <div class="p2pmodal-information-item-text">
+                            {{ $t('Submitted contents are visible to both parties and CS. Avoid including any private or sensitive info.') }}
+                        </div>
+                    </div>
+                    <div class="p2pmodal-information-item">
+                        <div class="p2pmodal-information-item-icon">
+                            2
+                        </div>
+                        <div class="p2pmodal-information-item-text">
+                            {{ $t('CS review takes a few hours. More proof from both parties might be requested.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10 p2p-order-feedback-body">
+                    <label class="">{{ $t('Description (Max Length: 500)')}}</label>
+                    <textarea maxlength="500" class="textarea-modal mt-5" :placeholder="$t('Please respond as detailed as possible')" v-model="appealForm.reason"></textarea>
+                </div>
+
+                <div class="mt-5 mb-10 form-components__block-item">
+
+                    <label class="mb-5">{{ $t('Upload proof (Mandatory)') }}</label>
+
+                    <div class="text-small">
+                        <p class="mb-5 mt-5">{{ $t('Screenshots or video/audio recordings of payment and communication data should not exceed a total of 5 files with total size of 200 MB. Supported file formats include pdf, jpg, jpeg, png, mp4, avi, mov, wmv.')}}</p>
+                        <ul>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="Interface / Check">
+                                        <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </g>
+                                </svg>
+                                {{ $t('Ensure that the date, time, account number, and name of the sender and recipient are displayed in the payment transaction details.') }}</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Interface / Check">
+                                    <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                            </svg>{{ $t('Video should show the entire payment account log in process (please hide the password), and the payment transaction details.') }}</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Interface / Check">
+                                    <path id="Vector" d="M6 12L10.2426 16.2426L18.727 7.75732" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                            </svg>{{ $t('Video must be recorded using another phone/camera and unedited.') }}</li>
+                            <li><svg class="close-fill" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9393 12L6.9696 15.9697L8.03026 17.0304L12 13.0607L15.9697 17.0304L17.0304 15.9697L13.0607 12L17.0303 8.03039L15.9696 6.96973L12 10.9393L8.03038 6.96973L6.96972 8.03039L10.9393 12Z" />
+                            </svg>{{ $t('Account will be restricted if fake payment proof is provided.') }}</li>
+                        </ul>
+                    </div>
+                    <div id="file-uploader-form" class="file-uploader-form-modal">
+                        <VueFileAgent
+                            class="profile-pic-upload-block"
+                            ref="fileUploadForm"
+                            :multiple="true"
+                            :deletable="true"
+                            :meta="false"
+                            :maxFiles="5"
+                            :accept="'image/*,video/*,.pdf'"
+                            :helpText="'Drag an image file here'"
+                            :errorText="{type: 'Please select an image'}"
+                            v-model="fileRecords"
+                            @select="onSelect($event)"
+                            @upload="onUpload($event)"
+                            @beforedelete="onDelete($event)"
+                        >
+                        </VueFileAgent>
+                    </div>
+
+                    <div class="text-red-600 mb-3" v-if="appealErrors">
+                        {{ appealErrors }}
+                    </div>
+                </div>
+
+
+            </div>
+        </template>
+
+        <template #footer>
+
+            <jet-button class="ml-2" @click.native="respondAppealSubmit">
+                {{ $t('Send Respond') }}
+            </jet-button>
+        </template>
+    </jet-dialog-modal>
+
+</app-layout>

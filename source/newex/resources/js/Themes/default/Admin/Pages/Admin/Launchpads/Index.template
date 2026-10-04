@@ -1,0 +1,43 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("Launchpad") }}</h1>
+    <div class="mb-6 flex justify-between items-center">
+        <nav-button-link :href="route('admin.launchpads.create')">
+            <span>{{ $t("添加") }}</span>
+            <span class="hidden md:inline">{{ $t(" 新 Launchpad") }}</span>
+        </nav-button-link>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("Launchpad ID") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("Launchpad 名称") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t('Publication status') }}</th>
+            </tr>
+            <tr v-for="launchpad in launchpads.data" :key="launchpad.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.launchpads.edit', launchpad.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ launchpad.id }}
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <Link :href="route('admin.launchpads.edit', launchpad.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ launchpad.name }}
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" :type="launchpad.status ? 'green' : 'gray'">
+                            {{ launchpad.status ? $t("Enabled") : $t("Disabled") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t px-6 py-4">{{ $t(launchpad.publication_status === 'published' ? 'Reviewed and published' : launchpad.publication_status === 'pending' ? 'Awaiting review' : 'Draft') }}</td>
+            </tr>
+            <tr v-if="launchpads.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到 Launchpad。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="launchpads.links" />
+</app-layout>

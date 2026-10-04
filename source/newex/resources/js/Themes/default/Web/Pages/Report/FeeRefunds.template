@@ -1,0 +1,251 @@
+<app-layout>
+
+    <!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Fee Refunds') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="fee_refunds"></reports-tab>
+
+    <div class="components-filter">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <label>{{ $t('Type') }}：</label>
+                <t-rich-user-select
+                    :options="typeOptions"
+                    v-model="form.type"
+                    :placeholder="$t('Select type')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <label>{{ $t('Search') }}：</label>
+                <text-user-input
+                    v-model="form.search"
+                    :placeholder="$t('Search order ID or transaction ID')"
+                />
+            </div>
+
+            <div class="components-filter__item">
+                <t-button-green
+                    @click.stop="getList"
+                    class="components-filter__button mt-8 py-2 px-6"
+                    :class="{ 'opacity-75': sending }"
+                >
+                    <span class="components-filter__icon">
+                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ $t('Search') }}
+                    </span>
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-trades">
+            <!-- thead start -->
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Type') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Fee Type') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Source ID') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Original Fee') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('VIP') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Discount') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Refund Rate') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Refund Amount') }}</span>
+                    </div>
+                </th>
+
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr v-for="record in records.data" :key="record.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <div class="components-label" :class="getProductTypeClass(record.product_type)">
+                                {{ getProductTypeLabel(record.product_type) }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Fee Type') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ getFeeTypeLabel(record.fee_type) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Source ID') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span class="cursor-pointer" @click="doCopy(getSourceId(record))">
+                                {{ format_string(getSourceId(record), 18) }}
+                            </span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Original Fee') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ math_formatter(record.original_fee, 8) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('VIP') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span v-if="record.vip_level !== null && record.vip_level !== undefined">VIP{{ record.vip_level }}</span>
+                            <span v-else>-</span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Discount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ formatDiscount(record.discount_rate) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Refund Rate') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ formatPercent(record.refund_rate) }}
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Refund Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span class="color-buy">
+                                {{ math_formatter(record.refund_amount, 8) }}
+                            </span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ record.created_at }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfoot start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="!records.data || records.data.length === 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No fee refund records found.') }}</span>
+                    </div>
+
+                    <pagination :links="records.links" />
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfoot end -->
+
+        </table>
+        <!-- tables end -->
+
+    </div>
+    <!-- table components end -->
+
+</app-layout>

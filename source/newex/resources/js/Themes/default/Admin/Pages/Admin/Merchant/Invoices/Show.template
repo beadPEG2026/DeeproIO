@@ -1,0 +1,142 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('账单') }} {{ invoice.id.substring(0, 8) }}</title>
+    </Head>
+
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <a :href="route('admin.merchant.invoices')" class="text-blue-600 hover:text-blue-800 text-sm">&larr; {{ $t('返回账单列表') }}</a>
+                <h1 class="text-2xl font-bold text-gray-800 mt-2">{{ $t('账单详情') }}</h1>
+            </div>
+            <span :class="['px-4 py-2 rounded-full text-sm font-medium', getStatusBadge(invoice.status)]">{{ invoice.status }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Invoice Info -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('账单信息') }}</h3>
+                    <dl class="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('账单 ID') }}</dt>
+                            <dd class="font-mono text-sm">{{ invoice.id }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('外部 ID') }}</dt>
+                            <dd class="font-medium">{{ invoice.external_id || '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('美元金额') }}</dt>
+                            <dd class="font-medium text-xl">${{ Number(invoice.amount_usd).toFixed(2) }}</dd>
+                        </div>
+                        <div v-if="invoice.supported_asset">
+                            <dt class="text-sm text-gray-500">{{ $t('加密货币金额') }}</dt>
+                            <dd class="font-medium">{{ invoice.amount_crypto }} {{ invoice.supported_asset.currency ? invoice.supported_asset.currency.code : '' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('充值地址') }}</dt>
+                            <dd class="font-mono text-sm break-all">{{ invoice.deposit_address.address || '-' }}</dd>
+                        </div>
+                        <div v-if="invoice.supported_asset">
+                            <dt class="text-sm text-gray-500">{{ $t('网络') }}</dt>
+                            <dd class="font-medium">{{ invoice.supported_asset.network ? invoice.supported_asset.network.name : '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">{{ $t('创建时间') }}</dt>
+                            <dd>{{ new Date(invoice.created_at).toLocaleString() }}</dd>
+                        </div>
+                        <div v-if="invoice.paid_at">
+                            <dt class="text-sm text-gray-500">{{ $t('支付时间') }}</dt>
+                            <dd>{{ new Date(invoice.paid_at).toLocaleString() }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Payments -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('支付记录') }} ({{ invoice.payments ? invoice.payments.length : 0 }})</h3>
+                    <div v-if="invoice.payments && invoice.payments.length">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-xs text-gray-500 uppercase">
+                                    <th class="pb-2">{{ $t('交易哈希') }}</th>
+                                    <th class="pb-2">{{ $t('金额') }}</th>
+                                    <th class="pb-2">{{ $t('确认数') }}</th>
+                                    <th class="pb-2">{{ $t('状态') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr v-for="payment in invoice.payments" :key="payment.id">
+                                    <td class="py-2 font-mono text-sm">{{ payment.txn_hash ? payment.txn_hash.substring(0, 16) + '...' : '-' }}</td>
+                                    <td class="py-2">{{ payment.amount_crypto }}</td>
+                                    <td class="py-2">{{ payment.confirmations }} / {{ payment.required_confirmations }}</td>
+                                    <td class="py-2"><span class="px-2 py-1 rounded text-xs bg-gray-100">{{ payment.status }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p v-else class="text-gray-500 text-center py-4">{{ $t('暂无支付记录') }}</p>
+                </div>
+
+                <!-- Webhooks -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('Webhook 记录') }} ({{ invoice.webhooks ? invoice.webhooks.length : 0 }})</h3>
+                    <div v-if="invoice.webhooks && invoice.webhooks.length">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-xs text-gray-500 uppercase">
+                                    <th class="pb-2">{{ $t('事件') }}</th>
+                                    <th class="pb-2">{{ $t('状态') }}</th>
+                                    <th class="pb-2">{{ $t('尝试次数') }}</th>
+                                    <th class="pb-2">{{ $t('创建时间') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr v-for="webhook in invoice.webhooks" :key="webhook.id">
+                                    <td class="py-2">{{ webhook.event_type }}</td>
+                                    <td class="py-2"><span :class="['px-2 py-1 rounded text-xs', webhook.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800']">{{ webhook.status }}</span></td>
+                                    <td class="py-2">{{ webhook.attempt_count }}</td>
+                                    <td class="py-2 text-sm text-gray-500">{{ new Date(webhook.created_at).toLocaleString() }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p v-else class="text-gray-500 text-center py-4">{{ $t('暂无 Webhook 记录') }}</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Merchant -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('商户') }}</h3>
+                    <p class="font-medium">{{ invoice.merchant.business_name }}</p>
+                    <p class="text-sm text-gray-500">{{ invoice.merchant.business_email }}</p>
+                    <a :href="route('admin.merchant.merchants.show', invoice.merchant.id)" class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">{{ $t('查看商户') }}</a>
+                </div>
+
+                <!-- Customer -->
+                <div class="bg-white rounded-xl shadow-sm p-6" v-if="invoice.customer_email || invoice.customer_name">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('客户') }}</h3>
+                    <p class="font-medium" v-if="invoice.customer_name">{{ invoice.customer_name }}</p>
+                    <p class="text-sm text-gray-500" v-if="invoice.customer_email">{{ invoice.customer_email }}</p>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white rounded-xl shadow-sm p-6" v-if="invoice.timeline && invoice.timeline.length">
+                    <h3 class="font-semibold text-gray-800 mb-4">{{ $t('时间线') }}</h3>
+                    <div class="space-y-3">
+                        <div v-for="event in invoice.timeline" :key="event.id" class="flex items-start space-x-3">
+                            <div class="w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
+                            <div>
+                                <p class="text-sm font-medium">{{ event.event_type }}</p>
+                                <p class="text-xs text-gray-500">{{ new Date(event.created_at).toLocaleString() }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

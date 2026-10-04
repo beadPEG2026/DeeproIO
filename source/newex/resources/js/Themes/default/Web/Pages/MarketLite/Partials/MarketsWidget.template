@@ -1,0 +1,115 @@
+<!-- WIDGET MARKETS START -->
+<div class="widget widget-markets">
+
+    <div class="widget-container">
+
+
+        <!-- widget head start -->
+        <div class="widget-head">
+
+            <!-- widget markets navigation start -->
+            <div class="noselect widget-markets__navigation">
+                <h3 @click="setSort('favorites')">
+                    <span class="navigation-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path class="navigation-icon__color" :class="{'navigation-icon__active': filter.sortBy == 'favorites'}" d="M11.5793 1.65498C11.7761 1.3486 12.2239 1.3486 12.4207 1.65498L15.6448 6.67456C15.7125 6.77997 15.8173 6.85613 15.9385 6.88795L21.7087 8.40311C22.0609 8.49559 22.1993 8.92148 21.9687 9.20332L18.1911 13.8207C18.1118 13.9177 18.0717 14.0409 18.0789 14.166L18.421 20.122C18.4419 20.4856 18.0796 20.7488 17.7403 20.6166L12.1815 18.4507C12.0648 18.4052 11.9352 18.4052 11.8185 18.4507L6.2597 20.6166C5.92041 20.7488 5.55812 20.4856 5.579 20.122L5.92109 14.166C5.92827 14.0409 5.88824 13.9177 5.8089 13.8207L2.0313 9.20332C1.80072 8.92148 1.93911 8.49559 2.2913 8.40311L8.0615 6.88795C8.18268 6.85613 8.2875 6.77997 8.35521 6.67456L11.5793 1.65498Z"/>
+                        </svg>
+                    </span>
+                </h3>
+                <nav>
+                    <a @click.prevent="setSort(false)" :class="{'navigation-active': !filter.sortBy }">{{ $t('ALL') }}</a>
+                    <a v-for="quote in quotes" @click.prevent="setSort(quote)" :class="{'navigation-active': filter.sortBy == quote }">{{ quote }}</a>
+                </nav>
+            </div>
+            <!-- widget markets navigation end -->
+
+            <!-- widget markets search start -->
+            <div class="widget-markets__search">
+
+                <input maxlength="12" v-model="filter.search" type="text" :placeholder="$t('Search')">
+                <button class="widget-markets__search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect class="widget-markets__search-color" x="2" y="2" width="17" height="17" rx="8.5"/>
+                        <line class="widget-markets__search-color" x1="16.2428" y1="17.5356" x2="20.5356" y2="21.8285"/>
+                    </svg>
+                </button>
+
+            </div>
+            <!-- widget markets search end -->
+
+        </div>
+        <!-- widget head end -->
+
+
+        <!-- widget body start -->
+        <div class="widget-body">
+            <p v-if="$store.getters.getMarketsLoadFailed" class="text-xs px-3 text-gray-500" role="status">{{ $t('Market list could not be updated.') }} <button type="button" @click="$store.dispatch('fetchMarkets', route('markets.api.ticker'))">{{ $t('Retry') }}</button></p>
+
+            <!-- widget markets sort start -->
+            <div class="widget-markets__sort">
+                <div @click="setFilter('name')" class="widget-markets__sort-pair">
+                    {{ $t('Pair') }}
+                    <span class="widget-markets__sort-icon">
+                        <icon-filter
+                            :filter="filter"
+                            field="name">
+                        </icon-filter>
+                    </span>
+                </div>
+                <div @click="setFilter('last')" class="widget-markets__sort-price">
+                    {{ $t('Price') }}
+                    <span class="widget-markets__sort-icon">
+                        <icon-filter
+                            :filter="filter"
+                            field="last">
+                        </icon-filter>
+                    </span>
+                </div>
+                <div @click="setFilter('change')" class="widget-markets__sort-change">
+                    {{ $t('Change') }}
+                    <span class="widget-markets__sort-icon">
+                        <icon-filter
+                            :filter="filter"
+                            field="change">
+                        </icon-filter>
+                    </span>
+                </div>
+            </div>
+            <!-- widget markets sort end -->
+
+            <!-- widget markets list start -->
+            <div class="widget-markets__list">
+                <vue-scroll>
+                    <div v-for="market in markets" class="widget-markets__list-item">
+                        <a @click.prevent="setMarket(market, futures)" class="widget-markets__list-item__link">
+                            <div class="widget-markets__list-item__pair">
+                                <span @click.stop="favoriteToggle(market)" class="pair-icon" :class="{'pair-icon__active': market.favorite}">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.5793 1.65498C11.7761 1.3486 12.2239 1.3486 12.4207 1.65498L15.6448 6.67456C15.7125 6.77997 15.8173 6.85613 15.9385 6.88795L21.7087 8.40311C22.0609 8.49559 22.1993 8.92148 21.9687 9.20332L18.1911 13.8207C18.1118 13.9177 18.0717 14.0409 18.0789 14.166L18.421 20.122C18.4419 20.4856 18.0796 20.7488 17.7403 20.6166L12.1815 18.4507C12.0648 18.4052 11.9352 18.4052 11.8185 18.4507L6.2597 20.6166C5.92041 20.7488 5.55812 20.4856 5.579 20.122L5.92109 14.166C5.92827 14.0409 5.88824 13.9177 5.8089 13.8207L2.0313 9.20332C1.80072 8.92148 1.93911 8.49559 2.2913 8.40311L8.0615 6.88795C8.18268 6.85613 8.2875 6.77997 8.35521 6.67456L11.5793 1.65498Z" class="navigation-icon__color"/>
+                                    </svg>
+                                </span>
+                                <span class="pair-title">{{ market.name }}</span>
+                            </div>
+                            <div class="widget-markets__list-item__price">
+                                <span :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">{{ decimal_format(market.last, market.quote_precision, market.quote_currency_type) }}</span>
+
+                            </div>
+                            <div class="widget-markets__list-item__change">
+                                <span :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">
+                                    {{ market.change == null ? '—' : market.change + '%' }}
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="widget-empty" v-if="markets && markets.length == 0">
+                        <span>{{ $t('No markets found') }}</span>
+                    </div>
+                </vue-scroll>
+            </div>
+            <!-- widget markets list end -->
+        </div>
+        <!-- widget body end -->
+    </div>
+
+</div>
+<!-- WIDGET MARKETS END -->

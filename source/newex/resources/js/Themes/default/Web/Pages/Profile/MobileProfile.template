@@ -1,0 +1,40 @@
+<app-layout>
+    <!-- section mobmenu start -->
+    <div class="mobmenu">
+
+        <div class="mobmenu__row">
+            <div class="mobmenu__block">
+                <div class="mobmenu__block-link">
+                    <Link :href="route('reports.trades')" :class="{'active': isUrl('reports')}">{{ $t('Transactions') }}</Link>
+                    <Link :href="route('swap')" :class="{'active': isUrl('swap')}">{{ $t('Swap') }}</Link>
+                    <Link :href="route('launchpads')" :class="{'active': isUrl('launchpad')}">{{ $t('Launchpads') }}</Link>
+                    <Link :href="route('stakings')" :class="{'active': isUrl('staking')}">{{ $t('Staking') }}</Link>
+                    <Link :href="route('profile.show')" :class="{'active': isUrl('staking')}">{{ $t('Profile') }}</Link>
+                </div>
+            </div>
+
+            <div class="mobmenu__block">
+                <div class="mobmenu__block-title">
+                    <h3>{{ $t("Site Language") }}</h3>
+                </div>
+                <div class="mobmenu__block-link">
+
+                    <div class="mobmenu__block-language">
+                        <language-switcher></language-switcher>
+                        <theme-mode></theme-mode>
+                    </div>
+                    <Link v-if="$page.props.user" as="button" :href="route('logout')" method="post" class="settings-dropdown__list-link logout">{{ $t('Logout') }}</Link>
+                    <Link v-if="!$page.props.user" :href="route('login')" class="settings-dropdown__list-link logout">{{ $t('Login') }}</Link>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- section mobmenu end -->
+
+
+
+
+</app-layout>

@@ -1,0 +1,75 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('死信队列') }}</title>
+    </Head>
+
+    <div class="p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('死信队列') }}</h1>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('商户') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('事件') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('尝试次数') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('最后错误') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('创建时间') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('操作') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr v-for="dl in deadLetters.data" :key="dl.id" class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="font-medium">{{ dl.merchant.business_name }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 bg-gray-100 rounded text-sm">{{ dl.event_type }}</span>
+                        </td>
+                        <td class="px-6 py-4">{{ dl.total_attempts }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-red-600 truncate max-w-xs">{{ dl.last_error }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(dl.created_at).toLocaleString() }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button v-if="!dl.resolved_at" @click="openResolve(dl)" class="text-blue-600 hover:text-blue-800">{{ $t('处理') }}</button>
+                            <span v-else class="text-green-600">{{ $t('已处理') }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center" v-if="deadLetters.links">
+            <nav class="flex space-x-2">
+                <a v-for="link in deadLetters.links" :key="link.label" :href="link.url" v-html="link.label" :class="['px-3 py-2 rounded', link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100']"></a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Resolve Modal -->
+    <div v-if="showResolveModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="font-semibold text-lg mb-4">{{ $t('处理死信') }}</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('处理方式') }}</label>
+                    <themed-select v-model="resolveForm.resolution" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="retry">{{ $t('重试') }}</option>
+                        <option value="discard">{{ $t('丢弃') }}</option>
+                        <option value="manual">{{ $t('手动处理') }}</option>
+                    </themed-select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">{{ $t('备注') }}</label>
+                    <textarea v-model="resolveForm.notes" class="w-full px-4 py-2 border rounded-lg" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button @click="showResolveModal = false" class="px-4 py-2 border rounded-lg">{{ $t('取消') }}</button>
+                <button @click="resolveDeadLetter" :disabled="processing" class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ $t('处理') }}</button>
+            </div>
+        </div>
+    </div>
+</app-layout>

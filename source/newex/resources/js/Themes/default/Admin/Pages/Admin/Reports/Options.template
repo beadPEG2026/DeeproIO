@@ -1,0 +1,162 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="options"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.users.edit', filters.referrer)" v-if="filters.referrer">{{ $t("返回 -") }} </Link> {{ $t("期权") }}
+    </h1>
+    <section v-if="settlementReviews.length" class="dp-option-reviews" aria-labelledby="settlement-review-heading">
+        <h2 id="settlement-review-heading">{{ zh?'结算复核':'Settlement reviews' }}</h2>
+        <p>{{ zh?'以下订单缺少可靠结算依据，尚未按输赢结算。退款需要两位不同操作员先提议、再复核；批准后返还本金及净入场手续费至原资金账户。':'These positions have no reliable settlement evidence and remain unsettled. A refund requires a proposal and approval by two different operators. Approval returns principal and the net entry fee to the original balance source.' }}</p>
+        <div class="overflow-x-auto"><table><thead><tr><th>{{ zh?'订单':'Position' }}</th><th>{{ zh?'状态 / 原因':'Status / reason' }}</th><th>{{ zh?'到期时间':'Expiry' }}</th><th>{{ zh?'操作':'Action' }}</th></tr></thead><tbody>
+            <tr v-for="review in settlementReviews" :key="review.option_id"><td>#{{ review.option_id }}</td><td>{{ review.status==='refund_requested'?(zh?'等待独立复核':'Awaiting independent approval'):(zh?'等待处理':'Pending review') }}<small>{{ review.reason==='verified_expiry_quote_unavailable'?(zh?'缺少可核验的到期价格':'Verified expiry price unavailable'):review.reason }}</small></td><td>{{ review.expires_at }}</td><td>
+                <button v-if="canReview && review.status==='pending'" type="button" @click="openReview(review,'request_refund')">{{ zh?'提议退款':'Propose refund' }}</button>
+                <button v-if="canReview && review.status==='refund_requested' && Number(review.requested_by)!==Number($page.props.user.id)" type="button" @click="openReview(review,'approve_refund')">{{ zh?'复核退款':'Review refund' }}</button>
+                <span v-if="review.status==='refund_requested' && Number(review.requested_by)===Number($page.props.user.id)">{{ zh?'由另一位操作员复核':'Another operator must approve' }}</span>
+            </td></tr>
+        </tbody></table></div>
+    </section>
+    <dialog ref="reviewDialog" class="dp-option-review-dialog" @cancel.prevent="closeReview" :aria-label="zh?'结算复核':'Settlement review'">
+        <form @submit.prevent="submitReview">
+            <h2>{{ reviewAction==='approve_refund'?(zh?'批准退款':'Approve refund'):(zh?'提议退款':'Propose refund') }} #{{ activeReview ? activeReview.option_id : '' }}</h2>
+            <p>{{ zh?'核对订单、缺失的结算证据及退款原因后填写说明。批准会产生真实账务变动。':'Check the position, missing settlement evidence and refund reason before proceeding. Approval changes account balances.' }}</p>
+            <label for="settlement-review-note">{{ zh?'复核说明（8–1000 字）':'Review note (8–1000 characters)' }}</label>
+            <textarea id="settlement-review-note" v-model="reviewNote" minlength="8" maxlength="1000" required :disabled="sending"></textarea>
+            <p v-if="reviewError" role="alert">{{ reviewError }}</p>
+            <div><button type="button" :disabled="sending" @click="closeReview">{{ zh?'取消':'Cancel' }}</button><button type="submit" :disabled="sending">{{ sending?(zh?'处理中…':'Processing…'):(zh?'确认提交':'Confirm') }}</button></div>
+        </form>
+    </dialog>
+    <div class="mb-6 flex flex-wrap items-center justify-between">
+        <div class="flex items-center flex-1 mr-4">
+            <search-filter :filter="false" v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset"></search-filter>
+            <div class="period-block hidden md:block min-w-md">
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                />
+            </div>
+        </div>
+        <button @click="exportCsv" class="btn-blue inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none mt-4 md:mt-0">
+            {{ $t ? $t('导出') : $t("导出") }}
+        </button>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("入场价格") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("结算价格") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("周期") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("盈亏") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("模板") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="transaction in transactions.data" :key="transaction.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ format_string(transaction.uuid, 10) }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.market.name }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge class="mr-2" :type="transaction.type == 'buy' ? 'green' : 'red'">
+                            {{ transaction.type == 'buy' ? $t("买涨") : $t("买跌") }} 
+                            <font-awesome-icon :icon="transaction.type == 'buy' ? 'arrow-up' : 'arrow-down'" class="ml-1" />
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.price }} {{ transaction.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.market_price }} {{ transaction.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="transaction.period == 1">{{ $t("60秒") }}</template>
+                        <template v-if="transaction.period == 2">{{ $t("120秒") }}</template>
+                        <template v-if="transaction.period == 3">{{ $t("180秒") }}</template>
+                        <template v-if="transaction.period == 4">{{ $t("5分钟") }}</template>
+                        <template v-if="transaction.period == 5">{{ $t("10分钟") }}</template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.amount }} {{ transaction.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.user.email }}<br> {{ $t("用户ID:") }} {{ transaction.user.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="transaction.status == 'active'">
+                        <badge class="mr-2" :type="'orange'">
+                            {{ $t("进行中") }}
+                        </badge>
+                        </template>
+                        <template v-else>
+                        <badge class="mr-2" :type="transaction.status == 'won' ? 'green' : (transaction.status == 'lost' ? 'red': 'orange')">
+                            <template v-if="transaction.status == 'won'">{{ $t("盈利") }}</template>
+                            <template v-if="transaction.status == 'lost'">{{ $t("亏损") }}</template>
+                            <template v-if="transaction.status == 'scheduled'">{{ $t("已安排 (") }}{{ humanizeCountdown(transaction.start_at) }})</template>
+                            <template v-if="transaction.status == 'active'">{{ $t("进行中") }}</template>
+                            <template v-if="transaction.status == 'closed'">{{ $t("已关闭") }}</template>
+                        </badge>
+                        <div v-if="transaction.status == 'scheduled'">
+                            <t-button-green @click.stop="closePosition(transaction)" class="mr-2">{{ $t('关闭') }}</t-button-green>
+                        </div>
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="transaction.status == 'active' || transaction.status == 'closed' || transaction.status == 'scheduled'">
+                        <badge class="mr-2" :type="'orange'">
+                            {{ $t("不适用") }}
+                        </badge>
+                        </template>
+                        <template v-else>
+                        <badge class="mr-2" :type="transaction.status == 'won' ? 'green' : 'red'">
+                            {{ transaction.status == 'won' ? '+' + transaction.pnl : '-' + transaction.amount }} {{ transaction.currency.symbol }}
+                        </badge>
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.is_exception ? $t("已使用 (ID: ") + transaction.template_id + ')' : $t("未使用") }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.created_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="transactions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到交易记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="transactions.links" />
+</app-layout>

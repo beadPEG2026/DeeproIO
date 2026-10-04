@@ -1,0 +1,164 @@
+<!-- MODULE ORDERFORM START -->
+<div class="module module-orderform" :class="{'module-orderform-opened': openForm}">
+    <div class="module-orderform__header flex justify-between items-center mb-2">
+        <h3>{{ $t('Place Order') }}</h3>
+    </div>
+
+    <div class="button-clear"></div>
+
+    <div class="module-container options-module options-module-bordered">
+        <!-- module body start -->
+        <div class="module-body">
+
+            <!-- module orderform container start -->
+            <div class="module-orderform__container">
+
+                <!-- module orderform buy start -->
+                <div v-if="activeTab == 'buy'" class="module-orderform__buy">
+
+                    <div class="module-orderform__buy-forms">
+
+                        <div class="module-orderform__sell-forms__item">
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Timeframe') }}</label>
+                            <themed-select class="futures-select" v-model.number="bid.type">
+                                <option :value="1">60s</option>
+                                <option :value="2">120s</option>
+                                <option :value="3">3m</option>
+                                <option :value="4">5m</option>
+                                <option :value="5">10m</option>
+                            </themed-select>
+                        </div>
+
+                        <div class="module-orderform__sell-forms__item">
+                            <label class="module-orderform__sell-forms__item-left">{{ $t('Timeline') }}</label>
+                            <themed-select class="futures-select w-full" v-model="selectedTimelineStart" @change="onTimelineChange()">
+                                <option v-for="slot in timelineSlots" :key="slot.start" :value="slot.start">
+                                    {{ slot.label }}
+                                </option>
+                            </themed-select>
+                        </div>
+
+                        <div class="module-orderform__buy-forms__item" :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'quantity'}">
+                            <label class="module-orderform__buy-forms__item-left">
+                                {{ $t('Amount') }}
+                            </label>
+
+                            <input
+                                placeholder="0.00"
+                                @keyup="(e) => clearInput(e, 'buy','quantity')"
+                                @paste.prevent
+                                @drop.prevent
+                                v-model="bid.quantity"
+                                type="text"
+                            >
+
+                            <label class="module-orderform__buy-forms__item-right">
+                                {{ market.quote_currency}}
+                            </label>
+                        </div>
+
+                        <div class="form-text-parent">
+
+                            <div class="form-text-group">
+                                <div class="mb-1 flex justify-between">
+                                    <span class="info-badge">{{ $t('Available balance:')}}</span>
+                                    <span>
+                                        {{ formattedAvailableQuoteBalance }} {{ market.quote_currency}}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <vue-slider
+                                @input="changeBuySlider"
+                                @dragging="changeBuySlider"
+                                @change="changeBuySlider"
+                                v-model="buySlider.value"
+                                :disabled="buySlider.disabled || !limitsReady"
+                                :min="buySlider.min"
+                                :max="buySlider.max"
+                                :interval="buySlider.interval"
+                                :tooltip-formatter="formatSliderTooltip"
+                                :adsorb="false"
+                                :included="true"
+                                :hide-label="true"
+                                :tooltip-placement="'top'"
+                            ></vue-slider>
+
+                            <div class="mb-2 mt-2" v-if="balanceError">
+                                <span class="text-sm color-sell info-badge-error">{{ $t('Insufficient balance')}}</span>
+                            </div>
+
+                            <div class="form-text-group pt-4">
+                                <div class="mb-1 flex justify-between">
+                                    <span class="info-badge">{{ $t('Min. position size:')}}</span>
+                                    <span>
+                                        {{ minPositionSize }} {{ market.quote_currency}}
+                                    </span>
+                                </div>
+
+                                <div class="mb-1 flex justify-between">
+                                    <span class="info-badge">{{ $t('Max. position size:')}}</span>
+                                    <span>
+                                        {{ maxPositionSize }} {{ market.quote_currency}}
+                                    </span>
+                                </div>
+
+                                <div class="mb-1 flex justify-between">
+                                    <span class="info-badge">{{ $t('Potential Payout:')}}</span>
+                                    <span class="text-green font-semibold">
+                                        {{ decimal_format(estimatedReturn, 2) }} {{ market.quote_currency}}
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <p v-if="!limitsReady" role="status">{{ $t("Position limits are not configured. Orders are temporarily unavailable.") }}</p>
+                        <div class="flex">
+                            <button
+                                @click="placeBuyOrder('buy')"
+                                :disabled="!limitsReady || placingBuyOrder"
+                                :class="{ 'opacity-75': placingBuyOrder || !limitsReady }"
+                                class="module-orderform__buy-forms__button mr-2"
+                            >
+                                <span>
+                                    <svg v-show="placingBuyOrder" class="inline animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ $t('Up') }}
+                                </span>
+                            </button>
+
+                            <button
+                                @click="placeBuyOrder('sell')"
+                                :disabled="!limitsReady || placingBuyOrder"
+                                :class="{ 'opacity-75': placingBuyOrder || !limitsReady }"
+                                class="module-orderform__sell-forms__button ml-2"
+                            >
+                                <span>
+                                    <svg v-show="placingBuyOrder" class="inline animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ $t('Down') }}
+                                </span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+                <!-- module orderform buy end -->
+            </div>
+
+            <div v-if="errors" class="mt-5 text-sm text-red-500">
+                {{ errors }}
+            </div>
+            <!-- module orderform container end -->
+
+        </div>
+        <!-- module body end -->
+    </div>
+</div>
+<!-- MODULE ORDERFORM END -->

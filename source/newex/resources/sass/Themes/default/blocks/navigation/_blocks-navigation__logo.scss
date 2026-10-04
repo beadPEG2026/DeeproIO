@@ -1,0 +1,24 @@
+
+/** logo start */
+.header-logo {
+    margin-right: 3.50rem;
+
+    a {
+        font-weight: var(--extra-font);
+        font-size: var(--big-font__size);
+    }
+}
+/** logo end */
+
+
+
+/** logo media screen start */
+@media screen and (max-width: 900px) {
+
+    .header-logo {
+        margin-right: 0;
+        display: inline-block;
+    }
+
+}
+/** logo media screen end */

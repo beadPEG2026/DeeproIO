@@ -1,0 +1,68 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="staking"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.users.edit', filters.referrer)" v-if="filters.referrer">{{ $t("返回 -") }} </Link> {{ $t("质押交易记录") }}
+    </h1>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("交易ID") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("数量") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("周期（天）") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("周期收益率") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("奖励") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="transaction in transactions.data" :key="transaction.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.amount }} {{ transaction.staking && transaction.staking.currency ? transaction.staking.currency.symbol : '' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.user.email }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.days }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.apy }}%
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.reward }} {{ transaction.staking && transaction.staking.currency ? transaction.staking.currency.symbol : '' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.status }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ transaction.created_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="transactions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到交易记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="transactions.links" />
+</app-layout>

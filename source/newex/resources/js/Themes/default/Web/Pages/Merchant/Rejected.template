@@ -1,0 +1,99 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Application Rejected') }}</title>
+    </Head>
+
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Rejection Notice -->
+            <div class=" rounded-xl shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="bg-red-500 px-8 py-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0 w-16 h-16  rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">{{ $t('Application Rejected') }}</h1>
+                            <p class="text-red-100" v-if="formattedRejectedAt">{{ formattedRejectedAt }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-8">
+                    <!-- Business Info -->
+                    <div class="mb-6 pb-6 border-b">
+                        <h2 class="text-lg font-semibold  mb-2">{{ merchant.business_name }}</h2>
+                        <p class="">{{ merchant.business_email }}</p>
+                    </div>
+
+                    <!-- Rejection Reason -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold  uppercase tracking-wide mb-3">{{ $t('Rejection Reason') }}</h3>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <p class="text-red-800">{{ rejectionReason || $t('No specific reason provided. Please contact support for more information.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Submission History -->
+                    <div class="mb-8 p-4  rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="">{{ $t('Submission attempts') }}</span>
+                            <span class="font-semibold ">{{ submissionCount }}</span>
+                        </div>
+                    </div>
+
+                    <!-- What to do next -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold  uppercase tracking-wide mb-3">{{ $t('What to do next') }}</h3>
+                        <ul class="space-y-3 ">
+                            <li class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>{{ $t('Review the rejection reason carefully') }}</span>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>{{ $t('Update your application with accurate information') }}</span>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>{{ $t('Resubmit your application for review') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button
+                            @click="goToResubmit"
+                            class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center space-x-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <span>{{ $t('Resubmit Application') }}</span>
+                        </button>
+                        <a
+                            href="mailto:support@example.com"
+                            class="flex-1 px-6 py-3 bg-gray-100  rounded-lg hover:bg-gray-200 transition-colors font-semibold flex items-center justify-center space-x-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>{{ $t('Contact Support') }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

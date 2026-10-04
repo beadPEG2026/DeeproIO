@@ -1,0 +1,431 @@
+<app-layout>
+    <div class="admin-users-page">
+        <div class="page-header-clean">
+            <div>
+                <h1 class="page-title-clean">{{ $t("用户") }}</h1>
+                <p class="page-subtitle-clean">{{ $t("用户列表、余额、团队层级与状态管理") }}</p>
+            </div>
+
+            <button
+                v-if="isSuperAdmin"
+                type="button"
+                class="danger-clean-button"
+                :disabled="sending"
+                @click="clearVirtualRealBalances"
+            >
+                {{ sending ? $t("处理中...") : $t("虚拟真实余额归0") }}
+            </button>
+        </div>
+
+        <p v-if="form.dashboard_participants" class="mb-4 text-sm">做单用户：按开仓时间筛选，包含已平仓订单，同一用户只显示一次。</p>
+
+        <div class="stats-clean-grid" v-if="!form.dashboard_participants">
+            <div class="stats-clean-card">
+                <span>{{ $t("充值") }}</span>
+                <strong class="text-green-600">{{ safeStats.totalDepositAmount || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("提现") }}</span>
+                <strong class="text-red-600">{{ safeStats.totalWithdrawalAmount || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("充提差") }}</span>
+                <strong class="text-indigo-600">{{ safeStats.netDepositAmount || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("真实账户余额") }}</span>
+                <strong class="text-yellow-600">{{ safeStats.totalRealUsdBalance || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("当前在线") }}</span>
+                <strong class="text-green-600">{{ safeStats.onlineUserCount || 0 }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("合约手续费") }}</span>
+                <strong class="text-purple-600">{{ safeStats.totalfuturesFeeAmount || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("现货手续费") }}</span>
+                <strong class="text-purple-600">{{ safeStats.totalFeeAmount || '0.00' }}</strong>
+            </div>
+
+            <div class="stats-clean-card">
+                <span>{{ $t("总返佣") }}</span>
+                <strong class="text-pink-600">{{ safeStats.totalReferralAmount || '0.00' }} USDT</strong>
+                <small>{{ $t("汇总仅计入来源已核实的真实 USDT 到账；其他币种、模拟及历史待核对记录请查看明细。") }}</small>
+            </div>
+        </div>
+
+        <div class="filter-clean-panel">
+            <div class="filter-clean-grid">
+                <div>
+                    <label>{{ $t("搜索") }}</label>
+                    <input
+                        v-model="form.search"
+                        type="text"
+                        class="form-input rounded text-sm"
+                        placeholder="UID/邮箱/手机号/邀请码/钱包"
+                    />
+                </div>
+
+                <div>
+                    <label>{{ $t("角色") }}</label>
+                    <themed-select v-model="form.role" class="form-select rounded text-sm">
+                        <option :value="null">{{ $t("全部") }}</option>
+                        <option value="user">{{ $t("用户") }}</option>
+                        <option value="admin">{{ $t("管理员") }}</option>
+                        <option value="superadmin">{{ $t("超级管理员") }}</option>
+                        <option value="user_leader">{{ $t("组长") }}</option>
+                        <option value="salesman">{{ $t("业务员") }}</option>
+                    </themed-select>
+                </div>
+
+                <div>
+                    <label>{{ $t("用户状态") }}</label>
+                    <themed-select v-model="form.status" class="form-select rounded text-sm">
+                        <option :value="null">{{ $t("全部") }}</option>
+                        <option value="normal">{{ $t("正常") }}</option>
+                        <option value="deactivated">{{ $t("已封禁") }}</option>
+                    </themed-select>
+                </div>
+
+                <div>
+                    <label>{{ $t("KYC状态") }}</label>
+                    <themed-select v-model="form.kyc_status" class="form-select rounded text-sm">
+                        <option :value="null">{{ $t("全部") }}</option>
+                        <option value="verified">{{ $t("已认证") }}</option>
+                        <option value="unverified">{{ $t("未认证") }}</option>
+                    </themed-select>
+                </div>
+
+                <div>
+                    <label>{{ $t("邮箱状态") }}</label>
+                    <themed-select v-model="form.email_status" class="form-select rounded text-sm">
+                        <option :value="null">{{ $t("全部") }}</option>
+                        <option value="verified">{{ $t("已验证") }}</option>
+                        <option value="unverified">{{ $t("未验证") }}</option>
+                    </themed-select>
+                </div>
+
+                <div>
+                    <label>{{ $t("登录IP") }}</label>
+                    <input
+                        v-model="form.login_ip"
+                        type="text"
+                        class="form-input rounded text-sm"
+                        placeholder="输入IP"
+                    />
+                </div>
+
+                <div>
+                    <label>{{ $t("IP归属地") }}</label>
+                    <input
+                        v-model="form.ip_location"
+                        type="text"
+                        class="form-input rounded text-sm"
+                        placeholder="国家/省/市"
+                    />
+                </div>
+
+                <div class="filter-date">
+                    <label>{{ form.dashboard_participants ? $t("开仓时间") : $t("注册时间") }}</label>
+                    <t-datepicker
+                        :monthsPerView="2"
+                        v-model="form.period"
+                        :range="true"
+                        :timepicker="false"
+                        dateFormat="Y-m-d"
+                        userFormat="Y-m-d"
+                        :weekStart="1"
+                        placeholder="点击选择时间"
+                    />
+                </div>
+
+                <div class="filter-clean-actions">
+                    <t-button-green @click="filterDuplicateIp()">{{ $t("重复IP") }}</t-button-green>
+                    <t-button-green @click="filterDuplicateAccount()">{{ $t("重复账号") }}</t-button-green>
+                    <t-button-green @click="reset()">{{ $t("重置") }}</t-button-green>
+                </div>
+            </div>
+        </div>
+
+        <div class="users-clean-table-wrap">
+            <table class="users-clean-table">
+                <thead>
+                    <tr>
+                        <th>{{ $t("用户") }}</th>
+                        <th>{{ $t("身份信息") }}</th>
+                        <th>{{ $t("余额信息") }}</th>
+                        <th>{{ $t("推荐关系") }}</th>
+                        <th>{{ $t("登录 / 注册") }}</th>
+                        <th>{{ $t("状态") }}</th>
+                        <th>{{ $t("操作") }}</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr v-for="user in displayUsers.data" :key="'user-row-' + user.id">
+                        <td>
+                            <div class="user-main-cell">
+                                <Link
+                                    v-if="$page.props.is_yw != 1"
+                                    class="user-uid-link"
+                                    :href="route('admin.users.edit', user.id)"
+                                >
+                                    {{ user.referral_code || ('UID ' + user.id) }}
+                                </Link>
+
+                                <span v-else class="user-uid-link is-muted">
+                                    {{ user.referral_code || ('UID ' + user.id) }}
+                                </span>
+
+                                <div class="user-main-name">
+                                    {{ user.display_nickname || user.display_email || user.display_phone || user.name || '-' }}
+                                </div>
+
+                                <div class="user-main-sub">
+                                    {{ $t("ID:") }} {{ user.id }}
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="user-info-list">
+                                <div>
+                                    <span>{{ $t("邮箱") }}</span>
+                                    <strong>{{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : (user.display_email || '-') }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>{{ $t("手机") }}</span>
+                                    <strong>{{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : (user.display_phone || '-') }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>{{ $t("组长") }}</span>
+                                    <strong>{{ user.display_leader_name || '-' }}</strong>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+    <div class="balance-clean-card balance-clean-card--finance balance-clean-card--redesign">
+        <div class="balance-finance-top balance-finance-top--three">
+            <div class="balance-finance-item">
+                <span>{{ $t("总入金") }}</span>
+                <strong class="balance-simple-green">
+                    {{ formatBalance(user.list_total_deposit) }}
+                </strong>
+            </div>
+
+            <div class="balance-finance-item">
+                <span>{{ $t("总出金") }}</span>
+                <strong class="balance-simple-red">
+                    {{ formatBalance(user.list_total_withdrawal) }}
+                </strong>
+            </div>
+
+            <div class="balance-finance-item">
+                <span>{{ $t("存取差") }}</span>
+                <strong :class="depositWithdrawDiff(user) >= 0 ? 'balance-simple-green' : 'balance-simple-red'">
+                    {{ formatBalance(depositWithdrawDiff(user)) }}
+                </strong>
+            </div>
+        </div>
+
+	        <div class="balance-finance-bottom" style="grid-template-columns: 1fr;">
+	            <div class="balance-finance-section">
+	                <div class="balance-finance-title">{{ $t("真实账户") }}</div>
+
+	                <div class="balance-finance-pair">
+	                    <div class="balance-finance-box">
+	                        <span>{{ $t("余额") }}</span>
+	                        <strong class="balance-simple-orange">
+	                            {{ formatBalance(user.list_real_wallet_balance) }}
+	                        </strong>
+	                    </div>
+
+	                    <div class="balance-finance-box">
+	                        <span>{{ $t("交易") }}</span>
+	                        <strong class="balance-simple-blue">
+	                            {{ formatBalance(user.list_real_trade_balance) }}
+	                        </strong>
+	                    </div>
+	                </div>
+
+	                <div class="balance-finance-pair" style="margin-top: 8px;">
+	                    <div class="balance-finance-box">
+	                        <span>{{ $t("量化") }}</span>
+	                        <strong class="balance-simple-green">
+	                            {{ formatBalance(user.list_real_earn_balance) }}
+	                        </strong>
+	                    </div>
+
+	                    <div class="balance-finance-box">
+	                        <span>{{ $t("质押") }}</span>
+	                        <strong class="balance-simple-purple">
+	                            {{ formatBalance(user.list_real_staking_balance) }}
+	                        </strong>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</td>
+
+                        <td>
+                            <div class="user-info-list">
+                                <div>
+                                    <span>{{ $t("推荐人") }}</span>
+
+                                    <button
+                                        v-if="user.referral || user.referral_id"
+                                        type="button"
+                                        class="referral-chain-link"
+                                        @click="openUplineModal(user)"
+                                    >
+                                        {{ referralDisplay(user) }}
+                                    </button>
+
+                                    <strong v-else>N/A</strong>
+                                </div>
+
+                                <div>
+                                    <span>{{ $t("统计") }}</span>
+                                    <badge class="mr-2" :type="!user.is_t ? 'green' : 'gray'">
+                                        {{ !user.is_t ? $t("是") : $t("否") }}
+                                    </badge>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="user-info-list">
+                                <div>
+                                    <span>{{ $t("归属地") }}</span>
+                                    <strong>{{ locationLabel(user.ip_location) || '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>IP</span>
+                                    <strong>{{ user.login_ip || '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>{{ $t("注册") }}</span>
+                                    <strong>{{ user.created_at || '-' }}</strong>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="status-clean-stack">
+                                <badge :type="user.kyc_verified_at ? 'green' : 'gray'">
+                                    {{ user.kyc_verified_at ? $t("KYC已认证") : $t("KYC未认证") }}
+                                </badge>
+
+                                <badge :type="user.email_verified_at ? 'green' : 'gray'">
+                                    {{ user.email_verified_at ? $t("邮箱已验证") : $t("邮箱未验证") }}
+                                </badge>
+
+                                <badge :type="!user.deactivated ? 'green' : 'gray'">
+                                    {{ !user.deactivated ? $t("正常") : $t("已封禁") }}
+                                </badge>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="action-clean-stack">
+                                <button
+                                    v-if="isSuperAdmin"
+                                    type="button"
+                                    class="clean-action clean-action--green"
+                                    @click="goFund(user)"
+                                >
+                                    {{ $t("充值") }}
+                                </button>
+
+                                <button
+                                    v-else
+                                    type="button"
+                                    class="clean-action clean-action--green"
+                                    @click="viewWallet(user)"
+                                >
+                                    {{ $t("查看钱包") }}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="clean-action clean-action--blue"
+                                    @click="viewTeam(user)"
+                                >
+                                    {{ $t("查看团队") }}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr v-if="displayUsers.data.length === 0">
+                        <td colspan="100" class="empty-clean-cell">{{ $t("未找到用户。") }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pagination :links="displayUsers.links" />
+
+        <div
+            v-if="showUplineModal"
+            class="upline-modal-mask"
+            @click.self="closeUplineModal"
+        >
+            <div class="upline-modal-card">
+                <div class="upline-modal-head">
+                    <h3>{{ $t("直推上级") }}</h3>
+
+                    <button type="button" class="upline-modal-close" @click="closeUplineModal">
+                        ×
+                    </button>
+                </div>
+
+                <div class="upline-modal-body">
+                    <div v-if="uplineLoading" class="upline-modal-empty">
+                        {{ $t("加载中...") }}
+                    </div>
+
+                    <table v-else class="upline-table">
+                        <thead>
+                            <tr>
+                                <th>{{ $t("上级ID") }}</th>
+                                <th>{{ $t("上级账号") }}</th>
+                                <th>{{ $t("上级昵称") }}</th>
+                                <th>{{ $t("上级姓名") }}</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-for="item in uplineRows" :key="'upline-' + item.id + '-' + item.level">
+                                <td>{{ item.id || '-' }}</td>
+                                <td>{{ item.account || '-' }}</td>
+                                <td>{{ item.nickname || '-' }}</td>
+                                <td>{{ item.name || '-' }}</td>
+                            </tr>
+
+                            <tr v-if="uplineRows.length === 0">
+                                <td colspan="4" class="upline-modal-empty">
+                                    {{ $t("暂无上级数据") }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

@@ -1,0 +1,145 @@
+/* The trading workspace owns its layout; no marketing-page width constraints. */
+.dp-trading-layout .main-section {padding:16px 0 24px}
+.dp-trading-layout .main__container {width:100%;max-width:none;padding:0 20px;margin:0}
+.dp-trading-layout .main__container>div {max-width:none}
+.dp-workbench {display:grid;grid-template-columns:280px minmax(0,1fr) 280px;grid-template-areas:"summary summary markets" "book chart markets" "book ticket trades" "orders orders orders";gap:8px;margin:0 auto;width:100%;max-width:2560px;align-items:start}
+.dp-panel {min-width:0;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:10px;color:var(--ui-text);overflow:hidden}
+.dp-panel h2 {font-size:14px;font-weight:650;margin:0;padding:14px 16px;color:var(--ui-text)}
+.dp-workbench__summary {grid-area:summary;padding:14px 16px;display:flex;align-items:center;gap:12px;min-height:96px}
+.dp-workbench__summary .widget-stats {flex:1;min-width:0}
+.dp-workbench__summary .widget-stats__row {flex-wrap:wrap;gap:12px}
+.dp-workbench__summary .widget-stats__title,.dp-workbench__summary .widget-stats__info {white-space:normal}
+.dp-workbench__tools {display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+.dp-workbench__chart {grid-area:chart}
+.dp-workbench__chart-tabs {display:flex;align-items:center;gap:24px;padding:12px 16px;border-bottom:1px solid var(--ui-line);font-size:13px}
+.dp-workbench__chart-tabs>span {font-weight:700}
+.dp-workbench__chart-tabs a {color:var(--ui-accent-text)}
+.dp-workbench .dp-market-chart {border-radius:0}
+.dp-workbench .dp-market-chart iframe {padding:0}
+.dp-workbench .dp-stock-info {border:0;border-radius:0;margin:0}
+.dp-workbench .dp-stock-info__body {grid-template-columns:1fr}
+.dp-workbench__book {grid-area:book;align-self:stretch}
+.dp-workbench__book .module-orderbook {width:100%;padding:0 12px}
+.dp-workbench__book .module-container {padding:0}
+.dp-workbench__book .module-orderbook__list {height:350px}
+.dp-workbench__book .module-orderbook__title,.dp-workbench__book .module-orderbook__list-item {font-size:12px}
+.dp-workbench__ticket {grid-area:ticket;padding:16px}
+.dp-workbench__ticket .module-orderform {width:100%;padding:0;border:0;border-radius:0;background:transparent}
+.dp-workbench__ticket .module-container {padding:0}
+.dp-workbench__ticket .module-orderform__container {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.dp-workbench__ticket .module-orderform__buy,.dp-workbench__ticket .module-orderform__sell {width:100%;min-width:0}
+.dp-workbench__ticket .dp-ticket-side-tabs,.dp-workbench__ticket .button-clear {display:none}
+.dp-workbench__ticket [class$="-forms__item"] {display:grid;grid-template-columns:minmax(65px,1fr) minmax(50px,1.4fr) auto;gap:8px;align-items:center;padding:10px 12px;margin-bottom:12px;min-height:48px;background:var(--ui-field);border:1px solid var(--ui-line);border-radius:8px}
+.dp-workbench__ticket [class$="-forms__item"] input {min-width:0;width:100%;padding:0;height:26px;line-height:26px;text-align:right;background:transparent;border:0;color:var(--ui-text)}
+.dp-workbench__ticket [class$="-forms__item"] label {position:static;width:auto;min-width:0;font-size:12px;padding:0;line-height:1.4;color:var(--ui-muted);overflow-wrap:anywhere}
+.dp-workbench__ticket [class$="-forms__item-left"] {justify-self:start}
+.dp-workbench__ticket [class$="-forms__item-right"] {justify-self:end}
+.dp-workbench__ticket [class$="-forms__info"] {font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.dp-workbench__ticket [class$="-forms__button"] {min-height:44px;border-radius:8px;white-space:normal;line-height:1.4;padding:10px}
+.dp-workbench__ticket [class$="-currency"] {font-size:12px;white-space:normal}
+.dp-workbench__markets {grid-area:markets;align-self:stretch}
+.dp-market-directory {padding:0 12px 12px}
+.dp-market-directory__heading {display:flex;align-items:center;justify-content:space-between}
+.dp-market-directory h2 {padding-inline:0}
+.dp-market-directory input {width:100%;padding:10px 12px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-field);color:var(--ui-text);font-size:13px}
+.dp-market-directory__labels,.dp-market-directory__row {display:grid;grid-template-columns:minmax(76px,1.2fr) minmax(60px,1fr) 60px;gap:6px;align-items:center}
+.dp-market-directory__labels {padding:12px 0;font-size:11px;color:var(--ui-muted)}
+.dp-market-directory__labels span:not(:first-child),.dp-market-directory__row>span:not(:first-child) {text-align:right}
+.dp-market-directory__row {padding:9px 4px;font-size:12px;border-radius:5px;color:var(--ui-text)}
+.dp-market-directory__row>span {min-width:0;overflow-wrap:anywhere}
+.dp-market-directory__row small {font-size:10px;color:var(--ui-muted);display:block}
+.dp-market-directory__row:hover,.dp-market-directory__row.is-active {background:var(--ui-highlight)}
+.dp-market-directory__list {max-height:445px;overflow:auto}
+.dp-market-directory__close,.dp-market-directory-toggle {display:none}
+.dp-workbench__trades {grid-area:trades;align-self:stretch;padding:0 12px}
+.dp-workbench__trades .module {padding:0;width:100%;border:0}
+.dp-workbench__trades .module-markethistory__list {max-height:340px}
+.dp-workbench__orders {grid-area:orders;padding:16px;min-height:250px}
+.dp-workbench__orders .module-orderopen__navigation {gap:20px;overflow-x:auto}
+.dp-workbench__orders .module-orderopen__navigation-title {min-width:max-content}
+.dp-workbench__orders .module-orderopen__navigation-title h4 {font-size:13px;line-height:1.4}
+.dp-workbench__mobile-tabs {display:none}
+@media(min-width:1600px) {.dp-workbench {grid-template-columns:300px minmax(0,1fr) 300px}.dp-workbench__ticket {padding:20px}}
+@media(min-width:768px) and (max-width:1199px) {
+ .dp-workbench {grid-template-columns:225px minmax(0,1fr);grid-template-areas:"summary summary" "book chart" "book ticket" "trades trades" "orders orders"}
+ .dp-workbench__ticket .module-orderform__container {gap:14px}
+ .dp-workbench__ticket [class$="-forms__item"] {grid-template-columns:1fr auto}
+ .dp-workbench__ticket [class$="-forms__item-left"] {grid-column:1/-1}
+ .dp-workbench__ticket [class$="-forms__item"] input {text-align:left}
+}
+@media(max-width:1199px) {
+ .dp-workbench__markets {display:none}
+ .dp-workbench__markets.is-open {display:block;position:fixed;inset:90px 20px 75px auto;width:min(360px,calc(100vw - 40px));z-index:60;overflow:auto;border-color:var(--ui-focus)}
+ .dp-market-directory__close,.dp-market-directory-toggle {display:block;border:1px solid var(--ui-line);border-radius:6px;background:var(--ui-surface);color:var(--ui-text);padding:8px;font-size:12px}
+ .dp-market-directory__list {max-height:60vh}
+}
+@media(max-width:767px) {
+ .dp-trading-layout .main-section {padding-top:10px}
+ .dp-trading-layout .main__container {width:100%;padding:0 10px}
+ .dp-workbench {display:flex;flex-direction:column;gap:10px}
+ .dp-workbench>.dp-panel {width:100%}
+ .dp-workbench__summary {padding:12px;min-height:0}
+ .dp-workbench__summary .widget-stats__info {gap:8px;flex-wrap:wrap}
+ .dp-workbench__summary .widget-stats__price-title {font-size:11px}
+ .dp-workbench__mobile-tabs {display:flex;width:100%;gap:4px;border-bottom:1px solid var(--ui-line);overflow:auto}
+ .dp-workbench__mobile-tabs button {flex:1;padding:12px 8px;min-height:44px;font-size:13px;color:var(--ui-muted);white-space:nowrap;background:transparent;border-bottom:2px solid transparent}
+ .dp-workbench__mobile-tabs button[aria-pressed=true] {color:var(--ui-text);border-color:var(--ui-accent);font-weight:700}
+ .dp-workbench:not([data-panel=chart]) .dp-workbench__chart,.dp-workbench:not([data-panel=orderbook]) .dp-workbench__book,.dp-workbench:not([data-panel=trades]) .dp-workbench__trades,.dp-workbench:not([data-panel=trade]) .dp-workbench__ticket {display:none}
+ .dp-workbench__ticket .dp-ticket-side-tabs {display:flex;gap:8px}
+ .dp-workbench__ticket .module-orderform__container {display:block}
+ .dp-workbench__ticket .dp-ticket-inactive {display:none}
+ .dp-workbench__ticket .button-tab {width:50%}
+ .dp-workbench__ticket [class$="-forms__item"] input {font-size:16px}
+ .dp-workbench__book .module-orderbook__list {height:260px}
+ .dp-workbench__orders {padding:12px;min-height:180px}
+ .dp-workbench__orders .module-orderopen__navigation {gap:16px}
+ .dp-workbench__markets.is-open {width:calc(100vw - 32px);inset:80px 16px 80px}
+}
+
+.dp-workbench__summary .market-risk-btn {position:static;inset:auto;transform:none;flex-shrink:0}
+.dp-workbench__summary .widget-stats__title__market-name {display:block!important;position:static;line-height:1.5;margin-bottom:5px}
+.dp-workbench__summary .widget-stats__inner {border:0;padding:0;display:flex;gap:28px;flex-wrap:wrap}
+.dp-workbench__summary .widget-stats__block-1 {width:auto;flex:0 1 auto;gap:30px}
+.dp-workbench__summary .widget-stats__block-2 {flex:1;min-width:0}
+.dp-workbench__summary .widget-stats__list {display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between}
+.dp-workbench__summary .widget-stats__title {min-width:115px}
+.dp-workbench__ticket [class$="-forms__item-right"] {width:auto;white-space:nowrap}
+@media(max-width:767px) {.dp-workbench__summary .widget-stats__inner {gap:12px}.dp-workbench__summary .widget-stats__list {gap:12px}.dp-workbench__summary .widget-stats__block-2 {flex-basis:100%}}
+@media(max-width:767px){
+ .dp-trading-layout .main-section {padding-top:14px!important;padding-bottom:24px!important}
+ .dp-trading-layout .main__container {padding-inline:10px!important}
+ .dp-workbench__summary {position:relative;padding:14px}
+ .dp-workbench__summary .widget-stats__inner {display:grid;grid-template-columns:1fr;gap:14px}
+ .dp-workbench__summary .widget-stats__block-1 {justify-content:flex-start;gap:24px;padding:0}
+ .dp-workbench__summary .widget-stats__title {min-width:0;margin:0}
+ .dp-workbench__summary .widget-stats__block-2 {padding:0}
+ .dp-workbench__summary .widget-stats__list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .dp-workbench__summary .widget-stats__list-item {margin:0}
+ .dp-workbench__tools {align-self:flex-start;flex-direction:column;gap:6px}
+ .dp-workbench__chart .dp-market-chart {min-height:340px}
+ .dp-trading-layout .dp-footer--compact {margin-top:24px}
+}
+
+.dp-workbench__ticket.is-futures .module-orderform__container {grid-template-columns:1fr}
+@media(max-width:767px){
+ .dp-workbench__summary .widget-stats__block-1 {margin-bottom:0}
+ .dp-workbench__summary .widget-stats__list__lable-title {white-space:normal;max-width:none;width:auto;margin-bottom:3px;font-size:11px;line-height:1.4}
+ .dp-workbench__summary .widget-stats__list__lable-number {font-size:12px;line-height:1.5}
+ .dp-trading-layout .main-section {margin-top:0}
+}
+@media(max-width:767px){
+ .dp-workbench__summary .widget-stats__list-item {width:auto;min-width:0}
+ .dp-workbench__summary .widget-stats__row {margin-bottom:0}
+ .dp-trading-layout .main__container {padding-block:0}
+}
+
+/* Independent numeric columns prevent depth values from colliding. */
+.dp-workbench__book .module-orderbook__list-item {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);column-gap:6px;align-items:center;font-variant-numeric:tabular-nums}
+.dp-workbench__book :is(.module-orderbook__list-item__price,.module-orderbook__list-item__amount,.module-orderbook__list-item__total) {min-width:0;width:auto;max-width:100%;margin:0;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+.dp-workbench__book :is(.module-orderbook__list-item__amount,.module-orderbook__list-item__total) {text-align:right}
+.dp-workbench__book .module-orderbook__sell .module-orderbook__title {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:6px}
+.dp-workbench__book .module-orderbook__sell .module-orderbook__title>div {min-width:0;width:auto;white-space:normal}
+.dp-workbench__book .module-orderbook__title-total {justify-content:flex-end}
+/* Keep the overlay scrollbar clear of the final numeric column. */
+.dp-workbench__book .module-orderbook__list-item,
+.dp-workbench__book .module-orderbook__sell .module-orderbook__title {padding-inline-end:12px;box-sizing:border-box}

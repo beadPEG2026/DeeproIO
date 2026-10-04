@@ -1,0 +1,90 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="funding_fee_distributions"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.users.edit', filters.referrer)" v-if="filters.referrer">{{ $t("返回 -") }} </Link> {{ $t("资金费") }}
+    </h1>
+    <div class="mb-6 flex flex-wrap items-center justify-between">
+        <div class="flex items-center flex-1 mr-4">
+            <search-filter :filter="false" v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset"></search-filter>
+            <input v-model="form.user_id" type="number" :placeholder="$t(&quot;用户ID&quot;)" class="mr-4 px-3 py-2 border rounded focus:outline-none">
+            <input v-model="form.market" type="text" :placeholder="$t(&quot;市场&quot;)" class="mr-4 px-3 py-2 border rounded focus:outline-none">
+            <div class="period-block hidden md:block min-w-md">
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    @input="form.start_date = form.period && form.period[0] ? form.period[0] : null; form.end_date = form.period && form.period[1] ? form.period[1] : null;"
+                />
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("市场") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("仓位") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("仓位数量") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("资金费") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("资金费率") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("分发时间") }}</th>
+            </tr>
+            <tr v-for="distribution in distributions.data" :key="distribution.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ distribution.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <Link v-if="distribution.user" :href="route('admin.users.edit', distribution.user.id)" class="text-indigo-600 hover:text-indigo-800">
+                            {{ distribution.user.email }} ({{ distribution.user.id }})
+                        </Link>
+                        <span v-else>{{ distribution.user_id }}</span>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ distribution.market ? distribution.market.name : '-' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge class="mr-2" :type="distribution.is_long ? 'green' : 'red'">
+                            {{ distribution.is_long ? $t("多头") : $t("空头") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(distribution.position_size, distribution.market ? distribution.market.quote_precision : 8) }} {{ distribution.market && distribution.market.quote_currency ? distribution.market.quote_currency.symbol : '' }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <badge class="mr-2" :type="parseFloat(distribution.funding_fee_amount) >= 0 ? 'red' : 'green'">
+                        {{ math_formatter(distribution.funding_fee_amount, distribution.market ? distribution.market.quote_precision : 8) }} {{ distribution.market && distribution.market.quote_currency ? distribution.market.quote_currency.symbol : '' }}
+                    </badge>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ math_formatter(distribution.funding_rate * 100, 4) }}%
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ distribution.distributed_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="distributions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到分发记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="distributions.links" />
+</app-layout>

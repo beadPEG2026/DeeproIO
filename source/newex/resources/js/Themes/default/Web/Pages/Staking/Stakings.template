@@ -1,0 +1,220 @@
+<app-layout>
+    <Head>
+        <title>{{ $page.props.staking_type == 1 ? $t('Quantitative Trading') : $t('Wealth') }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="staking-page" :class="{'dp-wealth-page': $page.props.staking_type != 1}">
+        <section v-if="$page.props.staking_type != 1" class="dp-staking-summary"><span>{{ $t('Accrued rewards (current estimate)') }} · USDT</span><strong>{{ $page.props.user ? formatRewardEstimate($page.props.rewardEstimate) : '—' }}</strong></section>
+        <!-- Header Section -->
+        <div class="staking-page__header">
+            <div class="staking-page__header-content">
+                <h1>{{ $page.props.staking_type == 1 ? $t('Quantitative Trading') : $t('Wealth') }}</h1>
+
+                <p>{{ $page.props.staking_type == 1 ? $t('Earn rewards with automated trading strategies') : $t('Earn rewards by staking your crypto assets') }}</p>
+            </div>
+            <div class="staking-page__header-stats">
+                <div class="staking-page__stat">
+                    <span class="staking-page__stat-value">{{ stakings.data ? stakings.data.length : 0 }}</span>
+                    <span class="staking-page__stat-label">{{ $t('Available Assets') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="staking-page__tabs">
+            <button
+                @click="setSort('all', $page.props.staking_type)"
+                class="staking-page__tab"
+                :class="{'staking-page__tab--active': sort == 'all'}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {{ $page.props.staking_type == 1 ? $t('Quant Trading') : $t('Available Coins') }}
+            </button>
+
+            <button
+                @click="setSort('my', $page.props.staking_type)"
+                class="staking-page__tab"
+                :class="{'staking-page__tab--active': sort == 'my'}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                {{ $page.props.staking_type == 1 ? $t('My Quant Trading') : $t('My Staking') }}
+            </button>
+        </div>
+
+        <p class="staking-page__note" v-if="$page.props.staking_type != 1">{{ $t('Accrual starts at 00:00 the next day in the platform business timezone. Accrued rewards update daily; principal and rewards reach spot after the maturity settlement run. Accrued rewards are not yet credited.') }} {{ $page.props.timezone }} {{ $t('(local daylight saving time applies)') }}</p>
+
+        <!-- Available Coins Grid -->
+        <div v-if="sort == 'all'" class="staking-page__grid">
+            <div v-for="staking in stakings.data" :key="staking.id" class="staking-card" @click="openStakingCard($event,staking,$page.props.staking_type)">
+                <div class="staking-card__header">
+                    <div class="staking-card__coin">
+
+                        <img
+                            :src="$page.props.staking_type == 1 && staking.currencyd && staking.currencyd.file
+                                ? staking.currencyd.file.url
+                                : staking.currency_logo"
+                            class="staking-card__logo"
+                        />
+
+                        <div class="staking-card__coin-info">
+
+                            <span class="staking-card__symbol">
+
+                                <template v-if="$page.props.staking_type == 1 && staking.currencyd">
+                                    {{ staking.currencyd.symbol }} - {{ staking.currency_symbol }}
+                                </template>
+
+                                <template v-else>
+                                    {{ staking.currency_symbol }}
+                                </template>
+
+                            </span>
+
+                            <span class="staking-card__name">
+                                {{ $page.props.staking_type == 1 && staking.currencyd
+                                    ? staking.currencyd.name
+                                    : staking.currency }}
+                            </span>
+
+                        </div>
+
+                    </div>
+                    <div class="staking-card__status" :class="{'staking-card__status--active': staking.status == 'active', 'staking-card__status--sold': staking.status == 'sold'}">
+                        {{ staking.status == 'active' ? $t('Active') : $t('Sold Out') }}
+                    </div>
+                </div>
+
+                <div class="staking-card__body">
+                    <div class="staking-card__apy">
+                        <span class="staking-card__apy-label">{{ $i18n.locale.startsWith('zh') ? '预估年化' : 'Est. APR' }}</span>
+                        <span class="staking-card__apy-value">
+                            <template v-if="staking.ranges">
+                                <template v-if="$page.props.staking_type == 1 && staking.currencyd">
+                                    {{ getFirstAnnualizedRate(staking, 'rewards_percentage') }}% - {{ getFirstAnnualizedRate(staking, 'rewards_percentage_t') }}%
+                                </template>
+                                <template v-else>
+                                    {{ getFirstAnnualizedRate(staking) }}%
+                                </template>
+                            </template>
+                            <template v-else>-</template>
+                        </span>
+                    </div>
+
+                    <p v-if="firstStakingPeriod(staking)">{{ firstStakingPeriod(staking).days }} {{ $t("days") }}</p>
+                    <div class="staking-card__details">
+                        <div class="staking-card__detail">
+                            <span class="staking-card__detail-label">{{ $t('Min Amount') }}</span>
+                            <span class="staking-card__detail-value">{{ staking.min_amount }}</span>
+                        </div>
+                        <div class="staking-card__detail">
+                            <span class="staking-card__detail-label">{{ $t('Max Amount') }}</span>
+                            <span class="staking-card__detail-value">{{ staking.max_amount }}</span>
+                        </div>
+                        <div class="staking-card__detail">
+                            <span class="staking-card__detail-label">{{ $t('Strategy Overview') }}</span>
+                            <span class="staking-card__detail-value">{{ staking.Introduction }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="staking-card__footer">
+                    <Link :href="route('staking',staking.id)+'?staking_type='+$page.props.staking_type" :aria-label="$t('View product')+' '+staking.currency_symbol" class="staking-card__btn staking-card__btn--primary">
+                        {{ staking.status !== 'active' ? $t('View product') : ($page.props.staking_type == 1 ? $t('Start Now') : (staking.subscription && !staking.subscription.ready ? $t('View product') : ($i18n.locale.startsWith('zh') ? '申购' : 'Subscribe'))) }}
+                    </Link>
+
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-if="stakings.data && stakings.data.length == 0" class="staking-page__empty">
+                <div class="staking-page__empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3>{{ $page.props.staking_type == 1 ? 'No Quant Trading Products Available' : $t('No Staking Available') }}</h3>
+                <p>{{ $page.props.staking_type == 1 ? 'No quant trading products found.' : $t('No coins for staking found.') }}</p>
+            </div>
+        </div>
+
+        <!-- My Staking List -->
+        <div v-if="sort == 'my'" class="staking-page__my-list">
+            <div v-for="staking in stakings.data" :key="staking.id" class="my-stake-card">
+                <div class="my-stake-card__header">
+                    <div class="my-stake-card__coin">
+                        <img :src="staking.currency_logo" :alt="staking.currency_symbol" class="my-stake-card__logo" />
+                        <div class="my-stake-card__coin-info">
+                            <span class="my-stake-card__symbol">{{ staking.currency_symbol }} {{ $page.props.staking_type == 1 ? '- USDT' : '' }}</span>
+                            <span class="my-stake-card__name">{{ staking.currency }}</span>
+                        </div>
+                    </div>
+                    <div class="my-stake-card__status" :class="{
+                        'my-stake-card__status--active': staking.status == 'active',
+                        'my-stake-card__status--completed': staking.status == 'completed',
+                        'my-stake-card__status--redeemed': staking.status == 'redeemed'
+                    }">
+                        <template v-if="staking.status == 'active'">{{ $t('Active') }}</template>
+                        <template v-if="staking.status == 'redeemed'">{{ $t('Redeemed') }}</template>
+                        <template v-if="staking.status == 'completed'">{{ $t('Completed') }}</template>
+                    </div>
+                </div>
+
+                <div class="my-stake-card__body">
+                    <div class="my-stake-card__grid">
+                        <div class="my-stake-card__item">
+                            <span class="my-stake-card__item-label">{{ $t('Staked Amount') }}</span>
+                            <span class="my-stake-card__item-value">{{ staking.amount }} {{ staking.currency_symbol }}</span>
+                        </div>
+                        <div class="my-stake-card__item">
+                            <span class="my-stake-card__item-label">{{ $t('Estimated APR (simple)') }}</span>
+                            <span class="my-stake-card__item-value my-stake-card__item-value--highlight">{{ getMyAnnualizedRate(staking) }}%</span>
+                        </div>
+                        <div class="my-stake-card__item">
+                            <span class="my-stake-card__item-label">{{ $t('Period') }}</span>
+                            <span class="my-stake-card__item-value">{{ staking.days }} {{ staking.days == 1 ? $t('day') : $t('days') }}</span>
+                        </div>
+                        <div class="my-stake-card__item">
+                            <span class="my-stake-card__item-label">{{ $t('Your Reward') }}</span>
+                            <span class="my-stake-card__item-value my-stake-card__item-value--reward">
+                                {{ staking.status == 'redeemed' ? formatAmount(0) : formatAmount(staking.reward) }} {{ staking.currency_symbol }}
+                            </span>
+                        </div>
+                        <div class="my-stake-card__item my-stake-card__item--full">
+                            <span class="my-stake-card__item-label">{{ $t('Redemption Date') }}</span>
+                            <span class="my-stake-card__item-value">{{ staking.redemption_date }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-stake-card__footer" v-if="staking.status == 'active'">
+                    <button @click.stop="redeem(staking.id)" class="my-stake-card__btn">
+                        {{ $t('Redeem Early') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-if="stakings.data && stakings.data.length == 0" class="staking-page__empty">
+                <div class="staking-page__empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                    </svg>
+                </div>
+                <h3>{{ $t('No Active Stakes') }}</h3>
+                <p>{{ $t('No active staked coins found.') }}</p>
+            </div>
+        </div>
+    </div>
+</app-layout>

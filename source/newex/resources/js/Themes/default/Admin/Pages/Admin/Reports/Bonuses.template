@@ -1,0 +1,98 @@
+<app-layout>
+
+    <admin-reports-tab section="bonuses"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">{{ $t("充值与推荐奖励") }}</h1>
+
+    <div class="bg-white rounded shadow overflow-x-auto overflow-y-hidden">
+        <table class="w-full whitespace-no-wrap">
+
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("来源用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("比例") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("奖励金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("充值ID") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("创建时间") }}</th>
+            </tr>
+
+            <tr v-for="b in bonuses.data" :key="b.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.user.email || b.user.name || b.user_id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.source_user ? (b.source_user.email || b.source_user.name) : '-' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.currency.symbol || b.currency_id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.amount_deposited }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.percent }}%
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.bonus_amount }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center capitalize">
+                        {{ b.type }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.deposit_id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ b.created_at }}
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr v-if="bonuses.data.length === 0">
+                <td class="border-t px-6 py-4 flex items-center" colspan="100">
+                    {{ $t("暂无奖励记录") }}
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+    <pagination :links="bonuses.links || bonuses.meta.links" />
+
+</app-layout>

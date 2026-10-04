@@ -1,0 +1,114 @@
+
+.widget-market-trades {
+    min-height: 260px;
+    margin-top: 2rem;
+    /** navigation start */
+    &__navigation {
+
+        nav {
+            display: flex;
+            justify-content: flex-start;
+            border-bottom: 1px solid var(--border-line-color);
+        }
+
+        a {
+            outline: 1px solid #F00;
+            display: block;
+
+            font-size: var(--default-font__size);
+            color: var(--white-color);
+
+            margin-right: 0.70rem;
+            padding-bottom: 0.80rem;
+            outline: none;
+            color: var(--second-text-color);
+
+            &:hover {
+                color: var(--first-text-color);
+            }
+
+            cursor: pointer;
+
+        }
+
+        .navigation-active {
+            border-bottom: 2px solid var(--first-text-color);
+            color: var(--first-text-color);
+        }
+
+    }
+    /** navigation end */
+
+
+    /** title start */
+    &__title {
+        display: flex;
+        justify-content: space-between;
+        font-size: var(--small-font__size);
+        color: var(--second-text-color);
+
+        margin: 1.20rem 0;
+        opacity: 80%;
+
+        &-price {
+            width: 36%;
+        }
+
+        &-amount {
+            width: 40%;
+            text-align: left;
+        }
+
+        &-time {
+            width: 24%;
+            text-align: right;
+            padding-right: 0.80rem;
+        }
+
+    }
+    /** title end */
+
+
+    /** list start */
+    &__list {
+        height: 260px;
+        &-item {
+            padding: 0.20rem 0.80rem 0.20rem 0;
+
+            a {
+                display: flex;
+                justify-content: space-between;
+                font-size: var(--small-font__size);
+            }
+
+            &__link {
+                display: block;
+            }
+
+            &__price {
+                outline:none;
+                width: 36%;
+            }
+
+            &__amount {
+                outline:none;
+                width: 40%;
+                text-align: left;
+            }
+
+            &__time {
+                outline:none;
+                width: 24%;
+                text-align: right;
+            }
+
+        }
+
+    }
+    /** list end */
+
+    .__rail-is-vertical {
+        right: 0px !important;
+    }
+
+}

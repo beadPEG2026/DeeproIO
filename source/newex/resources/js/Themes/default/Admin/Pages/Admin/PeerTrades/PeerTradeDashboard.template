@@ -1,0 +1,90 @@
+<app-layout>
+
+    <admin-top-menu section="peerTradeDashboard"></admin-top-menu>
+
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("广告") }}</h1>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">ID</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("基础货币") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("价格") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("数量 / 剩余") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="(ad, key) in ads.data" :key="ad.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge v-if="ad.status == 'active'" class="mr-2" type="green">
+                            {{ $t("启用") }}
+                        </badge>
+                        <badge v-if="ad.status == 'closed'" class="mr-2" type="gray">
+                            {{ $t("已关闭") }}
+                        </badge>
+                        <badge v-if="ad.status == 'draft'" class="mr-2" type="gray">
+                            {{ $t("草稿") }}
+                        </badge>
+                        <badge v-if="ad.status == 'hidden'" class="mr-2" type="red">
+                            {{ $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ ad.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <badge class="mr-2" :type="ad.type == 'buy' ? 'green' : 'red'">
+                            {{ ad.type }} <font-awesome-icon :icon="ad.type == 'buy' ? 'arrow-up' : 'arrow-down'" class="ml-1" />
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ ad.base_currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <template v-if="ad.price_type == 'float'">
+                            {{ $t("市场价格 (") }}{{ ad.price_percentage }}%)
+                        </template>
+                        <template v-else>
+                            {{ ad.price }}
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex flex-col focus:text-indigo-500">
+                        <div>{{ ad.amount }} {{ ad.quote_currency.symbol }}</div>
+                        <div>{{ ad.remaining_amount }} {{ ad.quote_currency.symbol }}</div>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ ad.user.email }}
+                        <div v-if="ad.user.merchant_verified_at" class="ml-1 user-badge merchant-badge">
+                            <svg v-tooltip="$t('认证商家')" width="18" height="18" class="" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.438 4.313L14.814 1.5 12 3.124 9.187 1.5 7.562 4.313H4.313v3.25L1.5 9.186 3.124 12 1.5 14.813l2.813 1.625v3.248h3.25L9.186 22.5 12 20.876l2.813 1.624 1.625-2.814h3.248v-3.248l2.814-1.624L20.876 12 22.5 9.187l-2.814-1.625V4.313h-3.248zm-.902 4.215l1.414 1.414-6.364 6.364L7.05 12.77l1.414-1.414 2.122 2.122 4.95-4.95z" fill="#F0B90B"></path></svg>
+                        </div>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ ad.created_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="ads.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到广告。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="ads.links" />
+
+</app-layout>

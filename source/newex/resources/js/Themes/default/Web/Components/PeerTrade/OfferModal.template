@@ -1,0 +1,283 @@
+<div>
+    <jet-dialog-modal :max-width="'6xl'" :show="showAdOffer" @close="showAdOffer = null">
+        <template #content>
+            <div class="p2pmodal gap-10 p2pmodal-mob" v-if="activeOffer">
+                <div class="modal-col-1 modal-col-left">
+                    <div class="modal-user p2p-ads-table">
+
+                        <div class="p2p-flex gap-2 flex-col">
+                            <div class="p2p-flex items-center h-6 gap-1">
+                                <div class="p2p-flex items-center gap-2 mt-4 mt-mob-no">
+
+                                    <div class="">
+
+                                        <div
+                                            class="p2p-flex p2p-avatar p2p-avatar-lg items-center justify-center relative mr-2">
+                                            {{ activeOffer.user.username_short}}
+                                            <div class="user-status-badge online"></div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="">
+                                        <div class="mt-1">
+
+                                            <div class="">
+                                                <div class="p2p-flex items-center">
+
+                                                    <div>
+                                                        <Link :href="route('p2p.profile', activeOffer.user.id)" class="overflow-hidden cursor-pointer no-underline">
+                                                            {{ activeOffer.user.username }}
+                                                        </Link>
+                                                    </div>
+
+                                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="p2p-svg"
+                                                         style="width: 16px; height: 16px;">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                              d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z"
+                                                              fill="currentColor"></path>
+                                                    </svg>
+                                                    <div class="span p2p-text-small">{{ activeOffer.user.feedback_percentage }}%</div>
+                                                </div>
+                                            </div>
+                                            <div class="p2p-bubble" style="transform: translate(-50%, 0px); top: 100%; left: 50%;">
+                                                <div class="p2p-bubble-arrow"
+                                                     style="transform: translate(-50%, 0px) rotate(45deg); top: 9px; left: 50%;"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="">
+
+                                            <div class="p2p-flex items-center">
+                                                <span class="p2p-text-small">{{ activeOffer.user.total_orders }} {{ $t('order(s)')}}</span>
+                                                <span class="p2p-text-small">{{ activeOffer.user.orders_completion_rate }}% {{ $t('completion')}}</span>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-ad-timeline margin-left-custom margin-left-custom-mob margin-top-custom">
+                        <div class="modal-text">
+                            <div class="modal-text-header">{{ activeOffer.timeframe }} {{ $t('Minutes')}}</div>
+                            <div class="modal-text-footer">{{ $t('Payment Time Limit')}}</div>
+                        </div>
+                        <div class="modal-text">
+                            <template v-if="activeOffer.type == 'sell'">
+                                <div class="modal-text-header">{{ activeOffer.user.orders_avg_releasetime }} {{ $t('Minute(s)')}}</div>
+                                <div class="modal-text-footer">{{ $t('Avg. Release Time')}}</div>
+                            </template>
+                            <template v-else>
+                                <div class="modal-text-header">{{ activeOffer.user.orders_avg_paytime }} {{ $t('Minute(s)')}}</div>
+                                <div class="modal-text-footer">{{ $t('Avg. Pay Time')}}</div>
+                            </template>
+
+                        </div>
+                        <div class="modal-text">
+                            <div class="modal-text-header">{{ activeOffer.remaining_amount }} {{ activeOffer.coin.symbol }}</div>
+                            <div class="modal-text-footer">{{ $t('Available')}}</div>
+                        </div>
+                    </div>
+                    <div class="modal-ad-comment margin-left-custom margin-left-custom-mob">
+                        <div class="modal-text-header">{{ $t("Advertisers' Terms (Please read carefully)")}}</div>
+                        <div v-if="activeOffer.remarks" class="modal-text-footer pre-wrap">{{ activeOffer.remarks }}</div>
+                        <div v-else class="modal-text-footer">{{ $t('This advertiser did not set any terms.')}}</div>
+                    </div>
+                </div>
+                <div class="modal-col-1 modal-col-2">
+                    <div class="modal-right-top mb-0-fixed">
+                        <span>{{ $t('Price')}}</span>
+                        <span class='text-bold-500 ml-2' :class="{'color-buy': activeOffer.type == 'sell', 'color-sell': activeOffer.type == 'buy'}">{{ activeOffer.offered_price }} {{ activeOffer.fiat.symbol }}</span>
+                        <span @click="refreshPrice()" class="refresh-icon"><svg :class="{'rotate-element': sending }" class="cursor-pointer" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.997 12.21a8.161 8.161 0 000-.42v.42zm-4.463 3.327l-2.608-2.608h7.07V20l-2.341-2.342A8.003 8.003 0 014.252 14h3.164a5.001 5.001 0 008.118 1.537zM19.747 10A8.003 8.003 0 006.343 6.343L4.001 4v7.071h7.07L8.466 8.464A5.001 5.001 0 0116.585 10h3.162zM4 12L4 11.845v.31A8.126 8.126 0 014 12z" fill="currentColor"></path></svg></span>
+                    </div>
+                    <div class="modal-right-top">
+                        <span>{{ $t('Processing Fee')}}</span>
+                        <span class='text-bold-500 ml-2'>{{ processingFee }} {{ activeOffer.coin.symbol }}</span>
+                    </div>
+                    <div class="modal-right-bottom flex flex-col">
+                        <div class="modal-input-group" :class="{'p2p-form-error': activeOffer.type == 'sell' && formErrors.amount, 'order-2' : activeOffer.type == 'buy', 'order-1' : activeOffer.type == 'sell' }">
+                            <div class="modal-input-group-label">
+                                <template v-if="activeOffer.type == 'sell'">{{ $t('You Pay') }}</template>
+                                <template v-else>{{ $t('You Receive') }}</template>
+                            </div>
+                            <div class="modal-input-group-btn">
+                                <div class="modal-input-group-field">
+                                    <vue-number @keyup.native="calculateSend()" v-model="adForm.offerAmount" v-bind="numericValue(5)" :placeholder="calculateLimits()"></vue-number>
+                                </div>
+                                <div class="modal-input-group-field-placeholder">
+                                    <div class="modal-input-group-field-asset">
+                                        <div class="modal-input-group-field-asset-img">
+                                            <img :src="activeOffer.fiat.logo" />
+                                        </div>
+                                        <div class="modal-input-group-field-asset-symbol">
+                                            {{ activeOffer.fiat.symbol }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="activeOffer.type == 'sell' && formErrors.amount" class="modal-input-error">
+                                {{ $t(formErrors.amount) }}
+                            </div>
+                        </div>
+
+                        <div class="modal-input-group" :class="{'p2p-form-error': activeOffer.type == 'buy' && formErrors.amount, 'order-1' : activeOffer.type == 'buy', 'order-2' : activeOffer.type == 'sell'}">
+                            <div class="modal-input-group-label">
+                                <template v-if="activeOffer.type == 'sell'">{{ $t('You Receive') }}</template>
+                                <template v-else>{{ $t('You Sell') }}</template>
+                            </div>
+                            <div class="modal-input-group-btn">
+                                <div class="modal-input-group-field">
+                                    <vue-number @keyup.native="calculateReceive()" v-model="adForm.offerReceived" v-bind="numericValue(5)" placeholder="0.00"></vue-number>
+                                </div>
+                                <div class="modal-input-group-field-placeholder">
+                                    <div class="modal-input-group-field-asset">
+                                        <div class="modal-input-group-field-asset-img">
+                                            <img :src="activeOffer.coin.logo" />
+                                        </div>
+                                        <div class="modal-input-group-field-asset-symbol">
+                                            {{ activeOffer.coin.symbol }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="activeOffer.type == 'buy' && baseWallet">
+                                {{ $t('Balance:')}} {{ baseWallet.balance_in_wallet }} {{ activeOffer.coin.symbol }}
+                            </div>
+
+                            <div v-if="activeOffer.type == 'buy' && formErrors.amount" class="modal-input-error">
+                                {{ $t(formErrors.amount) }}
+                            </div>
+                        </div>
+
+                        <div @click="showMethodPopup()" class="modal-input-group order-3 mb-mob-no">
+                            <div class="flex sm:justify-between mt-1">
+                                <div>
+                                    <template v-if="paymentMethod">
+
+                                        <template v-if="activeOffer.type == 'sell'">
+                                            <div v-if="activeOffer" v-for="method in activeOffer.payment_methods">
+                                                <div v-if="method.id == paymentMethod">
+                                                    <div class="p2p-payment-item">
+                                                        <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                                        {{ method.name }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <div v-if="userPaymentMethods" v-for="method in userPaymentMethods">
+                                                <div v-if="method.id == paymentMethod">
+
+                                                    <div class="p2p-payment-item">
+                                                        <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                                        {{ method.name }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                    </template>
+                                    <template v-else>
+                                        {{ $t('Set my payment method') }}
+                                    </template>
+                                </div>
+                                <div class="">
+                                    <div class="next-icon">
+                                        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class=""><path fill-rule="evenodd" clip-rule="evenodd" d="M12.288 12l-3.89 3.89 1.768 1.767L15.823 12l-1.768-1.768-3.889-3.889-1.768 1.768 3.89 3.89z" fill="currentColor"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="formErrors.payment_method" class="modal-input-error">
+                                {{ $t(formErrors.payment_method) }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="showAdOffer = null">
+                {{ $t('Cancel') }}
+            </jet-secondary-button>
+
+            <jet-button class="ml-2" @click.native="acceptOffer">
+                <template v-if="activeOffer && activeOffer.type == 'sell'">
+                    {{ $t('Buy') }}
+                </template>
+                <template v-else>
+                    {{ $t('Sell') }}
+                </template>
+            </jet-button>
+        </template>
+    </jet-dialog-modal>
+    <jet-dialog-modal :show="showMethods" @close="closeMethods">
+        <template #title>
+            {{ $t('Select Payment Methods')}}
+        </template>
+        <template #content>
+            <div class="payment-method-wrapper-modal" v-if="activeOffer">
+                <template v-if="activeOffer.type == 'sell'">
+                    <div v-for="method in activeOffer.payment_methods">
+                        <label @click="confirmMethods(method)" class="checkbox-select-group flex items-center justify-between" :class="{'bordered-card': method.id == paymentMethod}">
+                        <span class="ml-2 text-sm text-gray-600 flex">
+                            <div class="p2p-payment-item">
+                                <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                {{ method.name }}
+                            </div>
+                        </span>
+                        </label>
+                    </div>
+                </template>
+                <template v-else>
+                    <template v-if="userPaymentMethods && userPaymentMethods.length > 0">
+                        <div class="checkbox-select-group"  v-for="method in userPaymentMethods" v-if="activePaymentMethod.includes(method.method_id)">
+                            <label @click="confirmUserMethods(method)">
+                                <div class="flex items-center justify-between p2p-payment-method-card-mini-head">
+                                <span class="ml-2 text-sm text-gray-600 flex">
+                                    <div class="p2p-payment-item">
+                                        <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                        {{ method.name }}
+                                    </div>
+                                </span>
+                                </div>
+                                <div class="p2p-payment-method-card p2p-payment-method-card-mini">
+                                    <div v-for="fields in method.fields" class="p2p-payment-method-card-element ">
+                                        <div class="p2p-payment-method-card-left headline-text">{{ $t(fields.field)}}</div>
+                                        <div class="p2p-payment-method-card-right">
+                                            {{ fields.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div>
+                            <div class="mt-5 mb-5">
+                                {{ $t('You do not have any active payment method. Please create at least 1 payment method.')}}
+                            </div>
+                            <div class="">
+                                <Link :href="route('p2p.paymentMethods')" as="div" class="max-width-200 mt-2 mb-5 btn-action-mini btn-action-green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M13.5 3h-3v7.5H3v3h7.5V21h3v-7.5H21v-3h-7.5V3z" fill="currentColor"></path></svg> {{ $t('Add Payment Method')}}</Link>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+
+        </template>
+        <template #footer>
+            <div class="w-full flex flex-end">
+                <div @click="closeMethods" class="">
+                    <span>{{ $t('Cancel')}}</span>
+                </div>
+            </div>
+        </template>
+    </jet-dialog-modal>
+</div>

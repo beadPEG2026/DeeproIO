@@ -1,0 +1,188 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("冷钱包") }}</h1>
+
+    <div v-if="!showGoogleVerifyModal">
+        <div v-if="$page.props.v == 5" class="mb-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <nav-button-link :href="coldStorageCreateUrl()">
+                    <span>{{ $t("添加") }}</span>
+                    <span class="hidden md:inline">{{ $t(" 新的冷钱包") }}</span>
+                </nav-button-link>
+
+                <button
+                    type="button"
+                    @click="openDepositBankCardModal"
+                    class="ml-3 px-4 py-2 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-sm transition"
+                >
+                    {{ $t("修改入金银行卡") }}
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded shadow overflow-x-auto">
+            <div class="p-10" v-if="$page.props.v != 5">
+                {{ $t('此功能仅在 VIP 套餐中可用') }}
+            </div>
+
+            <table v-else class="w-full whitespace-no-wrap">
+                <thead>
+                    <tr class="text-left font-bold">
+                        <th class="px-6 pt-6 pb-4">{{ $t("币种") }}</th>
+                        <th class="px-6 pt-6 pb-4">{{ $t("网络") }}</th>
+                        <th class="px-6 pt-6 pb-4">{{ $t("地址 / 入金银行卡") }}</th>
+                        <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr
+                        v-for="storage in coldStorage.data"
+                        :key="storage.id"
+                        class="hover:bg-gray-100 focus-within:bg-gray-100"
+                    >
+                        <td class="border-t">
+                            <Link
+                                :href="coldStorageEditUrl(storage.id)"
+                                class="px-6 py-4 flex items-center text-indigo-500"
+                            >
+                                <span v-if="storage.currency">
+                                    {{ storage.currency.name }}
+                                </span>
+                                <span v-else>
+                                    -
+                                </span>
+                            </Link>
+                        </td>
+
+                        <td class="border-t">
+                            <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                <span v-if="storage.network">
+                                    {{ storage.network.name }}
+                                </span>
+                                <span v-else>
+                                    -
+                                </span>
+                            </span>
+                        </td>
+
+                        <td class="border-t">
+                            <span
+                                class="px-6 py-4 flex items-center focus:text-indigo-500 break-all"
+                                style="min-width: 260px;"
+                            >
+                                {{ storage.address }}
+                            </span>
+                        </td>
+
+                        <td class="border-t">
+                            <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                <badge class="mr-2" :type="storage.status ? 'green' : 'gray'">
+                                    {{ storage.status ? $t("启用") : $t("禁用") }}
+                                </badge>
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr v-if="coldStorage.data.length === 0">
+                        <td class="border-t px-6 py-2" colspan="100">
+                            {{ $t("未找到冷钱包记录。") }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pagination :links="coldStorage.links" />
+    </div>
+
+    <!-- 修改入金银行卡弹窗 -->
+    <jet-dialog-modal :show="showDepositBankCardModal" @close="closeDepositBankCardModal">
+        <template #title>
+            {{ $t("修改入金银行卡") }}
+        </template>
+
+        <template #content>
+            <div v-if="selectedStorage">
+                <div class="mb-4 bg-gray-50 rounded p-4 text-sm">
+                    <div>
+                        <strong>{{ $t("修改数据 ID：") }}</strong>
+                        {{ selectedStorage.id }}
+                    </div>
+
+                    <div class="mt-2">
+                        <strong>{{ $t("当前入金银行卡：") }}</strong>
+                        <span class="break-all">{{ selectedStorage.address || '-' }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm mb-2">
+                        {{ $t("入金银行卡") }}
+                    </label>
+
+                    <textarea
+                        v-model="depositBankCardForm.address"
+                        rows="5"
+                        class="w-full form-input rounded"
+                        placeholder="请输入新的入金银行卡信息"
+                    ></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm mb-2">
+                        {{ $t("状态") }}
+                    </label>
+
+                    <themed-select
+                        v-model="depositBankCardForm.status"
+                        class="w-full form-select rounded"
+                    >
+                        <option :value="true">{{ $t("启用") }}</option>
+                        <option :value="false">{{ $t("禁用") }}</option>
+                    </themed-select>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeDepositBankCardModal">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-danger-button
+                class="ml-2"
+                @click.native="submitDepositBankCard"
+                :disabled="sending"
+            >
+                {{ $t("确认修改") }}
+            </jet-danger-button>
+        </template>
+    </jet-dialog-modal>
+
+    <!-- Google 二次验证弹窗 -->
+    <jet-dialog-modal :show="showGoogleVerifyModal">
+        <template #title>
+            {{ $t("Google 二次验证") }}
+        </template>
+
+        <template #content>
+            <div class="mb-3 text-sm text-gray-600">
+                {{ $t("请输入 Google 验证器中的 6 位验证码后继续操作冷钱包页面。") }}
+            </div>
+
+            <input
+                v-model="googleCode"
+                type="text"
+                maxlength="6"
+                class="w-full form-input rounded"
+                placeholder="请输入 6 位验证码"
+            />
+        </template>
+
+        <template #footer>
+            <jet-danger-button @click.native="verifyGoogleCode">
+                {{ $t("确认验证") }}
+            </jet-danger-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

@@ -1,0 +1,129 @@
+<app-layout>
+    <site-presentation-settings scope="support"/>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("客服工单") }}</h1>
+
+    <form @submit.prevent="applyFilters" class="flex flex-wrap gap-3 mb-6">
+        <label>{{ $t('Search') }}<input v-model="filterForm.search" maxlength="150" class="border rounded p-2" :placeholder="$t('Ticket / user / title')"></label>
+        <label>{{ $t('Status') }}<themed-select v-model="filterForm.status" class="border rounded p-2"><option value="">{{ $t('All') }}</option><option v-for="s in ['new','replied','closed']" :key="s" :value="s">{{ $t(s) }}</option></themed-select></label>
+        <label>{{ $t('Assigned to') }}<themed-select v-model="filterForm.assigned_to" class="border rounded p-2"><option value="">{{ $t('All') }}</option><option v-for="o in operators" :key="o.id" :value="o.id">#{{o.id}} {{o.name}}</option></themed-select></label>
+        <label><input type="checkbox" v-model="filterForm.overdue">{{ $t('Overdue') }}</label><button type="submit" class="border rounded p-2">{{ $t('Search') }}</button>
+    </form>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("工单编号") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("标题") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("消息内容") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("附件") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="ticket in tickets.data" :key="ticket.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center font-mono">
+                        {{ ticket.ticket_id || (ticket.id + '').padStart(15, '0') }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <div>
+                            <div>{{ $t("ID:") }} {{ ticket.user ? ticket.user.id : '—' }}</div>
+                            <div class="text-gray-500 text-sm">
+                                <template v-if="ticket.user">
+                                    {{ $page.props.mode == 'readonly' ? $t("演示模式隐藏") : (ticket.user.email || 'N/A') }}
+                                </template>
+                                <template v-else>
+                                    N/A
+                                </template>
+                            </div>
+                        </div>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ ticket.title }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center max-w-xl truncate" :title="ticket.body">
+                        {{ ticket.body }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <template v-if="ticket.file">
+                            <a class="text-indigo-600" :href="ticket.file.url" target="_blank">{{ $t("查看") }}</a>
+                        </template>
+                        <template v-else>
+                            N/A
+                        </template>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <button class="px-3 py-1 bg-indigo-600 text-white rounded" @click="openReply(ticket)">{{ $t('查看 / 管理') }}</button>
+                        <small class="ml-2">{{ $t(ticket.status) }} · {{ $t(ticket.priority) }} · #{{ ticket.assigned_to || '—' }}<br>{{ticket.due_at || '—'}}</small>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ ticket.created_at }}
+                    </span>
+                </td>
+
+            </tr>
+            <tr v-if="tickets.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("未找到工单。") }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="tickets.links" />
+
+    <jet-dialog-modal :show="showReplyModal" @close="closeReply">
+        <template #title>
+            <div>
+                {{ $t("回复工单 #") }}{{ selectedTicket ? (selectedTicket.ticket_id || (selectedTicket.id + '').padStart(15, '0')) : '' }}
+            </div>
+        </template>
+        <template #content>
+            <div>
+                <div class="mb-4">
+                    <div class="text-sm text-gray-600">{{ $t("用户问题：") }}</div>
+                    <div class="font-semibold">{{ selectedTicket ? selectedTicket.title : '' }}</div>
+                    <div class="text-gray-700 whitespace-pre-line mt-2">{{ selectedTicket ? selectedTicket.body : '' }}</div>
+                    <div class="mt-2" v-if="selectedTicket && selectedTicket.file">
+                        <a class="text-indigo-600" :href="selectedTicket.file.url" target="_blank">{{ $t("查看附件") }}</a>
+                    </div>
+                </div>
+                <div v-if="selectedTicket" class="mb-4"><h3>{{ $t('History') }}</h3>
+                    <p v-if="!selectedTicket.entries.length && selectedTicket.reply" class="whitespace-pre-line">{{selectedTicket.reply}} · {{ $t('Delivery unknown') }}</p>
+                    <details v-for="e in selectedTicket.entries" :key="e.id" class="border-b py-2"><summary>{{e.created_at}} · #{{e.actor_id || '—'}} · {{ $t(e.kind) }} · {{ $t(e.mail_status) }}</summary><p class="whitespace-pre-line">{{e.body}}</p><a v-if="e.file" :href="e.file.url" target="_blank" rel="noopener">{{ $t("View attachment") }}</a><pre style="white-space:pre-wrap">{{JSON.stringify(e.changes,null,2)}}</pre></details>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <label>{{ $t('Status') }}<themed-select v-model="workflow.status" class="border rounded p-2 w-full"><option v-for="s in ['new','replied','closed']" :key="s" :value="s">{{ $t(s) }}</option></themed-select></label>
+                    <label>{{ $t('Priority') }}<themed-select v-model="workflow.priority" class="border rounded p-2 w-full"><option v-for="s in ['normal','high','urgent']" :key="s" :value="s">{{ $t(s) }}</option></themed-select></label>
+                    <label>{{ $t('Assigned to') }}<themed-select v-model="workflow.assigned_to" class="border rounded p-2 w-full"><option :value="null">{{ $t('Unassigned') }}</option><option v-for="o in operators" :key="o.id" :value="o.id">#{{o.id}} {{o.name}}</option></themed-select></label>
+                    <label>{{ $t('Due at') }}<input type="datetime-local" v-model="workflow.due_at" class="border rounded p-2 w-full"></label>
+                </div>
+                <p v-for="(e,k) in $page.props.errors" :key="k" role="alert" class="text-red-600">{{e}}</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t("你的回复") }}</label>
+                <label class="block my-2"><input type="checkbox" v-model="workflow.internal_note"> {{ $t("Internal note (no email)") }}</label>
+                <textarea v-model="replyText" rows="6" class="w-full border rounded p-2" :placeholder="$t(&quot;在这里输入你的回复...&quot;)"></textarea>
+            </div>
+        </template>
+        <template #footer>
+            <jet-secondary-button @click.native="closeReply">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+            <jet-danger-button class="ml-2" @click.native="sendReply" :class="{ 'opacity-75': sending }">
+                <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ $t("Save") }}
+            </jet-danger-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

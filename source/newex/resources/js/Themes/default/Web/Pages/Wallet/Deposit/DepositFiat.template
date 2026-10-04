@@ -1,0 +1,280 @@
+<app-layout>
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('Deposit') }} {{ currency.symbol }}</h2>
+</div>
+<!-- components title end -->
+
+<!-- components title end -->
+<div v-if="!currency.deposit_status" class="mb-20">
+    <div class="form-search__info">
+        <div class="form-search__info-icon">
+            <svg-icon icon="info"></svg-icon>
+        </div>
+        <div class="block-info__content">
+            <h4>{{ currency.name }} {{ $t('Deposits Suspended') }}</h4>
+            <p>{{ $t('We have disabled deposits as our systems are currently undergoing maintenance.') }}</p>
+        </div>
+    </div>
+</div>
+<div v-else class="mb-20">
+    <div v-if="step == 'payment_method' || step == 'payment_form'" class="pr-6 w-full mb-10 mob-tab">
+        <div class="table-components__table-title mb-10"><h4>{{ $t('1. Select a payment method') }}</h4></div>
+        <section class="text-gray-600 body-font">
+            <div class="flex flex-wrap -m-4 mob-tab__btns">
+                <div v-if="currency.bank_status && networks.includes('bank_credit_card')" class="xl:w-1/4 md:w-1/4 w-full p-4 mob-tab__item">
+                    <div @click="setStep('payment_form', 'bank')" class="border border-gray-200 p-3 px-4 rounded-lg card-warning cursor-pointer" :class="{'active': method == 'bank'}">
+                        <div class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-green-50 text-green-500 mb-4">
+                            <font-awesome-icon icon="university" />
+                        </div>
+                        <h2 class="text-lg text-gray-900 font-medium title-font mb-2 ">{{ $t('Bank Transfer') }}</h2>
+                        <p v-if="parseFloat(currency.deposit_fee) > 0" class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee }}%</p>
+                        <p v-else class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee_fixed }} {{ currency.symbol }}</p>
+                    </div>
+                </div>
+                <div v-if="currency.cc_status && networks.includes('bank_credit_card')" class="xl:w-1/4 md:w-1/4 w-full p-4 mob-tab__item">
+                    <div @click="setStep('payment_form', 'cc')" class="border border-gray-200 p-3 px-4 rounded-lg card-warning cursor-pointer" :class="{'active': method == 'cc'}">
+                        <div class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-500 mb-4">
+                            <font-awesome-icon icon="credit-card" />
+                        </div>
+                        <h2 class="text-lg text-gray-900 font-medium title-font mb-2">{{ $t('Bank Card') }}</h2>
+                        <p v-if="parseFloat(currency.deposit_fee) > 0" class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee }}%</p>
+                        <p v-else class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee_fixed }} {{ currency.symbol }}</p>
+
+                    </div>
+                </div>
+                <div v-if="networks.includes('payeer')" class="xl:w-1/4 md:w-1/4 w-full p-4 mob-tab__item">
+                    <div @click="setStep('payment_form', 'payeer')" class="border border-gray-200 p-3 px-4 rounded-lg card-warning cursor-pointer" :class="{'active': method == 'perfectmoney'}">
+                        <div class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-green-50 text-green-500 mb-4">
+                            <font-awesome-icon icon="money-bill" />
+                        </div>
+                        <h2 class="text-lg text-gray-900 font-medium title-font mb-2 ">{{ $t('Payeer') }}</h2>
+                        <p class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee }}%</p>
+                    </div>
+                </div>
+                <div v-if="networks.includes('perfectmoney')" class="xl:w-1/4 md:w-1/4 w-full p-4 mob-tab__item">
+                    <div @click="setStep('payment_form', 'perfectmoney')" class="border border-gray-200 p-3 px-4 rounded-lg card-warning cursor-pointer" :class="{'active': method == 'perfectmoney'}">
+                        <div class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-green-50 text-green-500 mb-4">
+                            <font-awesome-icon icon="money-bill" />
+                        </div>
+                        <h2 class="text-lg text-gray-900 font-medium title-font mb-2 ">{{ $t('Perfect Money') }}</h2>
+                        <p class="leading-relaxed text-base">{{ $t('Deposit Fee: ') }}{{ currency.deposit_fee_fixed }} {{ currency.symbol }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div v-if="step == 'payment_form'" class="pt-2 pr-6 pb-4 w-full mob-tab__content">
+        <div class="table-components__table-title"><h4>{{ $t('2. Make a deposit') }}</h4></div>
+        <deposit-bank v-if="method == 'bank'" :currency="currency" :errors="errors"></deposit-bank>
+        <deposit-cc v-else-if="method == 'cc'" :currency="currency" :errors="errors" :stripe="stripe"></deposit-cc>
+        <deposit-perfect v-else-if="method == 'perfectmoney'" :site-name="siteName" :site-lang="siteLang" :account-id="accountId" :currency="currency" :errors="errors"></deposit-perfect>
+        <deposit-payeer v-else-if="method == 'payeer'" :currency="currency" :errors="errors"></deposit-payeer>
+
+    </div>
+</div>
+
+<div class="table-components__table-title mb-10"><h3>{{ $t('Recent Deposits') }}</h3></div>
+
+    <!-- table components start -->
+    <div class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-recent-deposits">
+            <!-- tbody start -->
+            <thead class="table-sort no-cursor">
+                <tr>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Amount') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Status') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Type') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Date') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value"></div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="table-list">
+            <tr class="cursor-pointer" v-if="deposits" v-for="deposit in deposits" @click="openModal(deposit)">
+
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__image"><img :src="deposit.logo"></div>
+                        <div class="table-list__title">{{ deposit.amount }} {{ deposit.symbol }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="{'label-green': deposit.status == 'confirmed', 'label-red': deposit.status == 'rejected', 'label-orange': deposit.status == 'pending' }">
+                            <template v-if="deposit.status == 'confirmed'">
+                                {{ 'Confirmed' }}
+                            </template>
+                            <template v-else-if="deposit.status == 'rejected'">
+                                <span :title="deposit.rejected_reason">{{ $t('Rejected') }}</span>
+                            </template>
+                            <template v-else>
+                                {{ $t('Pending') }}
+                            </template>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <template v-if="deposit.type == 'cc'">{{ $t('Bank Card')}}</template>
+                            <template v-else-if="deposit.type == 'pix'">{{ $t('PIX')}}</template>
+                            <template v-else-if="deposit.type == 'deriv'">{{ $t('Deriv')}}</template>
+                            <template v-else-if="deposit.type == 'ach'">{{ $t('ACH')}}</template>
+                            <template v-else-if="deposit.type == 'perfectmoney'">{{ $t('Perfect Money')}}</template>
+                            <template v-else-if="deposit.type == 'payeer'">{{ $t('Payeer')}}</template>
+                            <template v-else>{{ $t('Bank Transfer')}}</template>
+
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <span class="list-text__name">{{ $t("Date:") }}{{ $t('') }}</span>
+                            {{ deposit.created_at }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle"></div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                                <span class="list-text__icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="list-text__icon-color" d="M10 16.5C10 16.5 14 12.5 14 12C14 11.5 10 7.5 10 7.5"/>
+                                    </svg>
+                                </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="deposits && deposits.length == 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                        <span class="table-result__notfound-text">{{ $t('No deposits found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+
+    </div>
+    <!-- table components end -->
+
+    <!-- Show User  Modal -->
+    <jet-dialog-modal :show="showDepositModal" @close="closeModal">
+        <template #title>
+            {{ $t('Deposit') }}
+        </template>
+        <template #content>
+            <div v-if="depositModal">
+                <div class="form-search">
+                    <div class="form-search__container">
+                        <div class="form-search__result">
+                            <div class="flex flex-wrap">
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Status') }}</span>
+                                        <p>
+                                            <div v-if="depositModal.status == 'confirmed'" class="components-label label-green mt-2">
+                                                {{ $t('Completed') }}
+                                            </div>
+                                            <div v-if="depositModal.status == 'pending'" class="components-label label-orange mt-2">
+                                                {{ $t('Pending') }}
+                                            </div>
+                                            <div v-if="depositModal.status == 'rejected'" class="components-label label-red mt-2">
+                                                <span :title="depositModal.rejected_reason">{{ $t('Rejected') }}</span>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Currency') }}</span>
+                                        <p>{{ depositModal.currency }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Symbol') }}</span>
+                                        <p>{{ depositModal.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Amount') }}</span>
+                                        <p>{{ depositModal.amount}} {{ depositModal.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Deposit Fee') }}</span>
+                                        <p>{{ depositModal.system_fee}} {{ depositModal.symbol }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                                    <div class="form-search__result-item w-full">
+                                        <span>{{ $t('Date') }}</span>
+                                        <p>{{ depositModal.created_at}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t('Close') }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+</app-layout>

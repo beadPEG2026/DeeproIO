@@ -1,0 +1,62 @@
+<!-- WIDGET MARKET TRADES START -->
+<div class="widget widget-market-trades">
+
+    <div class="widget-container">
+
+        <!-- widget head start -->
+        <div class="widget-head">
+
+            <!-- widget market trades navigation start -->
+            <div class="widget-market-trades__navigation">
+                <nav>
+                    <a class="navigation-active">{{ $t('Recent Positions') }}</a>
+                </nav>
+            </div>
+            <!-- widget market trades navigation end -->
+
+        </div>
+        <!-- widget head end -->
+
+        <!-- widget body start -->
+        <div class="widget-body">
+            <!-- widget market trades title start -->
+            <div class="widget-market-trades__title">
+                <div class="widget-market-trades__title-price">{{ $t('Position') }}</div>
+                <div class="widget-market-trades__title-amount">{{ $t('Duration') }}</div>
+                <div class="widget-market-trades__title-amount">{{ $t('PNL') }}</div>
+                <div class="widget-market-trades__title-time widget-market-trades__title-time-larger">{{ $t('Time') }}</div>
+            </div>
+            <!-- widget market trades title end -->
+
+            <!-- widget market trades list start -->
+            <div class="widget-market-trades__list">
+                <vue-scroll>
+                    <div v-for="trade in options" class="widget-market-trades__list-item">
+                        <a class="widget-market-trades__list-item__link">
+                            <div class="widget-market-trades__list-item__price">
+                                <span :class="{'color-buy': trade.type == 'buy', 'color-sell': trade.type == 'sell'}">{{ trade.type == 'buy' ? $t('Buy Long') : $t('Sell Short') }}</span>
+                            </div>
+                            <div class="widget-market-trades__list-item__price">
+                                {{ trade.period_text }}s
+                            </div>
+                            <div class="widget-market-trades__list-item__price">
+                                <span :class="{'color-buy': trade.status == 'won', 'color-sell': trade.status == 'lost'}">{{ trade.status == 'won' ? '+' + trade.pnl : '-' + trade.pnl }} {{ trade.symbol }}</span>
+                            </div>
+                            <div class="widget-market-trades__list-item__time widget-market-trades__list-item__time-larger">{{ trade.created_at }}</div>
+                        </a>
+                    </div>
+                    <div class="widget-empty" v-if="options && options.length == 0">
+                        <span>{{ $t('No positions found') }}</span>
+                    </div>
+                </vue-scroll>
+            </div>
+            <!-- widget market trades list end -->
+
+
+        </div>
+        <!-- widget body end -->
+
+
+    </div>
+</div>
+<!-- WIDGET MARKET TRADES END -->

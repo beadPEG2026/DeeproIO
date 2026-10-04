@@ -1,0 +1,93 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.lendings')">{{ $t("借贷") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("借贷信息") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("货币：") }}</label>
+                    <t-rich-select
+                        :options="currencies"
+                        v-model="form.currency_id"
+                        placeholder="选择货币"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.currency_id" class="form-error text-red-400">{{ errors.currency_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("状态：") }}</label>
+                    <t-rich-select
+                        v-model="form.status"
+                        :options="[
+                            {'id':'active','name':'启用'},
+                            {'id':'hidden','name':'隐藏'}
+                        ]"
+                        placeholder="选择状态"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.status" class="form-error text-red-400">{{ errors.status }}</div>
+                </div>
+
+                <text-input v-model="form.min_amount" :error="errors.min_amount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小借贷金额&quot;)" />
+
+                <text-input v-model="form.max_amount" :error="errors.max_amount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大借贷金额&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("借贷类型") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("灵活利率") }}</label>
+                    <t-toggle v-model="form.is_flexible" />
+                </div>
+
+                <text-input v-model="form.annual_rate_flexible" :error="errors.annual_rate_flexible" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;灵活年利率 (%)&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("7 天固定利率") }}</label>
+                    <t-toggle v-model="form.is_weekly" />
+                </div>
+
+                <text-input v-model="form.annual_rate_weekly" :error="errors.annual_rate_weekly" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;7 天固定年利率 (%)&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("30 天固定利率") }}</label>
+                    <t-toggle v-model="form.is_monthly" />
+                </div>
+
+                <text-input v-model="form.annual_rate_monthly" :error="errors.annual_rate_monthly" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;30 天固定年利率 (%)&quot;)" />
+
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除借贷") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ actionButtonTitle }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

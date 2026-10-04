@@ -1,0 +1,163 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="wallets"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.users.edit', filters.referrer)" v-if="filters.referrer">{{ $t("返回 -") }} </Link> {{ $t("用户钱包") }}
+    </h1>
+    <div class="mb-6 flex justify-between items-center">
+        <search-filter v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset">
+            <label class="block text-gray-700">{{ $t("钱包：") }}</label>
+            <themed-select v-model="form.type" class="mt-1 w-full form-select rounded">
+                <option value="all">{{ $t("全部") }}</option>
+                <option value="balance">{{ $t("仅显示有余额") }}</option>
+            </themed-select>
+        </search-filter>
+    </div>
+    <div class="pr-6 pb-8 w-full lg:w-1/4" v-if="!filters.referrer">
+        <label class="form-label d-block">{{ $t("用户：") }}</label>
+        <t-rich-select
+            :fetch-options="fetchUser"
+            v-model="form.user"
+            placeholder="选择用户"
+            value-attribute="id"
+            text-attribute="email"
+            :minimum-input-length="2"
+        >
+            <template
+                slot="label"
+                slot-scope="{ className, option, query }"
+            >
+                <div class="flex">
+                    <div class="flex flex-col ml-2 text-gray-800">
+                        <strong>{{ option.text }}</strong>
+                    </div>
+                </div>
+            </template>
+        </t-rich-select>
+    </div>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("地址") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("资金账户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("交易账户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("挂单中") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提现处理中") }}</th>
+                <th v-if="isSuperAdmin" class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+            <tr v-for="wallet in wallets.data" :key="wallet.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <div class="px-3 py-2">
+                        <div class="font-semibold text-gray-900 break-all max-w-xs">
+                            {{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : wallet.user.email }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            {{ $t("ID:") }} {{ wallet.user.id }}
+                        </div>
+                    </div>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ wallet.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <div v-if="wallet.currency.type == 'fiat'">
+                            {{ '' }}
+                        </div>
+                        <div v-else-if="wallet.address">
+                            {{ format_string(wallet.address.address, 10) }}
+                            <font-awesome-icon class="ml-2 cursor-pointer" icon="copy" @click="doCopy(wallet.address.address)" />
+                        </div>
+                        <div v-else>
+
+                        </div>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ wallet.balance_in_wallet }} {{ wallet.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ wallet.balance_in_trade }} {{ wallet.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ wallet.balance_in_order }} {{ wallet.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ wallet.balance_in_withdraw }} {{ wallet.currency.symbol }}
+                    </span>
+                </td>
+                <td v-if="isSuperAdmin" class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <t-button-green @click="transfer(wallet)" class="mr-2">{{ $t("充值/扣除") }}</t-button-green>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="wallets.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到钱包。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="wallets.links" />
+
+    <!-- Confirmation Modal -->
+    <jet-dialog-modal v-if="isSuperAdmin && selectedWallet" :show="selectedWallet">
+        <template #title>
+            <div class="mb-5">{{ $t("内部转账") }}</div>
+            <br><strong>{{ $t("钱包：") }}</strong> {{ selectedWallet.currency.name }}
+            <br><strong>{{ $t("用户：") }}</strong> ({{ $page.props.mode == "readonly" ? $t("演示模式隐藏") : selectedWallet.user.email }})
+        </template>
+
+        <template #content>
+            <div class="flex flex-wrap mt-10">
+                <div class="w-full mb-4">
+                    <label class="form-label d-block">{{ $t("账户类型：") }}</label>
+                    <themed-select v-model="accountType" class="mt-2 w-full form-select rounded">
+                        <option value="real">{{ $t("真实账户") }}</option>
+                        <option value="virtual">{{ $t("虚拟账户") }}</option>
+                    </themed-select>
+                </div>
+                <div class="w-full mb-4">
+                    <label class="form-label d-block">{{ $t("入账账户：") }}</label>
+                    <themed-select v-model="balanceType" class="mt-2 w-full form-select rounded">
+                        <option value="wallet">{{ $t("资金账户") }}</option>
+                        <option value="trade">{{ $t("交易账户") }}</option>
+                    </themed-select>
+                </div>
+                <div class="w-full mb-4" v-if="accountType === 'real'">
+                    <p>{{ $t('Real transfers require funded inventory and an independent reviewer. Simulation funds stay separate.') }}</p>
+                    <label>{{ $t('Source wallet') }}<text-input v-model="sourceWallet" type="number" /></label>
+                    <label>{{ $t('Source account') }}<themed-select v-model="sourceBalanceType"><option value="wallet">{{ $t('Funding') }}</option><option value="trade">{{ $t('Trading') }}</option></themed-select></label>
+                    <label>{{ $t('Reference') }}<text-input v-model="reference" /></label>
+                </div>
+                <div class="w-full mb-4">
+                    <label class="form-label d-block">{{ $t("充值金额：") }}</label>
+                    <text-input type="number" v-model="deposit" class="mt-2 w-full"></text-input>
+                </div>
+                <div class="w-full">
+                    <label class="form-label d-block">{{ $t("备注：") }}</label>
+                    <text-input type="text" v-model="note" :placeholder="$t(&quot;At least 10 characters&quot;)" class="mt-2 w-full"></text-input>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="selectedWallet = null; deposit = 0;">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+
+            <jet-success-button class="ml-2" @click.native="transferConfirm">
+                {{ $t("Submit") }}
+            </jet-success-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

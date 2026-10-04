@@ -1,0 +1,160 @@
+<div>
+    <div class="form-search flex flex-wrap -m-4">
+        <div class="form-search__container w-full">
+            <div class="form-search__result xl:w-1/2 md:w-1/2 w-full p-4">
+                <div class="flex flex-wrap">
+                    <div class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Bank Account Name') }}</span>
+                            <p>{{ currency.bank_account.name }}</p>
+                        </div>
+                    </div>
+                    <div v-if="currency.bank_account.reference_number" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Reference Number') }}</span>
+                            <p>{{ currency.bank_account.reference_number }}</p>
+                        </div>
+                    </div>
+                    <div v-if="currency.bank_account.iban" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Account Number') }}</span>
+                            <p>{{ currency.bank_account.iban }}</p>
+                        </div>
+                    </div>
+                    <div v-if="currency.bank_account.swift" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('SWIFT') }}</span>
+                            <p>{{ currency.bank_account.swift }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.country" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Country') }}</span>
+                            <p>{{ currency.bank_account.country }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.ifsc" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Branch Code') }}</span>
+                            <p>{{ currency.bank_account.ifsc }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.address" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Bank Address') }}</span>
+                            <p>{{ currency.bank_account.address }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.account_holder_name" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div  class="form-search__result-item w-full">
+                            <span>{{ $t('Account Holder Name') }}</span>
+                            <p>{{ currency.bank_account.account_holder_name }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.account_holder_address"  class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Account Holder Address') }}</span>
+                            <p>{{ currency.bank_account.account_holder_address }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.note" class="form-search__result-block w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Note') }}</span>
+                            <p>{{ currency.bank_account.note }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.account_holder_address"  class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Min Deposit Amount') }}</span>
+                            <p>{{ currency.min_deposit }} {{ currency.symbol }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="currency.bank_account.note" class="form-search__result-block xl:w-1/2 md:w-1/2 w-full">
+                        <div class="form-search__result-item w-full">
+                            <span>{{ $t('Max Deposit Amount') }}</span>
+                            <p>{{ currency.max_deposit }} {{ currency.symbol }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-components__table-title"><h4>{{ $t('3. Submit a deposit request') }}</h4></div>
+
+    <div class="components-filter components-filter__form">
+        <form @submit.prevent="submit">
+
+            <div class="components-filter__row">
+                <text-user-input @keyup.native="(e) => clearInput(e)" @keypress.native="(e) => handleInput(e)" @paste.native.prevent @drop.native.prevent v-model="form.amount" :error="errors.amount" class="components-filter__item" :label="$t(&quot;Amount&quot;)" />
+                <text-user-input v-model="form.note" :error="errors.note" class="components-filter__item" :label="$t('Note')" />
+            </div>
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <label>{{ $t('Receipt') }}</label>
+                    <div id="file-uploader-form">
+                        <VueFileAgent
+                            class="profile-pic-upload-block"
+                            ref="uploadForm"
+                            :multiple="false"
+                            :deletable="false"
+                            :meta="false"
+                            :compact="true"
+                            :accept="'image/*'"
+                            :helpText="$t('Drag an image file here')"
+                            :errorText="{
+                                    type: this.$t('Please select an image'),
+                                }"
+                            v-model="receipt"
+                            @select="onSelect($event)"
+                            @upload="onUpload($event)"
+                            @upload:error="onError($event)"
+                        >
+                            <template v-slot:before-outer>
+                            </template >
+                            <template v-slot:after-outer>
+                                <div :title="$t(&quot;after-outer&quot;)">
+                                    <div class="mb-4">
+                                        <p class="text-sm">{{ $t('Allowed types: ') }}<strong>{{ $t('jpg, png.') }}</strong></p>
+                                        <p class="text-sm">{{ $t('Max filesize: ') }}<strong>{{ $t('2MB') }}</strong></p>
+                                    </div>
+                                    <div class="drop-help-text">
+                                        <p class="text-success">{{ $t('Drop the file!') }}</p>
+                                    </div>
+                                    <button type="button" class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none" :class="[uploaded ? 'btn-danger' : 'btn-secondary']" v-if="receipt" @click="removePic()">{{ $t('Remove') }}</button>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </template >
+                        </VueFileAgent>
+                    </div>
+                    <div class="text-red-600 mb-3" v-if="errors.receipt_id">
+                        {{ errors.receipt_id }}
+                    </div>
+                </div>
+            </div>
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <t-button-green @click="" class="components-filter__button py-3 px-5" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ $t('Make a deposit') }}
+                        </span>
+                    </t-button-green>
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+</div>

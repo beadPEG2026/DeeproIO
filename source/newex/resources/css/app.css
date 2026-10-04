@@ -1,0 +1,7 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'toast/theme.css';
+@import 'file-uploader/theme.css';
+@import 'layout/layout.css';
+@import 'swap/style.css';

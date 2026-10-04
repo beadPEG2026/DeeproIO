@@ -1,0 +1,337 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Home') }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="cex-home dp-home dp-home-compact">
+        <div v-if="showPopupAnnouncement && popupArticle" class="cex-home__popup-overlay" role="dialog" aria-modal="true" @click.self="closePopupAnnouncement">
+            <article class="cex-home__popup-card" tabindex="-1">
+                <button type="button" class="cex-home__popup-close" :aria-label="$t('Close')" @click="closePopupAnnouncement">×</button>
+                <div class="cex-home__popup-scroll">
+                    <img v-if="popupArticle.thumbnail" :src="popupArticle.thumbnail" :alt="popupArticle.title" class="cex-home__popup-image" />
+                    <div class="cex-home__popup-content">
+                        <h2>{{ popupArticle.title }}</h2>
+                        <div class="cex-home__popup-body" v-html="popupArticle.body"></div>
+                    </div>
+                </div>
+                <div class="cex-home__popup-footer">
+                    <button type="button" class="cex-home__popup-action" @click="closePopupAnnouncement">{{ $t('Close') }}</button>
+                </div>
+            </article>
+        </div>
+        <home-dashboard :banners="banners" :articles="articles" />
+
+        <!-- Staking Section -->
+        <section class="cex-home__staking dp-home-wealth">
+            <div class="cex-home__section-header">
+                <div>
+                    <h2>{{ $t('Wealth') }}</h2>
+                    <p>{{ $t('Earn rewards by staking your crypto assets') }}</p>
+                </div>
+                <Link :href="route('stakings')" class="cex-home__view-all">
+                    {{ $t('View All') }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </Link>
+            </div>
+
+            <p v-if="!stakings || !stakings.data || !stakings.data.length" class="dp-wealth-empty">{{ $t('No coins for staking found.') }}</p>
+            <div v-else class="cex-home__staking-grid">
+                <div v-for="staking in stakings.data.slice(0, 2)" :key="staking.id" class="cex-home__staking-card">
+                    <div class="cex-home__staking-header">
+                        <img :src="staking.currency_logo" class="cex-home__staking-logo" />
+                        <div class="cex-home__staking-info">
+                            <span class="cex-home__staking-symbol">{{ staking.currency_symbol }}</span>
+                            <span class="cex-home__staking-name">{{ staking.currency }}</span>
+                        </div>
+                    </div>
+                    <div class="cex-home__staking-apy">
+                        <span class="cex-home__staking-apy-label">{{ $t('Estimated APR (simple)') }}</span>
+                        <span class="cex-home__staking-apy-value">
+                            <template v-if="firstStakingPeriod(staking)">
+                                {{ firstStakingPeriod(staking).annualized }}%
+                            </template>
+                        </span>
+                    </div>
+                    <p v-if="firstStakingPeriod(staking)">{{ firstStakingPeriod(staking).days }} {{ $t("days") }} · {{ $t("Period return") }} {{ Number(firstStakingPeriod(staking).reward).toFixed(5) }}%</p>
+                    <button type="button" class="cex-home__staking-btn" @click="setStaking(staking, 0)">{{ $t(staking.subscription && !staking.subscription.ready?'View product':'Stake Now') }}</button>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="dp-home-remit dp-home-remit--after-wealth"><header class="dp-home-section-heading"><h2>{{ $t('Remittance') }}</h2></header><div><span><b>{{ $t('Global remittance') }}</b><p>{{ $t('Global reach, effortless transfers') }}</p><button type="button" @click="$toast.open($t('暂未开通此功能'))">{{ $t('Start remittance') }}</button></span><svg viewBox="0 0 72 64" aria-hidden="true"><g transform="rotate(-18 36 32)"><rect x="8" y="12" width="56" height="40" rx="7" fill="#c8d8b5"/><rect x="14" y="18" width="44" height="28" rx="4" fill="none" stroke="#829d72" stroke-width="2"/><circle cx="36" cy="32" r="9" fill="#eff5e9"/><path d="M36 25v14m4-11c-8-4-10 5-4 5s4 8-4 4" fill="none" stroke="#829d72" stroke-width="2"/></g></svg></div></section>
+
+        <!-- Launchpad Section -->
+        <section class="cex-home__launchpad" v-if="launchpads && launchpads.data && launchpads.data.length > 0">
+            <div class="cex-home__section-header">
+                <div>
+                    <h2>{{ $t('Launchpad') }}</h2>
+                    <p>{{ $t('Discover and participate in token launches') }}</p>
+                </div>
+                <Link :href="route('launchpads')" class="cex-home__view-all">
+                    {{ $t('View All') }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </Link>
+            </div>
+
+            <div class="cex-home__launchpad-grid">
+                <div v-for="launchpad in launchpads.data" :key="launchpad.id" @click="setLaunchpad(launchpad)" class="cex-home__launchpad-card">
+                    <div class="cex-home__launchpad-header">
+                        <img :src="launchpad.currency_logo" class="cex-home__launchpad-logo" />
+                        <div class="cex-home__launchpad-info">
+                            <span class="cex-home__launchpad-symbol">{{ launchpad.currency_symbol }}</span>
+                            <span class="cex-home__launchpad-name">{{ launchpad.name }}</span>
+                        </div>
+                        <div class="cex-home__launchpad-status" :class="{
+                            'cex-home__launchpad-status--active': launchpad.status === 'open',
+                            'cex-home__launchpad-status--upcoming': launchpad.status === 'pending'
+                        }">
+                            {{ launchpad.status === 'open' ? $t('Active') : $t('Upcoming') }}
+                        </div>
+                    </div>
+                    <div class="cex-home__launchpad-progress">
+                        <div class="cex-home__launchpad-progress-header">
+                            <span>{{ $t('Progress') }}</span>
+                            <span>{{ launchpad.filled }}%</span>
+                        </div>
+                        <div class="cex-home__launchpad-progress-bar">
+                            <div class="cex-home__launchpad-progress-fill" :style="{ width: launchpad.filled + '%' }"></div>
+                        </div>
+                    </div>
+                    <div class="cex-home__launchpad-details">
+                        <div class="cex-home__launchpad-detail">
+                            <span>{{ $t('Hard Cap') }}</span>
+                            <span>{{ launchpad.hard_cap }}</span>
+                        </div>
+                        <div class="cex-home__launchpad-detail">
+                            <span>{{ $t('Price') }}</span>
+                            <span>{{ launchpad.rate }}</span>
+                        </div>
+                    </div>
+                    <button class="cex-home__launchpad-btn" v-if="launchpad.status === 'open'">{{ $t('Participate') }}</button>
+                    <button class="cex-home__launchpad-btn cex-home__launchpad-btn--upcoming" v-else>{{ $t('Coming Soon') }}</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="cex-home__features">
+            <div class="cex-home__section-header cex-home__section-header--center">
+                <h2>{{ $t('Why Choose Us') }}</h2>
+                <p>{{ $t('Trading, assets and ecosystem tools in one place.') }}</p>
+            </div>
+
+            <div class="cex-home__features-grid">
+                <div class="cex-home__feature-card">
+                    <div class="cex-home__feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3>{{ $t('Secure Storage') }}</h3>
+                    <p>{{ $t('View your balances, deposits and withdrawals in your asset account.') }}</p>
+                </div>
+                <div class="cex-home__feature-card">
+                    <div class="cex-home__feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3>{{ $t('Help & Support') }}</h3>
+                    <p>{{ $t('Find guidance and submit account or transaction questions through the support center.') }}</p>
+                </div>
+                <div class="cex-home__feature-card">
+                    <div class="cex-home__feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M2 12h20M12 2c2.5 4 2.5 16 0 20M12 2c-2.5 4-2.5 16 0 20"></path>
+                        </svg>
+                    </div>
+                    <h3>{{ $t('UMI Ecosystem') }}</h3>
+                    <p>{{ $t('Your UMI account, ecosystem products and history in one place.') }}</p>
+                </div>
+                <div class="cex-home__feature-card">
+                    <div class="cex-home__feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>{{ $t('Advanced Trading') }}</h3>
+                    <p>{{ $t('Charts and order tools for spot and perpetual futures.') }}</p>
+                </div>
+            </div>
+        </section>
+        <!-- APP Download Section -->
+<section class="cex-home__app-download-simple" v-if="hasAppDownloadLinks">
+    <div class="cex-home__app-download-simple-inner">
+        <div class="cex-home__app-download-simple-copy">
+            <h2>
+                {{ $t('Secure access, assets protected') }}
+            </h2>
+
+            <p>
+                {{ $t('Use the mobile app to follow live market movements, manage your wallet, access spot and futures trading, and keep your account protected with security tools designed for digital asset users.') }}
+            </p>
+        </div>
+
+        <div class="cex-home__app-download-simple-actions">
+            <div
+                class="cex-home__app-download-simple-item"
+                v-if="androidDownloadUrlValue"
+                @mouseenter="showDownloadQr('android')"
+                @mouseleave="hideDownloadQr"
+            >
+                <button
+                    type="button"
+                    class="cex-home__app-download-simple-btn"
+                    :aria-expanded="downloadQrIsVisible('android')" @click="toggleDownloadQr('android')"
+                >
+                    <span class="cex-home__app-download-simple-btn-icon">
+                        <svg class="bn-svg text-BasicBg h-6 w-6 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.543 14.1a1 1 0 01-.997-.997 1 1 0 01.997-.997 1 1 0 01.997.997 1 1 0 01-.997.997zm-11.05 0a1 1 0 01-.996-.997 1 1 0 01.997-.997 1 1 0 01.997.997.993.993 0 01-.997.997zM17.9 8.082l1.994-3.458a.409.409 0 00-.155-.567.409.409 0 00-.567.156l-2.022 3.503a12.354 12.354 0 00-5.14-1.098c-1.857 0-3.594.394-5.14 1.098L4.848 4.213a.419.419 0 00-.568-.156.419.419 0 00-.155.567l1.994 3.458C2.689 9.948.348 13.423 0 17.52h24c-.32-4.107-2.67-7.583-6.1-9.44z" fill="currentColor"></path></svg>
+                    </span>
+
+                    <span>{{ $t('Android Download') }}</span>
+
+                    <span class="cex-home__app-download-simple-btn-qr">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                            <path d="M14 14h2v2h-2z"></path>
+                            <path d="M18 14h3v3"></path>
+                            <path d="M14 18h3v3"></path>
+                            <path d="M20 20h1v1"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <div
+                    class="cex-home__app-download-simple-popover"
+                    v-show="downloadQrIsVisible('android')"
+                >
+                    <div class="cex-home__app-download-simple-qr-card">
+                        <canvas ref="androidDownloadQr"></canvas>
+
+                        <div class="cex-home__app-download-simple-qr-title">
+                            {{ $t("Android") }} {{ $t('App') }}
+                        </div>
+
+                        <div class="cex-home__app-download-simple-qr-text">
+                            {{ $t('Scan to download') }}
+                        </div>
+
+                        <div class="cex-home__app-download-simple-link-actions">
+                            <button type="button" @click="openDownloadUrl(androidDownloadUrlValue)">
+                                {{ $t('Download Android app') }}
+                            </button>
+
+                            <button type="button" @click="copyDownloadUrl(androidDownloadUrlValue)">
+                                {{ $t('Copy Link') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="cex-home__app-download-simple-item"
+                v-if="iosDownloadUrlValue"
+                @mouseenter="showDownloadQr('ios')"
+                @mouseleave="hideDownloadQr"
+            >
+                <button
+                    type="button"
+                    class="cex-home__app-download-simple-btn"
+                    :aria-expanded="downloadQrIsVisible('ios')" @click="toggleDownloadQr('ios')"
+                >
+                    <span class="cex-home__app-download-simple-btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                             viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16.36 1.43c0 1.16-.43 2.19-1.28 3.1-.91.97-1.97 1.53-3.11 1.44-.14-1.11.39-2.27 1.17-3.18.86-.99 2.23-1.74 3.22-1.36Zm3.72 16.77c-.55 1.25-.82 1.8-1.52 2.9-.99 1.52-2.39 3.42-4.12 3.44-1.54.02-1.94-.99-4.02-.98-2.08.01-2.52 1-4.06.98-1.73-.02-3.05-1.72-4.04-3.24-2.76-4.24-3.05-9.21-1.35-11.85 1.2-1.87 3.1-2.97 4.88-2.97 1.81 0 2.95 1 4.45 1 1.46 0 2.35-1 4.46-1 1.59 0 3.28.87 4.47 2.36-3.93 2.15-3.29 7.76.85 9.36Z"/>
+                        </svg>
+                    </span>
+
+                    <span>{{ $t('iOS home screen guide') }}</span>
+
+                    <span class="cex-home__app-download-simple-btn-qr">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                            <path d="M14 14h2v2h-2z"></path>
+                            <path d="M18 14h3v3"></path>
+                            <path d="M14 18h3v3"></path>
+                            <path d="M20 20h1v1"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <div
+                    class="cex-home__app-download-simple-popover"
+                    v-show="downloadQrIsVisible('ios')"
+                >
+                    <div class="cex-home__app-download-simple-qr-card">
+                        <canvas ref="iosDownloadQr"></canvas>
+
+                        <div class="cex-home__app-download-simple-qr-title">
+                            {{ $t('iOS home screen guide') }}
+                        </div>
+
+                        <div class="cex-home__app-download-simple-qr-text">
+                            {{ $t('Scan to view tutorial') }}
+                        </div>
+
+                        <div class="cex-home__app-download-simple-link-actions">
+                            <button type="button" @click="openDownloadUrl(iosDownloadUrlValue)">
+                                {{ $t('View tutorial') }}
+                            </button>
+
+                            <button type="button" @click="copyDownloadUrl(iosDownloadUrlValue)">
+                                {{ $t('Copy Link') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    <section class="deepro-home-ecosystem"><div><span class="deepro-eyebrow">DEEPRO × UMI</span><h2>{{ $t('Explore the UMI ecosystem') }}</h2><p>{{ $t('Your UMI account, ecosystem products and history in one place.') }}</p></div><Link :href="route('umi.portfolio')" class="cex-home__btn cex-home__btn--primary">{{ $t('Explore UMI') }} ↗</Link></section>
+        <!-- CTA Section -->
+        <section class="cex-home__cta">
+            <div class="cex-home__cta-content">
+                <template v-if="$page.props.user">
+                    <h2>{{ $t('Ready to Trade?') }}</h2>
+                    <p>{{ $t('Access all markets and start trading now') }}</p>
+                    <Link :href="route('markets')" class="cex-home__btn cex-home__btn--primary cex-home__btn--large">
+                        {{ $t('Go to Markets') }}
+                    </Link>
+                </template>
+                <template v-else>
+                    <h2>{{ $t('Start Trading Today') }}</h2>
+                    <p>{{ $t('Create your Deepro account and explore digital asset markets.') }}</p>
+                    <Link :href="route('register')" class="cex-home__btn cex-home__btn--primary cex-home__btn--large">
+                        {{ $t('Create Free Account') }}
+                    </Link>
+                </template>
+            </div>
+        </section>
+    </div>
+
+    <market-channel></market-channel>
+</app-layout>

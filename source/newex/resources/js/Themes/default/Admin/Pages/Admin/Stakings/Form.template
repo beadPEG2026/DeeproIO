@@ -1,0 +1,181 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.stakings')">{{ $page.props.staking_type == 1 ? $t("量化") : $t("质押") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden w-full">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $page.props.staking_type == 1 ? $t("量化") : $t("质押") }}{{ $t("信息") }}</div>
+                </div>
+
+
+
+<div
+    v-if="String($page.props.staking_type) !== '1'"
+    class="pr-6 pb-8 w-full lg:w-1/2"
+>
+    <label class="form-label d-block">{{ $t("币种：") }}</label>
+
+    <t-rich-select
+        :options="currencies"
+        v-model="form.currency_id"
+        placeholder="选择币种"
+        value-attribute="id"
+        text-attribute="name"
+    >
+        <template slot="label" slot-scope="{ option }">
+            <div class="flex">
+                <div class="flex flex-col">
+                    <span>{{ option.text }}</span>
+                </div>
+            </div>
+        </template>
+    </t-rich-select>
+
+    <div v-if="errors.currency_id" class="form-error text-red-400">
+        {{ errors.currency_id }}
+    </div>
+</div>
+
+                <!-- 量化模式 -->
+                <div
+                    v-else
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                >
+                    <!-- 隐藏的固定币种 -->
+                    <input type="hidden" v-model="form.currency_id" />
+
+                    <label class="form-label d-block">{{ $t("币种：") }}</label>
+
+                    <t-rich-select
+                        :options="currencies"
+                        v-model="form.currency_idd"
+                        placeholder="选择币种"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template slot="label" slot-scope="{ option }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+
+                    <div v-if="errors.currency_idd" class="form-error text-red-400">
+                        {{ errors.currency_idd }}
+                    </div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("状态：") }}</label>
+                    <t-rich-select
+                        v-model="form.status"
+                        :options="[
+                            {'id':'active','name':'启用'},
+                            {'id':'sold','name':'已售罄'},
+                            {'id':'hidden','name':'隐藏'}
+                        ]"
+                        placeholder="选择状态"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.status" class="form-error text-red-400">{{ errors.status }}</div>
+                </div>
+
+            <text-input
+                v-model="form.min_amount"
+                :error="errors.min_amount"
+                class="pr-6 pb-8 w-full lg:w-1/2"
+                :label="$page.props.staking_type == 1 ? '最小量化数量' : '最小质押数量'"
+            />
+
+            <text-input
+                v-model="form.max_amount"
+                :error="errors.max_amount"
+                class="pr-6 pb-8 w-full lg:w-1/2"
+                :label="$page.props.staking_type == 1 ? '最大量化数量' : '最大质押数量'"
+            />
+
+
+
+<text-input
+    v-if="String($page.props.staking_type) === '1'"
+    v-model="form.rewards_percentage"
+    :error="errors.rewards_percentage"
+    class="pr-6 pb-8 w-full lg:w-1/2"
+    :label="$page.props.staking_type === '1'
+        ? '量化利润起步'
+        : '收益百分比（用逗号分隔，例如 0.5,10,12.5）'"
+/>
+                <text-input
+                    v-if="String($page.props.staking_type) === '1'"
+                    v-model="form.rewards_percentage_a"
+                    :error="errors.rewards_percentage_a"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="量化利润最高"
+                />
+                <text-input
+                    v-if="String($page.props.staking_type) === '1'"
+                    v-model="form.rewards_percentage_t"
+                    :error="errors.rewards_percentage_t"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="利润提升（例如 5就为5%）"
+                />
+                <text-input
+    v-if="String($page.props.staking_type) === '1'"
+    v-model="form.allowed_days"
+    :error="errors.allowed_days"
+    class="pr-6 pb-8 w-full lg:w-1/2"
+    :label="$page.props.staking_type === '1'
+        ? '量化天数（例如 30）'
+        : '允许天数（用逗号分隔，例如 30,60,90）'"
+/>
+                <text-input
+                    v-if="String($page.props.staking_type) === '1'"
+                    v-model="form.Introduction"
+                    :error="errors.Introduction"
+                    class="pr-6 pb-8 w-full lg:w-1/2"
+                    label="量化介绍"
+                />
+
+            </div>
+            <section v-if="String($page.props.staking_type)==='0'" class="p-6">
+              <section v-if="configuration &amp;&amp; configuration.controls &amp;&amp; configuration.controls.funded_term" class="mb-6">
+                <h3>收益资金安排</h3><p v-if="configuration.controls.reward_funding === 'platform'">平台到期支付收益；无需配置收益资金用户或预存准备金。产品状态控制申购开放，已有订单保留原结算方式。</p><p v-else>设置运营用户 UID，并向该用户对应币种的现货账户注资。每次申购先锁定整期收益；余额不足时自动暂停新申购，已有订单的准备金不受影响。</p>
+                <text-input v-if="configuration.controls.reward_funding !== 'platform'" v-model="form.reward_user_id" :error="errors.reward_user_id" label="收益资金用户 UID（留空暂停申购）" />
+                <text-input v-model="form.pool_limit" :error="errors.pool_limit" label="产品总申购上限（币数量）" />
+              </section>
+              <staking-periods-editor :days="form.allowed_days" :rates="form.rewards_percentage" @change="form={...form,allowed_days:$event.days,rewards_percentage:$event.rates}" />
+              <p class="form-error text-red-400">{{ errors.allowed_days || errors.rewards_percentage || errors.revision }}</p>
+              <p class="my-4">{{ $t('Changes apply to new subscriptions. Existing positions keep their original terms.') }}</p>
+              <text-input v-model="form.apr_limit" :error="errors.apr_limit" :label="$t('APR limit (%) — blank means no hard limit')" />
+              <label class="block my-4"><input type="checkbox" v-model="form.high_apr_ack"> {{ $t('I reviewed any APR above 100%') }}</label><p class="text-red-400">{{ errors.high_apr_ack }}</p>
+              <label v-if="isEdit" class="block my-4">{{ $t('Effective time — blank applies immediately') }}<input type="datetime-local" v-model="effectiveAt" class="block border rounded p-2"></label><p class="text-red-400">{{ errors.effective_at }}</p>
+              <text-input v-model="form.reason" :error="errors.reason" :label="$t('Reason for change')" />
+              <p v-if="configuration && configuration.controls.pending" class="my-4">{{ $t('Scheduled change') }}: {{ configuration.controls.pending.effective_at }} · {{ $t('Saving replaces the pending version. Clear the effective time to apply immediately.') }}</p>
+              <details v-if="configuration" class="my-4"><summary>{{ $t('Change history') }}</summary><article v-for="event in configuration.history" :key="event.id"><b>{{ event.created_at }} · #{{ event.actor_id }} · {{ event.action }}</b><p>{{ event.reason }}</p><pre class="overflow-auto">{{ JSON.stringify(event.changes,null,2) }}</pre></article></details>
+            </section>
+            <product-config-preview :form="form" :original="original" :fields="previewFields" :is-edit="isEdit" :currencies="currencies" />
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+                <button v-if="isEdit" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除") }}{{ $page.props.staking_type == 1 ? $t("量化") : $t("质押") }}</button>
+                <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">{{ $t(actionButtonTitle) }}</loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

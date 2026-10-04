@@ -1,0 +1,33 @@
+<auth-screen-layout screen="login">
+    <Head><title>{{ $t('Login') }}</title></Head>
+    <form class="dp-auth-single__form" @submit.prevent="submit">
+        <p v-if="status" class="dp-auth-single__status" role="status">{{ status }}</p>
+        <div v-if="generalErrors.length" class="dp-auth-single__errors" role="alert"><p v-for="(message, index) in generalErrors" :key="index">{{ displayError(message) }}</p></div>
+        <div class="dp-auth-single__fields">
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.email}" for="FormLabel-email">
+                    <span>{{ $t('Email') }}</span>
+                    <input id="FormLabel-email" v-model="form.email" type="email" inputmode="email" autocomplete="username" required autocapitalize="none" :spellcheck="false" :placeholder="$t('Enter email')" :aria-invalid="!!errors.email" :aria-describedby="errors.email ? 'auth-email-error' : null">
+                </label>
+                <p v-if="errors.email" id="auth-email-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.email) }}</p>
+            </div>
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.password}" for="FormLabel-password">
+                    <span>{{ $t('Password') }}</span>
+                    <div class="dp-auth-single__input-row">
+                        <input id="FormLabel-password" v-model="form.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" :placeholder="$t('Enter password')" :aria-invalid="!!errors.password" :aria-describedby="errors.password ? 'auth-password-error' : null">
+                        <button type="button" class="dp-auth-single__eye" :aria-label="$t(showPassword ? 'Hide password' : 'Show password')" :aria-pressed="showPassword" @click="showPassword = !showPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path v-if="showPassword" d="m4 4 16 16"/></svg></button>
+                    </div>
+                </label>
+                <p v-if="errors.password" id="auth-password-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.password) }}</p>
+            </div>
+        </div>
+        <div class="dp-auth-single__options">
+            <span class="dp-auth-single__security"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg>{{ $t('Secure sign-in protects your account.') }}</span>
+            <Link v-if="canResetPassword" :href="route('password.request')">{{ $t('Forgot your password?') }}</Link>
+        </div>
+        <div v-if="$page.props.captcha" class="dp-auth-single__captcha"><vue-recaptcha ref="recaptcha" @verify="onVerify" @expired="onCaptchaExpired" @error="onCaptchaExpired" :sitekey="$page.props.captcha_key" :loadRecaptchaScript="true" /></div>
+        <button type="submit" class="dp-auth-single__primary" :disabled="form.processing" :aria-busy="form.processing">{{ $t('Login') }}</button>
+        <p class="dp-auth-single__switch"><span>{{ $t('No account yet?') }}</span><Link :href="route('register')">{{ $t('Register now') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></Link></p>
+    </form>
+</auth-screen-layout>

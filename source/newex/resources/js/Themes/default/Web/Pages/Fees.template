@@ -1,0 +1,103 @@
+<app-layout>
+  <Head>
+    <title>{{ $t('Fees') }}</title>
+    <meta name="description" content="" />
+  </Head>
+
+  <div class="components-title"><h2>{{ $t('Fees') }}</h2></div>
+
+  <section class="dp-fee-summary"><h3>{{ $t('Spot trading fees') }}</h3><div><span>Maker <b>{{ makerFee }}%</b></span><span>Taker <b>{{ takerFee }}%</b></span><Link :href="route('page.trading-rules')">{{ $t('Trading Rules') }} ↗</Link></div></section>
+  <section class="dp-fee-summary"><h3>{{ $t('Futures trading fees') }}</h3><div><span>Maker <b>{{ futuresMakerFee }}%</b></span><span>Taker <b>{{ futuresTakerFee }}%</b></span></div></section>
+  <div class="table-components">
+    <table class="tables mob-table-referral-transactions">
+      <thead class="table-sort no-cursor">
+        <tr>
+          <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Currency') }}</span></div></th>
+          <th class="text-left">{{ $t('Network') }}</th>
+          <th class="text-left">{{ $t('Minimum Deposit') }}</th>
+          <th class="text-left">{{ $t('Minimum Withdrawal') }}</th>
+          <th class="text-left">{{ $t('Deposit Fee') }}</th>
+          <th class="text-left">{{ $t('Withdrawal Fee') }}</th>
+        </tr>
+      </thead>
+      <tbody class="table-list">
+        <tr v-for="c in currencies" :key="c.id">
+          <td>
+            <div class="table-list__subtitle">{{ $t('Currency') }}</div>
+            <div class="table-list__value title-icon">
+              <currency-avatar class="table-list__image" :symbol="c.symbol" :src="c.logo_path" />
+              <div class="title-icon__name">{{ c.symbol }} <span class="quote-symbol">{{ c.name }}</span></div>
+            </div>
+          </td>
+          <td>
+            <div class="table-list__subtitle">{{ $t('Networks') }}</div>
+            <div class="table-list__value">
+              <table class="tables w-full no-borders">
+                <tbody>
+                  <tr v-for="n in (c.networks || [])" :key="`${c.id}-${n.id}`">
+                    <td><network-icon :network-id="n.id" :name="networkName(n)"/>{{ networkName(n) }}</td>
+                  </tr>
+                  <tr v-if="!c.networks || !c.networks.length">
+                    <td colspan="5">{{ $t('No networks') }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+          <td>
+              <div class="table-list__subtitle">{{ $t('Minimum Deposit') }}</div>
+              <div class="table-list__value">
+                <table class="tables w-full no-borders">
+                  <tbody>
+                    <tr v-for="n in (c.networks || [])" :key="`${c.id}-${n.id}`">
+                      <td>{{ c.min_deposit }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+        </td>
+        <td>
+            <div class="table-list__subtitle">{{ $t('Minimum Withdrawal') }}</div>
+            <div class="table-list__value">
+              <table class="tables w-full no-borders">
+                <tbody>
+                  <tr v-for="n in (c.networks || [])" :key="`${c.id}-${n.id}`">
+                    <td>{{ c.min_withdraw }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+          <td>
+              <div class="table-list__subtitle">{{ $t('Deposit Fee') }}</div>
+              <div class="table-list__value">
+                <table class="tables w-full no-borders">
+                  <tbody>
+                    <tr v-for="n in (c.networks || [])" :key="`${c.id}-${n.id}`">
+                      <td>{{ depositFeeFor(c, n.slug) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+            <td>
+              <div class="table-list__subtitle">{{ $t('Withdrawal Fee') }}</div>
+              <div class="table-list__value">
+                <table class="tables w-full no-borders">
+                  <tbody>
+                    <tr v-for="n in (c.networks || [])" :key="`${c.id}-${n.id}`">
+                      <td>{{ withdrawFeeFor(c, n.slug) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+        </tr>
+        <tr v-if="!currencies || !currencies.length">
+          <td colspan="2">{{ $t('No currencies found.') }}</td>
+        </tr>
+      </tbody>
+      <tfoot class="table-result"></tfoot>
+    </table>
+  </div>
+</app-layout>

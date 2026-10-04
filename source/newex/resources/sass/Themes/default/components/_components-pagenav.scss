@@ -1,0 +1,30 @@
+
+/** pagenav start */
+.pagenav {
+    margin-top: 3rem;
+    
+    a {
+        outline: none;
+        border-color: var(--border-line-color);
+        border-radius: 2px;
+        background-color: transparent;
+
+        &:hover {
+            background-color: var(--border-line-color);
+        }
+        &:focus {
+            color: var(--yellow-color);
+            border-color: var(--yellow-color);
+        }
+        
+    }
+    div {
+        outline: none;
+        border-color: var(--border-line-color);
+        background-color: transparent;
+    }
+    .bg-white {
+        background-color: var(--border-line-color);
+    }
+}
+/** pagenav end */

@@ -1,0 +1,52 @@
+.page-section {
+    .components-title {
+        h1 {
+            margin: 5rem 0 3rem;
+            font-size: var(--h2-font__size);
+        }
+    }
+
+    &-content {
+
+        img {
+            max-width: 100%;
+        }
+
+        p, li, h2, h3, h4 {
+            line-height: 2.2rem;
+            color: var(--first-text-color);
+        }
+
+        h2 {
+            margin: 2rem 0;
+            font-size: 1.3rem;
+            color: var(--first-text-color);
+        }
+
+        ul {
+            list-style: circle;
+            padding: 0px 1rem;
+        }
+
+        a {
+            color: var(--purple-second-color) !important;
+
+            &:visited {
+                color: var(--purple-second-color) !important;
+            }
+
+            &:hover {
+                color: var(--purple-second-color) !important;
+            }
+        }
+    }
+}
+
+.profile-inner-page {
+    .form-components__title {
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    }
+}

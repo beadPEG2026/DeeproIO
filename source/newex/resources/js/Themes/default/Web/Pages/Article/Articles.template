@@ -1,0 +1,103 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('News & Announcements') }}</title>
+        <meta name="description" content="Latest news and announcements">
+    </Head>
+
+    <div class="articles-page">
+        <div class="container mx-auto px-4 py-8">
+            
+            <!-- Page Header -->
+            <div class="articles-header text-center mb-12">
+                <h1 class="articles-title">{{ $t('News & Announcements') }}</h1>
+                <p class="articles-subtitle">{{ $t('Stay updated with the latest news, updates, and announcements from our platform') }}</p>
+            </div>
+
+            <!-- Featured Article (First Article) -->
+            <div v-if="articles.data.length > 0" class="featured-article mb-12" @click="setArticle(articles.data[0])">
+                <div class="featured-article-inner">
+                    <div class="featured-image">
+                        <img :src="articles.data[0].thumbnail" :alt="articles.data[0].title" />
+                        <div class="featured-badge">{{ $t('Featured') }}</div>
+                    </div>
+                    <div class="featured-content">
+                        <div class="featured-meta">
+                            <span class="featured-date">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                {{ articles.data[0].created_at }}
+                            </span>
+                        </div>
+                        <h2 class="featured-title">{{ articles.data[0].title }}</h2>
+                        <p class="featured-excerpt" v-if="articles.data[0].excerpt">{{ articles.data[0].excerpt }}</p>
+                        <div class="featured-cta">
+                            <span class="read-more-btn">
+                                {{ $t('Read Article') }}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            <div class="articles-grid" v-if="articles.data.length > 1">
+                <div 
+                    v-for="(article, index) in articles.data.slice(1)" 
+                    :key="article.id" 
+                    class="article-card"
+                    @click="setArticle(article)"
+                >
+                    <div class="article-card-image">
+                        <img :src="article.thumbnail" :alt="article.title" />
+                        <div class="article-card-overlay"></div>
+                    </div>
+                    <div class="article-card-content">
+                        <div class="article-card-meta">
+                            <span class="article-date">{{ article.created_at }}</span>
+                        </div>
+                        <h3 class="article-card-title">{{ article.title }}</h3>
+                        <p class="article-card-excerpt" v-if="article.excerpt">{{ article.excerpt }}</p>
+                        <div class="article-card-footer">
+                            <span class="read-more-link">
+                                {{ $t('Read More') }}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-if="articles.data.length === 0" class="articles-empty">
+                <div class="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <h3 class="empty-title">{{ $t('No Articles Yet') }}</h3>
+                <p class="empty-description">{{ $t('Check back soon for the latest news and announcements.') }}</p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="articles.data.length > 0" class="articles-pagination">
+                <pagination :links="articles.meta.links" />
+            </div>
+
+        </div>
+    </div>
+
+</app-layout>

@@ -1,0 +1,606 @@
+/* Single semantic palette. Components choose a role, never a fixed light/dark color. */
+:root {
+ --ui-page:#f7f8fa;--ui-surface:#ffffff;--ui-field:#f1f3f6;
+ --ui-text:#181d25;--ui-muted:#586474;--ui-line:#c7ac66;--ui-divider:#e8dfc9;
+ --ui-accent:#f5ca32;--ui-accent-hover:#e7b823;--ui-accent-text:#755600;--ui-on-accent:#171b22;
+ --ui-highlight:#fff4cf;--ui-focus:#97701b;--ui-success:#087b55;--ui-danger:#bd2942;
+ --ui-success-fill:#087b55;--ui-danger-fill:#bd2942;--ui-on-fill:#ffffff;
+ --ui-umi-accent:#29db6a;--ui-umi-link:#126a35;--ui-umi-text:#143824;
+ --ui-umi-muted:#486653;--ui-umi-soft:#eef8f1;--ui-umi-line:#9ac2a6;
+ --ui-backdrop:rgba(12,18,28,.6);
+}
+body.dark {
+ color-scheme:dark;--ui-page:#11151c;--ui-surface:#1b212b;--ui-field:#252d39;
+ --ui-text:#edf1f7;--ui-muted:#b0bdcd;--ui-line:#716039;--ui-divider:#3e3a30;
+ --ui-accent-text:#f1cc67;--ui-highlight:#383323;--ui-focus:#e1bf63;
+ --ui-success:#55d5a8;--ui-danger:#ff8b9c;
+ --ui-umi-link:#77e5a0;--ui-umi-text:#e1f7e8;--ui-umi-muted:#a7c7b1;
+ --ui-umi-soft:#172a20;--ui-umi-line:#46694f;
+}
+body {
+ color:var(--ui-text);background:var(--ui-page);
+ --body-color:var(--ui-page);--dark-body-color:var(--ui-page);--dark-profile-body-color:var(--ui-page);
+ --first-text-color:var(--ui-text);--second-text-color:var(--ui-muted);--third-text-color:var(--ui-text);--fourth-text-color:var(--ui-text);--dark-text-color:var(--ui-muted);--dark-text-color2:var(--ui-muted);
+ --border-line-color:var(--ui-divider);--border-line-color-v2:var(--ui-divider);--modal-border-line-color:var(--ui-line);--border-select-color:var(--ui-line);
+ --rows-color:var(--ui-field);--white-input:var(--ui-field);--tr-hover-color:var(--ui-highlight);
+ --green-color:var(--ui-success);--green-second-color:var(--ui-success);--red-color:var(--ui-danger);--red-second-color:var(--ui-danger);
+ --blue-dark-color:var(--ui-surface);--blue-dark-second-color:var(--ui-field);--blue-dark-thir-color:var(--ui-surface);--blue-dark-bar-color:var(--ui-page);--blue-dark-fourth-color:var(--ui-line);--blue-dark-fifth-color:var(--ui-surface);
+ --purple-color:var(--ui-accent-text);--purple-second-color:var(--ui-accent-text);--purple-third-color:var(--ui-field);--purple-fourth-color:var(--ui-field);
+ --yellow-color:var(--ui-accent);--yellow-darker-color:var(--ui-accent-text);--yellow-secondary-color:var(--ui-accent-text);
+ --table-head-color:var(--ui-field);--btn-secondary-color:var(--ui-field);--btn-secondary-text-color:var(--ui-text);--label-bubble-color:var(--ui-field);
+ --xp-ink:var(--ui-text);--xp-muted:var(--ui-muted);--xp-line:var(--ui-line);--xp-surface:var(--ui-surface);--xp-soft:var(--ui-page);--xp-yellow:var(--ui-accent);--xp-green:var(--ui-umi-accent);
+ --risk-modal-bg:var(--ui-surface);--risk-modal-text:var(--ui-text);--risk-modal-border:var(--ui-line);--risk-modal-backdrop:var(--ui-backdrop);--risk-close-color:var(--ui-text);--risk-body-text:var(--ui-muted);--risk-confirm-bg:var(--ui-accent);--risk-confirm-hover:var(--ui-accent-hover);--risk-confirm-text:var(--ui-on-accent);
+ --launchpad-modal-bg:var(--ui-surface);--launchpad-modal-text:var(--ui-text);--launchpad-modal-body-text:var(--ui-muted);
+}
+body:not(.dark) {color-scheme:light}
+body.dark {--first-text-color:var(--ui-text);--second-text-color:var(--ui-muted);--body-color:var(--ui-page);--rows-color:var(--ui-field)}
+button,input,select,textarea {font:inherit}
+button,a,input,select,textarea {touch-action:manipulation}
+button {overflow-wrap:anywhere}
+button:disabled {cursor:not-allowed;opacity:.65}
+:where(button,a,input,select,textarea,summary):focus-visible {outline:2px solid var(--ui-focus);outline-offset:3px}
+.dp-site {--xp-surface:var(--ui-surface);--xp-page:var(--ui-page);--xp-ink:var(--ui-text);--xp-muted:var(--ui-muted);--xp-line:var(--ui-line)}
+.dp-site .dp-button--outline {color:var(--ui-text)!important;background:var(--ui-surface);border-color:var(--ui-line)}
+.dp-site .dp-home-hero {background:var(--ui-surface);color:var(--ui-text)}
+.dp-site .dp-home-hero h1,.dp-site .dp-home-hero h1 em {color:var(--ui-text)}
+.dp-site .dp-home-hero p {color:var(--ui-muted)}
+.dp-site .dp-home-hero:before {opacity:.13}
+.dp-site .dp-technology-orbit__core {box-shadow:none}
+.dp-site .header-section .gxhead-link {white-space:normal;line-height:1.3;text-align:start}
+.dp-site .header-section .gxhead-navlist {gap:clamp(12px,1.5vw,24px)}
+.dp-site .header__row {max-width:none}
+.dp-site .header-nav {min-width:0}
+.dp-site .component-language-switcher .item-language {white-space:normal;text-align:start;min-height:40px;padding:8px 10px;color:var(--ui-text)}
+.dp-site .component-language-switcher .item-language__active {background:var(--ui-highlight);color:var(--ui-accent-text)}
+.dp-theme-toggle {display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
+.dp-theme-toggle .dp-theme-switch {display:block;position:relative;min-width:48px;width:48px;height:28px;border:1px solid var(--ui-line);border-radius:18px;background:var(--ui-field)}
+.dp-theme-toggle .dp-theme-switch:before {content:"☀";position:absolute;left:4px;top:1px;font-size:17px;line-height:24px;color:var(--ui-accent-text)}
+.dp-theme-toggle .dp-theme-switch:after {content:"";position:absolute;left:25px;top:5px;width:16px;height:16px;border-radius:50%;background:var(--ui-text)}
+body.dark .dp-theme-toggle .dp-theme-switch:before {content:"☾";left:25px}
+body.dark .dp-theme-toggle .dp-theme-switch:after {left:5px}
+.dp-theme-toggle__label {font-size:13px;color:var(--ui-muted)}
+.site-layout .header-navigation-right .dp-theme-toggle__label {display:none}
+.site-layout .header-navigation-right .dp-theme-toggle {margin-inline-start:8px}
+.dp-site .deepro-stocks {background:var(--ui-surface);color:var(--ui-text)}
+.dp-site .deepro-stocks input {background:var(--ui-field)!important;color:var(--ui-text)!important}
+.dp-site .stock-native-actions a {background:var(--ui-highlight);color:var(--ui-accent-text)}
+.dp-site .page-section-content .prose {color:var(--ui-text);max-width:80ch;margin-inline:auto}
+.dp-site .page-section-content .prose :is(h1,h2,h3,h4,strong,th) {color:var(--ui-text)}
+.dp-site .page-section-content .prose :is(p,li,td,blockquote) {color:var(--ui-muted)}
+.dp-site .page-section-content .prose a {color:var(--ui-accent-text);text-decoration:underline}
+.dp-site .page-section-content .prose img {max-width:100%;height:auto}
+.dp-site .page-section-content .prose table {display:block;overflow:auto;max-width:100%}
+.dp-site .dp-profile a:not(.umi-action),.dp-site .dp-profile .link {color:var(--ui-accent-text)}
+.dp-site .components-filter__search {background:var(--ui-accent);color:var(--ui-on-accent)}
+.dp-site .components-filter__search * {color:inherit}
+.dp-site .risk-dialog {background:var(--ui-surface);color:var(--ui-text);max-height:calc(100dvh - 40px);overflow:auto}
+.dp-site .risk-body {color:var(--ui-muted)}
+.dp-site .risk-confirm {color:var(--ui-on-accent);background:var(--ui-accent)}
+.dp-site .table-sort__title,.dp-site .table-list td {overflow-wrap:anywhere}
+.dp-site :is(.btn-yellow,.form-components__block-button,.staking-list__button,.launchpad-list__button) {color:var(--ui-on-accent)}
+.dp-site :is(.btn-yellow,.form-components__block-button) span {color:inherit}
+.dp-site .color-buy {color:var(--ui-success)}
+.dp-site .color-sell {color:var(--ui-danger)}
+.dp-site .module-orderform__buy-forms__button:not(.button-tab),.dp-site .button-tab-buy-active {background:var(--ui-success-fill);color:var(--ui-on-fill)}
+.dp-site .module-orderform__sell-forms__button:not(.button-tab),.dp-site .button-tab-sell-active {background:var(--ui-danger-fill);color:var(--ui-on-fill)}
+.dp-site .module-orderform__title {gap:20px;flex-wrap:wrap}
+.dp-site .module-orderform__title-item {white-space:normal;min-height:40px}
+.dp-site .dp-earn :is(.text-yellow-300,.text-yellow-400,.text-indigo-300,.text-purple-300) {color:var(--ui-accent-text)}
+.dp-site .dp-earn :is(.text-gray-100,.text-gray-200,.text-gray-800) {color:var(--ui-text)}
+.dp-site .dp-earn :is(.text-gray-400,.text-gray-500,.text-gray-600) {color:var(--ui-muted)}
+.dp-site .dp-earn :is(.bordered-dark,.rounded-2xl) {background:var(--ui-surface);border-color:var(--ui-line)}
+.dp-site .dp-earn :is(.text-green-300,.text-green-400,.text-emerald-300,.text-emerald-400) {color:var(--ui-success)}
+.dp-site .dp-earn :is(.text-red-300,.text-red-400) {color:var(--ui-danger)}
+.dp-site .dp-earn button {white-space:normal;line-height:1.5}
+/* Localized headings and actions are allowed to grow without clipping adjacent content. */
+:is(.dp-auth-shell,.dp-site,.admin-layout) :is(h1,h2,h3,h4) {overflow-wrap:anywhere}
+.dp-actions,.dp-umi-entry,.dp-auth-shell__controls {flex-wrap:wrap}
+.dp-auth-form label {white-space:normal}
+.dp-auth-form .form-components__code-btn {max-width:45%;white-space:normal;line-height:1.2}
+.dp-site .dp-stock-info summary {flex-wrap:wrap}
+@media(max-width:1399px) {
+ .dp-site .header__row {min-height:64px;padding-inline:14px}
+ .dp-site .header-nav.active {position:fixed;inset:64px 0 64px!important;width:100%!important;max-width:none;padding:16px!important;overflow-y:auto}
+ .dp-site .header-nav.active .gxhead-navlist {display:flex;flex-direction:column;align-items:stretch;gap:4px}
+ .dp-site .header-nav.active .gxhead-link {min-height:44px;font-size:16px!important}
+ .dp-site .header-nav.active .mobile-menu-profile {margin-top:16px}
+ .dp-site .header-navigation-right {gap:8px}
+ .dp-site .dp-theme-toggle {display:flex}
+ .dp-site .mobbar__link {min-width:0;font-size:10px;text-align:center;line-height:1.2;overflow-wrap:anywhere}
+ .dp-site .mobbar {height:auto;min-height:64px}
+ .dp-site .mobbar__link span {white-space:normal}
+}
+
+@media(min-width:1400px) { .dp-site .header-btn,.dp-site .left-header-icon {display:none!important}.dp-site .header-nav {display:block!important}.dp-site .header-navigation-right {display:flex!important} }
+@media(max-width:1399px) { .dp-site .header-btn {display:block!important}.dp-site .header-nav:not(.active) {display:none!important}.dp-site .header-nav.active {display:block!important}.dp-site .header-navigation-right {display:flex!important}.dp-site .header-section .deepro-brand {font-size:24px}.dp-site .header__row {justify-content:space-between}.dp-site .header-nav.active .header-logo {display:none}.dp-site .gxhead-submenu {position:static;box-shadow:none!important;width:auto!important} }
+
+.site-layout .dp-theme-toggle__label {display:none}
+.dp-site :is(.umi-hero,.deepro-eco-hero,.deepro-eco-overview,.umi-token-card) {background:var(--ui-umi-soft);color:var(--ui-umi-text)}
+.dp-site :is(.umi-tabs,.ub-tabs) button {color:var(--ui-umi-link)}
+.dp-site :is(.umi-tabs,.ub-tabs) button.selected {background:var(--ui-umi-soft);color:var(--ui-umi-text)}
+
+/* Explicit foreground/background pairs for accent controls and market states. */
+.dp-site :is(.cex-home__staking-btn,.cex-home__launchpad-btn,.staking-card__btn--primary,.launchpad-card__btn--primary,.staking-page__tab--active,.launchpad-page__tab--active) {background:var(--ui-accent)!important;color:var(--ui-on-accent)!important}
+.dp-site :is(.cex-home__markets-change--up,.table-list__text.color-buy) {background:var(--ui-success-fill);color:var(--ui-on-fill)}
+.dp-site :is(.cex-home__markets-change--down,.table-list__text.color-sell) {background:var(--ui-danger-fill);color:var(--ui-on-fill)}
+.dp-site :is(.staking-card__status--active,.launchpad-card__status--active) {color:var(--ui-success);background:var(--ui-surface)}
+.dp-site .deepro-eco-modules>button {background:var(--ui-surface)}
+.dp-site .deepro-eco-modules>button:hover,.dp-site .deepro-eco-modules>button.active {background:var(--ui-umi-soft)}
+.dp-site .deepro-stock-tabs button {color:var(--ui-muted)}
+.dp-site .deepro-stock-tabs button.active {color:var(--ui-text)}
+.dp-site .deepro-stocks .umi-up {color:var(--ui-success)}
+.dp-site .deepro-stocks .umi-down {color:var(--ui-danger)}
+.dp-site .deepro-stocks :is(.umi-eyebrow,.umi-page-heading p) {color:var(--ui-muted)}
+.dp-site .deepro-stock-identity small i {color:var(--ui-muted);background:var(--ui-field)}
+.dp-site .market-risk-btn {color:var(--ui-text);background:var(--ui-field);border-color:var(--ui-line)}
+.dp-site .module-orderbook__title {color:var(--ui-muted)}
+.dp-site .module-orderbook__title>div {color:inherit}
+.dp-site .module-orderopen__navigation-active h4 {color:var(--ui-text)}
+.dp-site :is(.table-list__link,.module-orderopen__notfont,.module-orderopen__no-orders) a {color:var(--ui-accent-text)}
+.dp-site .table-sort__title-active h4 {color:var(--ui-text)}
+.dp-site .module-orderform .button-tab span {color:inherit}
+.dp-site .module-orderform .button-tab-buy-active {background:var(--ui-success-fill)!important;color:var(--ui-on-fill)}
+.dp-site .module-orderform .button-tab-sell-active {background:var(--ui-danger-fill)!important;color:var(--ui-on-fill)}
+.dp-site .module-orderform .button-tab:not(.button-tab-buy-active):not(.button-tab-sell-active) {background:var(--ui-field);color:var(--ui-text)}
+.dp-site :is(.dp-workbench,.page-section-content) :is(.text-gray-500,.text-gray-600) {color:var(--ui-muted)}
+.dp-site :is(.dp-route-profile,.profile-section,.dp-route-wallet) .text-gray-500,.dp-site :is(.text-gray-400,.text-gray-500,.text-gray-600) {color:var(--ui-muted)}
+.dp-site .text-red-500 {color:var(--ui-danger)}
+.dp-site .umi-text-button {color:var(--ui-umi-link)}
+.dp-site .wallet-assets-btn {background:var(--ui-field);color:var(--ui-text)}
+.dp-site .wallet-assets-btn--primary {background:var(--ui-accent);color:var(--ui-on-accent)}
+.dp-site .transfer-direction-hint,.dp-site .help-text {color:var(--ui-muted)}
+.dp-site .badged-label-button {color:var(--ui-accent-text);background:var(--ui-field)}
+.dp-site .components-filter__button,.dp-site .components-filter__button .components-filter__icon {color:var(--ui-on-accent)}
+.dp-site .dp-earn :is(.text-gray-300,.text-indigo-400,.auto-invest-help-btn) {color:var(--ui-muted)}
+.dp-site .dp-earn :is(.text-green-500,.text-emerald-500) {color:var(--ui-success)}
+.dp-site .dp-earn :is(.text-red-500,.text-rose-500) {color:var(--ui-danger)}
+.dp-site .dp-earn .bg-emerald-500 {background:var(--ui-success-fill);color:var(--ui-on-fill)}
+.dp-site .components-label.label-green {color:var(--ui-success);background:var(--ui-surface)}
+@media(max-width:1399px){
+ .dp-site .header__row {display:flex;position:relative;gap:12px;min-height:64px}
+ .dp-site .header__row-left.hidden-in-desktop {display:flex;width:28px;flex-shrink:0}
+ .dp-site .header__row-left:not(.hidden-in-desktop) {flex:1;min-width:0;justify-content:flex-start}
+ .dp-site .header__row .header-logo {position:static;transform:none;width:auto;margin:0;padding:0}
+ .dp-site .header__row-right {display:flex;align-items:center;gap:12px;margin:0}
+ .dp-site .header-btn {order:2;margin:0;width:28px;min-width:28px;height:28px}
+ .dp-site .header__row-right>.dp-theme-toggle {order:1;margin:0}
+ .dp-site .header__row .deepro-brand {font-size:22px;gap:8px}
+ .dp-site .header__row .deepro-brand svg {width:30px}
+}
+
+/* Scoped upload widgets ship fixed gray helper text; keep the theme authoritative. */
+:is(.dp-site,.admin-layout) .help-text {color:var(--ui-muted)!important}
+.dp-site #transfer-container .transfer-direction-hint {background:var(--ui-field);color:var(--ui-muted);border-color:var(--ui-line)}
+.dp-site .components-filter__button {background:var(--ui-accent);color:var(--ui-on-accent)}
+.dp-site .table-sort__title-active h4 {color:var(--ui-on-accent)}
+/* Legacy market widgets keep their role even when nested styles use !important. */
+body {--umi-yellow:var(--ui-accent);--umi-text:var(--ui-text);--umi-muted:var(--ui-muted);--umi-line:var(--ui-line);--umi-green:var(--ui-success);--umi-red:var(--ui-danger)}
+.dp-site .umi-markets-heading p {color:var(--ui-muted)}
+.dp-site .sub-tabs-nav__item {background:var(--ui-field);color:var(--ui-text)}
+.dp-site .sub-tabs-nav__item h4 {color:inherit}
+.dp-site .sub-tabs-nav__active {background:var(--ui-accent);color:var(--ui-on-accent)}
+.dp-site .sub-tabs-nav__active h4 {color:var(--ui-on-accent)}
+.dp-site .table-list__value .table-list__text.color-buy {background:transparent!important;color:var(--ui-success)!important}
+.dp-site .table-list__value .table-list__text.color-sell {background:transparent!important;color:var(--ui-danger)!important}
+.dp-site .module-orderopen__login-text a {color:var(--ui-accent-text)}
+.dp-site .module-orderform .button-tab-buy-active span {color:var(--ui-on-fill)}
+.dp-site .module-orderform .button-tab-buy-active {background:var(--ui-success-fill)}
+@media(max-width:1399px){.dp-site.site-layout {padding-top:64px}}
+
+.dp-site .pagenav>div {background:var(--ui-field);color:var(--ui-muted);border-color:var(--ui-line)}
+.dp-site .wallet-assets-search span {color:var(--ui-muted)}
+.dp-site .currency-avatar {background:var(--ui-field);color:var(--ui-text)}
+.dp-site .currency-avatar>span {color:inherit}
+.dp-site .currency-avatar--umi {background:var(--ui-umi-soft);color:var(--ui-umi-link)}
+
+@media(max-width:767px){
+ .dp-auth-language .component-language-switcher {position:fixed;inset:100px 16px auto;width:auto;max-width:none;max-height:calc(100dvh - 120px)}
+}
+
+.dp-site .mobile-body .tabs-nav__active h4 {color:var(--ui-on-accent)!important}
+.dp-site .module-orderform__buy-forms__button:not(.button-tab):hover,.dp-site .button-tab-buy-active:hover {background:var(--ui-success-fill)!important;color:var(--ui-on-fill)}
+.dp-site .module-orderform__sell-forms__button:not(.button-tab):hover,.dp-site .button-tab-sell-active:hover {background:var(--ui-danger-fill)!important;color:var(--ui-on-fill)}
+
+.dp-site .mobile-body .tabs-nav__item:not(.tabs-nav__active) {background:var(--ui-field)!important}
+.dp-site .mobile-body .tabs-nav__item:not(.tabs-nav__active) h4 {color:var(--ui-text)!important}
+.dp-site .table-list__text:not(.color-buy):not(.color-sell) {color:var(--ui-text)!important}
+
+/* Long locale labels must wrap within mobile controls and retain paired colors. */
+.dp-site .mobile-body .tabs-nav__active {background:var(--ui-accent)!important;color:var(--ui-on-accent)!important}
+.dp-site .support-page__submit {background:var(--ui-accent)!important;color:var(--ui-on-accent)!important;box-shadow:none}
+.dp-site .support-page__submit span {color:inherit}
+.admin-layout .stock-onboard {grid-template-columns:minmax(0,1fr)}
+.admin-layout .stock-onboard>* {min-width:0;max-width:100%}
+.admin-layout .stock-onboard button {white-space:normal;overflow-wrap:anywhere}
+/* Desktop navigation can wrap in longer locales; reserve space for both lines. */
+@media(min-width:1400px){.dp-site.site-layout {padding-top:136px}}
+
+/* Copy-trading legacy panels follow the site palette in both modes. */
+body .dp-site .copy-page {
+    color: var(--ui-text);
+    background: var(--ui-page)
+}
+body .dp-site .copy-product-tab {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-product-tab--active {
+    color: var(--ui-text)
+}
+body .dp-site .copy-product-tab--active::after {
+    background: var(--ui-accent)
+}
+body .dp-site .copy-manage-btn,
+body .dp-site .copy-card-action {
+    border: 1px solid var(--ui-line);
+    color: var(--ui-on-accent);
+    background: var(--ui-accent)
+}
+body .dp-site .copy-balance-label,
+body .dp-site .copy-balance-sub,
+body .dp-site .copy-card-kicker,
+body .dp-site .copy-card-rate-label,
+body .dp-site .copy-card-stat-label,
+body .dp-site .copy-empty {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-balance-value {
+    color: var(--ui-text)
+}
+body .dp-site .copy-balance-stat {
+    border: 1px solid var(--ui-line);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-balance-stat span {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-balance-stat strong {
+    color: var(--ui-text)
+}
+body .dp-site .copy-positive {
+    color: var(--ui-success) !important
+}
+body .dp-site .copy-negative {
+    color: var(--ui-danger) !important
+}
+body .dp-site .copy-portfolio {
+    border: 1px solid var(--ui-line);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-portfolio-title {
+    color: var(--ui-text)
+}
+body .dp-site .copy-portfolio-sub {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-portfolio-count {
+    color: var(--ui-on-accent);
+    background: var(--ui-accent)
+}
+body .dp-site .copy-position-row {
+    border-top: 1px solid var(--ui-line);
+    color: var(--ui-text)
+}
+body .dp-site .copy-position-head {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-position-market {
+    color: var(--ui-text)
+}
+body .dp-site .copy-position-trader {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-position-side--long {
+    color: var(--ui-success)
+}
+body .dp-site .copy-position-side--short {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-nav-tab {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-nav-tab--active {
+    color: var(--ui-text)
+}
+body .dp-site .copy-nav-tab--active::after {
+    background: var(--ui-accent)
+}
+body .dp-site .copy-daily-btn {
+    border: 1px solid var(--ui-line);
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-section-title {
+    color: var(--ui-text)
+}
+body .dp-site .copy-more {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-trader-card {
+    border: 1px solid var(--ui-line);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-trader-card:hover {
+    border-color: var(--ui-line);
+    background: var(--ui-field)
+}
+body .dp-site .copy-card-name {
+    color: var(--ui-text)
+}
+body .dp-site .copy-card-capacity,
+body .dp-site .copy-card-tag {
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-card-tag {
+    color: var(--ui-text)
+}
+body .dp-site .copy-profit {
+    color: var(--ui-success)
+}
+body .dp-site .copy-card-rate strong {
+    color: var(--ui-success)
+}
+body .dp-site .copy-sparkline-line {
+    stroke: var(--ui-success)
+}
+body .dp-site .copy-card-stat-value {
+    color: var(--ui-text)
+}
+body .dp-site .copy-card-action--active {
+    color: var(--ui-text);
+    border-color: var(--ui-line);
+    background: var(--ui-field)
+}
+body .dp-site .copy-card-action:disabled {
+    color: var(--ui-muted);
+    border-color: var(--ui-line);
+    background: var(--ui-field)
+}
+body .dp-site .copy-card-action:hover,
+body .dp-site .copy-manage-btn:hover {
+    border-color: var(--ui-line);
+    background: var(--ui-accent)
+}
+@media (max-width: 860px) {
+    body .dp-site .copy-position-row > div::before {
+        color: var(--ui-muted)
+    }
+}
+body .dp-site .copy-detail-page {
+    color: var(--ui-text);
+    background: var(--ui-page)
+}
+body .dp-site .copy-back {
+    color: var(--ui-text)
+}
+body .dp-site .copy-pipe {
+    background: var(--ui-muted)
+}
+body .dp-site .copy-domain {
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-detail-follow {
+    border: 1px solid var(--ui-line);
+    color: var(--ui-on-accent);
+    background: var(--ui-accent)
+}
+body .dp-site .copy-detail-follow--active {
+    color: var(--ui-text);
+    border-color: var(--ui-line);
+    background: var(--ui-field)
+}
+body .dp-site .copy-detail-follow:disabled {
+    color: var(--ui-muted);
+    border-color: var(--ui-line);
+    background: var(--ui-field)
+}
+body .dp-site .copy-profile-name {
+    color: var(--ui-text)
+}
+body .dp-site .copy-profile-desc {
+    color: var(--ui-text)
+}
+body .dp-site .copy-translate {
+    color: var(--ui-accent-text)
+}
+body .dp-site .copy-detail-badge {
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-detail-badge--hot {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-detail-metric {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-metric strong {
+    color: var(--ui-text)
+}
+body .dp-site .copy-detail-panel {
+    border: 1px solid var(--ui-line);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-panel-title {
+    color: var(--ui-text)
+}
+body .dp-site .copy-detail-range {
+    color: var(--ui-text)
+}
+body .dp-site .copy-detail-stat-row {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-stat-value {
+    color: var(--ui-text)
+}
+body .dp-site .copy-detail-stat-value--green,
+body .dp-site .copy-positive {
+    color: var(--ui-success)
+}
+body .dp-site .copy-negative {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-detail-chart-tab {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-chart-tab--active {
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-chart-tooltip {
+    color: var(--ui-text);
+    background: var(--ui-field);
+    border: 1px solid var(--ui-line)
+}
+body .dp-site .copy-chart-tooltip::after {
+    border-top: 8px solid var(--ui-field)
+}
+body .dp-site .copy-chart-grid {
+    stroke: var(--ui-muted)
+}
+body .dp-site .copy-chart-label {
+    fill: var(--ui-muted)
+}
+body .dp-site .copy-chart-line {
+    stroke: var(--ui-success)
+}
+body .dp-site .copy-chart-hit--active {
+    stroke: var(--ui-success)
+}
+body .dp-site .copy-donut::after {
+    background: var(--ui-field)
+}
+body .dp-site .copy-asset-item {
+    color: var(--ui-text)
+}
+body .dp-site .copy-asset-item strong {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-note {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-tab {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-detail-tab--active {
+    color: var(--ui-text)
+}
+body .dp-site .copy-detail-tab--active::after {
+    background: var(--ui-accent)
+}
+body .dp-site .copy-orders-panel {
+    border: 1px solid var(--ui-line);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-history-toolbar {
+    border: 1px solid var(--ui-line);
+    color: var(--ui-muted);
+    background: var(--ui-surface)
+}
+body .dp-site .copy-history-toolbar button {
+    color: var(--ui-text)
+}
+body .dp-site .copy-history-card {
+    border-bottom: 1px solid var(--ui-line)
+}
+body .dp-site .copy-history-title {
+    color: var(--ui-text)
+}
+body .dp-site .copy-market-dot {
+    color: var(--ui-text)
+}
+body .dp-site .copy-history-market {
+    color: var(--ui-text)
+}
+body .dp-site .copy-history-pill {
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-history-pill--green {
+    color: var(--ui-success)
+}
+body .dp-site .copy-history-close {
+    color: var(--ui-text)
+}
+body .dp-site .copy-history-grid span {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-history-grid strong {
+    color: var(--ui-text)
+}
+body .dp-site .copy-date-filter {
+    border: 1px solid var(--ui-line);
+    color: var(--ui-text);
+    background: var(--ui-field)
+}
+body .dp-site .copy-date-filter span {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-timeline-time {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-timeline-dot {
+    background: var(--ui-muted)
+}
+body .dp-site .copy-timeline-dot::after {
+    background: var(--ui-muted)
+}
+body .dp-site .copy-timeline-body {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-operation-badge {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-operation-badge--long {
+    color: var(--ui-success)
+}
+body .dp-site .copy-operation-badge--short {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-timeline-text {
+    color: var(--ui-muted)
+}
+body .dp-site .copy-order-row {
+    border-top: 1px solid var(--ui-line);
+    color: var(--ui-text)
+}
+body .dp-site .copy-follower-row {
+    border-top: 1px solid var(--ui-line);
+    color: var(--ui-text)
+}
+body .dp-site .copy-follower-head {
+    color: var(--ui-muted);
+    background: var(--ui-field)
+}
+body .dp-site .copy-order-head {
+    color: var(--ui-muted);
+    background: var(--ui-field)
+}
+body .dp-site .copy-order-market {
+    color: var(--ui-text)
+}
+body .dp-site .copy-side-long {
+    color: var(--ui-success)
+}
+body .dp-site .copy-side-short {
+    color: var(--ui-danger)
+}
+body .dp-site .copy-empty {
+    color: var(--ui-muted)
+}
+@media (max-width: 680px) {
+    body .dp-site .copy-order-row > div::before {
+        color: var(--ui-muted)
+    }
+}
+/* The suspended-user summary remains readable on the dark admin surface. */
+.admin-layout .text-pink-600 {color:var(--ui-danger)}
+/* Hints are readable text; legacy browser-specific placeholders must inherit the palette. */
+body :is(.dp-site,.dp-auth-shell,.admin-layout) :is(input,textarea)::placeholder {color:var(--ui-muted)!important;opacity:1}
+
+.copy-data-notice { color:var(--ui-muted);background:var(--ui-field);padding:12px 16px;border:1px solid var(--ui-line);border-radius:10px;margin:12px 0;font-size:14px;line-height:1.6; }
+
+/* Risk dialogs remain usable with keyboard and coarse pointers. */
+.dp-site :is(.risk-close,.staking-detail__risk-close,.launchpad-detail__risk-close){min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.dp-site :is(.risk-dialog,.staking-detail__risk-dialog,.launchpad-detail__risk-dialog){max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain}
+@media (prefers-reduced-motion:reduce){.dp-site :is(.dp-home-hero,.dp-technology-orbit,.marquee-slider) *{animation:none!important;transition:none!important}}

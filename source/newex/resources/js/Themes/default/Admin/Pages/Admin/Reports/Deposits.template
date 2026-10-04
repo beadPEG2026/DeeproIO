@@ -1,0 +1,512 @@
+<app-layout>
+    <p v-if="form.first_only" class="p-3 bg-yellow-50 text-gray-800">{{ $t("First confirmed deposits only") }}</p>
+    <admin-reports-tab :referrer="filters.referrer" section="deposits"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link
+            class="text-indigo-400 hover:text-indigo-600"
+            :href="route('admin.users.edit', filters.referrer)"
+            v-if="filters.referrer"
+        >
+            {{ $t("返回 -") }}
+        </Link>
+        {{ $t("充值记录") }}
+    </h1>
+
+    <div class="mb-6 flex flex-wrap justify-between items-end gap-4">
+        <div class="flex flex-wrap items-end gap-3">
+
+            <div class="w-64">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded h-10 text-sm"
+                    placeholder="用户/哈希/地址"
+                />
+            </div>
+
+            <div class="w-40">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("类型") }}</label>
+                <themed-select v-model="form.type" class="w-full form-select rounded h-10 text-sm">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="coin">{{ $t("数字货币") }}</option>
+                    <option value="fiat">{{ $t("法币") }}</option>
+                </themed-select>
+            </div>
+
+            <div class="w-40">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("状态") }}</label>
+                <themed-select v-model="form.status" class="w-full form-select rounded h-10 text-sm">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="confirmed">{{ $t("已确认") }}</option>
+                    <option value="pending">{{ $t("待确认") }}</option>
+                </themed-select>
+            </div>
+
+            <div class="w-44">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("网络") }}</label>
+                <themed-select network v-model="form.network_id" class="w-full form-select rounded h-10 text-sm">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option v-for="item in networks" :key="item.id" :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </themed-select>
+            </div>
+
+            <div class="w-40">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("用户ID") }}</label>
+                <input
+                    v-model="form.user_id"
+                    type="text"
+                    class="w-full form-input rounded h-10 text-sm"
+                    placeholder="用户ID"
+                />
+            </div>
+
+            <div class="w-56">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("交易哈希") }}</label>
+                <input
+                    v-model="form.txn"
+                    type="text"
+                    class="w-full form-input rounded h-10 text-sm"
+                    placeholder="交易哈希"
+                />
+            </div>
+
+            <div class="w-56">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("钱包地址") }}</label>
+                <input
+                    v-model="form.address"
+                    type="text"
+                    class="w-full form-input rounded h-10 text-sm"
+                    placeholder="钱包地址"
+                />
+            </div>
+
+            <div class="w-64">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("时间") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    placeholder="选择时间"
+                />
+            </div>
+
+            <div class="w-40">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("每页显示") }}</label>
+                <themed-select v-model="form.per_page" class="w-full form-select rounded h-10 text-sm">
+                    <option :value="10">{{ $t("10条") }}</option>
+                    <option :value="50">{{ $t("50条") }}</option>
+                    <option :value="100">{{ $t("100条") }}</option>
+                    <option :value="500">{{ $t("500条") }}</option>
+                </themed-select>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="reset()" class="h-10 px-4">
+                    {{ $t("重置") }}
+                </t-button-green>
+            </div>
+        </div>
+
+        <div class="flex items-end gap-2">
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="exportExcel()" class="h-10 px-4">
+                    {{ $t("导出") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="openMissing()" class="h-10 px-4">
+                    {{ $t("缺失充值？") }}
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <template v-if="missingOpened">
+        <div class="flex flex-wrap">
+            <div class="pr-6 pb-8 w-full lg:w-1/3">
+                <text-input
+                    v-model="depositForm.address"
+                    class="pr-6 pb-8 w-full"
+                    label="钱包地址"
+                />
+            </div>
+
+            <div class="pr-6 pb-8 w-full lg:w-1/3">
+                <label class="form-label d-block mb-2">&nbsp;</label>
+
+                <nav-button
+                    :class="{ 'opacity-75': loading, 'mt-1': true }"
+                    @click.native="searchTx"
+                >
+                    <span>{{ $t("搜索") }}</span>
+                </nav-button>
+            </div>
+        </div>
+    </template>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th v-if='$page.props.mode !== "readonly"' class="px-6 pt-6 pb-4">{{ $t("热钱包") }}</th>
+                <th class="px-6 pt-6 pb-4">ID</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("交易哈希") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("金额") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("地址") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("网络") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("组长") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("推荐人") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("确认数") }}</th>
+                <th v-if='$page.props.mode !== "readonly" && isSuperAdmin' class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr
+                v-for="(deposit, key) in deposits.data"
+                :key="key"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center text-sm">
+                        {{ deposit.created_at }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <badge
+                            class="mr-2"
+                            :type="deposit.status == 'confirmed' ? 'green' : 'orange'"
+                        >
+                            {{ deposit.status == 'confirmed' ? $t("已确认") : $t("待确认") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td v-if='$page.props.mode !== "readonly"' class="border-t">
+                    <span
+                        v-if="deposit.network != 17 && deposit.network.id != 1 && deposit.status == 'confirmed'"
+                        class="px-6 py-4 flex items-center"
+                    >
+                        <template v-if="deposit.network.id == 17 || deposit.network.id == 1">
+                            <badge class="mr-2" :type="'orange'">
+                                {{ $t("手动") }}
+                            </badge>
+                        </template>
+
+                        <template v-else>
+                            <badge
+                                v-if="deposit.wallet_transfer_status == 'processed'"
+                                class="mr-2"
+                                :type="'green'"
+                            >
+                                {{ $t("已转账") }}
+                            </badge>
+
+                            <template v-if="deposit.wallet_transfer_status == 'queued' || deposit.wallet_transfer_status == 'pending'">
+                                <template v-if="deposit.wallet_transfer_status == 'queued'">
+                                    <template v-if="deposit.wallet_transfer_ago > 10">
+                                        <div class="block">
+                                            <div>
+                                                <badge class="mb-2" :type="'red'">
+                                                    {{ $t("失败") }}
+                                                </badge>
+                                            </div>
+
+                                            <div>
+                                                <t-button-green @click="transfer(deposit, key)" class="mr-2">
+                                                    {{ $t("重试") }}
+                                                </t-button-green>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <badge class="mr-2" :type="'orange'">
+                                            {{ $t("处理中") }}
+                                        </badge>
+                                    </template>
+                                </template>
+
+                                <template v-if="deposit.wallet_transfer_status == 'pending'">
+                                    <template v-if="deposit.wallet_transfer_ago > 6">
+                                        <div class="block">
+                                            <div>
+                                                <badge class="mb-2" :type="'red'">
+                                                    {{ $t("失败") }}
+                                                </badge>
+                                            </div>
+
+                                            <div>
+                                                <t-button-green @click="transfer(deposit, key)" class="mr-2">
+                                                    {{ $t("重试") }}
+                                                </t-button-green>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <badge class="mr-2" :type="'orange'">
+                                            {{ $t("处理中") }}
+                                        </badge>
+                                    </template>
+                                </template>
+                            </template>
+
+                            <template v-if="deposit.wallet_transfer_status == 'failed'">
+                                <div class="block">
+                                    <div>
+                                        <badge class="mb-2" :type="'red'">
+                                            {{ $t("失败") }}
+                                        </badge>
+                                    </div>
+
+                                    <div>
+                                        <t-button-green @click="transfer(deposit, key)" class="mr-2">
+                                            {{ $t("重试") }}
+                                        </t-button-green>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span v-if="deposit.deposit_id" class="px-6 py-4 flex items-center">
+                        {{ format_string(deposit.deposit_id, 5) }}
+
+                        <font-awesome-icon
+                            v-if="deposit.deposit_id"
+                            class="text-gray-600 ml-2 cursor-pointer"
+                            icon="copy"
+                            @click="doCopy(deposit.deposit_id)"
+                        />
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span
+                        v-if="deposit.txn && deposit.txn_link"
+                        class="px-6 py-4 flex items-center"
+                    >
+                        <a
+                            class="text-indigo-500"
+                            target="_blank"
+                            :href="deposit.txn_link"
+                        >
+                            {{ format_string(deposit.txn, 5) }}
+                        </a>
+
+                        <font-awesome-icon
+                            v-if="deposit.txn"
+                            class="text-gray-600 ml-2 cursor-pointer"
+                            icon="copy"
+                            @click="doCopy(deposit.txn)"
+                        />
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-6 py-4 flex flex-col">
+                        <span>
+                            {{ deposit.amount }} {{ deposit.currency.symbol }}
+                        </span>
+
+                        <span
+                            v-if="shouldShowUsdtEstimate(deposit)"
+                            class="mt-1 text-xs text-gray-500"
+                        >
+                            {{ $t("约等于") }} {{ formatAmount(depositUsdtAmount(deposit)) }} USDT
+                        </span>
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-6 py-4 flex items-center">
+                        <template v-if="deposit.internal_id">
+                            {{ format_string(deposit.address + ' #' + deposit.internal_id, 15) }}
+
+                            <font-awesome-icon
+                                v-if="deposit.internal_id"
+                                class="text-gray-600 ml-2 cursor-pointer"
+                                icon="copy"
+                                @click="doCopy(deposit.internal_id)"
+                            />
+                        </template>
+
+                        <template v-else>
+                            {{ format_string(deposit.address, 10) }}
+
+                            <font-awesome-icon
+                                v-if="deposit.address"
+                                class="text-gray-600 ml-2 cursor-pointer"
+                                icon="copy"
+                                @click="doCopy(deposit.address)"
+                            />
+                        </template>
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ deposit.network.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ deposit.user.email }}<br>
+                        {{ $t("ID:") }} {{ deposit.user.id }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        <template v-if="deposit.leader_display_name">
+                            <badge class="mr-2" type="green">
+                                {{ deposit.leader_display_name }}
+                            </badge>
+                        </template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-6 py-4 flex flex-col">
+                        <span>{{ getReferrerDisplay(deposit) }}</span>
+                        <button
+                            v-if="getReferrerChain(deposit).length"
+                            type="button"
+                            class="text-indigo-500 text-sm mt-1 text-left"
+                            @click="showReferrerChain(deposit)"
+                        >
+                            {{ $t("查看所有上级") }}
+                        </button>
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ deposit.confirms }}
+                    </span>
+                </td>
+
+                <td v-if='$page.props.mode !== "readonly" && isSuperAdmin' class="border-t">
+                    <div class="px-6 py-4 flex items-center">
+                        <t-button-green
+                            v-if="deposit.status == 'ignored'"
+                            :class="{ 'opacity-75 cursor-not-allowed': confirmingDepositId === deposit.id }"
+                            @click="confirmPending(deposit, key)"
+                        >
+                            {{ $t("确认") }}
+                        </t-button-green>
+                        <span v-else class="text-sm text-gray-400">-</span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr v-if="deposits.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">
+                    {{ $t("暂无充值记录") }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-6 bg-white rounded shadow p-5">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">
+                    {{ $t("充值统计") }}
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ $t("当前显示列表统计，已排除 Internal 内部充值。") }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <div class="px-5 py-4 rounded bg-blue-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("入金笔数") }}</div>
+                    <div class="text-2xl font-bold text-blue-700">
+                        {{ totalDepositCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-indigo-50" style="min-width: 180px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("入金人数") }}</div>
+                    <div class="text-2xl font-bold text-indigo-700">
+                        {{ totalDepositUserCount }}
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 rounded bg-green-50" style="min-width: 220px;">
+                    <div class="text-xs text-gray-500 mb-1">{{ $t("充值总额") }}</div>
+                    <div class="text-2xl font-bold text-green-700">
+                        {{ formatAmount(totalDepositAmount) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="text-sm text-gray-600">
+            {{ $t("当前每页显示：") }}
+            <themed-select v-model="form.per_page" class="form-select rounded h-9 text-sm mx-2">
+                <option :value="10">{{ $t("10条") }}</option>
+                <option :value="50">{{ $t("50条") }}</option>
+                <option :value="100">{{ $t("100条") }}</option>
+                <option :value="500">{{ $t("500条") }}</option>
+            </themed-select>
+        </div>
+
+        <pagination :links="deposits.links" />
+    </div>
+
+    <div
+        v-if="selectedReferrerChain !== null"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+    >
+        <div class="bg-white rounded shadow-lg w-full max-w-lg mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg">{{ selectedReferrerTitle }}</h3>
+                <button type="button" class="text-gray-500 hover:text-gray-800" @click="closeReferrerChain">×</button>
+            </div>
+
+            <div class="p-6">
+                <div v-if="!selectedReferrerChain.length" class="text-gray-500">
+                    {{ $t("没有上级推荐人。") }}
+                </div>
+
+                <div v-for="item in selectedReferrerChain" :key="item.level + '-' + item.id" class="border rounded p-3 mb-3">
+                    <div class="font-semibold text-gray-800">
+                        {{ $t("第") }} {{ item.level }} {{ $t("级：") }}{{ referrerPrimaryName(item) }}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("ID：") }}{{ item.id }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("邀请码：") }}{{ item.referral_code || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1 break-all">{{ $t("账号：") }}{{ item.account || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("姓名：") }}{{ item.name || '-' }}</div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t text-right">
+                <button type="button" class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200" @click="closeReferrerChain">
+                    {{ $t("关闭") }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

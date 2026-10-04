@@ -1,0 +1,51 @@
+<!-- WIDGET MARKET STATS START -->
+<div class="widget widget-market-stats widget-stats">
+    <div class="widget-container widget-stats__inner">
+
+        <div class="widget-stats__row widget-stats__block-1">
+            <div class="widget-stats__title">
+                <div class="widget-stats__title__market-name relative">
+                    <span @click.prevent="toggleMarketWidget" class="market-label">{{ market.name }}</span>
+
+                    <div v-click-outside="onClickOutside" v-if="marketWidgetVisible" class="absolute top-7 mob-market-stats">
+                        <markets-options-widget :futures="futures" :quotes="quotes"></markets-options-widget>
+                    </div>
+                </div>
+                <div class="widget-stats__title__currency-name">
+                    <span class="widget-stats__title__currency-icon">
+                        <img :src="market.base_currency_logo">
+                    </span>
+                    {{ market.base_currency_name }}
+                </div>
+            </div>
+            <div class="widget-stats__price">
+                <div class="widget-stats__price-title">{{ $t('Last Price') }}</div>
+                <div :class="{'color-buy' : market_stats.change > 0, 'color-sell' : market_stats.change < 0}" class="widget-stats__price-number">{{ decimal_format(market_stats.last, market.quote_precision, market.quote_currency_type) }}</div>
+            </div>
+        </div>
+
+        <div class="widget-stats__row widget-stats__block-2">
+            <div class="widget-stats__list">
+                <div class="widget-stats__list-item">
+                    <div class="widget-stats__list__lable-title">{{ $t('24h Change') }}</div>
+                    <div :class="{'color-buy' : market_stats.change > 0, 'color-sell' : market_stats.change < 0}" class="widget-stats__list__lable-number">{{ market_stats.change }}%</div>
+                </div>
+                <div class="widget-stats__list-item">
+                    <div class="widget-stats__list__lable-title">{{ $t('24h High') }}</div>
+                    <div class="widget-stats__list__lable-number">{{ decimal_format(market_stats.high, market.quote_precision, market.quote_currency_type) }}</div>
+                </div>
+                <div class="widget-stats__list-item">
+                    <div class="widget-stats__list__lable-title">{{ $t('24h Low') }}</div>
+                    <div class="widget-stats__list__lable-number">{{ decimal_format(market_stats.low, market.quote_precision, market.quote_currency_type) }}</div>
+                </div>
+                <div class="widget-stats__list-item">
+                    <div class="widget-stats__list__lable-title">{{ $t('24h Volume') }}</div>
+                    <div class="widget-stats__list__lable-number">{{ market_stats.volume }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<!-- WIDGET MARKET STATS END -->

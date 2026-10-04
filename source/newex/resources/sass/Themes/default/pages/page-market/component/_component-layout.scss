@@ -1,0 +1,225 @@
+.form-search__container, .table-components {
+    word-break: break-word;
+}
+
+/** trade start */
+.trade {
+    margin: 3rem 0;
+
+    &-head {
+        display: flex;
+        justify-content: space-between;
+
+        /* row start */
+        &__row-left {
+            border: 1px solid var(--border-line-color);
+            border-radius: 8px;
+            width: 72%;
+        }
+
+        &__row-right {
+            width: 27%;
+        }
+        /* row end */
+
+        /* block start */
+        &__block-top {
+            padding: 1.50rem;
+        }
+
+        &__block-middle {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse;
+            padding: 0 1.50rem 1.50rem;
+        }
+        /* block end */
+
+        /* head left/right start */
+        &__left {
+            width: 35%;
+            padding-right: 0.40rem;
+        }
+
+        &__right {
+            width: 64%;
+            padding-left: 0.40rem;
+
+            iframe {
+
+                padding-right: 1.5rem;
+            }
+
+        }
+        /* head left/right end */
+    }
+
+    // &-body {
+
+    // }
+}
+/** trade end */
+
+
+@media screen and (max-width: 1200px) {
+    /** trade start */
+    .trade {
+
+        &-head {
+
+            /* block start */
+            &__block-top {
+                padding: 1rem;
+            }
+
+            &__block-middle {
+                padding: 0 1rem 1rem;
+            }
+            /* block end */
+        }
+
+    }
+    /** trade end */
+}
+
+@media screen and (max-width: 1130px) {
+    /** trade start */
+    .trade {
+        margin: 3rem 0;
+
+        &-head {
+            display: block;
+
+            /* row start */
+            &__row-left {
+                width: 100%;
+                margin-bottom: 1.50rem;
+            }
+
+            &__row-right {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+
+                .widget {
+                    width: 49%;
+                }
+            }
+            /* row end */
+        }
+    }
+    /** trade end */
+}
+
+@media screen and (max-width: 770px) {
+    /** trade start */
+    .trade {
+
+        &-head {
+            display: block;
+            justify-content: space-between;
+
+            /* row start */
+            &__row-left {
+                width: 100%;
+            }
+
+            &__row-right {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+
+                .widget {
+                    width: 49%;
+                }
+            }
+            /* row end */
+
+            /* block start */
+            &__block-top {
+                padding: 0.50rem;
+            }
+
+            &__block-middle {
+                display: block;
+                padding: 0.50rem;
+            }
+            /* block end */
+
+            /* head left/right start */
+            &__left {
+                width: 100%;
+                padding: 0.40rem;
+            }
+
+            &__right {
+                width: 100%;
+                padding: 0.40rem;
+            }
+            /* head left/right end */
+
+        }
+
+        .module-container__row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .module-container__block {
+            width: 49%;
+        }
+    }
+    /** trade end */
+}
+
+@media screen and (max-width: 570px) {
+    /** trade start */
+    .trade {
+
+        &-head {
+
+            /* row start */
+            &__row-left {
+                width: 100%;
+            }
+
+            &__row-right {
+                display: block;
+
+                .widget {
+                    width: 100%;
+                }
+            }
+            /* row end */
+
+            /* block start */
+            &__block-middle {
+                display: block;
+                padding: 0.50rem;
+            }
+            /* block end */
+
+            /* head left/right start */
+            &__left {
+                width: 100%;
+                padding: 0.40rem;
+            }
+
+            &__right {
+                width: 100%;
+                padding: 0.40rem;
+            }
+            /* head left/right end */
+
+        }
+
+        .module-container__row {
+            display: block;
+        }
+
+        .module-container__block {
+            width: 100%;
+        }
+    }
+    /** trade end */
+}

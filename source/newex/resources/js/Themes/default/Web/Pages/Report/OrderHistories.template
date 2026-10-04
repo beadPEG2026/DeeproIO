@@ -1,0 +1,358 @@
+<app-layout>
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('Orders') }}</h2>
+</div>
+<!-- components title end -->
+
+<!-- tabs components start -->
+<div class="tabs">
+    <!-- tabs left start -->
+    <div class="tabs-left">
+        <div class="tabs-nav">
+            <Link :href="route('orders')" as="div" class="tabs-nav__item"><h4>{{ $t('Open Orders') }}</h4></Link>
+            <Link :href="route('reports.order-history')" as="div" class="tabs-nav__item tabs-nav__active"><h4>{{ $t('Orders History') }}</h4></Link>
+        </div>
+    </div>
+    <!-- tabs left end -->
+</div>
+<!-- tabs components end -->
+
+
+
+        <div class="components-filter">
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <label>{{ $t('Market:') }}</label>
+                    <t-rich-user-select
+                        :options="markets.data"
+                        v-model="form.market"
+                        :placeholder="$t('Select market')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="components-filter__item">
+                    <label>{{ $t('Status:') }}</label>
+                    <t-rich-user-select
+                        :options="[{'id': '', 'name': this.$t('All')},{'id': 'buy', 'name': this.$t('Buy')}, {'id': 'sell', 'name': this.$t('Sell')}]"
+                        v-model="form.side"
+                        :placeholder="$t('Select side')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="components-filter__item">
+                    <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ $t('Search') }}
+                        </span>
+                    </t-button-green>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- table components start -->
+    <div class="table-components">
+
+
+        <!-- tables start -->
+        <table class="tables mob-table-order-histories">
+
+            <!-- thead start -->
+            <thead class="table-sort no-cursor">
+                <tr>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('ID') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Market') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Type') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Price') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Date') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Status') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title"></span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <!-- thead end -->
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+                <tr class="cursor-pointer" v-if="orders" v-for="order in orders.data" @click="openModal(order)">
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('ID') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ order.id }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Market') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ order.market }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                <div class="components-label" :class="{'label-green': order.side == 'buy', 'label-red': order.side == 'sell'}">
+                                    {{ order.side }} {{ order.type == "stop_limit" ? 'stop limit' : order.type }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Price') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                <template v-if="order.type == 'market'">
+                                    {{$t('Market Price')}}
+                                </template>
+                                <template v-else>
+                                    {{ order.price }} {{ order.quote_currency }}
+                                </template>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ order.created_at }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                <div v-if="order.status == 'filled'" class="components-label label-green">
+                                    {{ $t('Filled') }}
+                                </div>
+                                <div v-if="order.status == 'partially_filled'" class="components-label label-orange">
+                                    {{ $t('Partial Fill') }}
+                                </div>
+                                <div v-if="order.status == 'cancelled'" class="components-label label-gray">
+                                    {{ $t('Cancelled') }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle"></div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                    <span class="list-text__icon">
+                                        <svg-icon icon="next" classname="list-text__icon-color"></svg-icon>
+                                    </span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+                <tr>
+                    <td colspan="100">
+                        <div v-if="orders.data.length == 7" class="table-result__notfound">
+                                <span class="table-result__notfound-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                        <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                        <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                        <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                        <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                        <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                    </svg>
+                                </span>
+                            <span class="table-result__notfound-text">{{ $t('No orders found.') }}</span>
+                        </div>
+                        <pagination :links="orders.meta.links" />
+                    </td>
+                </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+
+    </div>
+    <!-- table components end -->
+
+    <!-- Show User  Modal -->
+    <jet-dialog-modal :show="showModal" @close="closeModal">
+        <template #title>
+            {{ $t('Order History') }}
+        </template>
+
+        <template #content>
+            <div v-if="tradesModal"  class="table-components">
+                <!-- tables start -->
+                <table class="tables mob-table-order-history">
+                    <!-- thead start -->
+                    <thead class="table-sort no-cursor">
+                    <tr>
+
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Date') }}</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Executed Price') }}</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Fee') }}</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-sort__value">
+                                <span class="table-sort__title">{{ $t('Role') }}</span>
+                            </div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <!-- thead end -->
+
+                    <!-- tbody start -->
+                    <tbody class="table-list">
+                    <tr v-if="tradesModal.transactions" v-for="transaction in tradesModal.transactions" :key="transaction.id">
+
+                        <td>
+                            <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                            <div class="table-list__value">
+                                <div class="table-list__text">
+                                    {{ transaction.created_at }}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle">{{ $t('Executed Price') }}</div>
+                            <div class="table-list__value">
+                                <div class="table-list__text">
+                                    {{ transaction.price }}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle">{{ $t('Fee') }}</div>
+                            <div class="table-list__value">
+                                <div class="table-list__text">
+                                    {{ transaction.fee }}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-list__subtitle">{{ $t('Role') }}</div>
+                            <div class="table-list__value">
+                                <div class="table-list__text">
+                                    {{ transaction.is_maker ? 'Maker' : 'Taker' }}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <!-- tbody end -->
+
+                    <!-- tfood start -->
+                    <tfoot class="table-result">
+                    <tr>
+                        <td colspan="100">
+                            <div v-if="!tradesModal.transactions || Object.keys(tradesModal.transactions).length == 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                                <span class="table-result__notfound-text">{{ $t('No trades found.') }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                    <!-- tfood end -->
+
+                </table>
+                <!-- tables end -->
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t('Close') }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+</app-layout>

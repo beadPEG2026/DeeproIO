@@ -1,0 +1,115 @@
+<admin-layout>
+    <Head>
+        <title>{{ $t('商户收益总览') }}</title>
+    </Head>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{{ $t('商户收益总览') }}</h1>
+            <div class="flex space-x-2">
+                <Link :href="route('admin.merchant.earnings.deposits')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                    {{ $t('查看充值') }}
+                </Link>
+                <Link :href="route('admin.merchant.payouts')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    {{ $t('管理付款') }}
+                </Link>
+            </div>
+        </div>
+
+        <!-- Platform Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('总交易额') }}</p>
+                <p class="text-2xl font-bold text-gray-800">{{ formatCurrency(stats.total_volume) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('平台已收手续费') }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ formatCurrency(stats.total_fees_collected) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('商户收益') }}</p>
+                <p class="text-2xl font-bold text-blue-600">{{ formatCurrency(stats.total_merchant_earnings) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('总已付款') }}</p>
+                <p class="text-2xl font-bold text-purple-600">{{ formatCurrency(stats.total_paid_out) }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('今日交易额') }}</p>
+                <p class="text-2xl font-bold text-gray-800">{{ formatCurrency(stats.today_volume) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('今日手续费') }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ formatCurrency(stats.today_fees) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('待付款项') }}</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ formatCurrency(stats.total_pending_payouts) }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="text-gray-500 text-sm">{{ $t('活跃商户') }}</p>
+                <p class="text-2xl font-bold text-gray-800">{{ stats.active_merchants }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Top Merchants -->
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">{{ $t('按交易额排序的商户排行') }}</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('商户') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('交易额') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('手续费') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('账单数') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr v-for="merchant in topMerchants" :key="merchant.id" class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <Link :href="route('admin.merchant.earnings.merchant', merchant.id)" class="text-blue-600 hover:text-blue-700 font-medium">
+                                        {{ merchant.business_name }}
+                                    </Link>
+                                </td>
+                                <td class="px-6 py-4 font-medium">{{ formatCurrency(merchant.total_volume_usd) }}</td>
+                                <td class="px-6 py-4 text-green-600">{{ formatCurrency(merchant.total_fees_usd) }}</td>
+                                <td class="px-6 py-4">{{ merchant.paid_invoices }}</td>
+                            </tr>
+                            <tr v-if="!topMerchants || topMerchants.length === 0">
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">{{ $t('暂无数据') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Invoice Stats -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('账单统计') }}</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <span class="text-gray-600">{{ $t('已创建账单总数') }}</span>
+                        <span class="font-semibold text-gray-800">{{ stats.total_invoices }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <span class="text-gray-600">{{ $t('已支付账单') }}</span>
+                        <span class="font-semibold text-green-600">{{ stats.total_paid_invoices }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">{{ $t('转化率') }}</span>
+                        <span class="font-semibold text-blue-600">
+                            {{ stats.total_invoices > 0 ? ((stats.total_paid_invoices / stats.total_invoices) * 100).toFixed(1) : 0 }}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</admin-layout>

@@ -1,0 +1,52 @@
+<app-layout>
+    <div class="components-title">
+        <h2>{{ $t('Transactions') }}</h2>
+    </div>
+    <reports-tab section="bonuses"></reports-tab>
+
+    <div class="table-components">
+        <table class="tables mob-table-referral-transactions">
+            <thead class="table-sort no-cursor">
+            <tr>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Type') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Currency') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Amount Deposited') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Percent') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Bonus Amount') }}</span></div></th>
+                <th><div class="table-sort__value"><span class="table-sort__title">{{ $t('Date') }}</span></div></th>
+            </tr>
+            </thead>
+            <tbody class="table-list">
+            <tr v-for="b in records.data" :key="b.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                    <div class="table-list__value"><div class="components-label" :class="{'label-green': b.type==='self', 'label-orange': b.type==='referral'}">{{ b.type }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Currency') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ b.currency.symbol || b.currency_id }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Amount Deposited') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ b.amount_deposited }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Percent') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ b.percent }}%</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Bonus Amount') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ b.bonus_amount }}</div></div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value"><div class="table-list__text">{{ b.created_at }}</div></div>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot class="table-result">
+
+            </tfoot>
+        </table>
+    </div>
+</app-layout>

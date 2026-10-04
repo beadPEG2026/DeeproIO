@@ -1,0 +1,463 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('商户报表') }}</title>
+    </Head>
+
+    <div class="p-6">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ $t('商户报表') }}</h1>
+                <p class="text-gray-500 mt-1">{{ $t('综合分析与洞察') }}</p>
+            </div>
+            <div class="flex items-center space-x-2 mt-4 md:mt-0">
+                <button 
+                    @click="exportReport('csv')" 
+                    :disabled="exportLoading"
+                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center space-x-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>{{ $t('导出 CSV') }}</span>
+                </button>
+                <button 
+                    @click="exportReport('json')" 
+                    :disabled="exportLoading"
+                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center space-x-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span>{{ $t('导出 JSON') }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Date Filters -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <!-- Quick Presets -->
+                <div class="flex flex-wrap gap-2">
+                    <button @click="setPreset('today')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('今天') }}</button>
+                    <button @click="setPreset('yesterday')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('昨天') }}</button>
+                    <button @click="setPreset('7days')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('最近 7 天') }}</button>
+                    <button @click="setPreset('30days')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('最近 30 天') }}</button>
+                    <button @click="setPreset('90days')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('最近 90 天') }}</button>
+                    <button @click="setPreset('thisMonth')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('本月') }}</button>
+                    <button @click="setPreset('lastMonth')" class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{{ $t('上月') }}</button>
+                </div>
+                
+                <div class="flex-1"></div>
+                
+                <!-- Custom Date Range -->
+                <div class="flex items-center gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">{{ $t('开始') }}</label>
+                        <input type="date" v-model="form.date_from" class="px-3 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">{{ $t('结束') }}</label>
+                        <input type="date" v-model="form.date_to" class="px-3 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div class="pt-5">
+                        <button @click="applyFilters" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                            {{ $t('应用') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-3">{{ $t('当前显示') }} {{ periodDays }} {{ $t('天') }}{{ $t('的数据') }}: {{ form.date_from }} → {{ form.date_to }}</p>
+        </div>
+
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('总交易额') }}</p>
+                <p class="text-xl font-bold text-gray-800 mt-1">{{ formatCurrency(summary.total_volume) }}</p>
+                <p :class="['text-xs mt-1', getChangeClass(summary.volume_change)]">
+                    {{ getChangeIcon(summary.volume_change) }} {{ formatPercent(Math.abs(summary.volume_change)) }}
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('平台手续费') }}</p>
+                <p class="text-xl font-bold text-green-600 mt-1">{{ formatCurrency(summary.total_fees) }}</p>
+                <p :class="['text-xs mt-1', getChangeClass(summary.fees_change)]">
+                    {{ getChangeIcon(summary.fees_change) }} {{ formatPercent(Math.abs(summary.fees_change)) }}
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('账单总数') }}</p>
+                <p class="text-xl font-bold text-gray-800 mt-1">{{ formatNumber(summary.total_invoices) }}</p>
+                <p :class="['text-xs mt-1', getChangeClass(summary.invoices_change)]">
+                    {{ getChangeIcon(summary.invoices_change) }} {{ formatPercent(Math.abs(summary.invoices_change)) }}
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('已支付账单') }}</p>
+                <p class="text-xl font-bold text-green-600 mt-1">{{ formatNumber(summary.paid_invoices) }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ formatPercent(summary.conversion_rate) }} {{ $t('比率') }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('转化率') }}</p>
+                <p class="text-xl font-bold text-blue-600 mt-1">{{ formatPercent(summary.conversion_rate) }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ summary.paid_invoices }}/{{ summary.total_invoices }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('平均账单金额') }}</p>
+                <p class="text-xl font-bold text-gray-800 mt-1">{{ formatCurrency(summary.avg_invoice_value) }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('活跃商户') }}</p>
+                <p class="text-xl font-bold text-purple-600 mt-1">{{ formatNumber(summary.active_merchants) }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">{{ $t('新增商户') }}</p>
+                <p class="text-xl font-bold text-indigo-600 mt-1">{{ formatNumber(summary.new_merchants) }}</p>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Volume & Invoices Over Time -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Daily Volume Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('每日交易额') }}</h3>
+                <div class="h-64 flex items-end justify-between gap-1 px-2">
+                    <div 
+                        v-for="(day, index) in dailyData" 
+                        :key="index"
+                        class="flex-1 flex flex-col items-center group relative"
+                    >
+                        <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                            {{ day.label }}: {{ formatCurrency(day.volume) }}
+                        </div>
+                        <div 
+                            class="w-full bg-blue-500 hover:bg-blue-600 rounded-t transition-all cursor-pointer"
+                            :style="{ height: barHeight(day.volume, maxDailyVolume) + '%' }"
+                        ></div>
+                        <span v-if="dailyData.length <= 14" class="text-xs text-gray-400 mt-1 transform -rotate-45 origin-top-left">{{ day.label }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t">
+                    <span class="text-sm text-gray-500">{{ $t('总计') }}: {{ formatCurrency(summary.total_volume) }}</span>
+                    <span class="text-sm text-gray-500">{{ $t('日均') }}: {{ formatCurrency(summary.total_volume / periodDays) }}</span>
+                </div>
+            </div>
+
+            <!-- Daily Invoices Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('每日账单数') }}</h3>
+                <div class="h-64 flex items-end justify-between gap-1 px-2">
+                    <div 
+                        v-for="(day, index) in dailyData" 
+                        :key="index"
+                        class="flex-1 flex flex-col items-center group relative"
+                    >
+                        <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                            {{ day.label }}: {{ day.total_invoices }} ({{ day.paid_invoices }} {{ $t('已支付') }})
+                        </div>
+                        <div class="w-full flex flex-col" :style="{ height: barHeight(day.total_invoices, maxDailyInvoices) + '%' }">
+                            <div 
+                                class="w-full bg-gray-300 rounded-t flex-1"
+                                :style="{ flex: day.total_invoices > 0 ? (day.total_invoices - day.paid_invoices) / day.total_invoices : 0 }"
+                            ></div>
+                            <div 
+                                class="w-full bg-green-500 hover:bg-green-600 transition-all cursor-pointer"
+                                :style="{ flex: day.total_invoices > 0 ? day.paid_invoices / day.total_invoices : 1, borderRadius: day.paid_invoices === day.total_invoices ? '4px 4px 0 0' : '0' }"
+                            ></div>
+                        </div>
+                        <span v-if="dailyData.length <= 14" class="text-xs text-gray-400 mt-1 transform -rotate-45 origin-top-left">{{ day.label }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t">
+                    <div class="flex items-center space-x-4">
+                        <span class="flex items-center text-sm text-gray-500">
+                            <span class="w-3 h-3 bg-green-500 rounded mr-2"></span>{{ $t('已支付') }}
+                        </span>
+                        <span class="flex items-center text-sm text-gray-500">
+                            <span class="w-3 h-3 bg-gray-300 rounded mr-2"></span>{{ $t('未支付') }}
+                        </span>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ $t('日均') }}: {{ Math.round(summary.total_invoices / periodDays) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Distributions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Invoice Status Breakdown -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('账单状态分布') }}</h3>
+                <div class="flex justify-center mb-4">
+                    <simple-pie :data="statusPieData" :size="180" :thickness="24" :show-center="false" />
+                </div>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    <div v-for="(item, index) in invoicesByStatus" :key="index" class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: statusColors[item.status] || '#999' }"></span>
+                            <span class="text-gray-600">{{ formatStatus(item.status) }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-800">{{ item.count }}</span>
+                            <span class="text-gray-400 ml-1">({{ formatCurrency(item.total_amount) }})</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volume by Currency -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('按币种统计交易额') }}</h3>
+                <div class="flex justify-center mb-4">
+                    <simple-pie :data="currencyPieData" :size="180" :thickness="24" />
+                </div>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    <div v-for="(item, index) in volumeByCurrency" :key="index" class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: currencyColors[index] || '#999' }"></span>
+                            <span class="text-gray-600">{{ item.symbol }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-800">{{ formatCurrency(item.total_usd) }}</span>
+                            <span class="text-gray-400 ml-1">({{ item.count }})</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volume by Network -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('按网络统计交易额') }}</h3>
+                <div class="flex justify-center mb-4">
+                    <simple-pie :data="networkPieData" :size="180" :thickness="24" />
+                </div>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    <div v-for="(item, index) in volumeByNetwork" :key="index" class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: networkColors[index] || '#999' }"></span>
+                            <span class="text-gray-600">{{ item.name }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-800">{{ formatCurrency(item.total_usd) }}</span>
+                            <span class="text-gray-400 ml-1">({{ item.count }})</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Funnel & Hourly Distribution -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Conversion Funnel -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('转化漏斗') }}</h3>
+                <div class="space-y-3">
+                    <div v-for="(stage, index) in conversionFunnel" :key="index" class="relative">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">{{ stage.stage }}</span>
+                            <span class="text-sm text-gray-500">{{ stage.count }} ({{ stage.percentage }}%)</span>
+                        </div>
+                        <div class="h-8 bg-gray-100 rounded-lg overflow-hidden">
+                            <div 
+                                class="h-full transition-all duration-500"
+                                :class="['bg-blue-500', 'bg-blue-400', 'bg-blue-300', 'bg-green-500'][index]"
+                                :style="{ width: stage.percentage + '%' }"
+                            ></div>
+                        </div>
+                        <div v-if="index < conversionFunnel.length - 1" class="flex justify-center py-1">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Distribution -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('按小时统计支付分布') }}</h3>
+                <div class="h-48 flex items-end justify-between gap-0.5">
+                    <div 
+                        v-for="(hour, index) in hourlyDistribution" 
+                        :key="index"
+                        class="flex-1 flex flex-col items-center group relative"
+                    >
+                        <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                            {{ hour.label }}: {{ hour.count }} {{ $t('笔支付') }}, {{ formatCurrency(hour.volume) }}
+                        </div>
+                        <div 
+                            class="w-full bg-indigo-500 hover:bg-indigo-600 rounded-t transition-all cursor-pointer"
+                            :style="{ height: barHeight(hour.volume, maxHourlyVolume) + '%' }"
+                        ></div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-gray-400">
+                    <span>00:00</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
+                    <span>23:00</span>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">{{ $t('按小时统计支付活动（UTC）') }}</p>
+            </div>
+        </div>
+
+        <!-- Top Merchants & Fee Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Top Merchants Table -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">{{ $t('按交易额排序的商户排行') }}</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('商户') }}</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('账单数') }}</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('交易额') }}</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('手续费') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr v-for="(merchant, index) in topMerchants" :key="merchant.id" class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-500">{{ index + 1 }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-800">{{ merchant.business_name }}</p>
+                                            <p class="text-xs text-gray-400">
+                                                <span v-if="merchant.verified" class="text-green-600">✓ {{ $t('已认证') }}</span>
+                                                <span v-else class="text-yellow-600">{{ $t('未认证') }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right text-gray-800">{{ formatNumber(merchant.invoices_count) }}</td>
+                                <td class="px-4 py-3 text-sm text-right font-medium text-gray-800">{{ formatCurrency(merchant.total_volume) }}</td>
+                                <td class="px-4 py-3 text-sm text-right text-green-600">{{ formatCurrency(merchant.total_fees) }}</td>
+                            </tr>
+                            <tr v-if="!topMerchants || topMerchants.length === 0">
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">{{ $t('暂无商户数据') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Fee Analysis -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('手续费分析') }}</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <p class="text-sm text-green-600">{{ $t('已收手续费总额') }}</p>
+                        <p class="text-2xl font-bold text-green-700">{{ formatCurrency(feeAnalysis.total_fees_collected) }}</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <p class="text-sm text-blue-600">{{ $t('平均费率') }}</p>
+                        <p class="text-2xl font-bold text-blue-700">{{ formatPercent(feeAnalysis.average_fee_rate) }}</p>
+                    </div>
+                </div>
+
+                <h4 class="text-sm font-medium text-gray-700 mb-3">{{ $t('手续费贡献最高的商户') }}</h4>
+                <div class="space-y-2 max-h-48 overflow-y-auto">
+                    <div v-for="(item, index) in feeAnalysis.fees_by_merchant" :key="index" class="flex items-center justify-between py-2 border-b last:border-0">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">{{ item.business_name }}</p>
+                            <p class="text-xs text-gray-400">{{ item.invoice_count }} {{ $t('个账单') }}</p>
+                        </div>
+                        <span class="text-sm font-semibold text-green-600">{{ formatCurrency(item.total_fees) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payout Statistics -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $t('付款统计') }}</h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-500">{{ $t('申请总额') }}</p>
+                    <p class="text-xl font-bold text-gray-800">{{ formatCurrency(payoutStats.total_requested) }}</p>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <p class="text-sm text-green-600">{{ $t('已完成总额') }}</p>
+                    <p class="text-xl font-bold text-green-700">{{ formatCurrency(payoutStats.total_completed) }}</p>
+                    <p class="text-xs text-green-500">{{ payoutStats.completed_count }} {{ $t('笔付款') }}</p>
+                </div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p class="text-sm text-yellow-600">{{ $t('待处理') }}</p>
+                    <p class="text-xl font-bold text-yellow-700">{{ payoutStats.pending_count }}</p>
+                </div>
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-600">{{ $t('付款手续费') }}</p>
+                    <p class="text-xl font-bold text-blue-700">{{ formatCurrency(payoutStats.total_fees) }}</p>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <p class="text-sm text-purple-600">{{ $t('净支付金额') }}</p>
+                    <p class="text-xl font-bold text-purple-700">{{ formatCurrency(payoutStats.total_completed) }}</p>
+                </div>
+            </div>
+            
+            <!-- Payout status breakdown -->
+            <div v-if="payoutStats.by_status && payoutStats.by_status.length > 0">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">{{ $t('按状态统计') }}</h4>
+                <div class="flex flex-wrap gap-3">
+                    <div v-for="(status, index) in payoutStats.by_status" :key="index" 
+                        class="flex items-center px-3 py-2 bg-gray-100 rounded-lg">
+                        <span :class="['w-2 h-2 rounded-full mr-2', getStatusClass(status.status).split(' ')[0]]"></span>
+                        <span class="text-sm text-gray-700">{{ formatStatus(status.status) }}: </span>
+                        <span class="text-sm font-medium ml-1">{{ status.count }} ({{ formatCurrency(status.total) }})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-800">{{ $t('最近完成的支付') }}</h3>
+                <span class="text-sm text-gray-500">{{ $t('最近') }} {{ recentActivity.length }} {{ $t('笔交易') }}</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('参考编号') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('商户') }}</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('金额') }}</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('实收金额') }}</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('手续费') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('状态') }}</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('支付时间') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        <tr v-for="tx in recentActivity" :key="tx.id" class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <a :href="route('admin.merchant.invoices.show', tx.id)" class="text-sm font-mono text-blue-600 hover:text-blue-800">
+                                    {{ tx.reference }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-800">{{ tx.merchant_name }}</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-800">{{ formatCurrency(tx.amount_usd) }}</td>
+                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-800">{{ formatCurrency(tx.amount_received_usd) }}</td>
+                            <td class="px-4 py-3 text-sm text-right text-green-600">{{ formatCurrency(tx.fee_amount_usd) }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span :class="['px-2 py-1 text-xs rounded-full', getStatusClass(tx.status)]">
+                                    {{ formatStatus(tx.status) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-500">{{ formatDate(tx.paid_at) }}</td>
+                        </tr>
+                        <tr v-if="!recentActivity || recentActivity.length === 0">
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">{{ $t('暂无最近活动') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</app-layout>

@@ -1,0 +1,15 @@
+<app-layout>
+    <section class="user-status">
+        <div class="user-status__row">
+            <div class="user-status__item">
+                <font-awesome-icon class="animate-bounce text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation-circle"></font-awesome-icon>
+                <h2 class="user-status__title">{{ $t('An error occurred during your payment') }}</h2>
+                <div class="flex justify-center">
+                <nav-button-link :href="route('reports.deposits.fiat')">
+                    <span>{{ $t('Check your payment list') }}</span>
+                </nav-button-link>
+            </div>
+            </div>
+        </div>
+    </section>
+</app-layout>

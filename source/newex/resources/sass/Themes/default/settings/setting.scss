@@ -1,0 +1,70 @@
+@use "./setting-fonts";
+@use "./setting-typographia";
+@use "./setting-color";
+
+body {
+    font-family: 'Rubik', sans-serif;
+    font-weight: var(--medium-font);
+    font-size: var(--default-font__size);
+    margin: 0;
+    padding: 0;
+
+    color: var(--first-text-color);
+    background-color: var(--body-color);
+}
+
+.site-layout {
+    overflow-x: hidden;
+}
+
+body.dark {
+
+    .site-layout {
+        --tr-hover-color: #1d2234;
+        --tr-hover-color-second: #646f8f;
+        --border-line-color: #1d2234;
+        --rows-color: #1d2234;
+        --hover-v1-color: #FFC107;
+        --first-text-color: #B9BAC0;
+        --white-input: #131722;
+        --progress-color: #c19a23;
+        --select-option: #1d2234;
+        --second-fourth-color: #8d8787;
+
+        color: var(--dark-text-color);
+        background-color: var(--dark-body-color);
+
+        --border-select-color: #2a2948;
+
+
+        --btn-secondary-color: #273445;
+        --btn-secondary-text-color: #ffffff;
+
+        --disabled-checkbox: #1b1b1b;
+
+        --checkbox-bg: #1f1e35;
+        --checkbox-border: #393b3d;
+
+        --border-line-color-v2: #252c42;
+
+        --yellow-darker-color: #a78929;
+
+        --table-head-color: #1d2234;
+
+        --modal-border-line-color: #696b77;
+
+        --modal-information-color: #101520;
+
+        --modal-information-warning-color: #101320;
+
+        --modal-information-warning-color-label: #384260;
+
+        --label-bubble-color: #0e101e;
+
+        --dark-text-color2: #B9BAC0;
+
+        --dark-gray: #b9b9b9;
+
+    }
+}
+

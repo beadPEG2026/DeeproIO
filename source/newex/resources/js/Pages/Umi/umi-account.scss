@@ -1,0 +1,74 @@
+.umi-account{--umi-green:var(--ui-umi-link);--umi-muted:var(--ui-umi-muted);max-width:1240px;margin:auto;padding:48px 28px 80px;color:var(--ui-umi-text);font-size:14px;line-height:1.65;h1{font-size:34px;font-weight:650;letter-spacing:-1px;margin:8px 0}h2{font-size:21px;font-weight:600;margin-bottom:16px}h3{font-size:18px}a{color:var(--umi-green)}p{color:var(--ui-umi-muted)}button:disabled{opacity:.55;cursor:wait}input,textarea,select{display:block;width:100%;background:var(--ui-surface);border:1px solid var(--ui-umi-line);border-radius:10px;padding:12px 14px;color:var(--ui-umi-text);margin:7px 0 20px}label{display:block;color:var(--ui-umi-muted)}input:focus,textarea:focus,select:focus{outline:2px solid var(--ui-umi-line);outline-offset:2px}}
+.umi-eyebrow{font-size:11px;letter-spacing:2px;color:var(--ui-umi-muted);font-weight:650}.umi-account-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:28px}.umi-quiet-link{font-size:13px;display:inline-block;padding:8px 0}.umi-identity-strip{border:1px solid var(--ui-umi-line);background:var(--ui-umi-soft);padding:24px;border-radius:18px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:24px}.umi-identity-strip span{display:block;color:var(--ui-umi-muted);font-size:12px}.umi-identity-strip strong{font-size:18px}.umi-history-note{border-left:3px solid var(--ui-umi-line);padding:12px 18px;background:var(--ui-umi-soft);color:var(--ui-umi-muted);font-size:13px;margin:20px 0}.umi-account-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0 20px}.umi-account-tabs a{white-space:nowrap;border-radius:9px;padding:9px 16px;color:var(--ui-umi-text);border:1px solid transparent}.umi-account-tabs a.selected{background:var(--ui-surface);color:var(--ui-umi-text);font-weight:600}.umi-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px}.umi-stat-grid article,.umi-panel,.umi-token-card,.umi-empty-card,.umi-activation-card{background:var(--ui-surface);border:1px solid var(--ui-umi-line);border-radius:16px;padding:24px}.umi-stat-grid span,.umi-stat-grid small{color:var(--ui-umi-muted);display:block}.umi-stat-grid strong{font-size:22px;display:block;color:var(--ui-umi-text);margin:14px 0 2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.umi-two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.umi-panel{margin-bottom:20px}.umi-values>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--ui-umi-line)}.umi-values dt{color:var(--ui-umi-muted)}.umi-values dd{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.umi-service-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--ui-umi-line);padding:16px 0}.umi-service-row span{font-size:12px;color:var(--ui-umi-muted)}.umi-muted{font-size:12px;margin-top:16px;color:var(--ui-umi-muted)!important}.umi-table-wrap{overflow:auto}.umi-table-wrap table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}.umi-table-wrap th{color:var(--ui-umi-text);font-weight:400;font-size:12px;padding:14px 12px;border-bottom:1px solid var(--ui-umi-line)}.umi-table-wrap td{padding:16px 12px;border-bottom:1px solid var(--ui-umi-line);font-variant-numeric:tabular-nums}.umi-pagination{display:flex;gap:24px;justify-content:center;align-items:center;margin-top:22px;color:var(--ui-umi-text)}.umi-empty{text-align:center;padding:30px;color:var(--ui-umi-text)}.umi-token-card{margin-top:32px;display:flex;justify-content:space-between;align-items:center;gap:20px}.umi-token-card a{overflow-wrap:anywhere;font-family:monospace;font-size:12px}.umi-token-card small{font-size:12px;color:var(--ui-umi-muted)}.umi-status-pill{white-space:nowrap;padding:7px 13px;border:1px solid var(--ui-umi-line);border-radius:24px;font-size:12px;color:var(--ui-umi-text)}.umi-action{display:inline-block;background:var(--ui-umi-accent)!important;color:var(--ui-on-accent)!important;padding:12px 22px;border-radius:10px;font-weight:600;border:0;margin:15px 12px 10px 0}.umi-empty-card{padding:42px}.umi-activation-card{max-width:610px;margin:15px auto;padding:36px}.umi-steps{display:flex;gap:20px;list-style:none;padding:24px 0;font-size:12px;color:var(--ui-umi-text)}.umi-steps .active{color:var(--ui-umi-text)}.umi-activation-help{margin-top:28px;padding-top:25px;border-top:1px solid var(--ui-umi-line)}.umi-activation-help p{font-size:12px}.umi-error{color:var(--ui-danger)!important;background:var(--ui-umi-soft);border-radius:8px;padding:12px}.umi-text-button{color:var(--ui-umi-link);font-size:12px;margin:12px}.umi-admin-batches{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}.umi-admin-batches span{padding:12px;background:var(--ui-umi-soft);border-radius:8px}.umi-admin-search{display:flex;gap:12px;max-width:500px;align-items:center}.umi-admin-search input{margin:0}.umi-inline-form{max-width:650px}
+@media(max-width:760px){.umi-account{padding:28px 16px 55px;h1{font-size:28px}}.umi-account-heading{align-items:flex-start;flex-direction:column}.umi-identity-strip{grid-template-columns:1fr 1fr;padding:20px;gap:18px}.umi-stat-grid{grid-template-columns:1fr 1fr;gap:10px}.umi-stat-grid article{padding:16px}.umi-stat-grid strong{font-size:19px}.umi-two-columns{grid-template-columns:1fr}.umi-token-card{align-items:flex-start;flex-direction:column}.umi-panel{padding:18px}.umi-activation-card{padding:24px 20px}.umi-steps{gap:12px}.umi-values>div{flex-wrap:wrap}.umi-empty-card{padding:24px}.umi-account-tabs{margin-right:-16px}.umi-service-row{gap:12px}}
+
+
+.umi-account {
+  --umi-green: var(--ui-umi-link);
+  --umi-muted: var(--ui-umi-muted);
+  color: var(--ui-umi-text);
+  background: var(--ui-umi-soft);
+  min-width: 0;
+  width: 100%;
+  p { color: var(--ui-umi-muted); }
+  .umi-eyebrow { color: var(--ui-umi-muted); }
+  label { color: var(--ui-umi-muted); }
+  input, textarea, select {
+    background: var(--ui-surface);
+    border-color: var(--ui-umi-line);
+    color: var(--ui-umi-text);
+    &::placeholder { color: var(--ui-umi-text); opacity: 1; }
+    &:focus { outline-color: #237b3b; }
+  }
+  .umi-stat-grid article, .umi-panel, .umi-token-card,
+  .umi-empty-card, .umi-activation-card {
+    background: var(--ui-surface);
+    border-color: var(--ui-umi-line);
+  }
+  .umi-stat-grid span, .umi-stat-grid small { color: var(--ui-umi-muted); }
+  .umi-stat-grid strong { color: var(--ui-umi-text); }
+  .umi-values > div, .umi-service-row { border-color: var(--ui-umi-line); }
+  .umi-values dt, .umi-service-row span { color: var(--ui-umi-muted); }
+  .umi-muted { color: var(--ui-umi-muted) !important; }
+  .umi-history-note { border-color: var(--ui-umi-line); background: var(--ui-umi-soft); color: var(--ui-umi-muted); }
+  .umi-table-wrap {
+    th { background: var(--ui-umi-soft); color: var(--ui-umi-text); border-color: var(--ui-umi-line); }
+    td { color: var(--ui-umi-text); border-color: var(--ui-umi-line); }
+  }
+  .umi-pagination, .umi-empty, .umi-token-card small { color: var(--ui-umi-muted); }
+  .umi-status-pill { color: var(--ui-umi-text); border-color: var(--ui-umi-line); background: var(--ui-umi-soft); }
+  .umi-action { white-space: nowrap; flex-shrink: 0; background: var(--ui-umi-accent) !important; color: var(--ui-on-accent) !important; }
+  .umi-account-tabs a { color: var(--ui-umi-text); }
+  .umi-account-tabs a.selected { background: var(--ui-surface); color: var(--ui-umi-text); }
+  .umi-steps { color: var(--ui-umi-text); }
+  .umi-steps .active { color: var(--ui-umi-text); font-weight: 600; }
+  .umi-activation-help { border-color: var(--ui-umi-line); }
+  .umi-text-button { color: var(--ui-umi-link); }
+  .umi-admin-batches span { background: var(--ui-umi-soft); color: var(--ui-umi-muted); }
+  .umi-admin-search input { min-width: 0; }
+  .umi-error { color: var(--ui-danger) !important; background: var(--ui-umi-soft); }
+  .umi-identity-strip { color: var(--ui-umi-text); }
+  :is(a, button, summary):focus-visible { outline: 2px solid var(--ui-umi-line); outline-offset: 3px; }
+  .umi-review-filters {display:flex;gap:16px;align-items:center;flex-wrap:wrap;label{font-size:12px}input,select{margin-bottom:0} > div{min-width:170px;flex:1}}
+  .umi-review-detail {white-space:normal;min-width:230px;max-width:420px;strong,small{display:block}p{font-size:12px;margin:6px 0 0}}
+  .umi-review-amount {white-space:normal;overflow-wrap:anywhere;min-width:200px;max-width:330px;font-size:12px}
+  .umi-result {display:inline-block;padding:4px 8px;border-radius:6px;background:var(--ui-umi-soft);color:var(--ui-umi-text);font-size:12px}
+  .umi-result-difference,.umi-result-missing,.umi-result-ambiguous {background:var(--ui-umi-soft);color:var(--ui-umi-text)}
+  .umi-result-invalid {background:var(--ui-umi-soft);color:var(--ui-umi-text)}
+  .umi-rule-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .umi-rule-card {border:1px solid var(--ui-umi-line);border-radius:12px;padding:20px;h3{margin:16px 0 10px}strong,small{font-size:12px}small{color:var(--ui-umi-muted)}}
+  .umi-ancestor-path {display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 24px;font-size:12px}
+  .umi-ancestor-path span {padding:6px 10px;border:1px solid var(--ui-umi-line);border-radius:8px;background:var(--ui-umi-soft)}
+  .umi-ancestor-path .outside {border-style:dashed;background:var(--ui-umi-soft);color:var(--ui-umi-text)}
+  .umi-muted {overflow-wrap:anywhere}
+  @media(max-width:760px){.umi-rule-grid{grid-template-columns:1fr}.umi-review-filters>div{flex-basis:100%;min-width:0}.umi-review-filters .umi-action{margin-top:0}}
+}
+
+.umi-account {
+ .umi-account-heading h1,.umi-activation-card h1 {font-weight:750;letter-spacing:-.6px;}
+ .umi-action {background:var(--ui-umi-accent)!important;color:var(--ui-on-accent)!important;min-height:44px;border-radius:10px;}
+ .umi-identity-strip {background:var(--ui-umi-soft);border-color:var(--ui-umi-line);color:var(--ui-umi-text);}
+ .umi-identity-strip span {color:var(--ui-umi-muted);}
+ .umi-stat-grid article,.umi-panel,.umi-empty-card,.umi-token-card {border-radius:18px;}
+ .umi-account-tabs a.selected {background:var(--ui-surface);border-color:var(--ui-umi-line);color:var(--ui-umi-text);}
+}

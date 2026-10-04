@@ -1,0 +1,14 @@
+<div class="header-caption-block relative">
+    <video class="header-caption-overlay" autoplay loop muted webkit-playsinline playsinline>
+        <source src="/video.mp4" type="video/mp4">
+    </video>
+    <div class="header-caption-container relative">
+        <div class="header-caption-title">
+            <h1>{{ $t('Kickstart Your Crypto Journey')}}</h1>
+            <h2>{{ $t('0% Trading Fees for MOCCO Token Holders *')}}</h2>
+
+            <Link v-if="!$page.props.user" :href="route('register')" class="header-caption-button">{{ $t("Join now") }}</Link>
+            <Link v-else :href="route('markets')" class="header-caption-button">{{ $t("Trade now") }}</Link>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="site-layout wrapper flex flex-col min-h-screen">
+
+    <!-- thead start -->
+    <header class="header-section header z-10 noselect">
+        <div class="header__row">
+                <!-- header row left start -->
+                <div class="header__row-left">
+                    <!-- header logo start -->
+                    <div class="header-logo">
+                        <deepro-brand />
+                    </div>
+                </div>
+                <!-- header row left end -->
+        </div>
+    </header>
+    <!-- thead end -->
+
+    <!-- MAIN START -->
+    <main class="main-section main flex-grow">
+
+        <div class="main__container">
+            <div :class="{'max-w-screen-2xl mx-auto': !isHomePage, 'mobile-body': isMobile}">
+                <slot></slot>
+            </div>
+        </div>
+
+        <!-- Modal Portal -->
+        <portal-target name="modal" multiple></portal-target>
+    </main>
+    <!-- MAIN END -->
+
+    <!-- section footer start -->
+    <site-footer compact />
+    <!-- tfood end -->
+    <bottom-menu v-if="isMobile" />
+</div>
+
+
+

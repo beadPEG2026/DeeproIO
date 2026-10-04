@@ -1,0 +1,442 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link
+            class="text-indigo-400 hover:text-indigo-600"
+            :href="route('admin.users.edit', filters.referrer)"
+            v-if="filters.referrer"
+        >
+            {{ $t("返回 -") }}
+        </Link>
+        {{ $t("KYC 认证文件") }}
+    </h1>
+
+    <div class="mb-6">
+        <div
+            style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+                gap: 12px;
+                align-items: end;
+            "
+        >
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="UID/邮箱/邀请码/钱包/身份证号"
+                />
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("角色") }}</label>
+                <themed-select
+                    v-model="form.role"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="user">{{ $t("用户") }}</option>
+                    <option value="admin">{{ $t("管理员") }}</option>
+                    <option value="superadmin">{{ $t("超级管理员") }}</option>
+                    <option value="user_leader">{{ $t("组长") }}</option>
+                    <option value="salesman">{{ $t("业务员") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("用户状态") }}</label>
+                <themed-select
+                    v-model="form.status"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="normal">{{ $t("正常") }}</option>
+                    <option value="deactivated">{{ $t("已封禁") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("KYC状态") }}</label>
+                <themed-select
+                    v-model="form.kyc_status"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="pending">{{ $t("待审核") }}</option>
+                    <option value="approved">{{ $t("已通过") }}</option>
+                    <option value="rejected">{{ $t("已拒绝") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("邮箱状态") }}</label>
+                <themed-select
+                    v-model="form.email_status"
+                    class="w-full form-select rounded text-sm"
+                    style="height: 40px;"
+                >
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="verified">{{ $t("已验证") }}</option>
+                    <option value="unverified">{{ $t("未验证") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 200px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("登录IP") }}</label>
+                <input
+                    v-model="form.login_ip"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="输入IP"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("IP归属地") }}</label>
+                <input
+                    v-model="form.ip_location"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="国家/省/市"
+                />
+            </div>
+
+            <div style="width: 240px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("提交时间") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    placeholder="点击选择时间"
+                />
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="filterDuplicateIp()" class="h-10 px-4">
+                    {{ $t("查询重复IP") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="filterDuplicateAccount()" class="h-10 px-4">
+                    {{ $t("查询重复账号") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="reset()" class="h-10 px-4">
+                    {{ $t("重置") }}
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("用户信息") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("邮箱状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("登录IP") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("IP归属地") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("国家") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("自拍照片") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("证件") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("KYC状态") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("提交时间") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr
+                v-for="document in kycDocuments.data"
+                :key="document.id"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <span class="px-6 py-4 flex flex-col focus:text-indigo-500">
+                        <span>
+                            {{ $t("姓名：") }}{{ document.first_name }} {{ document.middle_name }} {{ document.last_name }}
+                        </span>
+
+                        <span>
+                            {{ $t("身份证号：") }}{{ formatDocumentNumber(document) }}
+                        </span>
+
+                        <span v-if="document.user">
+                            {{ $t("邮箱：") }}{{ document.user.email }}
+                        </span>
+
+                        <span v-if="document.user">
+                            {{ $t("昵称：") }}{{ document.user.nickname || '-' }}
+                        </span>
+
+                        <span v-if="document.user">
+                            {{ $t("UID：") }}{{ document.user.referral_code || document.user.id }}
+                        </span>
+
+                        <span v-if="document.user">
+                            {{ $t("组长：") }}{{ document.user.leader_display_name || '-' }}
+                        </span>
+
+                        <span v-if="document.user">
+                            {{ $t("推荐人：") }}{{ getReferrerDisplay(document) }}
+                            <button
+                                v-if="getReferrerChain(document).length"
+                                type="button"
+                                class="text-indigo-500 text-sm ml-2"
+                                @click="showReferrerChain(document)"
+                            >
+                                {{ $t("查看所有上级") }}
+                            </button>
+                        </span>
+
+                        <span v-if="document.user && document.user.wallet_id">
+                            {{ $t("钱包：") }}{{ format_string(document.user.wallet_id, 12) }}
+                        </span>
+
+                        <span v-if="document.user && document.user.roles && document.user.roles.length">
+                            {{ $t("角色：") }}
+                            <template v-for="role in document.user.roles">
+                                <badge :key="role.name" class="mr-1 mt-1" type="green">
+                                    <template v-if="role.name == 'user'">{{ $t("用户") }}</template>
+                                    <template v-if="role.name == 'admin'">{{ $t("管理员") }}</template>
+                                    <template v-if="role.name == 'content_editor'">{{ $t("内容编辑员") }}</template>
+                                    <template v-if="role.name == 'user_editor'">{{ $t("用户编辑员") }}</template>
+                                    <template v-if="role.name == 'finance_manager'">{{ $t("财务经理") }}</template>
+                                    <template v-if="role.name == 'superadmin'">{{ $t("超级管理员") }}</template>
+                                    <template v-if="role.name == 'assets_editor'">{{ $t("资产编辑员") }}</template>
+                                    <template v-if="role.name == 'p2p_appeal_judge'">{{ $t("P2P 客服") }}</template>
+                                    <template v-if="role.name == 'user_leader'">{{ $t("组长") }}</template>
+                                    <template v-if="role.name == 'salesman'">{{ $t("业务员") }}</template>
+                                    <template v-if="!role.name">{{ role }}</template>
+                                </badge>
+                            </template>
+                        </span>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge
+                            v-if="document.user"
+                            class="mr-2"
+                            :type="!document.user.deactivated ? 'green' : 'gray'"
+                        >
+                            {{ !document.user.deactivated ? $t("正常") : $t("已封禁") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge
+                            v-if="document.user"
+                            class="mr-2"
+                            :type="document.user.email_verified_at ? 'green' : 'gray'"
+                        >
+                            {{ document.user.email_verified_at ? $t("已验证") : $t("未验证") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.user ? document.user.login_ip : '' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.user ? locationLabel(document.user.ip_location) : '' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.country ? document.country.name : '' }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <font-awesome-icon
+                            @click="showModal([document.selfie])"
+                            icon="external-link-alt"
+                            class="cursor-pointer"
+                        />
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <font-awesome-icon
+                            @click="showModal([document.front, document.back])"
+                            icon="external-link-alt"
+                            class="cursor-pointer"
+                        />
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge v-if="document.status == 'pending'" class="mr-2" type="orange">
+                            {{ $t("待审核") }}
+                        </badge>
+
+                        <badge v-if="document.status == 'approved'" class="mr-2" type="green">
+                            {{ $t("已通过") }}
+                        </badge>
+
+                        <badge v-if="document.status == 'rejected'" class="mr-2 cursor-pointer" type="red">
+                            <div @click="showReason(document)">
+                                <span class="mr-1">{{ $t("已拒绝") }}</span>
+                                <font-awesome-icon icon="info-circle" />
+                            </div>
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ document.created_at }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span
+                        v-if="document.status == 'pending'"
+                        class="px-6 py-4 flex items-center focus:text-indigo-500"
+                    >
+                        <t-button-green @click="approve(document)" class="mr-2">
+                            {{ $t("通过") }}
+                        </t-button-green>
+
+                        <t-button-red @click="reject(document)">
+                            {{ $t("拒绝") }}
+                        </t-button-red>
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="kycDocuments.data.length === 0">
+                <td class="border-t px-6 py-4" colspan="100">
+                    {{ $t("没有找到KYC认证文件。") }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <pagination :links="kycDocuments.links" />
+
+    <!-- Show User Document Modal -->
+    <jet-dialog-modal :show="showImage" @close="closeModal">
+        <template #title>
+            {{ $t("KYC 图片") }}
+        </template>
+
+        <template #content>
+            <div v-for="image in images" :key="image ? image.url : Math.random()">
+                <img v-if="image" width="100%" :src="image.url" />
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeModal">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+    <!-- Show Rejection Reason Modal -->
+    <jet-dialog-modal :show="showReasonModal" @close="closeReasonModal">
+        <template #title>
+            {{ $t("拒绝原因") }}
+        </template>
+
+        <template #content>
+            <div v-html="rejectedReason"></div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeReasonModal">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+    <!-- Confirmation Modal -->
+    <jet-confirmation-modal :show="documentBeingReviewed">
+        <template #title>
+            {{ $t("确认操作") }}
+        </template>
+
+        <template #content>
+            <div v-if="selectedAction == 'approve'">
+                {{ $t("确定要通过该证件吗？") }}
+            </div>
+
+            <div v-if="selectedAction == 'reject'" class="flex flex-wrap">
+                {{ $t("请填写拒绝原因") }}
+                <t-textarea v-model="rejectedReasonText" class="mt-5 w-full"></t-textarea>
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="documentBeingReviewed = null">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-danger-button class="ml-2" @click.native="confirmAction">
+                {{ selectedAction == 'approve' ? $t("通过") : selectedAction == 'reject' ? $t("拒绝") : selectedAction }}
+            </jet-danger-button>
+        </template>
+    </jet-confirmation-modal>
+
+    <div
+        v-if="selectedReferrerChain !== null"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+    >
+        <div class="bg-white rounded shadow-lg w-full max-w-lg mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg">{{ selectedReferrerTitle }}</h3>
+                <button type="button" class="text-gray-500 hover:text-gray-800" @click="closeReferrerChain">×</button>
+            </div>
+
+            <div class="p-6">
+                <div v-if="!selectedReferrerChain.length" class="text-gray-500">
+                    {{ $t("没有上级推荐人。") }}
+                </div>
+
+                <div v-for="item in selectedReferrerChain" :key="item.level + '-' + item.id" class="border rounded p-3 mb-3">
+                    <div class="font-semibold text-gray-800">
+                        {{ $t("第") }} {{ item.level }} {{ $t("级：") }}{{ referrerPrimaryName(item) }}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("ID：") }}{{ item.id }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("邀请码：") }}{{ item.referral_code || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1 break-all">{{ $t("账号：") }}{{ item.account || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("姓名：") }}{{ item.name || '-' }}</div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t text-right">
+                <button type="button" class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200" @click="closeReferrerChain">
+                    {{ $t("关闭") }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

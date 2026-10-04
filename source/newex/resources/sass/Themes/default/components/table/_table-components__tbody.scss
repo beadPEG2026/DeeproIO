@@ -1,0 +1,232 @@
+
+/** tbody start */
+.table-list {
+
+    tr {
+        border-bottom: 1px solid var(--border-line-color);
+        transition: all 0.5s ease-out;
+
+        &:hover {
+            background-color: var(--tr-hover-color);
+        }
+    }
+
+    /** subtitle */
+    &__subtitle {
+        display: none;
+    }
+
+    /** value */
+    &__value {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0.90rem 0 0.90rem 0.20rem;
+    }
+
+    /** text */
+    &__text {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    /** link */
+    &__link {
+        display: flex;
+        justify-content: flex-start;
+        cursor: pointer;
+
+        a {
+            display: block;
+            margin-right: 1.50rem;
+            color: var(--yellow-color);
+
+            &:after {
+                content: "";
+                display: block;
+                width: 0%;
+                height: 2px;
+                background-color: var(--yellow-color);
+                transition: all 0.5s ease-out;
+            }
+
+            &:hover  {
+                &:after {
+                    width: 100%;
+                }
+            }
+
+        }
+
+    }
+
+    /** version 1 (title+icon)*/
+    .title-icon {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        /** icon */
+        &__icon {
+            position: relative;
+            top: 1px;
+            z-index: 9;
+            width: 18px;
+            height: 18px;
+            margin: 0 8px;
+            display: inline-block;
+
+            &-color {
+                fill: var(--second-text-color);
+            }
+
+            &-active {
+                fill: var(--yellow-color);
+            }
+        }
+
+        /** name */
+        &__name {
+            font-size: var(--default-font__size);
+        }
+
+    }
+
+    /** version 2 (title+image) */
+    &__image {
+        display: flex;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        margin: 0 1rem 0 0.60rem;
+
+        img {
+            border-radius: 50%;
+        }
+    }
+
+    &__title {
+
+        &-big {
+            display: block;
+            width: 100%;
+        }
+
+        &-small {
+            display: block;
+            font-size: var(--small-font__size);
+            color: var(--second-text-color);
+        }
+
+    }
+
+    /** title version 3 (text+two icon) */
+    .list-text__name {
+        color: var(--second-text-color);
+        display: block;
+        margin-right: 10px;
+    }
+    .list-text__icon {
+        position: relative;
+        display: block;
+        margin-left: 10px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+
+        &-color {
+            stroke: var(--second-text-color);
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        &:hover {
+            .list-text__icon-color {
+                stroke: var(--hover-v1-color);
+            }
+        }
+    }
+
+    /** title version 4 (noname) */
+    &__icon { outline: 1px solid #F00;
+        position: relative;
+        top: 1px;
+        z-index: 9;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        margin: 0 8px;
+
+
+        &-color {
+            fill: var(--second-text-color);
+        }
+    }
+}
+/** tbody end */
+
+
+
+/** tbody media screen start */
+@media screen and (max-width: 1000px) {
+
+    .table-list {
+
+        tr {
+            &:hover {
+                background-color: none;
+            }
+        }
+
+        td {
+            clear: both;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &:first-child {
+                padding-top: 1rem;
+            }
+            &:nth-last-child(1) {
+                padding-bottom: 1rem;
+            }
+        }
+
+        &__subtitle {
+            display: block;
+            color: var(--second-text-color);
+        }
+
+        /** link */
+        &__link {
+
+            a {
+                display: block;
+                margin-right: 0;
+                margin-left: 1.50rem;
+                color: var(--yellow-color);
+
+                &:after {
+                    content: "";
+                    display: block;
+                    width: 0%;
+                    height: 2px;
+                    background-color: var(--yellow-color);
+                    transition: all 0.5s ease-out;
+                }
+
+                &:hover  {
+                    &:after {
+                        width: 100%;
+                    }
+                }
+
+            }
+
+        }
+
+    }
+}
+/** tbody media screen end */

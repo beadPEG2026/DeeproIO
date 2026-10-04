@@ -1,0 +1,163 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('API Documentation') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('API Documentation')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <div class="flex">
+            <!-- Sidebar -->
+            <div class="hidden lg:block w-64 flex-shrink-0">
+                <div class="sticky top-6  rounded-xl shadow-sm p-4">
+                    <nav class="space-y-1">
+                        <a
+                            v-for="section in sections"
+                            :key="section.id"
+                            @click.prevent="setActiveSection(section.id)"
+                            :class="[
+                                'block px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors',
+                                activeSection === section.id
+                                    ? 'bg-blue-100 text-blue-700 font-medium'
+                                    : ' hover:bg-gray-100'
+                            ]"
+                        >
+                            {{ $t(section.label) }}
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 lg:ml-8">
+                <div class=" rounded-xl shadow-sm p-8">
+                    <!-- Getting Started -->
+                    <section id="getting-started" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Getting Started') }}</h2>
+                        <p class=" mb-4">
+                            {{ $t('The Crypto Acquiring API allows you to accept cryptocurrency payments on your website or application. Follow these steps to get started:') }}
+                        </p>
+                        <ol class="list-decimal list-inside space-y-2 ">
+                            <li>{{ $t('Generate API keys from the API Keys section') }}</li>
+                            <li>{{ $t('Set up your webhook endpoint to receive payment notifications') }}</li>
+                            <li>{{ $t('Create invoices using the API or dashboard') }}</li>
+                            <li>{{ $t('Redirect customers to the checkout page or embed the widget') }}</li>
+                        </ol>
+                    </section>
+
+                    <!-- Authentication -->
+                    <section id="authentication" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Authentication') }}</h2>
+                        <p class=" mb-4">
+                            {{ $t('All API requests require authentication using your API keys. Include these headers with every request:') }}
+                        </p>
+                        <div class="bg-gray-900 rounded-lg p-4 mb-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>X-API-Key: pk_live_your_public_key
+X-Timestamp: 1234567890
+X-Nonce: unique-uuid-v4
+X-Signature: v1=hmac_sha256_signature</code></pre>
+                        </div>
+                        <p class=" mb-4">{{ $t('The signature is computed as:') }}</p>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>signature = HMAC-SHA256(
+  "{timestamp}.{method}.{path}.{body}",
+  secret_key
+)</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Create Invoice -->
+                    <section id="create-invoice" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Create Invoice') }}</h2>
+                        <p class=" mb-4">{{ $t('Create a new payment invoice:') }}</p>
+                        <div class="bg-gray-900 rounded-lg p-4 mb-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>POST /api/v1/merchant/invoices
+
+{
+  "amount": 100.00,
+  "description": "Order #12345",
+  "customer_email": "customer@example.com",
+  "external_id": "order_12345",
+  "redirect_url": "https://yoursite.com/success",
+  "cancel_url": "https://yoursite.com/cancel"
+}</code></pre>
+                        </div>
+                        <p class=" mb-4">{{ $t('Response:') }}</p>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>{
+  "success": true,
+  "data": {
+    "invoice": {
+      "id": "inv_abc123...",
+      "status": "awaiting_selection",
+      "amount_usd": "100.00",
+      ...
+    },
+    "checkout_url": "https://example.com/pay/i/inv_abc123",
+    "widget_token": "wgt_..."
+  }
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Webhooks -->
+                    <section id="webhooks" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Webhooks') }}</h2>
+                        <p class=" mb-4">{{ $t('Webhooks notify your server when invoice status changes. Available events:') }}</p>
+                        <ul class="list-disc list-inside space-y-2  mb-4">
+                            <li><code class="bg-gray-100 px-1 rounded">invoice.pending</code> - {{ $t('Customer selected currency') }}</li>
+                            <li><code class="bg-gray-100 px-1 rounded">invoice.payment_detecting</code> - {{ $t('Payment detected in mempool') }}</li>
+                            <li><code class="bg-gray-100 px-1 rounded">invoice.confirming</code> - {{ $t('Payment confirming on blockchain') }}</li>
+                            <li><code class="bg-gray-100 px-1 rounded">invoice.paid</code> - {{ $t('Payment confirmed') }}</li>
+                            <li><code class="bg-gray-100 px-1 rounded">invoice.expired</code> - {{ $t('Invoice expired') }}</li>
+                        </ul>
+                        <p class=" mb-4">{{ $t('Webhook payload example:') }}</p>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>{
+  "id": "whk_xyz789",
+  "timestamp": "2024-01-15T12:00:00Z",
+  "event": {
+    "type": "invoice.paid"
+  },
+  "data": {
+    "invoice": {
+      "id": "inv_abc123",
+      "status": "paid",
+      "amount_usd": "100.00",
+      "amount_crypto": "0.0025",
+      ...
+    }
+  }
+}</code></pre>
+                        </div>
+                        <p class=" mt-4">{{ $t('Verify webhook signatures using X-Webhook-Signature header.') }}</p>
+                    </section>
+
+                    <!-- Widget -->
+                    <section id="widget" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Payment Widget') }}</h2>
+                        <p class=" mb-4">{{ $t('Redirect customers to the hosted checkout page:') }}</p>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-green-400 text-sm"><code>// Redirect to checkout
+window.location.href = invoice.checkout_url;
+
+// Or open in new window
+window.open(invoice.checkout_url, '_blank');</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Testing -->
+                    <section id="testing" class="mb-12">
+                        <h2 class="text-2xl font-bold  mb-4">{{ $t('Testing') }}</h2>
+                        <p class=" mb-4">{{ $t('Use test API keys (pk_test_*) for development. Test mode invoices:') }}</p>
+                        <ul class="list-disc list-inside space-y-2 ">
+                            <li>{{ $t('Do not create real blockchain transactions') }}</li>
+                            <li>{{ $t('Auto-confirm after a short delay') }}</li>
+                            <li>{{ $t('Webhooks are sent normally') }}</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-layout>

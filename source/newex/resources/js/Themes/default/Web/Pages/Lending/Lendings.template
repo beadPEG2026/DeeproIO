@@ -1,0 +1,581 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Lending') }}</title>
+        <meta name="description" content="">
+    </Head>
+    <!-- components title start -->
+
+    <template v-slot:tagline>
+        {{ $t('Lending')}}
+    </template>
+    <!-- components title end -->
+    <!-- components title end -->
+    <div class="table-components markets-tabs-list markets-tabs-list-inner">
+
+    <!-- tabs components start -->
+    <div class="tabs-components tabs markets-tabs">
+    <!-- tabs left start -->
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div @click="setSort('all')" class="tabs-nav__item" :class="{'tabs-nav__active': sort == 'all'}">
+                    <h4>{{ $t('Available coins') }}</h4>
+                </div>
+                <div @click="setSort('my')" class="tabs-nav__item" :class="{'tabs-nav__active': sort == 'my'}">
+                    <h4>{{ $t('My Lending') }}</h4>
+                </div>
+            </div>
+        </div>
+        <!-- tabs left end -->
+    </div>
+    <!-- tabs components end -->
+    <!-- table components start -->
+    <div v-if="sort == 'all'" class="table-components">
+        <!-- tables start -->
+        <table class="tables mob-table-lendings-available">
+            <!-- thead start -->
+            <thead class="table-sort">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Coin') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Min Amount') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Max Amount') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Status') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Actions') }}</span>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <!-- thead end -->
+            <!-- tbody start -->
+            <tbody class="table-list table-list-v2">
+            <tr @click="openModal(lending)" v-for="lending in lendings.data" :key="lending.id"  class="table-list__cursor">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Coin') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__image">
+                            <img :src="lending.currency_logo" />
+                        </div>
+                        <div class="table-list__title">
+                            <span class="table-list__title-big">{{ lending.currency_symbol }}</span>
+                            <span class="table-list__title-small">{{ lending.currency }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Min amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__name">{{ lending.min_amount }} {{ lending.currency_symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Max amount') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__name">{{ lending.max_amount }} {{ lending.currency_symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="{'label-green': lending.status == 'active', 'label-orange': lending.status == 'sold'}">
+                            <template v-if="lending.status == 'active'">{{ 'Active' }}</template>
+                            <template v-if="lending.status == 'closed'">{{ $t('Closed') }}</template>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Actions') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__link">
+                            <a href="javascript:void(0)">{{ $t('Borrow') }}</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="lendings.data && lendings.data.length == 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No coins for lending found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+    </div>
+    <!-- table components end -->
+
+    <div v-if="!isRepayment && sort == 'my'" class="table-components">
+
+        <!-- tables start -->
+        <table class="tables mob-table-lendings-my">
+
+            <!-- thead start -->
+            <thead class="table-sort">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Coin') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Borrowed') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Current LTV') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Remaining') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Status') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Actions') }}</span>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <!-- thead end -->
+
+            <!-- tbody start -->
+            <tbody class="table-list">
+            <tr v-for="lending in lendings.data" :key="lending.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Coin') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__image">
+                            <img :src="lending.currency_logo" />
+                        </div>
+                        <div class="table-list__title">
+                            <span class="table-list__title-big">{{ lending.currency_symbol }}</span>
+                            <span class="table-list__title-small">{{ lending.currency }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Borrowed') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__name">{{ lending.amount }} {{ lending.currency_symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Current LTV') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__name">
+                                <template v-if="lending.status == 'active'">
+                                    {{ lending.ltv }}%
+                                </template>
+                                <template v-else>
+                                    {{ $t('N/A') }}
+                                </template>
+
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Remaining') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__name">{{ lending.remaining_amount }} {{ lending.currency_symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                    <div class="table-list__value">
+                        <div class="components-label" :class="{'label-green': lending.status == 'active', 'label-orange': lending.status == 'liquidated'}">
+                            <template v-if="lending.status == 'active'">{{ $t('Active') }}</template>
+                            <template v-if="lending.status == 'closed'">{{ $t('Closed') }}</template>
+                            <template v-if="lending.status == 'liquidated'">{{ $t('Liquidated') }}</template>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Actions') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__link">
+
+                            <template v-if="lending.status == 'active'">
+                                <a @click.prevent="openRepayModal(lending, false)" v-if="lending.status == 'active'" href="#!">{{ $t('Repay') }}</a>
+                                <a class="mr-2" @click.prevent="openRepayModal(lending, true)" v-if="lending.status == 'active'" href="#!">{{ $t('Add Collateral') }}</a>
+
+                            </template>
+                            <a @click.prevent="openRepayHistory(lending)" href="#!">{{ $t('Repayment History') }}</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            <!-- tbody end -->
+            <!-- tfood start -->
+            <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="lendings.data && lendings.data.length == 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No borrowed coins found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+            <!-- tfood end -->
+
+        </table>
+        <!-- tables end -->
+
+    </div>
+
+    <div v-if="isRepayment && sort == 'my'" class="table-components">
+
+            <!-- tables start -->
+            <table class="tables mob-table-lendings-my">
+
+                <!-- thead start -->
+                <thead class="table-sort">
+                <tr>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Amount') }}</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Date') }}</span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <!-- thead end -->
+
+                <!-- tbody start -->
+                <tbody class="table-list">
+                <tr v-for="lending in lendings.data" :key="lending.id">
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Collateral') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__title title-icon">
+                                <div class="title-icon__name">{{ lending.amount }} {{ lending.collateral }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__title title-icon">
+                                <div class="title-icon__name">{{ lending.created_at }}</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                </tbody>
+                <!-- tbody end -->
+                <!-- tfood start -->
+                <tfoot class="table-result">
+                <tr>
+                    <td colspan="100">
+                        <div v-if="lendings.data && lendings.data.length == 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                            <span class="table-result__notfound-text">{{ $t('No repayments found.') }}</span>
+                        </div>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+            <!-- tables end -->
+
+        </div>
+
+    </div>
+
+    <!-- Show User  Modal -->
+    <jet-dialog-modal :show="showLendingModal" @close="closeModal">
+        <template #title>
+            <div class="flex justify-between">
+                <div>
+                    {{ $t('Borrow') }}
+                </div>
+                <div @click="closeModal" class="cursor-pointer">
+                    ✖
+                </div>
+            </div>
+
+        </template>
+        <template #content>
+            <div v-if="lendingModal">
+                <div class="modal-forms" id="main-modal-form">
+                    <div id="swap-container" class="lending-container">
+                        <div class="">
+                            <div class="">
+                                <div class="">
+                                    <div class="components-filter__item">
+                                        <label>{{ $t('Loan type:') }}</label>
+                                        <t-rich-user-select
+                                            :options="borrowTypes"
+                                            v-model="form.type"
+                                            :placeholder="$t('Select type')"
+                                            value-attribute="id"
+                                            text-attribute="name"
+                                            :clearable="false"
+                                            :hideSearchBox="true"
+                                        >
+                                            <template
+                                                slot="label"
+                                                slot-scope="{ className, option, query }"
+                                            >
+                                                <div class="flex">
+                                                    <div class="flex flex-col">
+                                                        <span>{{ option.text }}</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </t-rich-user-select>
+                                    </div>
+
+                                    <div class="components-filter__item mt-6 dropdown-extended">
+                                        <label>{{ $t('I want to borrow') }} {{ lendingModal.currency_symbol }}</label>
+                                        <div class="swap-container-elements rounded filter-select w-full flex text-left mt-2 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                                            <div class="relative-right">
+                                                <input placeholder="0.00" type="text" v-model="form.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="components-filter__item mt-6 dropdown-extended">
+                                        <label>{{ $t('Collateral') }}</label>
+                                        <div class="swap-container-elements rounded filter-select w-full flex text-left mt-2 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                                            <div class="relative-right">
+                                                <input readonly placeholder="" type="text" v-model="calculatedModel.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                                            </div>
+                                            <t-rich-user-select
+                                                v-model="form.collateral_id"
+                                                :options="currencies"
+                                                v-on:change="setupInitialData"
+                                                :placeholder="$t('Select coin')"
+                                                value-attribute="id"
+                                                text-attribute="name"
+                                                :clearable="false"
+                                                :hideSearchBox="true"
+                                            >
+                                                <template
+                                                    slot="label"
+                                                    slot-scope="{ className, option, query }"
+                                                >
+                                                    <div class="flex">
+                                                        <div class="flex flex-col">
+                                                            <div class="swap-label flex items-stretch">
+                                                                <img :src="option.text.logo" width="28" />
+                                                                <span class="pt-1 ml-5">{{ option.text.name }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                                <template
+                                                    slot="option"
+                                                    slot-scope="{ className, option, query }"
+                                                >
+                                                    <div class="flex">
+                                                        <div class="flex flex-col">
+                                                            <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                                                <img :src="option.text.logo" width="28" />
+                                                                <span class="pt-1 ml-5">{{ option.text.name }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </t-rich-user-select>
+                                        </div>
+                                    </div>
+                                    <div class="components-filter__item block-info mt-6">
+                                        <div>{{ $t('Annualized Interest Rate:') }}</div>
+                                        <div v-if="form.type == 'flexible'">
+                                            {{ lendingModal.annual_rate_flexible }}%
+                                        </div>
+                                        <div v-if="form.type == 'weekly'">
+                                            {{ lendingModal.annual_rate_weekly }}%
+                                        </div>
+                                        <div v-if="form.type == 'monthly'">
+                                            {{ lendingModal.annual_rate_monthly }}%
+                                        </div>
+                                    </div>
+                                    <div class="components-filter__item block-info mt-2">
+                                        <div>{{ $t('Estimated Hourly Interest:') }}</div>
+                                        <div v-if="form.type == 'flexible'">
+                                            {{ lendingModal.hourly_rate_flexible }}%
+                                        </div>
+                                        <div v-if="form.type == 'weekly'">
+                                            {{ lendingModal.hourly_rate_weekly }}%
+                                        </div>
+                                        <div v-if="form.type == 'monthly'">
+                                            {{ lendingModal.hourly_rate_monthly }}%
+                                        </div>
+                                    </div>
+                                    <div class="components-filter__item block-info mt-2">
+                                        <div>{{ $t('Initial LTV:') }}</div>
+                                        <div v-if="!collateral">-</div>
+                                        <div v-else>
+                                            <template v-if="form.type == 'flexible'">{{ collateral.flex_initial_ltv }}%</template>
+                                            <template v-if="form.type == 'weekly'">{{ collateral.weekly_initial_ltv }}%</template>
+                                            <template v-if="form.type == 'monthly'">{{ collateral.monthly_initial_ltv }}%</template>
+                                        </div>
+                                    </div>
+                                    <div class="components-filter__item block-info mt-2">
+                                        <div>{{ $t('Liquidation LTV:') }}</div>
+                                        <div v-if="!collateral">-</div>
+                                        <div v-else>
+                                            <template v-if="form.type == 'flexible'">{{ collateral.flex_liquidation_ltv }}%</template>
+                                            <template v-if="form.type == 'weekly'">{{ collateral.weekly_liquidation_ltv }}%</template>
+                                            <template v-if="form.type == 'monthly'">{{ collateral.monthly_liquidation_ltv }}%</template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <div id="main-modal-footer">
+                <jet-secondary-button @click.native="borrow()">
+                    {{ $t('Start Borrowing') }}
+                </jet-secondary-button>
+            </div>
+        </template>
+    </jet-dialog-modal>
+
+    <jet-dialog-modal :show="showRepayModal" @close="closeRepayModal">
+        <template #title>
+            <div class="flex justify-between">
+                <div>
+                    {{ isCollateral ? $t('Add Collateral') : $t('Repay') }}
+                </div>
+                <div @click="closeRepayModal" class="cursor-pointer">
+                    ✖
+                </div>
+            </div>
+        </template>
+        <template #content>
+            <div v-if="lendingModal">
+                <div class="modal-forms" id="main-modal-form">
+                    <div id="swap-container" class="lending-container">
+                        <div class="">
+                            <div class="">
+                                <div class="">
+
+                                    <div class="components-filter__item mt-6 dropdown-extended">
+                                        <label>
+                                            <template v-if="isCollateral">
+                                                {{ $t('Collateral') }} {{ lendingModal.collateral_symbol }}
+                                            </template>
+                                            <template v-else>
+                                                {{ $t('Repayment Amount') }} {{ lendingModal.currency_symbol }}
+                                            </template>
+                                        </label>
+                                        <div class="swap-container-elements rounded filter-select w-full flex text-left mt-2 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200">
+                                            <div class="relative-right">
+                                                <input placeholder="0.00" type="text" v-model="repayForm.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="!isCollateral" class="components-filter__item block-info mt-6">
+                                        <div>{{ $t('Total Debt') }}</div>
+                                        <div>{{ lendingModal.amount }} {{ lendingModal.currency_symbol }}</div>
+                                    </div>
+                                    <div v-if="!isCollateral" class="components-filter__item block-info mt-2">
+                                        <div>{{ $t('Remaining Debt') }}</div>
+                                        <div>{{ lendingModal.remaining_amount }} {{ lendingModal.currency_symbol }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+            <div id="main-modal-footer">
+                <jet-secondary-button @click.native="repay()">
+                    <template v-if="isCollateral">
+                        {{ $t('Add Collateral') }}
+                    </template>
+                    <template v-else>
+                        {{ $t('Repay') }}
+                    </template>
+                </jet-secondary-button>
+            </div>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

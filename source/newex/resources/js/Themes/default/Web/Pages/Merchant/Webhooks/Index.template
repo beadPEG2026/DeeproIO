@@ -1,0 +1,167 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Webhooks') }}</title>
+    </Head>
+
+    <merchant-top-menu :label="$t('Webhooks')"></merchant-top-menu>
+
+    <div class="container mx-auto py-6 merchant-container">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold ">{{ $t('Webhooks') }}</h1>
+                <p class=" mt-1">{{ $t('View webhook delivery history and status') }}</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="rounded-card rounded-xl shadow-sm p-4">
+                <div class="text-sm ">{{ $t('Total') }}</div>
+                <div class="text-2xl font-bold ">{{ stats.total }}</div>
+            </div>
+            <div class="rounded-card rounded-xl shadow-sm p-4">
+                <div class="text-sm ">{{ $t('Delivered') }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ stats.delivered }}</div>
+            </div>
+            <div class="rounded-card rounded-xl shadow-sm p-4">
+                <div class="text-sm ">{{ $t('Failed') }}</div>
+                <div class="text-2xl font-bold text-red-600">{{ stats.failed }}</div>
+            </div>
+            <div class="rounded-card rounded-xl shadow-sm p-4">
+                <div class="text-sm ">{{ $t('Delivery Rate') }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ stats.delivery_rate }}%</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="components-filter">
+            <div class="components-filter__row">
+                <div class="components-filter__item">
+                    <label>{{ $t('Status:') }}</label>
+                    <t-rich-user-select
+                        :options="statuses"
+                        v-model="form.status"
+                        :placeholder="$t('Select status')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="components-filter__item">
+                    <label>{{ $t('Event Type:') }}</label>
+                    <t-rich-user-select
+                        :options="eventTypes"
+                        v-model="form.event_type"
+                        :placeholder="$t('Select event')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="true"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="components-filter__item">
+                    <label>{{ $t('Invoice ID:') }}</label>
+                    <input v-model="form.invoice_id" type="text" class="components-filter__input" :placeholder="$t('Filter by invoice')">
+                </div>
+
+                <div class="components-filter__item">
+                    <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                        <span class="components-filter__icon">
+                            <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ $t('Search') }}
+                        </span>
+                    </t-button-green>
+                </div>
+            </div>
+        </div>
+
+        <!-- Webhooks List -->
+        <div class=" rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full merchant-table">
+                    <thead class="">
+                        <tr class="text-left text-sm ">
+                            <th class="px-6 py-4 font-medium">{{ $t('Event') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Status') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Invoice') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Attempts') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Response') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Created') }}</th>
+                            <th class="px-6 py-4 font-medium">{{ $t('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="webhook in webhooks.data"
+                            :key="webhook.id"
+                            class=""
+                        >
+                            <td class="px-6 py-4">
+                                <div class="font-medium ">{{ webhook.event_type }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span :class="['px-2 py-1 rounded-full text-xs font-medium', getStatusBadge(webhook.status).color]">
+                                    {{ getStatusBadge(webhook.status).label }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-mono text-sm">{{ webhook.invoice_id.substring(0, 8) }}...</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ webhook.attempt_count }} / {{ webhook.max_attempts }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span v-if="webhook.last_response_code" :class="webhook.last_response_code < 300 ? 'text-green-600' : 'text-red-600'">
+                                    {{ webhook.last_response_code }}
+                                </span>
+                                <span v-else class="">-</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm ">{{ formatDate(webhook.created_at) }}</td>
+                            <td class="px-6 py-4">
+                                <button
+                                    v-if="webhook.status === 'failed' || webhook.status === 'pending_retry'"
+                                    @click="retryWebhook(webhook)"
+                                    :disabled="retrying === webhook.id"
+                                    class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+                                >
+                                    {{ retrying === webhook.id ? $t('Retrying...') : $t('Retry') }}
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="!webhooks.data || webhooks.data.length === 0">
+                            <td colspan="7" class="px-6 py-12 text-center ">
+                                {{ $t('No webhooks found') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="webhooks.data && webhooks.data.length > 0" class="py-4 px-4">
+                <pagination :links="webhooks.links" />
+            </div>
+        </div>
+    </div>
+</app-layout>

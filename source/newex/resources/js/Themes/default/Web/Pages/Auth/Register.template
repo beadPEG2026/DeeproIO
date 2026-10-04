@@ -1,0 +1,71 @@
+<auth-screen-layout screen="register">
+    <Head><title>{{ $t('Register') }}</title></Head>
+    <form class="dp-auth-single__form" @submit.prevent="submit">
+        <div v-if="generalErrors.length" class="dp-auth-single__errors" role="alert"><p v-for="(message, index) in generalErrors" :key="index">{{ displayError(message) }}</p></div>
+        <div class="dp-auth-single__fields">
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.email}" for="FormLabel-email">
+                    <span>{{ $t('Email') }}</span>
+                    <input id="FormLabel-email" v-model="form.email" type="email" inputmode="email" autocomplete="username" required autocapitalize="none" :spellcheck="false" :placeholder="$t('Enter email')" :aria-invalid="!!errors.email" :aria-describedby="errors.email ? 'auth-email-error' : null">
+                </label>
+                <p v-if="errors.email" id="auth-email-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.email) }}</p>
+            </div>
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.email_code}" for="FormLabel-email-code">
+                    <span>{{ $t('Email verification code') }}</span>
+                    <div class="dp-auth-single__input-row">
+                        <input id="FormLabel-email-code" v-model="form.email_code" type="text" inputmode="numeric" autocomplete="one-time-code" :placeholder="$t('Enter verification code')" :aria-invalid="!!errors.email_code" :aria-describedby="errors.email_code ? 'auth-code-error' : null">
+                        <button type="button" class="dp-auth-single__send-code" :disabled="sendingEmailCode || emailCountdown > 0 || !canSendEmailCode" :aria-busy="sendingEmailCode" @click="sendEmailVerificationCode">{{ emailCountdown > 0 ? emailCountdown + 's' : $t('Get code') }}</button>
+                    </div>
+                </label>
+                <p v-if="errors.email_code" id="auth-code-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.email_code) }}</p>
+            </div>
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.password}" for="FormLabel-password">
+                    <span>{{ $t('Password') }}</span>
+                    <div class="dp-auth-single__input-row">
+                        <input id="FormLabel-password" v-model="form.password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" :placeholder="$t('Set your login password')" :aria-invalid="!!errors.password" :aria-describedby="errors.password ? 'auth-password-error' : null">
+                        <button type="button" class="dp-auth-single__eye" :aria-label="$t(showPassword ? 'Hide password' : 'Show password')" :aria-pressed="showPassword" @click="togglePassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path v-if="showPassword" d="m4 4 16 16"/></svg></button>
+                    </div>
+                </label>
+                <p v-if="errors.password" id="auth-password-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.password) }}</p>
+            </div>
+            <div>
+                <label class="dp-auth-single__field" :class="{'is-invalid': errors.password_confirmation}" for="FormLabel-password-confirmation">
+                    <span>{{ $t('Confirm Password') }}</span>
+                    <div class="dp-auth-single__input-row">
+                        <input id="FormLabel-password-confirmation" v-model="form.password_confirmation" :type="showPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" :placeholder="$t('Enter your password again')" :aria-invalid="!!errors.password_confirmation" :aria-describedby="errors.password_confirmation ? 'auth-confirm-error' : null">
+                        <button type="button" class="dp-auth-single__eye" :aria-label="$t(showPasswordConfirmation ? 'Hide password confirmation' : 'Show password confirmation')" :aria-pressed="showPasswordConfirmation" @click="togglePasswordConfirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path v-if="showPasswordConfirmation" d="m4 4 16 16"/></svg></button>
+                    </div>
+                </label>
+                <p v-if="errors.password_confirmation" id="auth-confirm-error" class="dp-auth-single__error" role="alert">{{ displayError(errors.password_confirmation) }}</p>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="dp-auth-single__referral" @click="openReferral" aria-haspopup="dialog">
+                <span>{{ $t('Invitation code') }} <small>{{ $t($page.props.referral_code_required ? '(Required)' : '(Optional)') }}</small></span>
+                <span class="dp-auth-single__referral-value">{{ form.referral || $t('Enter code') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
+            </button>
+            <p v-if="errors.referral" class="dp-auth-single__error" role="alert">{{ displayError(errors.referral) }}</p>
+        </div>
+        <div>
+            <label class="dp-auth-single__terms" for="FormLabel-checkbox">
+                <jet-checkbox name="terms" id="FormLabel-checkbox" v-model="form.terms" :aria-invalid="!!errors.terms" />
+                <span>{{ $t('I agree to the') }} <a target="_blank" rel="noopener" :href="route('page.show', 'terms')">{{ $t('Terms of Service') }}</a> {{ $t('and') }} <a target="_blank" rel="noopener" :href="route('page.show', 'privacy-gdpr')">{{ $t('Privacy Policy') }}</a></span>
+            </label>
+            <p v-if="errors.terms" class="dp-auth-single__error" role="alert">{{ displayError(errors.terms) }}</p>
+        </div>
+        <div v-if="$page.props.captcha" class="dp-auth-single__captcha"><vue-recaptcha ref="recaptcha" @verify="onVerify" @expired="onCaptchaExpired" @error="onCaptchaExpired" :sitekey="$page.props.captcha_key" :loadRecaptchaScript="true" /></div>
+        <button type="submit" class="dp-auth-single__primary" :disabled="form.processing" :aria-busy="form.processing">{{ $t('Register') }}</button>
+        <p class="dp-auth-single__switch"><span>{{ $t('Have an account?') }}</span><Link :href="route('login')">{{ $t('Sign in') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></Link></p>
+    </form>
+    <dialog ref="referralDialog" class="dp-auth-single__sheet" aria-labelledby="auth-referral-title">
+        <form @submit.prevent="saveReferral">
+            <div class="dp-auth-single__sheet-header"><h2 id="auth-referral-title">{{ $t('Invitation code') }}</h2><button type="button" class="dp-auth-single__close" :aria-label="$t('Close')" @click="closeReferral">×</button></div>
+            <p class="dp-auth-single__sheet-description">{{ $t(referralReadonly ? 'Invitation code from your referral link.' : 'Enter an invitation code if you have one.') }}</p>
+            <label class="dp-auth-single__field" :class="{'is-invalid': referralError}" for="FormLabel-Referral"><span>{{ $t('Invitation code') }}</span><input ref="referralInput" id="FormLabel-Referral" v-model="referralDraft" type="text" autocomplete="off" :readonly="referralReadonly" :placeholder="$t('Enter code')" :aria-invalid="referralError" :aria-required="!!$page.props.referral_code_required"></label>
+            <p v-if="referralError" class="dp-auth-single__error" role="alert">{{ $t('Valid Referral Code is required') }}</p>
+            <button type="submit" class="dp-auth-single__primary">{{ $t('Save') }}</button>
+        </form>
+    </dialog>
+</auth-screen-layout>

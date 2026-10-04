@@ -1,0 +1,578 @@
+<div class="admin-layout md:flex md:flex-col text-gray-700">
+    <Head :title="adminPageTitle" />
+    <!-- Hamburger -->
+    <div class="-mr-2 flex items-center admin-sidebar-nav text-right">
+        <button :aria-expanded="showingNavigationDropdown" :aria-label="$t('Navigation menu')" @click="showingNavigationDropdown = ! showingNavigationDropdown" class="mr-5 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path :class="{'hidden': showingNavigationDropdown, 'inline-flex': ! showingNavigationDropdown }" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path :class="{'hidden': ! showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <button v-if="showingNavigationDropdown" type="button" class="dp-admin-backdrop" :aria-label="$t('Close')" @click="showingNavigationDropdown=false"></button>
+    <div class="dp-admin-frame">
+        <div class="dp-admin-columns">
+            <div :class="{'admin-sidebar-active': showingNavigationDropdown}" class="admin-sidebar hidden md:block bg-gray-800 flex-shrink-0 w-56 overflow-y-auto">
+                <div class="flex items-center justify-center mt-10">
+                    <Link :href="route('home')">
+                        <deepro-brand />
+                    </Link>
+                </div>
+
+                <details class="dp-admin-language"><summary>{{ $t('Language') }}</summary><language-switcher /></details>
+                <div class="dp-admin-theme"><theme-mode /></div>
+                <nav class="admin-dashboard-nav mt-10">
+<nav-link v-if="canVisitAdmin('admin.operations.assets')" :href="route('admin.operations.assets')" :active="route().current('admin.operations.assets')">{{ $t('Asset workbench') }}</nav-link>
+<nav-link v-if="canVisitAdmin('admin.operations.trace')" :href="route('admin.operations.trace')" :active="route().current('admin.operations.trace')">{{ $t('Trace history') }}</nav-link>
+<nav-link v-if="canVisitAdmin('admin.operations.users')" :href="route('admin.operations.users')" :active="route().current('admin.operations.user*')">{{ $t('User service overview') }}</nav-link>
+<nav-link v-if="canVisitAdmin('admin.operations.incidents')" :href="route('admin.operations.incidents')" :active="route().current('admin.operations.incident*')">{{ $t('Operations incidents') }}</nav-link>
+<nav-link v-if="canVisitAdmin('admin.controls')" :href="route('admin.controls')" :active="isUrl('admin-controls')"><span class="mx-4 font-medium">{{ $t('Financial review') }}</span></nav-link>
+<nav-link v-if="canVisitAdmin('admin.referral-center')" :href="route('admin.referral-center')" :active="route().current('admin.referral-center')">{{ $t('邀请与返佣中心') }}</nav-link>
+<nav-link v-if="roles.includes('superadmin') || roles.some(r=>r.startsWith('perm_umi_'))" href="/exchange-control-panel/umi/operations" :active="route().current('admin.umi.operations')" class="deepro-ecosystem-link">UMI 运营中心</nav-link>
+<nav-link v-if="roles.some(r => ['superadmin','admin'].includes(r))" :href="route('admin.spot-execution')" :active="route().current('admin.spot-execution*')">{{ $t('Spot execution') }}</nav-link>
+<nav-link v-if="roles.some(r => ['superadmin','admin','assets_editor','perm_markets'].includes(r))" :href="route('admin.stock-tokens')" :active="route().current('admin.stock-tokens*')">{{ $t('Stock token management') }}</nav-link>
+                    <nav-link
+                        v-if="canVisitAdmin('admin.dashboard') && roles.some(role=>role!=='user' && !role.startsWith('perm_umi_'))"
+                        :href="route('admin.dashboard')"
+                        :active="isUrl('dashboard') ? true : false"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="tachometer-alt" />
+                            <span class="mx-4 font-medium">{{ $t('Dashboard') }}</span>
+                        </span>
+                    </nav-link>
+
+                    <!-- 交易管理 -->
+                    <button
+                        v-if="canVisitAdmin('admin.markets') || canVisitAdmin('admin.currencies') || canVisitAdmin('admin.networks') || canVisitAdmin('admin.stakings') || canVisitAdmin('admin.launchpads') || canVisitAdmin('admin.stakings.quantify') || canVisitAdmin('admin.liquidity')"
+                        type="button"
+                        @click="menuOpen.trading = !menuOpen.trading"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="chart-line" />
+                            <span class="mx-4 font-medium">{{ $t('Trading management') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.trading ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.trading">
+                        <nav-link
+                            v-if="canVisitAdmin('admin.markets')"
+                            :href="route('admin.markets')"
+                            :active="isUrl('markets') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Markets') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin') || $page.props.user.roles.includes('admin') || $page.props.user.roles.includes('perm_markets')"
+                            :href="'/exchange-control-panel/copy-trading'"
+                            :active="isUrl('copy-trading') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Copy trading settings') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.currencies')"
+                            :href="route('admin.currencies')"
+                            :active="isUrl('currencies') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Currencies') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.networks')"
+                            :href="route('admin.networks')"
+                            :active="isUrl('networks') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Networks') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+v-if="$uiFeatures.bankPayout && ($page.props.user.roles.includes('superadmin') || $page.props.user.roles.includes('perm_bank_accounts'))"
+                            :href="'/exchange-control-panel/bank-accounts'"
+                            :active="isUrl('bank-accounts') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Banks') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin') || $page.props.user.roles.includes('perm_p2p')"
+                            :href="$page.props.user.roles.includes('superadmin') ? route('admin.peerTradeDashboard') : route('admin.peerOrdersAppeals')"
+                            :active="isUrl('peer-trades') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">P2P</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.stakings')"
+                            :href="route('admin.stakings')"
+                            :active="$page.props.staking_type == 0"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Staking') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.launchpads')"
+                            :href="route('admin.launchpads')"
+                            :active="isUrl('launchpads') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Launchpad') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.stakings.quantify')"
+                            :href="route('admin.stakings.quantify')"
+                            :active="$page.props.staking_type == 1"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Quantitative products') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.liquidity')"
+                            :href="route('admin.liquidity')"
+                            :active="isUrl('liquidity') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Tasks') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <!-- 會員管理 -->
+                    <button
+                        v-if="canVisitAdmin('admin.users') || canVisitAdmin('admin.vouchers')"
+                        type="button"
+                        @click="menuOpen.member = !menuOpen.member"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="users" />
+                            <span class="mx-4 font-medium">{{ $t('Member management') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.member ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.member">
+                        <nav-link
+                            v-if="canVisitAdmin('admin.users')"
+                            :href="route('admin.users')"
+                            :active="isUrl('users') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Users') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="isSuperAdmin"
+                            :href="'/exchange-control-panel/verification-codes'"
+                            :active="isUrl('verification-codes') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('验证码状态') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin') || $page.props.user.roles.includes('perm_kyc_documents')"
+                            :href="'/exchange-control-panel/kyc-documents'"
+                            :active="isUrl('kyc-documents') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Identity verification') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.vouchers')"
+                            :href="route('admin.vouchers')"
+                            :active="isUrl('vouchers') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Vouchers') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <!-- 充值提現 -->
+                    <button
+                        v-if="canVisitAdmin('admin.reports.deposits') || canVisitAdmin('admin.reports.withdrawals')"
+                        type="button"
+                        @click="menuOpen.finance = !menuOpen.finance"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="wallet" />
+                            <span class="mx-4 font-medium">{{ $t('Deposits and withdrawals') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.finance ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.finance">
+                        <nav-link
+                            v-if="canVisitAdmin('admin.reports.deposits')"
+                            :href="route('admin.reports.deposits', { tab: 'd' })"
+                            :active="isDepositWithdrawalReportUrl()"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Deposits') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.reports.withdrawals')"
+                            :href="route('admin.reports.withdrawals', { tab: 'd' })"
+                            :active="isDepositWithdrawalReportUrl()"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Withdrawals') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <!-- 財務 -->
+                    <button
+                        v-if="canSeeFullFinance || canSeeOpenFutures"
+                        type="button"
+                        @click="menuOpen.financeReports = !menuOpen.financeReports"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="file-invoice-dollar" />
+                            <span class="mx-4 font-medium">{{ $t('Finance') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.financeReports ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.financeReports">
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin')"
+                            :href="'/exchange-control-panel/reports/wallets/system'"
+                            :active="isPathActive('/reports/wallets/system')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('System wallets') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin')"
+                            :href="'/exchange-control-panel/reports/wallets'"
+                            :active="$page.url == '/exchange-control-panel/reports/wallets' || isPathActive('/reports/wallets?')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('User wallets') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFullFinance"
+                            :href="'/exchange-control-panel/reports/trades?tab=e'"
+                            :active="isPathActive('/reports/trades')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Trade records') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeOpenFutures"
+                            :href="'/exchange-control-panel/reports/futures/open'"
+                            :active="isPathActive('/reports/futures/open') || isPathActive('/reports/futures?') || $page.url == '/exchange-control-panel/reports/futures'"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Open positions') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeOpenFutures"
+                            :href="'/exchange-control-panel/reports/futures/history'"
+                            :active="isPathActive('/reports/futures/history')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Order history') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFullFinance"
+                            :href="'/exchange-control-panel/reports/finances'"
+                            :active="isPathActive('/reports/finances')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Financial statistics') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFullFinance"
+                            :href="'/exchange-control-panel/reports/launchpad-transactions'"
+                            :active="isPathActive('/reports/launchpad-transactions')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Launchpad') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFinanceOrderReports"
+                            :href="'/exchange-control-panel/reports/staking-transactions'"
+                            :active="isPathActive('/reports/staking-transactions')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Staking') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFeeRefunds"
+                            :href="'/exchange-control-panel/reports/fee-refunds'"
+                            :active="isPathActive('/reports/fee-refunds')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Fee cashback') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFullFinance"
+                            :href="'/exchange-control-panel/reports/funding-fee-distributions'"
+                            :active="isPathActive('/reports/funding-fee-distributions')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Funding fees') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+v-if="$uiFeatures.binaryOptions && (canSeeFullFinance)"
+                            :href="'/exchange-control-panel/reports/options'"
+                            :active="isPathActive('/reports/options')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Options') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFullFinance"
+                            :href="'/exchange-control-panel/reports/lending-transactions'"
+                            :active="isPathActive('/reports/lending-transactions')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Lending') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="$page.props.user.roles.includes('superadmin')"
+                            :href="'/exchange-control-panel/reports/compliance'"
+                            :active="isPathActive('/reports/compliance')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Compliance audit') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canSeeFinanceOrderReports"
+                            :href="'/exchange-control-panel/reports/auto-invest-orders'"
+                            :active="isPathActive('/reports/auto-invest-orders')"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Quantitative orders') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <!-- 其他 -->
+                    <button
+                        v-if="canVisitAdmin('admin.pages') || canVisitAdmin('admin.articles') || canVisitAdmin('admin.languages') || canVisitAdmin('admin.options.templates') || canVisitAdmin('admin.support.tickets') || canVisitAdmin('admin.cold_storage')"
+                        type="button"
+                        @click="menuOpen.other = !menuOpen.other"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="th-large" />
+                            <span class="mx-4 font-medium">{{ $t('Other') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.other ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.other">
+                        <nav-link
+                            v-if="canVisitAdmin('admin.pages')"
+                            :href="route('admin.pages')"
+                            :active="isUrl('pages') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Pages') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link v-if="canVisitAdmin('admin.home-banners')" :href="route('admin.home-banners')" :active="isUrl('home-banners')"><span class="flex items-center pl-10"><span class="mx-4 font-medium">首页 Banner</span></span></nav-link>
+                        <nav-link
+                            v-if="canVisitAdmin('admin.articles')"
+                            :href="route('admin.articles')"
+                            :active="isUrl('articles') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Announcements') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.languages')"
+                            :href="route('admin.languages')"
+                            :active="isUrl('languages') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Languages') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+v-if="$uiFeatures.binaryOptions && canVisitAdmin('admin.options.templates')"
+                            :href="route('admin.options.templates')"
+                            :active="isUrl('options-templates') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Options templates') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.support.tickets')"
+                            :href="route('admin.support.tickets')"
+                            :active="isUrl('support') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Support center') }}</span>
+                            </span>
+                        </nav-link>
+
+                        <nav-link
+                            v-if="canVisitAdmin('admin.cold_storage')"
+                            :href="route('admin.cold_storage')"
+                            :active="isUrl('cold-storage') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Cold wallets') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <a v-if="$page.props.user.can_access_custody && route().has('admin.wallet.recovery')"
+                       :href="route('admin.wallet.recovery')" class="block py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100">
+                        {{ $i18n.locale.startsWith('zh') ? '钱包异常处理' : 'Wallet recovery' }}
+                    </a>
+
+                    <!-- 設置 -->
+                    <button
+                        v-if="canVisitAdmin('admin.settings')"
+                        type="button"
+                        @click="menuOpen.setting = !menuOpen.setting"
+                        class="w-full flex justify-between items-center py-3 px-6 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none"
+                    >
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="cog" />
+                            <span class="mx-4 font-medium">{{ $t('Settings') }}</span>
+                        </span>
+                        <font-awesome-icon :icon="menuOpen.setting ? 'chevron-down' : 'chevron-right'" />
+                    </button>
+
+                    <div v-show="menuOpen.setting">
+                        <nav-link
+                            v-if="canVisitAdmin('admin.settings')"
+                            :href="route('admin.settings')"
+                            :active="isUrl('settings') ? true : false"
+                        >
+                            <span class="flex items-center pl-10">
+                                <span class="mx-4 font-medium">{{ $t('Settings') }}</span>
+                            </span>
+                        </nav-link>
+                    </div>
+
+                    <Link as="button" :href="route('logout')" method="post" class="w-full flex justify-between items-center py-3 px-6 text-gray-400 cursor-pointer hover:bg-gray-700 hover:text-gray-100 focus:outline-none">
+                        <span class="flex items-center">
+                            <font-awesome-icon icon="sign-out-alt" />
+                            <span class="mx-4 font-medium">{{ $t('Logout') }}</span>
+                        </span>
+                    </Link>
+                </nav>
+            </div>
+
+            <div scroll-region="" class="dp-admin-content">
+                <div>
+                    <slot></slot>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        v-if="hasPendingReviews"
+        class="fixed left-6 bottom-6 z-40 bg-white border border-yellow-200 shadow-lg rounded p-4"
+        style="min-width: 260px; max-width: 340px;"
+    >
+        <div class="flex items-start">
+            <div class="rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center mr-3" style="width: 34px; height: 34px;">
+                <font-awesome-icon icon="bell" />
+            </div>
+
+            <div class="flex-1">
+                <div class="font-bold text-gray-800">
+                    {{ $t("待处理提醒") }}
+                </div>
+
+                <div class="text-sm text-gray-500 mt-1">
+                    {{ $t("有实名认证或银行卡申请未处理。") }}
+                </div>
+
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <Link
+                        v-if="pendingReviews.kyc_pending_count > 0"
+                        class="text-indigo-600 hover:text-indigo-800 font-semibold"
+                        :href="'/exchange-control-panel/kyc-documents?kyc_status=pending'"
+                    >
+                        {{ $t("实名认证待审核：") }}{{ pendingReviews.kyc_pending_count }}
+                    </Link>
+
+                    <Link
+v-if="$uiFeatures.bankPayout && (pendingReviews.bank_pending_count > 0)"
+                        class="text-indigo-600 hover:text-indigo-800 font-semibold"
+                        :href="'/exchange-control-panel/bank-accounts?status_type=0'"
+                    >
+                        {{ $t("银行卡待审核：") }}{{ pendingReviews.bank_pending_count }}
+                    </Link>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Portal -->
+    <portal-target name="modal" multiple></portal-target>
+    <socket />
+</div>

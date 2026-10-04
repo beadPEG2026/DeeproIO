@@ -1,0 +1,58 @@
+
+/** thead start */
+.table-sort{
+
+    /** value */
+    &__value {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        cursor: pointer;
+    }
+
+    /** title */
+    &__title {
+        font-weight: 500;
+        font-size: 0.80rem;
+        color: var(--second-text-color);
+    }
+
+    /** icon */
+    &__icon {
+        width: 24px;
+        height: 24px;
+
+        display: inline-block;
+
+        margin-left: 1rem;
+
+        &-color {
+            stroke: var(--second-text-color);
+            stroke-width: 1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        &-active {
+            stroke: var(--yellow-color);
+        }
+
+    }
+
+}
+/** thead end */
+
+
+
+/** tbody media screen start */
+@media screen and (max-width: 1000px) {
+
+    .table-sort{
+        display: none;
+    }
+}
+/** tbody media screen end */
+
+
+

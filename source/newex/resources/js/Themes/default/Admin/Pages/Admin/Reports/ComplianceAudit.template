@@ -1,0 +1,45 @@
+<app-layout>
+
+    <admin-reports-tab section="compliance"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">{{ $t("合规审计") }}</h1>
+
+    <div class="bg-white rounded shadow overflow-x-auto overflow-y-hidden">
+
+        <div class="p-8">
+
+            <h3 class="text-lg font-semibold mb-2">{{ $t("用户 KYC 与验证导出") }}</h3>
+
+            <p class="text-sm text-gray-500 mb-4">
+                {{ $t("下载包含关键合规信息的用户 CSV 文件（邮箱验证、KYC 状态、银行验证、角色等）。\n                可以选择按注册日期范围进行筛选。") }}
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+
+                <div>
+                    <label class="block text-sm mb-1">{{ $t("开始日期") }}</label>
+                    <input v-model="form.period[0]" type="date" class="input" />
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-1">{{ $t("结束日期") }}</label>
+                    <input v-model="form.period[1]" type="date" class="input" />
+                </div>
+
+                <div>
+                    <nav-button :processing="false" @click.native="exportUsers">
+                        {{ $t("导出用户 CSV") }}
+                    </nav-button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="text-xs text-gray-500 p-8">
+            {{ $t("注意：导出文件为审计用途的时间点数据快照。请确保安全保存，并仅与授权的监管机构或审计人员共享。") }}
+        </div>
+
+    </div>
+
+</app-layout>

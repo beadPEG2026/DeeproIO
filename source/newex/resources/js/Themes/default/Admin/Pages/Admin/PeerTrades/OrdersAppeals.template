@@ -1,0 +1,89 @@
+<app-layout>
+
+    <admin-top-menu section="peerOrdersAppeals"></admin-top-menu>
+
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("订单申诉") }}</h1>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("标题") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("日期") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+            <tr v-for="(appeal, key) in appeals.data" :key="appeal.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ appeal.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ appeal.appeal_stage }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        {{ appeal.appealed_at }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <nav-button-link class="mr-10" type="blue" :href="route('p2p.my-appeal', appeal.id)">
+                            <span>{{ $t("查看申诉") }}</span>
+                        </nav-button-link>
+
+                        <nav-button v-if="appeal.appeal_stage !== 'moderated'" class="mr-2" type="red" @click.stop.native="moderate(appeal, key)">
+                            <span>{{ $t("审核") }}</span>
+                        </nav-button>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="appeals.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("暂无申诉记录") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="appeals.links" />
+
+    <jet-dialog-modal :max-width="'6xl'" :show="showModerateModal" @close="showModerateModal = null">
+        <template #title>
+            {{ $t('申诉审核') }}
+        </template>
+        <template #content>
+            <div class="flex-col">
+
+                <div class="form-components__block">
+                    <div class="p2p-field-width mt-8">
+                        <div class="input-radio">
+                            <t-radio id="p2p-appeal-2" name="appeal" v-model="appeal" value="approve_release" />
+                            <label for="p2p-appeal-2">{{ $t('同意申诉并释放订单资金') }}</label>
+                        </div>
+                        <div class="input-radio">
+                            <t-radio id="p2p-appeal-1" name="appeal" v-model="appeal" value="approve_cancel" />
+                            <label for="p2p-appeal-1">{{ $t('同意申诉并取消订单') }}</label>
+                        </div>
+
+                        <div class="input-radio mt-10">
+                            <t-radio id="p2p-appeal-3" name="appeal" v-model="appeal" value="reject_release" />
+                            <label for="p2p-appeal-3">{{ $t('拒绝申诉并释放订单资金') }}</label>
+                        </div>
+
+                        <div class="input-radio">
+                            <t-radio id="p2p-appeal-4" name="appeal" v-model="appeal" value="reject_cancel" />
+                            <label for="p2p-appeal-4">{{ $t('拒绝申诉并取消订单') }}</label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </template>
+
+        <template #footer>
+
+            <jet-button class="ml-2" @click.native="moderateSubmit">
+                {{ $t('确认审核') }}
+            </jet-button>
+        </template>
+    </jet-dialog-modal>
+</app-layout>

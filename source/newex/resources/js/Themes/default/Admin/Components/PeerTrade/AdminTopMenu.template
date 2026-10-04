@@ -1,0 +1,26 @@
+<div>
+    <h1 class="mb-8 font-bold text-3xl">
+        P2P
+    </h1>
+    <div class="tabs">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div v-if="$page.props.user.roles.includes('superadmin')" @click="setSection('peerTradeDashboard')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'peerTradeDashboard'}">
+                    <h4>{{ $t("广告管理") }}</h4>
+                </div>
+                <div v-if="$page.props.user.roles.includes('superadmin')" @click="setSection('peerTradeTransactions')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'peerTradeTransactions'}">
+                    <h4>{{ $t("订单管理") }}</h4>
+                </div>
+                <div v-if="$page.props.user.roles.includes('superadmin')" @click="setSection('peerPaymentMethods')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'peerPaymentMethods'}">
+                    <h4>{{ $t("支付方式") }}</h4>
+                </div>
+                <div v-if="$page.props.user.roles.includes('superadmin') || $page.props.user.roles.includes('p2p_appeal_judge')" @click="setSection('peerOrdersAppeals')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'peerOrdersAppeals'}">
+                    <h4>{{ $t("申诉处理") }}</h4>
+                </div>
+                <div v-if="$page.props.user.roles.includes('superadmin')" @click="setSection('peerMerchantApplications')" class="tabs-nav__item" :class="{'tabs-nav__active': section == 'peerMerchantApplications'}">
+                    <h4>{{ $t("商户申请") }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

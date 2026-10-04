@@ -1,0 +1,27 @@
+<div class="dp-quote">
+    <div class="dp-quote__identity">
+        <img v-if="market.base_currency_logo" :src="market.base_currency_logo" alt="" />
+        <div><strong>{{ market.base_currency }}<span>/{{ market.quote_currency }}</span><button class="dp-quote__favorite" type="button" :aria-label="$t('Favorites')" :aria-pressed="String(favorite)" @click="toggleFavorite"><svg viewBox="0 0 24 24" :fill="favorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m12 2.5 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9Z"/></svg></button></strong><small>{{ market.base_currency_name }}</small></div>
+
+    </div>
+    <div class="dp-quote__price">
+        <small>{{ market.price_reference_product ? $t('Reference price') : (market_stats.quoteClosed ? $t('Closing price') : $t('Last Price')) }} <template v-if="market_stats.displayCurrency">({{ market_stats.displayCurrency }})</template></small>
+        <strong v-if="hasMetric(market_stats.last) && Number(market_stats.last) > 0" :ref="market.name">{{ decimal_format(market_stats.last, market_stats.displayCurrency === 'HKD' ? 3 : market.quote_precision, market.quote_currency_type) }}</strong>
+        <small v-else>{{ $t('No data') }}</small><small v-if="market_stats.approximateUsdt" class="dp-usdt-equivalent">（≈ {{ formatUsdt(market_stats.approximateUsdt) }} USDT）</small><small v-if="market_stats.underlyingHkd" class="dp-usdt-equivalent">{{ Number(market_stats.underlyingHkd).toFixed(3) }} HKD</small><time v-if="market_stats.quoteSourceTime" class="dp-quote__source-time">{{ new Date(market_stats.quoteSourceTime).toLocaleString($i18n.locale, {timeZone:'Asia/Hong_Kong',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}) }} HKT</time>
+        <span v-if="hasMetric(market_stats.change)" :class="Number(market_stats.change) >= 0 ? 'color-buy' : 'color-sell'">{{ Number(market_stats.change) > 0 ? '+' : '' }}{{ decimal_format(market_stats.change, 2) }}%</span>
+    </div>
+    <dl class="dp-quote__metrics">
+        <div v-if="hasMetric(market_stats.high) && Number(market_stats.high) > 0"><dt>{{ $t(market.price_reference_product?'Session high':'24h High') }}</dt><dd>{{ decimal_format(market_stats.high, market.quote_precision) }}</dd></div>
+        <div v-if="hasMetric(market_stats.low) && Number(market_stats.low) > 0"><dt>{{ $t(market.price_reference_product?'Session low':'24h Low') }}</dt><dd>{{ decimal_format(market_stats.low, market.quote_precision) }}</dd></div>
+        <div v-if="hasMetric(market_stats.volume)"><dt>{{ $t('24h Volume') }} ({{ market.base_currency }})</dt><dd>{{ compact(market_stats.volume) }}</dd></div>
+        <div v-if="hasMetric(market_stats.qVolume)"><dt>{{ $t('24h Turnover') }} ({{ market.quote_currency }})</dt><dd>{{ compact(market_stats.qVolume) }}</dd></div>
+        <div v-if="futures && hasMetric(fundingRate)"><dt>{{ $t('Funding Rate') }}</dt><dd>{{ fundingRateDisplay }}</dd></div>
+        <div v-if="futures && nextFundingTime"><dt>{{ $t('Next Funding') }}</dt><dd>{{ timeRemaining }}</dd></div>
+    </dl>
+    <div v-if="categories.length || market.base_currency_website || market.base_currency_twitter || market.base_currency_discord" class="dp-quote__tags">
+        <span v-for="label in categories" :key="label">{{ $t(label) }}</span>
+        <a v-if="safeLink(market.base_currency_website)" :href="market.base_currency_website" target="_blank" rel="noopener noreferrer">{{ $t('Website') }} ↗</a>
+        <a v-if="safeLink(market.base_currency_twitter)" :href="market.base_currency_twitter" target="_blank" rel="noopener noreferrer">X ↗</a>
+        <a v-if="safeLink(market.base_currency_discord)" :href="market.base_currency_discord" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+    </div>
+</div>

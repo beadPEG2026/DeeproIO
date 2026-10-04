@@ -1,0 +1,44 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">{{ $t("可用网络") }}</h1>
+    <Link :href="route('admin.deposit-channels')" class="inline-block mb-6 text-indigo-500">{{ $t('Deposit channels') }} →</Link>
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-6 pt-6 pb-4">{{ $t("名称") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("类型") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("充值状态") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("提现状态") }}</th>
+            </tr>
+            <tr v-for="network in networks" :key="network.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <Link :href="route('admin.networks.edit', network.id)" class="px-6 py-4 flex items-center text-indigo-500">
+                        {{ network.name }}<small v-if="networkRouteKind(network.id)"> · {{ $t(networkRouteKind(network.id)) }}</small>
+                    </Link>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center">
+                        {{ network.type }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+
+                        <badge class="mr-2" :type="network.deposit_status ? 'green' : 'gray'">
+                            {{ network.deposit_status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                        <badge class="mr-2" :type="network.withdraw_status ? 'green' : 'gray'">
+                            {{ network.withdraw_status ? $t("启用") : $t("隐藏") }}
+                        </badge>
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="networks.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">{{ $t("没有找到网络。") }}</td>
+            </tr>
+        </table>
+    </div>
+</app-layout>

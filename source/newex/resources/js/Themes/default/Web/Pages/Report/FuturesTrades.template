@@ -1,0 +1,668 @@
+<app-layout>
+
+    <!-- components title start -->
+    <div class="components-title">
+        <h2>{{ $t('Futures Transactions') }}</h2>
+    </div>
+    <!-- components title end -->
+
+    <reports-tab section="futures_trades"></reports-tab>
+
+    <div class="components-filter">
+        <div class="components-filter__row">
+            <div class="components-filter__item">
+                <label>{{ $t('Market:') }}</label>
+                <t-rich-user-select
+                    :options="markets.data"
+                    v-model="form.market"
+                    :placeholder="$t('Select market')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <label>{{ $t('Status:') }}</label>
+                <t-rich-user-select
+                    :options="[{'id': '', 'name': $t('All')},{'id': 'long', 'name': $t('Long')}, {'id': 'short', 'name': $t('Short')}]"
+                    v-model="form.type"
+                    :placeholder="$t('Select position')"
+                    value-attribute="id"
+                    text-attribute="name"
+                    :clearable="true"
+                >
+                    <template
+                        slot="label"
+                        slot-scope="{ className, option, query }"
+                    >
+                        <div class="flex">
+                            <div class="flex flex-col">
+                                <span>{{ option.text }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </t-rich-user-select>
+            </div>
+
+            <div class="components-filter__item">
+                <t-button-green @click.stop="getList" class="components-filter__button mt-8 py-2 px-6" :class="{ 'opacity-75': sending }">
+                    <span class="components-filter__icon">
+                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ $t('Search') }}
+                    </span>
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <!-- table components start -->
+    <div ref="futuresTransactionsTableWrap" class="table-components futures-transactions-table-wrap">
+        <table class="tables mob-table-trades futures-transactions-table">
+            <thead class="table-sort no-cursor">
+                <tr>
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Market') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Position') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Initial Principal') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Entry Fee') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Leverage') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Closed Price') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Exit Fee') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Settlement PNL') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Total Profit') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Released Amount') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Status') }}</span>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="table-sort__value">
+                            <span class="table-sort__title">{{ $t('Order Time') }}</span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="table-list">
+                <tr
+                    v-for="transaction in transactions.data"
+                    :key="transaction.id"
+                    class="cursor-pointer"
+                    @click="openFuturesDetail(transaction)"
+                >
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Market') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ transaction.market }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Position') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                <div class="components-label" :class="getPositionClass(transaction)">
+                                    {{ getPositionLabel(transaction) }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Initial Principal') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ getInitialPrincipalText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Entry Fee') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                -{{ getEntryFeeText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Leverage') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ getLeverageText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Closed Price') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ getClosePriceText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Exit Fee') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                -{{ getExitFeeText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Settlement PNL') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text" :class="getTotalProfitClass(transaction)">
+                                {{ getTotalProfitText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Total Profit') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text" :class="getNetProfitClass(transaction)">
+                                {{ getNetProfitText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Released Amount') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ getReleasedAmountText(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Status') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                <div class="components-label" :class="getStatusClass(transaction)">
+                                    {{ getStatusLabel(transaction) }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="table-list__subtitle">{{ $t('Order Time') }}</div>
+                        <div class="table-list__value">
+                            <div class="table-list__text">
+                                {{ getOpenTime(transaction) }}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+
+            <tfoot class="table-result">
+                <tr>
+                    <td colspan="100">
+                        <div v-if="transactions.data.length === 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                            <span class="table-result__notfound-text">{{ $t('No trades found.') }}</span>
+                        </div>
+                        <pagination :links="transactions.meta.links" />
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- mobile futures cards start -->
+    <div class="futures-transactions-mobile-list">
+        <div
+            v-for="transaction in transactions.data"
+            :key="'mobile-' + transaction.id"
+            class="futures-mobile-card"
+            @click="openFuturesDetail(transaction)"
+        >
+            <div class="futures-mobile-card__head">
+                <div>
+                    <div class="futures-mobile-card__market">
+                        {{ transaction.market }}
+                    </div>
+                    <div class="futures-mobile-card__date">
+                        {{ getOpenTime(transaction) }}
+                    </div>
+                </div>
+
+                <div class="components-label" :class="getStatusClass(transaction)">
+                    {{ getStatusLabel(transaction) }}
+                </div>
+            </div>
+
+            <div class="futures-mobile-card__meta">
+                <span class="components-label" :class="getPositionClass(transaction)">
+                    {{ getPositionLabel(transaction) }}
+                </span>
+
+                <span class="futures-mobile-card__leverage">
+                    {{ getLeverageText(transaction) }}
+                </span>
+            </div>
+
+            <div class="futures-mobile-card__rows">
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Initial Principal') }}</span>
+                    <strong>{{ getInitialPrincipalText(transaction) }}</strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Entry Fee') }}</span>
+                    <strong>-{{ getEntryFeeText(transaction) }}</strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Closed Price') }}</span>
+                    <strong>{{ getClosePriceText(transaction) }}</strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Exit Fee') }}</span>
+                    <strong>-{{ getExitFeeText(transaction) }}</strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Settlement PNL') }}</span>
+                    <strong :class="getTotalProfitClass(transaction)">
+                        {{ getTotalProfitText(transaction) }}
+                    </strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Total Profit') }}</span>
+                    <strong :class="getNetProfitClass(transaction)">
+                        {{ getNetProfitText(transaction) }}
+                    </strong>
+                </div>
+
+                <div class="futures-mobile-card__row">
+                    <span>{{ $t('Released Amount') }}</span>
+                    <strong>{{ getReleasedAmountText(transaction) }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="transactions.data.length === 0" class="futures-mobile-empty">
+            {{ $t('No trades found.') }}
+        </div>
+
+        <pagination :links="transactions.meta.links" />
+    </div>
+    <!-- mobile futures cards end -->
+
+
+    <!-- futures detail modal start -->
+    <div
+        v-if="showFuturesDetailModal && selectedFutures"
+        class="fixed inset-0 flex items-center justify-center px-4"
+        style="z-index: 99999;"
+    >
+        <div
+            class="absolute inset-0"
+            style="background: rgba(0, 0, 0, 0.72);"
+            @click="closeFuturesDetail"
+        ></div>
+
+        <div
+            class="relative w-full max-w-2xl rounded-2xl overflow-hidden"
+            style="background: #080b12; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 80px rgba(0,0,0,0.45); max-height: 90vh; overflow-y: auto;"
+            @click.stop
+        >
+            <div class="flex items-center justify-between px-6 py-5" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button
+                    type="button"
+                    class="text-white"
+                    style="font-size: 28px; line-height: 1;"
+                    @click="closeFuturesDetail"
+                >
+                    ‹
+                </button>
+
+                <h3 class="text-white font-bold text-xl">
+                    {{ $t('Order Details') }}
+                </h3>
+
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between mb-7">
+                    <div>
+                        <div class="text-white font-bold text-2xl mb-2">
+                            {{ getContractTitle(selectedFutures) }}
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="px-2 py-1 rounded text-xs"
+                                :class="getPositionTextClass(selectedFutures)"
+                                style="background: rgba(255,255,255,0.08);"
+                            >
+                                {{ getPositionLabel(selectedFutures) }}
+                            </span>
+
+                            <span
+                                class="px-2 py-1 rounded text-xs text-white"
+                                style="background: rgba(255,255,255,0.10);"
+                            >
+                                {{ getMarginMode(selectedFutures) }}
+                            </span>
+
+                            <span
+                                class="px-2 py-1 rounded text-xs text-white"
+                                style="background: rgba(255,255,255,0.10);"
+                            >
+                                {{ getLeverageText(selectedFutures) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex items-center">
+                        <div
+                            class="components-label"
+                            :class="getStatusClass(selectedFutures)"
+                            style="min-width: 120px; height: 26px; display: flex; align-items: center; justify-content: center; padding: 0 18px; line-height: 1;"
+                        >
+                            {{ getStatusLabel(selectedFutures) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 16px;">
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Position') }}</span>
+                        <span style="color: #ffffff;">{{ getPositionLabel(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Leverage') }}</span>
+                        <span style="color: #ffffff;">{{ getLeverageText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Initial Principal') }}</span>
+                        <span style="color: #ffffff;">{{ getInitialPrincipalText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Entry Fee') }}</span>
+                        <span style="color: #ffffff;">-{{ getEntryFeeText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Entry Price') }}</span>
+                        <span style="color: #ffffff;">{{ getEntryPriceText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Closed Price') }}</span>
+                        <span style="color: #ffffff;">{{ getClosePriceText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Settlement PNL') }}</span>
+                        <span :class="getTotalProfitClass(selectedFutures)">
+                            {{ getTotalProfitText(selectedFutures) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Total Profit') }}</span>
+                        <span :class="getNetProfitClass(selectedFutures)">
+                            {{ getNetProfitText(selectedFutures) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Exit Fee') }}</span>
+                        <span style="color: #ffffff;">-{{ getExitFeeText(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Released Amount') }}</span>
+                        <span style="color: #ffffff;">{{ getReleasedAmountText(selectedFutures) }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button
+                        type="button"
+                        @click="toggleDetailedOrder"
+                        class="w-full rounded-xl font-semibold py-3 px-4 transition-all duration-200"
+                        style="background: rgba(255,255,255,0.08); color: #ffffff; border: 1px solid rgba(255,255,255,0.10);"
+                    >
+                        {{ showDetailedOrder ? $t('Hide Detailed Order') : $t('Detailed Order') }}
+                    </button>
+                </div>
+
+                <div
+                    v-if="showDetailedOrder"
+                    class="mt-5 rounded-2xl p-5"
+                    style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);"
+                >
+                    <div style="display: grid; gap: 16px;">
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Order Status') }}</span>
+                            <span style="color: #ffffff;">{{ getStatusLabel(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Order Type') }}</span>
+                            <span style="color: #ffffff;">{{ getOrderType(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Position Principal') }}</span>
+                            <span style="color: #ffffff;">{{ getPositionPrincipalText(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Liquidation Price') }}</span>
+                            <span style="color: #ffffff;">{{ getLiquidationPriceText(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Net Profit') }}</span>
+                            <span :class="getProfitClass(selectedFutures)">
+                                {{ getSettlementPnlText(selectedFutures) }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Funding Fee') }}</span>
+                            <span style="color: #ffffff;">-{{ getFundingFeeText(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Funding Fee Rate') }}</span>
+                            <span style="color: #ffffff;">{{ getFundingFeeRateText(selectedFutures) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span style="color: #8d93a6;">{{ $t('Closed PNL Rate') }}</span>
+                            <span :class="{'color-buy': selectedFutures.pnl > 0, 'color-sell': selectedFutures.pnl < 0}">
+                                {{ getPnlRateText(selectedFutures) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6" style="display: grid; gap: 16px;">
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Order Time') }}</span>
+                        <span style="color: #ffffff;">{{ getOpenTime(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span style="color: #8d93a6;">{{ $t('Close Time') }}</span>
+                        <span style="color: #ffffff;">{{ getCloseTime(selectedFutures) }}</span>
+                    </div>
+
+                    <div class="flex items-start justify-between gap-5">
+                        <span style="color: #8d93a6;">{{ $t('Order ID') }}</span>
+                        <span
+                            style="color: #ffffff; max-width: 68%; text-align: right; word-break: break-all;"
+                            class="cursor-pointer"
+                            @click="doCopy(getOrderId(selectedFutures))"
+                        >
+                            {{ getOrderId(selectedFutures) }}
+                            <span style="opacity: 0.55; margin-left: 6px;">⧉</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TP/SL Info Modal -->
+    <div v-if="showTPSLModal && selectedTPSL" @click="closeTPSLModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div @click.stop class="modal-popup rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">{{ $t('TP/SL Information') }}</h3>
+                <button @click="closeTPSLModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('Market') }}</div>
+                    <div class="font-medium">{{ selectedTPSL.market }}</div>
+                </div>
+
+                <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('Position') }}</div>
+                    <div class="font-medium">
+                        <span :class="{'text-green-600': !isShortPosition(selectedTPSL), 'text-red-600': isShortPosition(selectedTPSL)}">
+                            {{ getPositionLabel(selectedTPSL) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('Entry Price') }}</div>
+                    <div class="font-medium">{{ getEntryPriceText(selectedTPSL) }}</div>
+                </div>
+
+                <div v-if="selectedTPSL.take_profit_price && selectedTPSL.take_profit_price > 0">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('Take Profit') }}</div>
+                    <div class="font-medium text-green-600">
+                        {{ math_formatter(selectedTPSL.take_profit_price, 8) }} {{ selectedTPSL.quote_symbol || getQuoteSymbol(selectedTPSL) }}
+                    </div>
+                </div>
+
+                <div v-if="selectedTPSL.stop_loss_price && selectedTPSL.stop_loss_price > 0">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('Stop Loss') }}</div>
+                    <div class="font-medium text-red-600">
+                        {{ math_formatter(selectedTPSL.stop_loss_price, 8) }} {{ selectedTPSL.quote_symbol || getQuoteSymbol(selectedTPSL) }}
+                    </div>
+                </div>
+
+                <div v-if="(!selectedTPSL.take_profit_price || selectedTPSL.take_profit_price <= 0) && (!selectedTPSL.stop_loss_price || selectedTPSL.stop_loss_price <= 0)" class="text-gray-500 text-sm">
+                    {{ $t('No TP/SL set for this position') }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        v-show="showFuturesBottomScrollbar"
+        ref="futuresBottomScrollbar"
+        class="futures-bottom-scrollbar"
+        @scroll="onFuturesBottomScrollbarScroll"
+    >
+        <div
+            class="futures-bottom-scrollbar__inner"
+            :style="{ width: futuresTableScrollWidth + 'px' }"
+        ></div>
+    </div>
+
+</app-layout>

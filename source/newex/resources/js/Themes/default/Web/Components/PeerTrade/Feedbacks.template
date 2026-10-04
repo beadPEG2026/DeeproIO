@@ -1,0 +1,141 @@
+<div class="peer-payment-method">
+
+    <div class="feedback-stats">
+        <div class="feedback-stats-left">
+            <div class="feedback-stats-left-top">
+                <div class="feedback-stats-left-top-content">
+                    <div data-bn-type="text" class="feedback-stats-left-top-content-label">{{ stats.percentage }} %</div>
+                </div>
+            </div>
+            <div data-bn-type="text" class="feedback-stats-left-bottom">{{ stats.total }} {{ $t('Review(s)')}}</div>
+        </div>
+
+        <div class="feedback-stats-right">
+            <div class="feedback-stats-right-top">
+                <div class="feedback-stats-right-top-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z"
+                              fill="currentColor"></path>
+                    </svg>
+                </div>
+
+                <div class="feedback-stats-right-top-middle">
+                    <div class="feedback-progressbar"></div>
+                </div>
+                <div data-bn-type="text" class="feedback-stats-right-top-right">{{ stats.positive }}</div>
+            </div>
+            <div class="feedback-stats-right-top feedback-stats-right-bottom">
+                <div class="feedback-stats-right-top-left feedback-stats-right-bottom-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M8 14.268l3.444 3.392v3.321h.888a3.106 3.106 0 003.106-3.105v-1.673H21V9.778A4.778 4.778 0 0016.222 5H8v9.268zm-2 .039H3V5h3v9.306z"
+                              fill="currentColor"></path>
+                    </svg>
+                </div>
+                <div class="feedback-stats-right-top-middle">
+                    <div class="feedback-progressbar"></div>
+                </div>
+                <div data-bn-type="text" class="feedback-stats-right-top-right">{{ stats.negative }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-tabs tabs-components tabs">
+        <div class="tabs-left">
+            <div class="tabs-nav">
+                <div @click="getFeedbackByType(null)" class="tabs-nav__item" :class="{'tabs-nav__active': type == null}"><h4>{{ $t('All')}}</h4></div>
+                <div @click="getFeedbackByType('positive')" class="tabs-nav__item" :class="{'tabs-nav__active': type == 'positive'}"><h4>{{ $t('Positive')}} ({{ stats.positive }})</h4></div>
+                <div @click="getFeedbackByType('negative')" class="tabs-nav__item tabs-nav__futures" :class="{'tabs-nav__active': type == 'negative'}"><h4>{{ $t('Negative')}} ({{ stats.negative }})</h4></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-list">
+
+        <div v-if="feedbacks.data" v-for="(feedback, key) in feedbacks.data" class="feedback-list-item">
+            <div class="feedback-list-item-top">
+                <template v-if="feedback.author">
+                    <div class="feedback-list-item-top-left">{{ feedback.author.nickname_first }}</div>
+                    <div class="feedback-list-item-top-middle">{{ feedback.author.nickname }}</div>
+                </template>
+                <template v-else>
+                    <div class="feedback-list-item-top-left">{{ $t('A') }}</div>
+                    <div class="feedback-list-item-top-middle">{{ $t('Anonymous')}}</div>
+                </template>
+                <div class="feedback-list-item-top-middle-2">{{ feedback.created_at }}</div>
+                <div class="feedback-list-item-top-right">
+                    <div v-if="feedback.paymentMethod"  class="feedback-list-item-top-right-inner">
+                        <div class="feedback-list-item-top-right-innner-content">{{ feedback.paymentMethod }}</div>
+                    </div>
+                    <div v-if="!feedback.reply_content && owner" @click="replyToFeedback(key, feedback)" class="ml-4 link-action">{{ $t('Reply') }}</div>
+                </div>
+            </div>
+
+            <div class="feedback-list-item-bottom">
+                <div class="feedback-list-item-bottom-top">
+                    <svg v-if="feedback.is_negative" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="bad">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z"
+                              fill="currentColor"></path>
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="good"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z" fill="currentColor"></path></svg>
+                </div>
+                <div data-bn-type="text" class="feedback-list-item-bottom-bottom">{{ feedback.content }}</div>
+            </div>
+            <div v-if="feedback.reply_content" class="feedback-list-item-reply">
+
+                <div class="feedback-list-item-reply-container flex">
+                    <div class="feedback-list-item-reply-title">
+                        {{ $t("Counterparty’s reply:")}}
+                    </div>
+                    <div class="feedback-list-item-reply-content">
+                        {{ feedback.reply_content }}
+                    </div>
+                </div>
+
+                <div v-if="owner" @click.prevent="deleteFeedback(key, feedback)" class="cursor-pointer table-div-body-column-container-action">
+                    <svg class="stroke-gray" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 11V17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 11V17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 7H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 7H12H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="feedbacks.data">
+            <pagination-ajax v-if="feedbacks.last_page > 1" :pagination="feedbacks" :offset="5" @paginate="getFeedbacks()"></pagination-ajax>
+        </div>
+
+    </div>
+
+    <jet-dialog-modal :max-width="'6xl'" :show="showReplyModal" @close="showReplyModal = null">
+        <template #title>
+            {{ $t('Reply to feedback') }}
+        </template>
+        <template #content>
+            <div class="p2pmodal flex-col">
+                <div class="mt-2 input-radio">
+                    <textarea ref="message" maxlength="500" v-model="reply" type="text" :placeholder="$t('Reply to counterparty\'s reply. Max length: 500 chars')"
+                              class="textarea-modal"
+                              name="message" />
+                </div>
+                <div class="mt-5 mb-10">
+                    <div>{{ $t('1. Your response can be seen by the public as “Counterparty’s reply.')}}</div>
+                    <div class="mt-2">{{ $t('2. If the original feedback is deleted by the giver, your reply will be removed.')}}</div>
+                </div>
+            </div>
+        </template>
+
+        <template #footer>
+
+            <jet-button class="ml-2" @click.native="submitReply">
+                {{ $t('Leave reply') }}
+            </jet-button>
+        </template>
+    </jet-dialog-modal>
+
+</div>

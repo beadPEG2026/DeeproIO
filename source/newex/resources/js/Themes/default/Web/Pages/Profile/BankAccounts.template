@@ -1,0 +1,236 @@
+<div class="form-container form-transactions form-bankacconts" :style="{'maxWidth': '100%'}">
+    <div class="form-components">
+        <div class="form-components__title">
+            <h3>{{ $t('Bank Accounts') }}</h3>
+        </div>
+
+        <div class="form-components__body">
+            <div class="form-components__input-text">
+
+                <div class="form-components__block">
+                    <div class="form-components__block-item block-text">
+                        <p>
+                            {{ $t('Add your bank account information for future withdrawal processing.') }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500">
+                            {{ $t('After submission, your bank account will be reviewed. If it is rejected, you can submit a new bank account again.') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-components__block">
+                    <div class="form-components__block-item block-button" :style="{'maxWidth': '260px'}">
+                        <button
+                            type="button"
+                            @click.prevent="openBankAccountModal"
+                            class="form-components__block-button"
+                            :disabled="!canSubmitBankAccount"
+                            :class="{ 'opacity-55 cursor-not-allowed': !canSubmitBankAccount }"
+                        >
+                            {{ $t(bankAccountButtonText) }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-components__block" v-if="bankAccountStatusNotice">
+                    <div class="form-components__block-item block-text">
+                        <p class="text-sm text-gray-500">
+                            {{ $t(bankAccountStatusNotice) }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-components__block">
+                    <div class="form-components__block-item block-text">
+                        <table class="w-full whitespace-no-wrap mob-table-bank-accounts">
+                            <tr class="text-left font-bold">
+                                <th class="px-6 pt-6 pb-4">{{ $t('Account Holder') }}</th>
+                                <th class="px-6 pt-6 pb-4">{{ $t('Country') }}</th>
+                                <th class="px-6 pt-6 pb-4">{{ $t('Bank Account (IBAN)') }}</th>
+                                <th class="px-6 pt-6 pb-4">{{ $t('Bank Code (BIC)') }}</th>
+                                <th class="px-6 pt-6 pb-4">{{ $t('Status') }}</th>
+                                <th class="px-6 pt-6 pb-4">{{ $t('Created at') }}</th>
+                            </tr>
+
+                            <tr v-for="account in accounts" :key="account.id">
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ account.accountName }}
+                                    </span>
+                                </td>
+
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ account.countryName || '-' }}
+                                    </span>
+                                </td>
+
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ account.accountNumber }}
+                                    </span>
+                                </td>
+
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ account.bic || '-' }}
+                                    </span>
+                                </td>
+
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                                            :class="accountStatusClass(account)"
+                                        >
+                                            {{ $t(accountStatusText(account)) }}
+                                        </span>
+                                    </span>
+                                </td>
+
+                                <td class="border-t">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ account.created_at || '-' }}
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr v-if="accounts === null || accounts.length === 0">
+                                <td class="border-t" colspan="100">
+                                    <span class="px-6 py-4 flex items-center focus:text-indigo-500">
+                                        {{ $t('No linked bank accounts found') }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div
+        v-if="showBankAccountModal"
+        class="bank-account-modal-overlay"
+        @click.self="closeBankAccountModal"
+    >
+        <div class="bank-account-modal">
+            <div class="bank-account-modal__header">
+                <h3>{{ $t(hasRejectedBankAccount ? 'Resubmit Bank Account' : 'Add Bank Account') }}</h3>
+
+                <button
+                    type="button"
+                    class="bank-account-modal__close"
+                    @click="closeBankAccountModal"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form class="bank-account-modal__body" @submit.prevent="submitBankAccount">
+                <div class="bank-account-modal__grid">
+                    <div class="input-field" :class="{'invalid': bankAccountErrors.first_name}">
+                        <label>{{ $t('First name') }}</label>
+                        <input
+                            type="text"
+                            v-model="bankAccountForm.first_name"
+                            :placeholder="$t('First name')"
+                        >
+                        <span v-if="bankAccountErrors.first_name" class="helper-text">
+                            {{ bankAccountErrors.first_name[0] }}
+                        </span>
+                    </div>
+
+                    <div class="input-field" :class="{'invalid': bankAccountErrors.last_name}">
+                        <label>{{ $t('Last name') }}</label>
+                        <input
+                            type="text"
+                            v-model="bankAccountForm.last_name"
+                            :placeholder="$t('Last name')"
+                        >
+                        <span v-if="bankAccountErrors.last_name" class="helper-text">
+                            {{ bankAccountErrors.last_name[0] }}
+                        </span>
+                    </div>
+
+                    <div class="input-field bank-account-modal__full" :class="{'invalid': bankAccountErrors.country_id}">
+                        <label>{{ $t('Country') }}</label>
+
+                        <themed-select
+                            v-model="bankAccountForm.country_id"
+                            class="p-2 form-control w-full"
+                        >
+                            <option :value="null" disabled>
+                                {{ $t('Select country') }}
+                            </option>
+
+                            <option
+                                v-for="country in countryOptions"
+                                :key="country.id"
+                                :value="country.id"
+                            >
+                                {{ country.name }}
+                            </option>
+                        </themed-select>
+
+                        <span v-if="bankAccountErrors.country_id" class="helper-text">
+                            {{ bankAccountErrors.country_id[0] }}
+                        </span>
+
+                        <span v-if="countryOptions.length === 0" class="helper-text">
+                            {{ $t('Country list is empty') }}
+                        </span>
+                    </div>
+
+                    <div class="input-field bank-account-modal__full" :class="{'invalid': bankAccountErrors.iban}">
+                        <label>{{ $t('Bank Account (IBAN)') }}</label>
+                        <input
+                            type="text"
+                            v-model="bankAccountForm.iban"
+                            :placeholder="$t('Bank Account (IBAN)')"
+                        >
+                        <span v-if="bankAccountErrors.iban" class="helper-text">
+                            {{ bankAccountErrors.iban[0] }}
+                        </span>
+                    </div>
+
+                    <div class="input-field bank-account-modal__full" :class="{'invalid': bankAccountErrors.bic}">
+                        <label>{{ $t('Bank Code (BIC)') }}</label>
+                        <input
+                            type="text"
+                            v-model="bankAccountForm.bic"
+                            :placeholder="$t('Bank Code (BIC)')"
+                        >
+                        <span v-if="bankAccountErrors.bic" class="helper-text">
+                            {{ bankAccountErrors.bic[0] }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bank-account-modal__notice">
+                    {{ $t('Please confirm your bank account information carefully. After submission, it will enter review status.') }}
+                </div>
+
+                <div class="bank-account-modal__footer">
+                    <button
+                        type="button"
+                        class="bank-account-modal__cancel"
+                        @click="closeBankAccountModal"
+                    >
+                        {{ $t('Cancel') }}
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="bank-account-modal__submit"
+                        :disabled="sending"
+                    >
+                        <span v-if="sending">{{ $t('Submitting...') }}</span>
+                        <span v-else>{{ $t('Submit') }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

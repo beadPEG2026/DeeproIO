@@ -1,0 +1,27 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {units,decimal}=require('../units');
+test('Amounts remain exact above the Number safe integer limit',()=>{assert.equal(units('9007199254740993.123456789012345678',18),9007199254740993123456789012345678n);assert.equal(decimal(1234567n,6),'1.234567');assert.throws(()=>units('1.0000001',6));assert.throws(()=>units('-1',6));assert.throws(()=>units('1e8',6));});
+function evm(){const data={chain:56,height:120,receipt:{status:true,blockNumber:100,blockHash:'block',logs:[]},tx:{from:'alice',to:'bob',value:'2000000000000000000',blockHash:'block'},block:{hash:'block'}};
+ const w={eth:{getChainId:async()=>data.chain,getBlockNumber:async()=>data.height,getTransactionReceipt:async()=>data.receipt,getTransaction:async()=>data.tx,getBlock:async()=>data.block},utils:{sha3:()=> 'transfer'}};
+ return {data,adapter:require('../evm')(w,'bnb'),intent:{txn:'hash',sender:'alice',destination:'bob',amount:'2',confirmations:15,prepared:{decimals:18}}};}
+test('EVM: successful canonical exact native transfer',async()=>{const{adapter,intent}=evm();assert.equal((await adapter.receipt(intent)).state,'confirmed');});
+test('EVM: wrong chain, recipient and amount rejected',async()=>{for(const kind of ['chain','recipient','amount']){const{adapter,intent,data}=evm();if(kind==='chain')data.chain=1;if(kind==='recipient')data.tx.to='mallory';if(kind==='amount')data.tx.value='1';await assert.rejects(adapter.receipt(intent));}});
+test('EVM: reorg and insufficient confirmation remain pending',async()=>{for(const kind of ['reorg','height']){const{adapter,intent,data}=evm();if(kind==='reorg')data.block.hash='other';else data.height=101;assert.equal((await adapter.receipt(intent)).state,'pending');}});
+test('EVM: failed transaction is refundable only after canonical confirmations',async()=>{const{adapter,intent,data}=evm();data.receipt.status='0x0';data.height=101;assert.equal((await adapter.receipt(intent)).state,'pending');data.height=120;const r=await adapter.receipt(intent);assert.equal(r.state,'failed');assert.equal(r.final,true);assert.equal(r.txn,'hash');});
+test('EVM token needs exactly one matching Transfer event',async()=>{const{adapter,intent,data}=evm();intent.sender='0x'+'1'.repeat(40);intent.destination='0x'+'2'.repeat(40);intent.contract='0x'+'3'.repeat(40);data.tx.from=intent.sender;
+ const log={address:intent.contract,topics:['transfer','0x'+'0'.repeat(24)+'1'.repeat(40),'0x'+'0'.repeat(24)+'2'.repeat(40)],data:'0x1bc16d674ec80000'};data.receipt.logs=[log];assert.equal((await adapter.receipt(intent)).state,'confirmed');data.receipt.logs=[log,log];await assert.rejects(adapter.receipt(intent));});
+test('TRON: failed but not solid is not final',async()=>{let solid=false;const adapter=require('../tron')({trx:{getTransactionInfo:async()=>({id:'hash',blockNumber:100,receipt:{result:'OUT_OF_ENERGY'}}),getTransaction:async()=>({ret:[{contractRet:'OUT_OF_ENERGY'}]}),getCurrentBlock:async()=>({block_header:{raw_data:{number:140}}})},solidityNode:{request:async endpoint=>!solid?{}:endpoint.endsWith('gettransactionbyid')?{txID:'hash',ret:[{contractRet:'OUT_OF_ENERGY'}]}:{id:'hash',blockNumber:100,receipt:{result:'OUT_OF_ENERGY'}}}});const p={txn:'hash',confirmations:20,prepared:{}};assert.equal((await adapter.receipt(p)).state,'pending');solid=true;assert.deepEqual(await adapter.receipt(p),{state:'failed',final:true,txn:'hash',confirmations:41,block_number:100});});
+test('Solana: error before finality remains pending',async()=>{let final=false;const conn={getGenesisHash:async()=> '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',getSignatureStatuses:async()=>({value:[{confirmationStatus:final?'finalized':'confirmed',err:{InstructionError:1}}]})};const adapter=require('../solana')({}, {},conn,{});const p={txn:'hash'};assert.equal((await adapter.receipt(p)).state,'pending');final=true;assert.equal((await adapter.receipt(p)).final,true);});
+test('X Layer finality is required before confirming OR refunding a withdrawal',async()=>{
+ let final=99;const w={eth:{getChainId:async()=>196,getBlockNumber:async()=>200,getTransactionReceipt:async()=>({blockNumber:100,blockHash:'canonical',status:false}),getTransaction:async()=>({blockHash:'canonical'}),getBlock:async n=>n==='finalized'?{number:final}:{hash:'canonical'}}};
+ const a=require('../evm')(w,'xlayer'),p={txn:'hash',confirmations:64};assert.equal((await a.receipt(p)).state,'pending');final=100;assert.equal((await a.receipt(p)).state,'failed');
+});
+test('X Layer rejects an Ethereum RPC even for balance reads',async()=>{
+ const a=require('../evm')({eth:{getChainId:async()=>1}},'xlayer');await assert.rejects(a.balance({sender:'address'}),/CUSTODY_WRONG_CHAIN/);
+});
+test('X Layer estimate includes L1 data fee in the fee cap and gas shortfall',async()=>{
+ const w={utils:{isAddress:()=>true},currentProvider:{send:(p,cb)=>{assert.equal(p.method,'eth_call');cb(null,{result:'0x64'});}},eth:{getChainId:async()=>196,getGasPrice:async()=>'1',estimateGas:async()=>21000,getBalance:async()=>'25200'}};
+ const a=require('../evm')(w,'xlayer');await assert.rejects(a.estimate({sender:'a',destination:'b',amount:'1',max_fee:'0.0000000000000252'}),/CUSTODY_FEE_LIMIT/);
+ const r=await a.estimate({sender:'a',destination:'b',amount:'1',max_fee:'0.01'});assert.equal(r.fee,'0.000000000000025300');assert.equal(r.native_shortfall,'0.000000000000000100');
+});

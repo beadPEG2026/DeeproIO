@@ -1,0 +1,1 @@
+document.getElementById('copy-url')?.addEventListener('click', async function () { try { await navigator.clipboard.writeText('https://deepro.io/'); this.textContent='已复制'; } catch (_) { this.textContent='请长按左侧网址复制'; } });

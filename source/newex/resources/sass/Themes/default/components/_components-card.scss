@@ -1,0 +1,54 @@
+
+/** components card start */
+.card-warning {
+
+    &.active {
+        background: var(--yellow-color);
+        border: 1px solid var(--yellow-color);
+    }
+
+    &:hover {
+        background: var(--yellow-color);
+    }
+}
+
+body.dark {
+    .site-layout {
+        .table-form-container-item {
+            border-color: var(--fourth-text-color);
+        }
+
+        .card-warning {
+
+            border-color: var(--fourth-text-color);
+
+            h2 {
+                color: var(--first-text-color);
+            }
+
+            h2 {
+                color: var(--second-text-color);
+            }
+
+            div {
+                background: var(--third-text-color);
+                color: var(--second-text-color);
+            }
+
+            &.active {
+                background: var(--blue-dark-fourth-color);
+                border: 1px solid var(--blue-dark-fourth-color);
+            }
+
+            &:hover {
+                background: var(--blue-dark-fourth-color);
+                border: 1px solid var(--blue-dark-fourth-color);
+            }
+        }
+
+        #card-element {
+            border-color: var(--border-line-color);
+        }
+    }
+}
+/** components card end */

@@ -1,0 +1,20 @@
+
+
+&__checkbox {
+    display: flex;
+    align-items: center;
+
+    margin-left: 3rem;
+
+    &-label {
+        font-size: 0.90rem;
+    }
+
+    input {
+        margin-right: 0.50rem;
+    }
+
+    // &-text {
+    //     outline: 1px solid #F00;
+    // }
+}

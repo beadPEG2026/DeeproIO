@@ -1,0 +1,183 @@
+/* Shared display contract: one page gutter, readable text, semantic market colors. */
+:root { --dp-up:#008a32; --dp-down:#e60012; --green-color:#008a32; --red-color:#e60012; }
+:root[data-market-colors="red-up"] { --dp-up:#e60012; --dp-down:#008a32; }
+.dp-site { --ui-text:#192027;--ui-muted:#58616d;--main-text-color:#192027; --second-text-color:#58616d; color:var(--main-text-color); }
+body.dark .dp-site { --ui-text:#f4f6f8;--ui-muted:#b8c1cc;--main-text-color:#f4f6f8; --second-text-color:#b8c1cc; }
+.dp-site .is-up,.dp-site .color-buy,.dp-site .dp-ranking-up { color:var(--dp-up)!important; }
+.dp-site .is-down,.dp-site .color-sell,.dp-site .dp-ranking-down { color:var(--dp-down)!important; }
+.dp-site .deepro-brand b,.dp-site .dp-platform-caption { color:var(--main-text-color); }
+.dp-site .compare-bids-bar { background:var(--dp-up)!important; }
+.dp-site .compare-asks-bar { background:var(--dp-down)!important; }
+.dp-site .compare-percent-buy { color:var(--dp-up)!important; }
+.dp-site .compare-percent-sell { color:var(--dp-down)!important; }
+.dp-site .dp-quote__identity { align-items:flex-start!important; }
+.dp-site .dp-quote__identity>img { object-fit:contain;align-self:flex-start;margin-top:0;height:36px;width:36px;flex:0 0 36px; }
+.dp-site .dp-quote__identity strong { min-height:36px; display:flex;align-items:center;white-space:nowrap; }
+.dp-site .dp-quote__favorite { width:32px!important;height:36px!important;flex:0 0 32px;margin-left:2px!important; }
+.dp-site .dp-quote__favorite svg { width:17px;height:17px; }
+.dp-site .dp-home-quotes { scrollbar-width:none; }
+.dp-site .dp-home-quotes::-webkit-scrollbar { display:none; }
+.dp-site .cex-home__staking-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+.dp-wealth-empty { padding:18px 0;color:var(--second-text-color); }
+.dp-uid-copy { margin:0 0 16px 64px;padding:6px 12px;border:1px solid currentColor;border-radius:8px;color:inherit;background:transparent; }
+.dp-preference-field { display:flex;flex-direction:column;gap:10px;margin-top:24px;font-weight:650; }
+.dp-preference-field select { width:100%;min-height:46px;border:1px solid #8c96a5;border-radius:10px;padding:10px;color:inherit;background:transparent; }
+.dp-preference-field option { color:#192027;background:#fff; }
+.dp-hub-preferences p { font-size:12px;line-height:1.7;color:var(--second-text-color,#58616d); }
+.dp-welcome[open] {display:flex;flex-direction:column;overflow-y:auto;padding:20px max(22px,calc((100vw - 410px)/2)) 18px;gap:10px}
+.dp-welcome>header,.dp-welcome__heading,.dp-welcome__entry{position:static;inset:auto;width:100%;max-width:none;margin:0;padding:0;flex-shrink:0}
+.dp-welcome>header{order:0}.dp-welcome__heading{order:1;padding-top:10px}
+.dp-welcome__heading h1{font-size:clamp(36px,10vw,50px);line-height:1.12;margin:8px 0}
+.dp-welcome__heading p,.dp-welcome__heading small,.dp-welcome__entry p{color:#54564d}
+.dp-welcome__heading p{font-size:12px;line-height:1.6;margin:0}
+.dp-welcome__art{position:static;inset:auto;order:2;min-height:300px;flex:1 0 300px;width:100%;background-position:center 60%;background-size:auto 170%;mask-image:linear-gradient(transparent,#000 7%,#000 90%,transparent)}
+.dp-welcome__entry{order:3;padding-top:6px;padding-bottom:env(safe-area-inset-bottom)}
+.dp-welcome__entry p{margin-bottom:12px}.dp-welcome__entry footer{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.dp-welcome__entry footer small{color:#41473f}.dp-welcome__entry footer button{padding:6px;color:#343b28;font-weight:700}
+.dp-site .dp-wealth-page .staking-page__grid { display:flex;flex-direction:column;gap:12px; }
+.dp-site .dp-wealth-page .staking-page__grid .staking-card { display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px;border-radius:14px; }
+.dp-site .dp-wealth-page .staking-card__header,.dp-site .dp-wealth-page .staking-card__body,.dp-site .dp-wealth-page .staking-card__footer { padding:0;border:0;margin:0; }
+.dp-site .dp-wealth-page .staking-card__status,.dp-site .dp-wealth-page .staking-card__details { display:none; }
+.dp-site .dp-wealth-page .staking-card__apy { margin:0; }
+.dp-site .dp-wealth-page .staking-card__apy-value { font-size:22px;color:var(--dp-up); }
+.dp-site .dp-wealth-page .staking-card__btn { padding:10px 14px;min-width:72px; }
+.dp-staking-summary { padding:22px;border-radius:16px;background:#ffda47;color:#20251b;margin-bottom:20px; }
+.dp-staking-summary strong { display:block;font-size:28px;margin-top:6px; }
+@media(max-width:767px) {
+ .dp-site:not(.dp-route-umi):not(.dp-route-trade) .main-section { padding-left:16px!important;padding-right:16px!important; }
+ .dp-site:not(.dp-route-umi):not(.dp-route-trade) .main__container { width:100%!important;max-width:none!important;padding-left:0!important;padding-right:0!important; }
+ .dp-site.dp-route-wallet .main-section .mobile-body { padding-left:0!important;padding-right:0!important; }
+ .dp-site.dp-route-wallet .wallet-assets-page,.dp-site.dp-route-wallet #transfer-container { width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important; }
+ .dp-site #transfer-container .swap-inner { width:100%!important;max-width:none!important;box-sizing:border-box;padding:16px!important; }
+ .dp-site #transfer-container .transfer-account-row { grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr);gap:8px; }
+ .dp-site .markets-tabs .tabs-nav { display:flex;overflow-x:auto;white-space:nowrap;mask-image:none!important;scrollbar-width:none; }
+ .dp-site .markets-tabs .tabs-nav__item { flex:0 0 auto;max-width:none!important; }
+ .dp-site.dp-route-home .cex-home,.dp-site.dp-route-home .dp-home-dashboard,.dp-site.dp-route-home .dp-home-wealth,.dp-site.dp-route-home .dp-home-remit { width:100%!important;max-width:none!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important; }
+ .dp-site .dp-home-wealth .cex-home__staking-grid { gap:12px; }
+ .dp-site .cex-home__staking-card { min-width:0;padding:16px 12px; }
+ .dp-site .cex-home__staking-apy-value { font-size:24px; }
+ .dp-site .cex-home__staking-symbol { font-size:18px; }
+ .dp-site .dp-home-section-heading,.dp-site .cex-home__section-header { padding-left:0;padding-right:0; }
+ .dp-site .header-logo { display:none!important; }
+ .dp-site.dp-route-markets .header__row { min-height:42px; }
+ .dp-site.dp-route-markets .main-section { padding-left:0!important;padding-right:0!important; }
+ .dp-site .dp-wealth-page .staking-page { padding:16px 0;width:100%; }
+ .dp-site .dp-wealth-page .staking-page__header { margin-bottom:16px; }
+ .dp-site .dp-wealth-page .staking-page__grid .staking-card { gap:10px;padding:14px 10px;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto; }
+ .dp-site .dp-wealth-page .staking-card__logo { width:28px;height:28px; }
+ .dp-site .dp-wealth-page .staking-card__coin { gap:8px; }
+ .dp-site .dp-wealth-page .staking-card__apy-value { font-size:18px; }
+ .dp-site .dp-wealth-page .staking-card__apy-label { font-size:10px; }
+ .dp-site .dp-wealth-page .staking-card__btn { min-width:54px;padding:9px;font-size:12px; }
+ .dp-site .dp-wealth-page .staking-card__name { font-size:11px; }
+ .dp-site .dp-wealth-page .staking-card__coin-info { min-width:0; }
+}
+@media(max-width:360px) { .dp-site:not(.dp-route-umi):not(.dp-route-trade) .main-section { padding-left:12px!important;padding-right:12px!important; } }
+
+.dp-site .cex-home__staking-apy-value { color:var(--dp-up)!important; }
+body.dark .dp-site { --dp-up:#00b947;--dp-down:#ff182b; }
+html[data-market-colors="red-up"] body.dark .dp-site { --dp-up:#ff182b;--dp-down:#00b947; }
+
+.dp-site .dp-wealth-page .staking-page__header { display:flex;flex-direction:row;justify-content:space-between;align-items:center;background:transparent!important;padding:0!important;border:0!important;min-height:0!important; }
+.dp-site .dp-wealth-page .staking-page__header h1 { font-size:24px;margin:0;color:var(--main-text-color); }
+.dp-site .dp-wealth-page .staking-page__header p,.dp-site .dp-wealth-page .staking-page__header-stats { display:none; }
+.dp-site .dp-wealth-page .staking-card__apy { padding:0!important;background:transparent!important; }
+.dp-site .dp-wealth-page .staking-card__body>p { margin:4px 0 0;font-size:11px;line-height:1.5; }
+.dp-site .dp-wealth-page .staking-card__symbol { color:var(--main-text-color); }
+.dp-site .dp-wealth-page .staking-card__status:not(.staking-card__status--active) { display:block;font-size:11px; }
+.dp-site .markets-tabs .tabs-nav__active,.dp-site .markets-tabs .tabs-nav__active a { color:var(--main-text-color)!important; }
+.dp-site .dp-wealth-page .staking-page__tabs { margin-top:16px; }
+
+.dp-header-title { display:none; }
+@media(max-width:767px) {
+ .dp-site>.dp-platform-caption { display:flex; }
+ .dp-site:not(.dp-route-home) .header-section { top:48px!important; }
+ .dp-site.dp-route-home .header-section { top:0!important; }
+ .dp-site .header__row { min-height:48px!important;gap:10px; }
+ .dp-site .dp-header-title { display:block;color:var(--main-text-color);font-size:17px;font-weight:750;white-space:nowrap; }
+ .dp-site .header__row-left { min-width:0; }
+ .dp-site .dp-ranking-table td,.dp-site .dp-ranking-table th { box-sizing:border-box; }
+ .dp-site .dp-ranking-table .dp-hub-spark { width:17%;min-width:44px;padding:0 4px; }
+ .dp-site .dp-hub-spark .dp-sparkline { display:block;position:static;width:100%;height:30px;opacity:1; }
+ .dp-site .dp-hub-price,.dp-site .dp-hub-price.is-hk { padding:0;min-height:48px;align-items:center; }
+ .dp-site .dp-ranking-table td:first-child { width:36%; }
+ .dp-site .dp-ranking-table .dp-hub-price-cell { width:29%; }
+ .dp-site .dp-hub-price>span { white-space:nowrap; }
+ .dp-site .dp-ranking-table .dp-ranking-identity strong { font-size:13px; }
+ .dp-site .dp-hub-price .dp-usdt-equivalent { font-size:11px; }
+ .dp-site .dp-ranking-change { font-size:12px;padding:8px 5px;min-width:55px; }
+ .dp-site .dp-ranking-identity { min-width:0;gap:7px; }
+ .dp-site .dp-ranking-identity>span { min-width:0; }
+ .dp-site .dp-ranking-identity strong { overflow:hidden;text-overflow:ellipsis; }
+ .dp-site .staking-detail { width:100%;padding:16px 0; }
+}
+.dp-hub-spark { width:100px;padding:0 12px; }
+.dp-hub-spark .dp-sparkline { position:static;width:100%;height:36px;display:block; }
+.dp-term-rules { margin:16px 0;padding:16px;border-radius:12px;background:var(--ui-surface,#f4f6f8);font-size:13px;line-height:1.8; }
+.dp-term-rules p { margin:4px 0; }
+.dp-term-pending { color:var(--second-text-color);font-weight:600; }
+@media(max-height:740px) { .dp-welcome[open] { padding-top:18px;gap:12px; } .dp-welcome__heading h1 { font-size:34px; } .dp-welcome__art { min-height:260px;flex-basis:260px; } }
+
+@media(max-width:767px) {
+ .dp-site .dp-market-hub .dp-ranking-table th:first-child { width:34%; }
+ .dp-site .dp-market-hub .dp-ranking-table th.dp-hub-spark { width:16%;padding:0 3px; }
+ .dp-site .dp-market-hub .dp-ranking-table th:nth-child(3) { width:30%;padding:0 5px; }
+ .dp-site .dp-market-hub .dp-ranking-table th:nth-child(4) { width:20%;padding:0 8px 0 3px; }
+ .dp-site .dp-market-hub .dp-ranking-table td.dp-hub-spark { padding:0 3px; }
+ .dp-site .dp-market-hub .dp-hub-spark .dp-sparkline { position:static;display:block;width:100%;height:30px;opacity:1; }
+ .dp-site .dp-market-hub .dp-hub-price.is-hk { min-height:54px;padding-top:0;align-items:center; }
+ .dp-site .dp-market-hub .dp-ranking-table td:nth-child(3) { padding-right:5px; }
+ .dp-site .dp-market-hub .dp-ranking-table td:nth-child(4) { padding-right:8px;padding-left:3px; }
+ .dp-site .dp-market-hub .dp-ranking-change { min-width:0;width:100%;font-size:11px; }
+}
+@media(max-width:992px) {
+ .dp-site .staking-detail__calculator { order:0; }
+ .dp-site .staking-detail__grid { gap:16px; }
+ .dp-site .staking-detail__info,.dp-site .staking-detail__calc-card { padding:16px; }
+}
+
+/* Operable navigation and readable mobile secondary prices. */
+.dp-site button.gxhead-link{border:0;background:transparent;font:inherit;color:inherit;cursor:pointer}
+.dp-site button.gxhead-link:focus-visible,.staking-card button:focus-visible,.staking-detail__apy-card:focus-visible{outline:2px solid #bc8b13;outline-offset:3px}
+.dp-site .dp-hub-price .dp-usdt-equivalent{font-size:11px;line-height:1.4}
+.dp-theme-switch:disabled{cursor:progress;opacity:.65}
+
+/* One brand caption is shared by routes and full-screen account panels. */
+.dp-site .dp-platform-caption { flex-direction:column;gap:2px;flex-shrink:0; }
+.dp-site .dp-platform-caption strong { font:inherit; }
+.dp-site .dp-platform-caption>span { font-size:11px;line-height:14px;font-weight:400;color:var(--second-text-color);letter-spacing:0; }
+.dp-site .dp-site-hub__inner>.dp-platform-caption { position:sticky;top:0;z-index:3;min-height:48px;height:48px;padding:6px 12px;font-size:14px;line-height:19px;background:var(--dp-hub-background);border-bottom:1px solid var(--ui-divider); }
+.dp-site .dp-site-hub__header { top:48px; }
+@media(max-width:1399px) {
+ .dp-site .header-btn { width:44px;min-width:44px;height:44px;padding:11px; }
+ .dp-site .header-btn span { width:22px;height:1.5px;margin:4.5px 0;border-radius:2px; }
+ .dp-site .header-btn span:first-child { margin-top:3px; }
+}
+@media(max-width:767px) {
+ .dp-site .dp-platform-caption { position:sticky;top:0;z-index:40;min-height:48px;height:48px;padding:6px 12px;font-size:14px;line-height:19px;font-weight:700; }
+ .dp-site .header-section { z-index:39; }
+ .dp-site:not(.dp-route-home) .header-nav.active { top:97px!important;margin-top:0!important;max-height:calc(100dvh - 161px);overflow-y:auto; }
+ .dp-site .dp-site-hub__inner>.dp-platform-caption { margin:0 -20px; }
+ .dp-site .dp-site-hub__header { top:48px; }
+ .dp-site .dp-site-hub__header h1 { font-size:17px; }
+}
+
+/* Asset balances and labels remain legible in both themes. */
+.dp-site.dp-route-wallet { --ui-text:#17212b;--main-text-color:#17212b;--ui-muted:#485462;--second-text-color:#485462; }
+body.dark .dp-site.dp-route-wallet { --ui-text:#f4f6f8;--main-text-color:#f4f6f8;--ui-muted:#c0c8d2;--second-text-color:#c0c8d2; }
+.dp-site .dp-assets-tabs>a,.dp-site .dp-assets-tabs>button { color:var(--main-text-color); }
+.dp-site .dp-assets-accounts>button>span { color:var(--main-text-color);font-weight:550; }
+.dp-site .dp-assets-total__label,.dp-site .dp-assets-row__identity small,.dp-site .dp-assets-row__value small { font-weight:500; }
+
+@media(max-width:767px){.dp-site .dp-profile .form-container{margin:16px auto;padding:16px;width:100%;max-width:100%}}
+.dp-manual-copy{padding:16px;display:flex;align-items:end;gap:10px}.dp-manual-copy label{flex:1;min-width:0}.dp-manual-copy input{display:block;width:100%;user-select:text!important;padding:10px;color:inherit;background:transparent;border:1px solid currentColor;border-radius:8px}
+
+.dp-site .dp-chat-connection{background:var(--ui-background,#fff);color:var(--ui-text,#192027);height:auto;min-height:220px;max-width:calc(100vw - 24px)}
+.dp-site .dp-chat-connection .online-support-modal__header{background:var(--ui-highlight,#f4f6f8);color:inherit}
+.dp-site .dp-chat-connection .online-support-modal__close{color:inherit;background:transparent;width:44px;height:44px}
+.dp-chat-status{padding:24px;text-align:center;line-height:1.6}.dp-chat-status button{padding:10px 22px;border-radius:8px;background:#ffd326;color:#192027}
+.dp-site .dp-chat-fallback{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:12px 16px 20px;color:inherit}.dp-chat-fallback a,.dp-chat-fallback button{color:inherit!important;padding:10px;font:inherit;border:1px solid var(--ui-divider,#dce1e6);border-radius:8px;background:transparent}
+body.dark .dp-site .dp-chat-connection{background:#202a34}body.dark .dp-site .dp-chat-connection .online-support-modal__header{background:#2a3540}
+
+/* UMI owns its compact section header; the shared brand caption remains above it. */
+.site-layout.wrapper.dp-site.dp-umi-shell > .main-section{padding:0!important}.dp-umi-shell .main__container{padding:0!important;max-width:none}.dp-umi-shell .main__container>.mobile-body{padding:0!important}

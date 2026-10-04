@@ -1,0 +1,224 @@
+// P2P Post Create
+#p2p-post-create {
+
+    .p2p-post-wrapper {
+        border-radius: 5px;
+        margin-top: 25px;
+
+        .p2p-post-tab-buttons {
+            button {
+                &.active {
+                    font-weight: bold;
+                    background: var(--purple-second-color);
+                }
+                padding: 15px 0;
+            }
+        }
+
+        .p2p-post-tab-content {
+
+            .components-filter {
+                margin-bottom: 2rem;
+            }
+        }
+    }
+
+    .p2p-field-width {
+        display: flex;
+        max-width: 300px;
+    }
+
+    .p2p-post-next-btn {
+        margin-top: 50px;
+        button {
+            max-width: 250px;
+            margin-bottom: 20px;
+        }
+    }
+
+    .p2p-asset-arrow {
+        margin-top: 30px;
+        margin-right: 13px;
+        margin-left: 13px;
+    }
+
+
+    .components-filter__item {
+        width: 50%;
+        margin-right: 0;
+
+        .filter-select {
+            padding: 0 1.5rem;
+            height: 55px;
+
+            &:focus {
+                border: 1px solid var(--border-line-color);
+            }
+        }
+    }
+
+    .custom-input-group {
+        position: relative;
+
+        input {
+            padding-right: 37px !important;
+        }
+
+        span {
+            font-size: 14px;
+            font-weight: 400;
+            position: absolute;
+            right: 25px;
+            top: 18px;
+        }
+    }
+
+    .p2p-result-price-group {
+        margin-top: 40px;
+
+        div {
+
+        }
+
+        p {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+    }
+}
+
+.p2p-order-view {
+
+    gap: 32px;
+
+    .p2p-headline {
+        font-size: var(--big-font__size);
+    }
+
+    .p2p-headline-info {
+        margin-top: 25px;
+    }
+
+    .text-headline {
+        color: var(--second-fourth-color);
+        margin-bottom: 10px;
+    }
+
+    .p2p-headline-method {
+        margin-top: 25px;
+    }
+}
+
+.p2p-create-steps {
+    display: flex;
+
+    .p2p-steps-line {
+        box-sizing: border-box;
+        margin: 0px;
+        min-width: 0px;
+        bottom: 20px;
+        height: 0px;
+        align-self: flex-end;
+        flex: 1 1 0%;
+        position: relative;
+        background: var(--table-head-color);
+
+        &:after {
+            content: "";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            height: 4px;
+            background-color: inherit;
+        }
+    }
+
+    .p2p-steps-line-np {
+        bottom: 12px;
+    }
+
+    .p2p-steps-step {
+        box-sizing: border-box;
+        margin: 0px;
+        min-width: 0px;
+        display: flex;
+        position: static;
+        color: rgb(112, 122, 138);
+        padding: 8px;
+        -webkit-box-flex: 0;
+        flex-grow: 0;
+        -webkit-box-align: center;
+        align-items: center;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .p2p-steps-step-np {
+        padding: 0;
+    }
+
+    .p2p-steps-step-inner {
+        box-sizing: border-box;
+        margin: 0px;
+        min-width: 0px;
+        display: flex;
+        flex-direction: column;
+        -webkit-box-align: center;
+        align-items: center;
+    }
+
+    .p2p-steps-step-marker {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        border-radius: 100%;
+        margin-top: 20px;
+        background: var(--table-head-color);
+        user-select: none;
+
+        &.active {
+            background-color: var(--yellow-color) !important;
+            color: var(--ui-text);
+        }
+
+        .p2p-create-step-marker-label {
+            box-sizing: border-box;
+            margin: 0px;
+            min-width: 0px;
+            font-size: 12px;
+
+            &:after {
+                content: "";
+                position: absolute;
+                height: 4px;
+                top: 12px;
+                width: 9999px;
+                left: 100%;
+                margin-left: 8px;
+                background: var(--table-head-color);
+            }
+        }
+
+        .p2p-create-step-marker-label-extra {
+
+            box-sizing: border-box;
+            margin: 0px;
+            min-width: 0px;
+            font-size: 12px;
+
+            &:before {
+                content: "";
+                position: absolute;
+                height: 4px;
+                top: 12px;
+                width: 9999px;
+                right: 100%;
+                margin-right: 8px;
+                background: var(--table-head-color);
+            }
+        }
+    }
+}

@@ -1,0 +1,590 @@
+<app-layout>
+
+<Head>
+    <title>{{ $t('P2P Ads')}}</title>
+    <meta name="description" content="">
+</Head>
+
+<top-menu :label="$t('P2P Ads')"></top-menu>
+
+<!-- table components start -->
+<div class="table-components table-components-mob">
+    <div class="filter-group">
+        <div class="filter-top-group">
+            <div class="filter-top-left">
+
+                <div class="filter-button-group">
+                    <div @click="setType('buy')" :class="{'active' : form.type != 'sell'}" class="filter-button-items filter-button-left-group">{{ $t('Buy')}}</div>
+                    <div @click="setType('sell')" :class="{'active' : form.type == 'sell'}" class="filter-button-items filter-button-right-group">{{ $t('Sell')}}</div>
+                </div>
+            </div>
+            <div class="filter-top-right">
+                <div @click="setBasePair(currency)" v-for="currency in baseCurrencies" :class="{'active': form.basePair == currency}" class="filter-top-item-list">
+                    {{ currency }}
+                </div>
+            </div>
+        </div>
+        <div class="filter-bottom-group">
+
+        </div>
+    </div>
+
+
+    <div class="components-filter components-filter-desktop">
+        <div class="flex flex-wrap">
+
+            <div class="w-full lg:w-1/2 flex">
+
+                <div class="flex w-full lg:w-1/2 filter-dropdown-group mt-2 ">
+                    <div class="relative-left">
+                        <input :placeholder="$t('Enter Amount')" type="text" v-model="form.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                    </div>
+                    <t-rich-user-select
+                        v-model="form.quotePair"
+                        :options="fiats"
+                        :placeholder="$t('Select fiat')"
+                        value-attribute="symbol"
+                        text-attribute="name"
+                        :clearable="false"
+                        :hideSearchBox="true"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="swap-label flex items-stretch">
+                                        <img :src="option.raw.logo" width="28" />
+                                        <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template
+                            slot="option"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                        <img :src="option.raw.logo" width="28" />
+                                        <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+
+                <div class="w-full lg:w-1/2 components-filter__item8 components-filter__item-multiple">
+                    <t-rich-user-select
+                        :options="paymentMethods"
+                        v-model="form.payment_method"
+                        :placeholder="$t('All Payments')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :multiple="true"
+                        :clearable="true"
+                    >
+                    </t-rich-user-select>
+                </div>
+
+            </div>
+
+            <div class="w-full lg:w-1/2 flex justify-between">
+
+                <div class="w-full lg:w-1/2 components-filter__item8 flex">
+                    <t-rich-user-select
+                        :options="regions"
+                        v-model="form.region"
+                        :placeholder="$t('All Regions')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="false"
+                    >
+                        <template
+                            slot="option"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="flex items-stretch pt-2 pb-2 pl-2 img-strict">
+                                        <img class="self-center" :src="option.raw.logo" />
+                                        <span class="ml-5">{{ option.raw.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+
+                    <div v-click-outside="hideFilters" class="ml-4 component-filter">
+                        <div @click="filterShow = !filterShow" class="component-filter-content">
+                            <svg class="svg-filter-icon" width="20" height="20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         viewBox="0 0 210.68 210.68" xml:space="preserve">
+                            <path d="M205.613,30.693c0-10.405-10.746-18.149-32.854-23.676C154.659,2.492,130.716,0,105.34,0
+                                C79.965,0,56.021,2.492,37.921,7.017C15.813,12.544,5.066,20.288,5.066,30.693c0,3.85,1.476,7.335,4.45,10.479l68.245,82.777v79.23
+                                c0,2.595,1.341,5.005,3.546,6.373c1.207,0.749,2.578,1.127,3.954,1.127c1.138,0,2.278-0.259,3.331-0.78l40.075-19.863
+                                c2.55-1.264,4.165-3.863,4.169-6.71l0.077-59.372l68.254-82.787C204.139,38.024,205.613,34.542,205.613,30.693z M44.94,20.767
+                                C61.467,17.048,82.917,15,105.34,15s43.874,2.048,60.399,5.767c18.25,4.107,23.38,8.521,24.607,9.926
+                                c-1.228,1.405-6.357,5.819-24.607,9.926c-16.525,3.719-37.977,5.767-60.399,5.767S61.467,44.338,44.94,40.62
+                                c-18.249-4.107-23.38-8.521-24.607-9.926C21.56,29.288,26.691,24.874,44.94,20.767z M119.631,116.486
+                                c-1.105,1.341-1.711,3.023-1.713,4.761l-0.075,57.413l-25.081,12.432v-69.835c0-1.741-0.605-3.428-1.713-4.771L40.306,54.938
+                                C58.1,59.1,81.058,61.387,105.34,61.387c24.283,0,47.24-2.287,65.034-6.449L119.631,116.486z"/>
+                            </svg>
+                        </div>
+                        <div class="component-popover" :class="{'active': filterShow}">
+                            <div class="component-popover-label">{{ $t('Sort By')}}</div>
+                            <div class="component-popover-content">
+                                <div class="mt-5 input-radio">
+                                    <t-radio id="filterForm1" name="document" v-model="form.sort" value="price" />
+                                    <label for="filterForm1">
+                                        <template v-if="form.type != 'sell'">
+                                            {{ $t('Price: lowest to highest') }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('Price: highest to lowest') }}
+                                        </template>
+                                    </label>
+                                </div>
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm2" name="document" v-model="form.sort" value="orders_completed"/>
+                                    <label for="filterForm2">{{ $t('Completed order number') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm3" name="document" v-model="form.sort" value="completion_rate"/>
+                                    <label for="filterForm3">{{ $t('Completion Rate') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm4" name="document" v-model="form.sort" value="feedback_rate"/>
+                                    <label for="filterForm4">{{ $t('Feedback Rate') }}</label>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-5">
+                                <div class="component-popover-label">{{ $t('Filter By')}}</div>
+                                <div class="component-popover-content">
+                                    <div class="mt-2 input-radio">
+                                        <label for="filterForm44" class="mr-1">{{ $t('Verified Merchant Ads only') }}</label>
+                                        <t-checkbox id="filterForm44" name="merchant_filter" v-model="form.merchants_only" value="true"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="component-popover-label mt-5">{{ $t('Payment Time Limit (minutes)')}}</div>
+                            <div class="component-popover-content">
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm125" name="document" v-model="form.timeframe" value="all" />
+                                    <label for="filterForm125">{{ $t('All') }}</label>
+                                </div>
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm124" name="document" v-model="form.timeframe" value="15"/>
+                                    <label for="filterForm124">{{ $t('15') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm123" name="document" v-model="form.timeframe" value="30"/>
+                                    <label for="filterForm123">{{ $t('30') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm122" name="document" v-model="form.timeframe" value="45"/>
+                                    <label for="filterForm122">{{ $t('45') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm121" name="document" v-model="form.timeframe" value="60"/>
+                                    <label for="filterForm121">{{ $t('60') }}</label>
+                                </div>
+
+                                <div class="mt-2 input-radio">
+                                    <t-radio id="filterForm120" name="document" v-model="form.timeframe" value="120"/>
+                                    <label for="filterForm120">{{ $t('120') }}</label>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 components-filter__item components-filter__item4">
+                    <div class="svg-icon-container">
+                        <div class="svg-icon-label">
+                            <svg v-if="refresh_state" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="0" fill="none" width="20" height="20"/>
+                                <g>
+                                    <path d="M5.7 9c.4-2 2.2-3.5 4.3-3.5 1.5 0 2.7.7 3.5 1.8l1.7-2C14 3.9 12.1 3 10 3 6.5 3 3.6 5.6 3.1 9H1l3.5 4L8 9H5.7zm9.8-2L12 11h2.3c-.5 2-2.2 3.5-4.3 3.5-1.5 0-2.7-.7-3.5-1.8l-1.7 1.9C6 16.1 7.9 17 10 17c3.5 0 6.4-2.6 6.9-6H19l-3.5-4z"/>
+                                </g>
+                            </svg>
+                            <svg v-else version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 viewBox="0 0 492.883 492.883" xml:space="preserve">
+                                            <g>
+                                                <g>
+                                                    <path d="M122.941,374.241c-20.1-18.1-34.6-39.8-44.1-63.1c-25.2-61.8-13.4-135.3,35.8-186l45.4,45.4c2.5,2.5,7,0.7,7.6-3
+                                                        l24.8-162.3c0.4-2.7-1.9-5-4.6-4.6l-162.4,24.8c-3.7,0.6-5.5,5.1-3,7.6l45.5,45.5c-75.1,76.8-87.9,192-38.6,282
+                                                        c14.8,27.1,35.3,51.9,61.4,72.7c44.4,35.3,99,52.2,153.2,51.1l10.2-66.7C207.441,421.641,159.441,407.241,122.941,374.241z"/>
+                                                    <path d="M424.941,414.341c75.1-76.8,87.9-192,38.6-282c-14.8-27.1-35.3-51.9-61.4-72.7c-44.4-35.3-99-52.2-153.2-51.1l-10.2,66.7
+                                                        c46.6-4,94.7,10.4,131.2,43.4c20.1,18.1,34.6,39.8,44.1,63.1c25.2,61.8,13.4,135.3-35.8,186l-45.4-45.4c-2.5-2.5-7-0.7-7.6,3
+                                                        l-24.8,162.3c-0.4,2.7,1.9,5,4.6,4.6l162.4-24.8c3.7-0.6,5.4-5.1,3-7.6L424.941,414.341z"/>
+                                                </g>
+                                            </g>
+                                        </svg>
+                        </div>
+                        <div class="svg-icon-text">
+                            <t-rich-user-select
+                                :placeholder="$t('Refresh Ads')"
+                                :options="refreshIntervals"
+                                v-model="selectedInterval"
+                                value-attribute="id"
+                                text-attribute="name"
+                                :clearable="false"
+                                :hideSearchBox="true"
+                            >
+                            </t-rich-user-select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="components-filter components-filter-mobile">
+        <div class="flex flex-wrap">
+
+            <div class="w-full">
+
+                <div class="flex w-full filter-dropdown-group">
+                    <t-rich-user-select
+                        v-model="form.quotePair"
+                        :options="fiats"
+                        :placeholder="$t('Select fiat')"
+                        value-attribute="symbol"
+                        text-attribute="name"
+                        :clearable="false"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="swap-label flex items-stretch">
+                                        <img :src="option.raw.logo" width="28" />
+                                        <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template
+                            slot="option"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="flex items-stretch pt-2 pb-2 pl-2">
+                                        <img :src="option.raw.logo" width="28" />
+                                        <span class="pt-1 ml-5">{{ option.raw.symbol }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                    <div class="relative-left relative-left-mobile">
+                        <input :placeholder="$t('Enter Amount')" type="text" v-model="form.amount" @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent   class="filter-select w-full flex text-left mt-1 justify-between items-center px-3 py-2 transition duration-100 ease-in-out focus:border-gray-200 focus:ring-2 focus:ring-gray-200 focus:outline-none focus:ring-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200" />
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="w-full mt-5">
+                <div class="w-full components-filter__item8 flex components-filter__item-multiple">
+                    <t-rich-user-select
+                        :options="paymentMethods"
+                        v-model="form.payment_method"
+                        :placeholder="$t('All Payments')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :multiple="true"
+                        :clearable="true"
+                    >
+                    </t-rich-user-select>
+                </div>
+            </div>
+
+            <div class="w-full mt-5">
+                <div class="w-full components-filter__item8 flex">
+                    <t-rich-user-select
+                        :options="regions"
+                        v-model="form.region"
+                        :placeholder="$t('All Regions')"
+                        value-attribute="id"
+                        text-attribute="name"
+                        :clearable="false"
+                    >
+                        <template
+                            slot="option"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <div class="flex items-stretch pt-2 pb-2 pl-2 img-strict">
+                                        <img class="self-center" :src="option.raw.logo" />
+                                        <span class="ml-5">{{ option.raw.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-user-select>
+                </div>
+            </div>
+
+            <div class="w-full mt-5">
+                <div>
+                    <div>
+                        <div class="component-popover-label">{{ $t('Sort By')}}</div>
+                        <div class="component-popover-content">
+                            <div class="mt-5 input-radio">
+                                <t-radio id="mfilterForm1" name="document2" v-model="form.sort" value="price" />
+                                <label for="mfilterForm1">
+                                    <template v-if="form.type != 'sell'">
+                                        {{ $t('Price: lowest to highest') }}
+                                    </template>
+                                    <template v-else>
+                                        {{ $t('Price: highest to lowest') }}
+                                    </template>
+                                </label>
+                            </div>
+                            <div class="mt-2 input-radio">
+                                <t-radio id="mfilterForm2" name="document2" v-model="form.sort" value="orders_completed"/>
+                                <label for="mfilterForm2">{{ $t('Completed order number') }}</label>
+                            </div>
+
+                            <div class="mt-2 input-radio">
+                                <t-radio id="mfilterForm3" name="document2" v-model="form.sort" value="completion_rate"/>
+                                <label for="mfilterForm3">{{ $t('Completion Rate') }}</label>
+                            </div>
+
+                            <div class="mt-2 input-radio">
+                                <t-radio id="mfilterForm4" name="document2" v-model="form.sort" value="feedback_rate"/>
+                                <label for="mfilterForm4">{{ $t('Feedback Rate') }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-10">
+                        <div class="component-popover-label mb-4">{{ $t('Filter By')}}</div>
+                        <div class="component-popover-content">
+                            <div class="mt-2 input-radio">
+                                <label for="mfilterForm44" class="mr-1">{{ $t('Verified Merchant Ads only') }}</label>
+                                <t-checkbox id="mfilterForm44" name="merchant_filter2" v-model="form.merchants_only" value="true"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tables start -->
+    <table class="tables mob-table-reports p2p-ads-table">
+
+        <!-- thead start -->
+        <thead class="table-sort no-cursor">
+            <tr>
+                <th class="pl-0">
+                    <div class="">
+                        <span class="table-sort__title">{{ $t('Advertisers') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="">
+                        <span class="table-sort__title">{{ $t('Price') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="">
+                        <span class="table-sort__title">{{ $t('Available/Order Limit') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="">
+                        <span class="table-sort__title">{{ $t('Payment') }}</span>
+                    </div>
+                </th>
+                <th class="text-right pr-0">
+                    <div class="">
+                        <span class="table-sort__title">{{ $t('Actions') }}</span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <!-- thead end -->
+
+
+        <!-- tbody start -->
+        <tbody class="table-list">
+            <tr v-for="(ad, key) in ads.data">
+                <td class="plr-0">
+                    <div class="p2p-flex gap-2 flex-col">
+                        <div class="p2p-flex items-center h-6 gap-1">
+                            <div class="p2p-flex items-center gap-2">
+                                <div
+                                    class="p2p-flex p2p-avatar items-center justify-center relative rounded-m subtitle3 text-center flex-none bg-primaryText text-basicBg"
+                                >{{ ad.user.username_short}}
+                                    <div class="user-status-badge"
+                                        :class="{'online': ad.user.is_online }"></div>
+                                </div>
+                                <Link :href="route('p2p.profile', ad.user.id)" class="overflow-hidden cursor-pointer no-underline">
+                                    {{ ad.user.username }}
+                                </Link>
+
+                                <div v-if="ad.user.is_merchant" class="user-badge merchant-badge">
+                                    <svg v-tooltip="$t('Verified Merchant')" width="18" height="18" class="" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ><path fill-rule="evenodd" clip-rule="evenodd" d="M16.438 4.313L14.814 1.5 12 3.124 9.187 1.5 7.562 4.313H4.313v3.25L1.5 9.186 3.124 12 1.5 14.813l2.813 1.625v3.248h3.25L9.186 22.5 12 20.876l2.813 1.624 1.625-2.814h3.248v-3.248l2.814-1.624L20.876 12 22.5 9.187l-2.814-1.625V4.313h-3.248zm-.902 4.215l1.414 1.414-6.364 6.364L7.05 12.77l1.414-1.414 2.122 2.122 4.95-4.95z" fill="#F0B90B"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p2p-flex items-center ml-8 p2p-flex-column-mobile">
+                            <span class="p2p-text-small">{{ ad.user.total_orders }} {{ $t('order(s)')}}</span>
+                            <span class="p2p-text-small">{{ ad.user.orders_completion_rate }}% {{ $t('completion')}}</span>
+                        </div>
+                        <div class="p2p-flex ml-8 items-center divide-y-2xs p2p-flex-column-mobile">
+                            <div class="p2p-tooltips-wrap">
+                                <div class="p2p-tooltips-ele">
+                                    <div class="p2p-flex items-center">
+                                        <svg class="p2p-svg" viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M8 9.723l3.444-3.391V3.01h.888a3.106 3.106 0 013.106 3.105v1.673H21v6.425a4.778 4.778 0 01-4.778 4.778H8V9.723zm-2-.038H3v9.306h3V9.685z"
+                                                  fill="currentColor"></path>
+                                        </svg>
+                                        <div class="span p2p-text-small">{{ ad.user.feedback_percentage }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="border-none bg-line flex w-px">
+                            <div class="p2p-flex gap-4xs items-center">
+                                <svg class="p2p-svg w-15 h-15" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                          d="M8 3h8v2.5H8V3zm8.425 5.575L18 7l1.768 1.768-1.715 1.714a7 7 0 11-1.629-1.907zM13.25 10.5v5h-2.5v-5h2.5z"
+                                          fill="currentColor"></path>
+                                </svg>
+                                <div class="">
+                                    <div class="p2p-text-small">
+                                        <div>{{ ad.timeframe }} {{ $t('min') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+                <td class="p2p-flex-row-mobile">
+                    <div class="table-list__value">
+                        <div class="table-list__value-text">
+                            <div class="table-list__value-text-headline">{{ ad.offered_price }}</div>
+                            <div class="table-list__value-text-subline">{{ ad.fiat.symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="p2p-flex-row-mobile">
+                    <div class="table-list__value">
+                        <div class="table-list__value-text-v2">
+                            <div class="table-list__value-text-normal table-list__value-text-normal-mobile"><div class="mobile-visible mr-1">{{ $t('Available:') }} </div>{{ ad.remaining_amount }} {{ ad.coin.symbol }}</div>
+                            <div class="table-list__value-text-normal mt-2 table-list__value-text-normal-mobile">
+                                <div class="flex"><div class="mobile-visible mr-1">{{ $t('Limit:') }}</div> {{ ad.min_amount }}</div>
+                                <div class="ml-1 mr-1">-</div>
+                                <div>{{ ad.max_amount }} {{ ad.fiat.symbol }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="p2p-flex-row-mobile">
+                    <div class="table-list__value">
+                        <div class="table-list__text table-list__value-text-normal-mobile">
+                            <div class=" gap-x-3 gap-y-2 flex-wrap"
+                                 style="flex-direction: column;">
+                                <div v-for="method in showLimitedMethods(ad.payment_methods)" class="flex items-center">
+                                    <div>
+                                        <div class="">
+                                            <div class="">
+                                                <div class="p2p-payment-item">
+                                                    <div class="p2p-payment-badge column-badge" :class='method.color'></div>
+                                                    <div>{{ method.name }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <template v-if="ad.payment_methods.length > 3">
+                                    <div v-tooltip="{ placement: 'bottom', content: showTooltipMethods(showLimitedMethods(ad.payment_methods, false))}">
+                                        <div class="more-arrow">
+                                            <svg viewBox="4 0 20 20" xmlns="http://www.w3.org/2000/svg">
+
+                                                <g id="Complete">
+
+                                                    <g id="F-More">
+
+                                                        <path d="M8,12a2,2,0,1,1-2-2A2,2,0,0,1,8,12Zm10-2a2,2,0,1,0,2,2A2,2,0,0,0,18,10Zm-6,0a2,2,0,1,0,2,2A2,2,0,0,0,12,10Z" id="Horizontal"/>
+
+                                                    </g>
+
+                                                </g>
+
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="p2p-flex-row-mobile">
+                    <div class="table-list__value table-list__value-end table-list__value-text-normal-mobile">
+                        <div class="table-list__link">
+                            <div @click="openOffer(ad)" v-if="ad.type == 'sell'" class="btn-action btn-action-green btn-action-mobile">{{ $t('Buy')}} {{ ad.coin.symbol }}</div>
+                            <div @click="openOffer(ad)" v-if="ad.type == 'buy'" class="btn-action btn-action-red btn-action-mobile">{{ $t('Sell')}} {{ ad.coin.symbol }}</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <!-- tbody end -->
+        <!-- tfood start -->
+        <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="ads.data.length === 0" class="table-result__notfound table-result__notfound-mob">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No ads found.') }}</span>
+                    </div>
+                    <pagination :links="ads.meta.links" />
+                </td>
+            </tr>
+        </tfoot>
+        <!-- tfood end -->
+
+    </table>
+    <!-- tables end -->
+
+
+</div>
+<!-- table components end -->
+<div class="p2pmodal-mob">
+    <offer-modal></offer-modal>
+</div>
+
+</app-layout>

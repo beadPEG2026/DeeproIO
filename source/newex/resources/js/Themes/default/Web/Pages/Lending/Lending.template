@@ -1,0 +1,164 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Lending') }} {{ lending.currency_symbol }}</title>
+        <meta name="description" content="">
+    </Head>
+    <!-- components title start -->
+    <template v-slot:tagline>
+        {{ $t('Lending')}}
+    </template>
+    <!-- components title end -->
+    <div class="Launchpads lending-inner table-components page-section article-section">
+        <div class="mt-16">
+            <div>
+                <Link :href="route('lendings')"><span class="mr-2">←</span>{{ $t('Back')}}</Link>
+            </div>
+            <div class="container-wrapper">
+            <div class="mx-auto p-4 rounded-lg bg-opacity-30  rounded-xl">
+                    <!-- ASCENT start  -->
+                    <div class="ascent  border-b border-base-color pb-9">
+                        <div class="lg:grid lg:grid-cols-7  gap-30px">
+                            <div class="col-span-3 lg:mb-0 mb-6">
+                                <img src="/images/Staking.png" :alt="$t(&quot;img&quot;)" class="rounded-10px">
+                            </div>
+                            <div class="col-span-4">
+                                <!-- top item start  -->
+                                <div class="flex justify-start gap-7 flex-wrap mb-4">
+                                    <h2 class="text-zinc-900 dark-font text-xl font-bold font-DMSans capitalize leading-normal self-center">
+                                        {{ lending.currency }}
+                                    </h2>
+                                    <div class="self-center">
+                                        <a href="" class="bg-opacity-30 bg-emerald-400 rounded-5px text-center text-emerald-400 text-sm font-normal font-DMSans leading-snug py-3px px-4 ">{{ $t("Upcoming") }}</a>
+                                    </div>
+                                </div>
+                                <!-- top item end  -->
+                                <!-- item start  -->
+                                <div class="item grid grid-cols-2 gap-5 max-w-380px">
+                                    <!-- single item start  -->
+
+                                    <div v-for="(reward, days) in lending.ranges" class="">
+                                        <h4 class="text-slate-400 text-xs lg:text-sm font-bold font-DMSans leading-snug mb-6px">
+                                            <template v-if="days == 1">{{ $t('Est. APY') }} {{ days }} {{ $t('day') }}</template>
+                                            <template v-else>{{ $t('Est. APY') }} {{ days }} {{ $t('days') }}</template>
+                                        </h4>
+                                        <p class="text-emerald-400 text-sm lg:text-base font-bold font-DMSans leading-normal">{{ reward }} %</p>
+                                    </div>
+
+                                    <!-- single item end -->
+                                    <div class=""></div>
+                                    <!-- single item start  -->
+                                    <div class="">
+                                        <h4 class="text-slate-400 text-xs lg:text-sm font-bold font-DMSans leading-snug mb-6px">{{ $t('Minimum stake amount')}}
+                                        </h4>
+                                        <p class="text-zinc-900 dark-font text-sm lg:text-base font-normal font-DMSans leading-normal">
+                                            {{ lending.min_amount }} {{ lending.currency_symbol }}</p>
+                                    </div>
+                                    <!-- single item end -->
+
+                                    <!-- single item start  -->
+                                    <div class="">
+                                        <h4 class="text-slate-400 text-xs lg:text-sm font-bold font-DMSans leading-snug mb-6px">{{ $t('Maximum stake amount')}}</h4>
+                                        <p class="text-zinc-900 dark-font text-sm lg:text-base font-normal font-DMSans leading-normal">
+                                            {{ lending.max_amount }} {{ lending.currency_symbol }}</p>
+                                    </div>
+                                    <!-- single item end -->
+                                </div>
+                                <!-- item end -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ASCENT end -->
+                    <!-- sale price start  -->
+                    <div class="pt-9">
+                        <!-- Balance  start  -->
+                        <div class="lg:grid lg:grid-cols-7 lg:gap-20">
+                            <!-- single item start  -->
+                            <div class="col-span-3">
+                                <!-- single item start  -->
+                                <div class="lg:grid lg:grid-cols-2 mb-3">
+                                    <div class="">
+                                        <h4 class="text-zinc-900 dark-font text-sm font-normal font-DMSans leading-snug">{{ $t('Balance:')}}</h4>
+                                    </div>
+                                    <div class="lg:text-right text-left">
+                                        <p class="text-amber-400 text-sm font-normal font-DMSans leading-snug"><template v-if="$page.props.user">{{ balance }}</template><template v-else>0.00</template> {{ lending.currency_symbol }}</p>
+                                    </div>
+                                </div>
+                                <!-- single item end -->
+
+                                <!-- single item start  -->
+                                <div class="lg:grid lg:grid-cols-2 lg:mb-0 mb-3">
+                                    <div class="">
+                                        <h4 class="text-zinc-900 dark-font text-sm font-normal font-DMSans leading-snug">{{ $t('Estimated Interests:')}}</h4>
+                                    </div>
+                                    <div class="lg:text-right text-left">
+                                        <p class="text-amber-400 text-sm font-normal font-DMSans leading-snug">{{ calculatedReward || '0.00' }} {{ lending.currency_symbol }}</p>
+                                    </div>
+                                </div>
+                                <!-- single item end -->
+                            </div>
+                            <!-- single item end -->
+
+                            <!-- single item start  -->
+                            <div class="col-span-4">
+                                <!-- single item start  -->
+                                <div class="lg:grid lg:grid-cols-3 mb-3">
+                                    <div class="col-span-1">
+                                        <h4 class="text-zinc-900 dark-font text-sm font-normal font-DMSans leading-snug">{{ $t('Value Date:') }}</h4>
+                                    </div>
+                                    <div class="col-span-2 lg:text-right text-left">
+                                        <p class="text-zinc-900 dark-font  text-sm font-normal font-DMSans leading-snug">{{ valueDate}}</p>
+                                    </div>
+                                </div>
+                                <!-- single item end -->
+
+                                <!-- single item start  -->
+                                <div class="lg:grid lg:grid-cols-3 ">
+                                    <div class="col-span-1">
+                                        <h4 class="text-zinc-900 dark-font text-sm font-normal font-DMSans leading-snug">{{ $t('Redemption Date:') }}</h4>
+                                    </div>
+                                    <div class="col-span-2 lg:text-right text-left">
+                                        <p class=" text-zinc-900 dark-font text-sm font-normal font-DMSans leading-snug">{{ redemptionDate }}</p>
+                                    </div>
+                                </div>
+                                <!-- single item end -->
+                            </div>
+                            <!-- single item end -->
+
+                        </div>
+                        <!-- Balance  end -->
+
+                        <!-- Stake period: start  -->
+                        <div class="flex flex-wrap lg:gap-12 gap-4 mb-5 mt-9">
+                            <h4 class="text-zinc-900 dark-font text-base font-normal font-DMSans leading-normal self-center">{{ $t('Stake period:')}}</h4>
+                            <div class="flex flex-wrap gap-3  self-center table-list__link">
+
+                            </div>
+                        </div>
+                        <!-- amount  -->
+                        <div class="flex flex-wrap mt-10">
+                            <div class="w-full lg:w-1/2 flex flex-wrap pr-5">
+                                <h4 class=" text-zinc-900 dark-font lg:text-base text-smfont-bold font-DMSans capitalize leading-normal self-center">{{ $t('Amount:') }}</h4>
+                                <input @keyup="(e) => clearInput(e)" @keypress="(e) => handleInput(e)" @paste.prevent @drop.prevent placeholder="0.00" v-model="form.amount" id="text-input-36" type="text" class="input-label-block w-346px max-w-full">
+                            </div>
+
+                            <div class="w-full lg:w-1/2 block-button mt-6">
+                                    <button @click.prevent="submit">
+                                    <span class="components-filter__icon">
+                                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <template v-if="$page.props.user">{{ $t('Stake') }} {{ lending.currency_symbol }}</template>
+                                        <template v-else>{{ $t('Login to lend' )}}</template>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- sale price end -->
+            </div>
+        </div>
+        </div>
+    </div>
+    <!-- form search end -->
+</app-layout>

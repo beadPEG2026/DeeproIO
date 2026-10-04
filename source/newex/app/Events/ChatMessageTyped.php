@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Events;
+
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class ChatMessageTyped implements ShouldBroadcastNow
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $user;
+
+    public $order;
+
+    public $queue = 'events';
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct($user, $order)
+    {
+        $this->user = $user;
+        $this->order = $order;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        return new PrivateChannel('user-' . $this->user);
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'order' => $this->order
+        ];
+    }
+}

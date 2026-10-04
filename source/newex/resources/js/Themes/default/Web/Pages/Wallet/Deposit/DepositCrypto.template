@@ -1,0 +1,35 @@
+<wallet-flow variant="deposit" :title="$t('Deposit')+' '+currency.symbol" :back-href="route('wallets.new')" :history-href="route('reports.deposits')">
+ <Head :title="$t('Deposit')+' '+currency.symbol"/>
+ <p v-if="$page.props.depositLocalPreview" class="wallet-flow__note" role="status">{{$t('Local test environment. Do not transfer real funds.')}}</p>
+ <template>
+  <div class="wallet-flow__field"><label for="deposit-network">{{$t('Network')}}</label><themed-select network id="deposit-network" v-model="activeNetwork" @change="loadAddress" :disabled="networksLoading || !currency.deposit_status || !!networksError || !Object.keys(networks).length"><option disabled value="">{{networksLoading ? $t('Loading...') : $t('Select network')}}</option><option v-for="(name,id) in networks" :key="id" :value="id">{{name}}</option></themed-select></div>
+  <div class="wallet-flow__field"><label for="deposit-asset">{{$t('Asset')}}</label><asset-picker input-id="deposit-asset" :assets="currencies" v-model="activeAsset.symbol" @change="changeAsset"/></div>
+  <p class="wallet-flow__note">{{$t('Select the same network on the sending platform. The asset and network must match.')}}</p>
+  <p v-if="nativeEvmDeposit" class="wallet-flow__note" role="note" data-testid="native-evm-deposit-note">
+   {{ $i18n.locale.startsWith('zh') ? '本网络的原生币仅支持普通地址直接转账充值。合约内部调用转入暂不自动到账。' : 'Native-asset deposits on this network support direct transfers from ordinary addresses only. Transfers through internal contract calls are not automatically credited.' }}
+   <a :href="route('support')">{{ $i18n.locale.startsWith('zh') ? '如已转入，请联系客服并提供交易哈希（TxID）、币种和网络。' : 'If already sent, contact support with the transaction hash (TxID), asset and network.' }}</a>
+   {{ $i18n.locale.startsWith('zh') ? '需核验链上凭证，不保证可找回或补入账。' : 'Chain evidence must be verified; recovery or credit is not guaranteed.' }}
+  </p>
+  <p v-if="!currency.deposit_status" class="wallet-flow__error" role="status">{{$t('Deposits Suspended')}}</p>
+  <p v-else-if="networksError" class="wallet-flow__error" role="alert">{{networksError}} <button type="button" @click="loadNetworks">{{$t('Try again')}}</button></p>
+  <p v-else-if="!networksLoading && !Object.keys(networks).length" class="wallet-flow__hint" role="status">{{$t('No deposit networks are currently available')}}</p>
+  <details v-if="networkStates.some(n=>!n.available)" class="wallet-flow__availability"><summary>{{$t('Network availability')}}</summary><network-status :networks="networkStates"/></details>
+ </template>
+ <section v-if="activeNetwork" aria-live="polite" :aria-busy="addressState==='loading'">
+  <div v-if="addressState==='loading'" class="wallet-flow__state"><strong>{{$t('Loading...')}}</strong><p class="wallet-flow__hint">{{$t('Preparing your deposit details. Please wait.')}}</p></div>
+  <div v-else-if="addressState==='error'" class="wallet-flow__state" role="alert"><strong>{{$t('Address unavailable')}}</strong><p class="wallet-flow__error">{{addressError}}</p><button type="button" class="wallet-flow__primary" @click="loadAddress">{{$t('Try again')}}</button></div>
+  <template v-else-if="addressState==='ready' && walletData">
+   <div class="wallet-flow__receive">
+    <span class="wallet-flow__network"><network-icon :network-id="activeNetwork" :name="networkName"/>{{currency.symbol}} · {{networkName}}</span>
+    <div class="wallet-flow__qr"><qr-code :key="activeAsset.symbol+':'+activeNetwork+':'+walletData.address" :size="160" :text="walletData.address"/></div>
+    <small>{{$t('Deposit address')}}</small><code class="wallet-flow__address" data-testid="deposit-address">{{walletData.address}}</code>
+    <button type="button" class="wallet-flow__copy-address" @click="doCopy(walletData.address)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>{{$t('Copy address')}}</button>
+   </div>
+   <div v-if="walletData.paymentId !== null && walletData.paymentId !== undefined && String(walletData.paymentId) !== ''" class="wallet-flow__note"><strong>{{$t('Memo')}}: {{walletData.paymentId}}</strong><button type="button" @click="doCopy(String(walletData.paymentId))" :aria-label="$t('Copy memo')"> ⧉</button><p>{{$t('Include this memo with your transfer.')}}</p></div>
+   <dl class="wallet-flow__summary"><div><dt>{{$t('Minimum deposit')}}</dt><dd>{{depositMinimum}} {{currency.symbol}}</dd></div><div><dt>{{$t('Deposit Fee')}}</dt><dd>{{depositFee}}</dd></div></dl>
+   <p class="wallet-flow__hint">{{$t('Send only')}} <strong>{{currency.symbol}}</strong> {{$t('to this deposit address')}} · {{networkName}}</p>
+   <p v-if="depositRules && depositRules.pilot" class="wallet-flow__note">{{$t('pilot')}} · {{$t('Test cumulative limit per account')}}: {{depositRules.pilot_limit}} {{currency.symbol}} · {{$t('Pilot expires')}}: {{depositRules.pilot_expires_at}}</p>
+  </template>
+ </section>
+ <p class="wallet-flow__trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 8 3v5c0 5-4 8-8 10-4-2-8-5-8-10V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>{{walletCopy('Funds are held by the Deepro protection pool. Safe and trusted.')}}</p>
+</wallet-flow>

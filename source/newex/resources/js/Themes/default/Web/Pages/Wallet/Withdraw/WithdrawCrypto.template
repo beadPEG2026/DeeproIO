@@ -1,0 +1,46 @@
+<wallet-flow variant="withdraw" :title="$t('Withdraw')+' '+currency.symbol" :step="flowStep===2 ? 1 : 0" :back-href="route('wallets.new')" :history-href="route('reports.withdrawals')" @back="goBack">
+ <Head :title="$t('Withdraw')+' '+currency.symbol"/>
+ <form id="withdraw-flow-form" @submit.prevent="advanceWithdrawal" novalidate>
+  <template v-if="flowStep===0">
+   <p v-if="scannedRecipientDraft" class="wallet-flow__note" role="status">{{$t('Only the address was imported. Check the asset and select the network. Enter the amount and Memo yourself.')}}</p>
+   <div class="wallet-flow__field"><label for="withdraw-asset">{{$t('Asset')}}</label><asset-picker input-id="withdraw-asset" :assets="currencies" v-model="activeAsset.symbol" @change="changeAsset"/></div>
+   <nav v-if="canShowInternalWithdraw" class="wallet-flow__type" :aria-label="$t('Withdrawal Type')"><button v-for="type in withdrawTypeOptions" :key="type.value" type="button" :aria-pressed="form.withdraw_type===type.value" @click="form.withdraw_type=type.value;changeWithdrawType()">{{type.text}}</button></nav>
+   <p v-if="!currency.withdraw_status" class="wallet-flow__error" role="status">{{$t('Withdrawal Suspended')}}</p>
+   <template v-else>
+    <template v-if="!isInternalWithdraw">
+     <div class="wallet-flow__field"><label for="withdraw-network">{{$t('Network')}}</label><themed-select network id="withdraw-network" class="dp-network-select" v-model="activeNetwork" @change="changeNetwork" :disabled="networksLoading"><option :value="null" disabled>{{networksLoading ? $t('Loading networks…') : $t('Select network')}}</option><option v-for="network in networks" :key="network.value" :value="network.value">{{network.text}}</option></themed-select></div>
+     <p v-if="networkError" class="wallet-flow__error" role="alert">{{networkError}} <button type="button" @click="loadNetworks">{{$t('Retry')}}</button></p>
+     <p v-else-if="!networksLoading && !networks.length" class="wallet-flow__hint">{{$t('No withdrawal networks are currently available.')}}</p>
+     <div class="wallet-flow__field"><label for="withdraw-address">{{$t('Recipient address')}}</label><div class="wallet-flow__recipient"><textarea id="withdraw-address" rows="2" v-model.trim="form.address" @input="editRecipient" :aria-invalid="!!addressError" :aria-describedby="!activeNetwork ? 'withdraw-address-hint' : null" :placeholder="$t('Enter recipient address')" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><button type="button" class="wallet-flow__scan" :disabled="scanning" @click="openCamera" :aria-label="walletCopy('Scan QR code')" :title="walletCopy('Scan QR code')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M3 12h18"/><path d="M8 8h3v3H8zm6 6h3v3h-3z"/></svg></button></div><input class="wallet-flow__recipient-image" ref="recipientImage" type="file" accept="image/*" :disabled="scanning || !canShowExternalForm" @change="scanRecipient" :aria-label="$t('Import recipient QR image')"/>
+      <p v-if="!activeNetwork" id="withdraw-address-hint" class="wallet-flow__hint">{{walletCopy('You can enter an address first. Select a network to validate it.')}}</p>
+     </div>
+     <p v-if="scanning" class="wallet-flow__hint" role="status">{{$t('Reading QR code…')}}</p>
+     <div v-if="currency.has_payment_id && canShowExternalForm" class="wallet-flow__field"><label for="withdraw-memo">{{$t('Memo')}}</label><input id="withdraw-memo" v-model.trim="form.payment_id" autocomplete="off"/><p class="wallet-flow__hint">{{$t('Memo is required for this asset.')}}</p></div>
+     <p v-if="activeNetwork" class="wallet-flow__hint">{{$t('Enter the recipient address on the selected network. Do not use your Deepro deposit address.')}}</p>
+     <details v-if="networkStates.some(n=>!n.available)" class="wallet-flow__availability"><summary>{{$t('Network availability')}}</summary><network-status :networks="networkStates"/></details>
+    </template>
+    <template v-else><div class="wallet-flow__field"><label for="recipient-uid">{{walletCopy('Internal receiving code')}}</label><input id="recipient-uid" v-model.trim="form.internal_uid" maxlength="100" autocomplete="off" :placeholder="walletCopy('Enter the recipient’s internal receiving code')"/><p class="wallet-flow__hint">{{walletCopy('Ask the recipient to copy their internal receiving code from Profile → Internal receiving code. This is not their UID or UMI invitation code.')}}</p></div><p class="wallet-flow__note">{{$t('Internal withdrawals are completed instantly and do not require blockchain confirmation.')}}</p></template>
+   </template>
+   <p v-if="addressError" role="alert" class="wallet-flow__error">{{addressError}}</p>
+   <div class="wallet-flow__field"><label for="withdraw-amount">{{$t('Withdrawal amount')}}</label><div class="wallet-flow__amount"><input id="withdraw-amount" v-model="form.amount" maxlength="40" inputmode="decimal" autocomplete="off" placeholder="0" :aria-invalid="!!amountError" @keydown.enter.prevent="advanceWithdrawal"/><span>{{currency.symbol}}</span><button type="button" @click="setMaxAmount">{{$t('MAX')}}</button></div></div>
+   <div class="wallet-flow__balance"><span>{{$t('Available Balance')}}</span><strong>{{availableBalance}} {{currency.symbol}}</strong></div>
+   <p v-if="isVirtualAccount && !isInternalWithdraw" class="wallet-flow__hint">{{$t('Virtual Balance')}}: {{virtualAvailableBalanceDisplay}} {{currency.symbol}}</p>
+   <p v-if="amountError" class="wallet-flow__error" role="alert">{{amountError}}</p>
+   <dl class="wallet-flow__summary"><div><dt>{{$t('Withdraw Fee')}}</dt><dd>{{feeLabel}}</dd></div><div><dt>{{$t('You get:')}}</dt><dd>{{displayReceived}} {{currency.symbol}}</dd></div><div><dt>{{$t('Minimum Withdraw Amount')}}</dt><dd>{{currency.min_withdraw}} {{currency.symbol}}</dd></div><div v-if="Number(currency.max_withdraw)>0"><dt>{{$t('Maximum Withdraw Amount')}}</dt><dd>{{currency.max_withdraw}} {{currency.symbol}}</dd></div></dl>
+   <p v-if="limit.status" class="wallet-flow__hint">{{$t('24h withdrawal limit:')}} {{limit.available}} / {{limit.total}} {{currency.symbol}}</p>
+  </template>
+  <template v-else>
+   <div class="wallet-flow__receive"><currency-avatar :symbol="currency.symbol" :src="currency.logo || currency.full_logo_path"/><small>{{$t('You get:')}}</small><strong>{{displayReceived}} {{currency.symbol}}</strong></div>
+   <dl class="wallet-flow__summary"><div><dt>{{$t('Network')}}</dt><dd><network-icon v-if="!isInternalWithdraw" :network-id="activeNetwork" :name="selectedNetworkName"/>{{isInternalWithdraw ? $t('Internal withdrawal') : selectedNetworkName}}</dd></div><div><dt>{{isInternalWithdraw ? walletCopy('Internal receiving code') : $t('Address')}}</dt><dd class="wallet-flow__address">{{isInternalWithdraw ? form.internal_uid : form.address}}</dd></div><div v-if="!isInternalWithdraw && currency.has_payment_id"><dt>{{$t('Memo')}}</dt><dd>{{form.payment_id}}</dd></div><div><dt>{{$t('Withdrawal amount')}}</dt><dd>{{form.amount}} {{currency.symbol}}</dd></div><div><dt>{{$t('Withdraw Fee')}}</dt><dd>{{feeLabel}}</dd></div></dl>
+   <div v-if="$page.props.user.two_factor_enabled" class="wallet-flow__field"><label for="withdraw-twofa">{{$t('2FA Code')}}</label><input id="withdraw-twofa" v-model.trim="form.twofa" inputmode="numeric" autocomplete="one-time-code" maxlength="6"/></div>
+   <p v-if="submitError" class="wallet-flow__error" role="alert">{{submitError}}</p>
+   <details v-if="!isInternalWithdraw" class="wallet-flow__note"><summary>{{$t('Deepro Withdrawal Security Review Notice')}}</summary><p>{{$t('Most withdrawal requests are reviewed and processed within 24 hours. If risk signals are detected, manual review may take up to 72 hours.')}}</p></details>
+  </template>
+ </form>
+ <camera-qr-scanner v-if="cameraOpen" @close="invalidateRecipientImport" @decoded="cameraRecipient" @import="importCameraImage"/>
+ <template #actions>
+  <p v-if="flowStep===2" class="wallet-flow__hint">{{$t('Check the recipient, network and amount before confirming.')}}</p>
+  <button type="submit" form="withdraw-flow-form" class="wallet-flow__primary" :disabled="sending || $page.props.mode==='readonly' || !canShowWithdrawForm || (!isInternalWithdraw && networksLoading) || (flowStep>0 && !wallet)">{{sending ? $t('Processing...') : flowStep===2 ? $t('Confirm withdrawal') : $t('Continue')}}</button>
+  <p v-if="$page.props.mode==='readonly'" class="wallet-flow__error">{{$t('Withdrawals are disabled in DEMO mode')}}</p>
+ </template>
+</wallet-flow>

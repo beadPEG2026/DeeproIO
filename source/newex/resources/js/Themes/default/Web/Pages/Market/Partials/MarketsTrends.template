@@ -1,0 +1,116 @@
+<div class="market-trends grid grid-cols-4 gap-4">
+    <div class="market-trends-item  ">
+        <div class="mt-header">
+            {{ $t('Hot Coins') }}
+        </div>
+        <div class="mt-body">
+            <div @click="setMarket(market)" v-for="market in hotMarkets" class="mt-body-item">
+                <div class="mt-body-item-column mt-body-content-name">
+                    <div class="mt-body-content flex">
+                        <div class="mt-body-img">
+                            <currency-avatar :symbol="market.base_currency" :src="market.base_currency_logo" />
+                        </div>
+                        <div>{{ market.base_currency }}</div>
+                    </div>
+                </div>
+                <div class="mt-body-item-column flex mt-body-content-price">
+                    <div class="mt-body-content ">
+                        <div :ref="market.name">{{ marketDisplayPrice(market.last) }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-body-item-column flex mt-body-content-change">
+                    <div class="mt-body-content " :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">
+                        {{ marketDisplayChange(market.change) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="market-trends-item  ">
+        <div class="mt-header">
+            {{ $t('Top Gainers') }}
+        </div>
+        <div class="mt-body">
+            <div @click="setMarket(market)" v-for="market in gainersMarkets" class="mt-body-item">
+                <div class="mt-body-item-column mt-body-content-name">
+                    <div class="mt-body-content flex">
+                        <div class="mt-body-img">
+                            <currency-avatar :symbol="market.base_currency" :src="market.base_currency_logo" />
+                        </div>
+                        <div>{{ market.base_currency }}</div>
+                    </div>
+                </div>
+                <div class="mt-body-item-column flex mt-body-content-price">
+                    <div class="mt-body-content ">
+                        <div :ref="market.name">{{ marketDisplayPrice(market.last) }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-body-item-column flex mt-body-content-change">
+                    <div class="mt-body-content " :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">
+                        {{ marketDisplayChange(market.change) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="market-trends-item  ">
+        <div class="mt-header">
+            {{ $t('Top Losers') }}
+        </div>
+        <div class="mt-body">
+            <div @click="setMarket(market)" v-for="market in losersMarkets" class="mt-body-item">
+                <div class="mt-body-item-column mt-body-content-name">
+                    <div class="mt-body-content flex">
+                        <div class="mt-body-img">
+                            <currency-avatar :symbol="market.base_currency" :src="market.base_currency_logo" />
+                        </div>
+                        <div>{{ market.base_currency }}</div>
+                    </div>
+                </div>
+                <div class="mt-body-item-column flex mt-body-content-price">
+                    <div class="mt-body-content ">
+                        <div :ref="market.name">{{ marketDisplayPrice(market.last) }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-body-item-column flex mt-body-content-change">
+                    <div class="mt-body-content " :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">
+                        {{ marketDisplayChange(market.change) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="market-trends-item  ">
+        <div class="mt-header">
+            {{ $t('New Listing') }}
+        </div>
+        <div class="mt-body">
+            <div @click="setMarket(market)" v-for="market in newMarkets" class="mt-body-item">
+                <div class="mt-body-item-column mt-body-content-name">
+                    <div class="mt-body-content flex">
+                        <div class="mt-body-img">
+                            <currency-avatar :symbol="market.base_currency" :src="market.base_currency_logo" />
+                        </div>
+                        <div>{{ market.base_currency }}</div>
+                    </div>
+                </div>
+                <div class="mt-body-item-column flex mt-body-content-price">
+                    <div class="mt-body-content ">
+                        <div :ref="market.name">{{ marketDisplayPrice(market.last) }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-body-item-column flex mt-body-content-change">
+                    <div class="mt-body-content " :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">
+                        {{ marketDisplayChange(market.change) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

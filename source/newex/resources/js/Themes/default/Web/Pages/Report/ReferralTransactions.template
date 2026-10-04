@@ -1,0 +1,190 @@
+<app-layout>
+    <div class="referral-dashboard">
+
+        <header class="dp-invite-hero"><span aria-hidden="true">🎁</span><h1>{{ $i18n.locale.startsWith('zh') ? '邀好友 · 直推享 15% 返佣' : 'Invite friends · 15% direct referral commission' }}</h1><p>{{ $i18n.locale.startsWith('zh') ? '交易手续费的多代合计分配最高为 50%，不是每位推荐人领取 50%。' : 'Up to 50% of trading fees is shared across all referral levels; it is not a 50% payment to each inviter.' }}</p></header>
+        <section v-if="inviteUrl" class="dp-invite-tools"><div><label>{{ $t('Invitation code') }}</label><div class="dp-invite-code"><strong>{{ $page.props.user.referral_code }}</strong><button type="button" @click="doCopy($page.props.user.referral_code)">{{ $t('Copy') }}</button></div><div class="dp-invite-link"><label for="invite-url">{{ $t('Referral Link:') }}</label><div><input id="invite-url" readonly :value="inviteUrl"><button type="button" @click="copyInvite">{{ $t('Copy') }}</button></div></div></div><div class="dp-invite-qr"><canvas ref="inviteQr" :aria-label="$t('Invitation QR code')"></canvas></div></section>
+        <button v-if="inviteUrl" type="button" class="dp-invite-share" @click="shareInvite">{{ $t('立即邀请好友') }} ↗</button>
+        <section class="dp-invite-rules"><h3>{{ $t('邀请规则') }}</h3><p>{{ $t('好友通过你的专属邀请链接或二维码注册，即可建立邀请关系。') }}</p><p>{{ $i18n.locale.startsWith('zh') ? '交易手续费的多代合计分配最高为 50%，不是每位推荐人领取 50%。' : 'Up to 50% of trading fees is shared across all referral levels; it is not a 50% payment to each inviter.' }}</p><p>{{ $i18n.locale.startsWith('zh') ? '第 1–8 代比例：15%、10%、8%、6%、4%、3%、2%、2%。有效账户至少可领取第 1 代，领取深度按等级最高至第 8 代；实际入账以符合条件的手续费记录为准。' : 'Levels 1–8: 15%, 10%, 8%, 6%, 4%, 3%, 2%, 2%. Eligible accounts receive at least level 1; tier rules allow up to 8 levels. Credits depend on eligible recorded trading fees.' }}</p><p>{{ $i18n.locale.startsWith('zh') ? 'UMI 邀请及奖励使用独立规则；划转费用和减免以划转确认页为准。' : 'UMI invitations and rewards follow separate rules. Transfer fees and discounts are shown at transfer confirmation.' }}</p></section>
+        <div v-if="isViewingChildUsers" class="referral-dashboard__header"><p>{{ currentViewingInvitesLabel }} {{ currentParentEmail }}</p><button type="button" class="referral-dashboard__ghost" @click="backToMyTeam">{{ $t('Back to My Team') }}</button></div>
+        <div class="referral-stats">
+            <div class="referral-stats__item">
+                <span>{{ $t('Total Referred Users') }}</span>
+                <strong>{{ total_referred_users ? total_referred_users : 0 }}</strong>
+            </div>
+
+            <div class="referral-stats__item">
+                <span>{{ $t('Today Referred Users') }}</span>
+                <strong>{{ today_referred_users ? today_referred_users : 0 }}</strong>
+            </div>
+
+            <div class="referral-stats__item">
+                <span>{{ $t('Total Commission Amount') }}</span>
+                <strong>{{ formatAmount(referral_amount) }}</strong>
+                <small>USDT</small>
+            </div>
+
+            <div class="referral-stats__item">
+                <span>{{ $t('Today Commission Amount') }}</span>
+                <strong>{{ formatAmount(today_referral_amount) }}</strong>
+                <small>USDT</small>
+            </div>
+        </div>
+
+        <div class="referral-controls">
+            <div class="referral-controls__search">
+                <label>{{ $t('Email') }}</label>
+                <input
+                    type="text"
+                    v-model="form.email"
+                    :placeholder="$t('Search Email')"
+                >
+            </div>
+
+            <div class="referral-controls__date">
+                <label>{{ $t('Date') }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                />
+            </div>
+
+            <div class="referral-controls__actions">
+                <button type="button" class="referral-dashboard__ghost" @click="viewTodayCommission">
+                    {{ $t('Today') }}
+                </button>
+                <button type="button" class="referral-dashboard__ghost" @click="reset">
+                    {{ $t('Reset') }}
+                </button>
+            </div>
+        </div>
+
+        <div class="referral-level-filter">
+            <button
+                v-for="item in levelCountList"
+                :key="item.key"
+                type="button"
+                class="referral-level-filter__item"
+                :class="{ 'referral-level-filter__item--active': form.level === item.key }"
+                @click="filterByLevel(item.key)"
+            >
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+            </button>
+        </div>
+
+        <div class="referral-section">
+            <div class="referral-section__head">
+                <div>
+                    <h3>{{ $t('My Invitations') }}</h3>
+                    <p v-if="currentFilterLevelLabel">{{ $t('Current Filter') }}: {{ currentFilterLevelLabel }}</p>
+                    <p v-else>{{ $t('All VIP Levels') }}</p>
+                </div>
+            </div>
+
+            <div class="referral-table-wrap">
+                <table class="referral-table">
+                    <thead>
+                    <tr>
+                        <th>{{ $t('Email') }}</th>
+                        <th>{{ $t('VIP Level') }}</th>
+                        <th>{{ $t('Invite Level') }}</th>
+                        <th>{{ $t('Direct Subordinates') }}</th>
+                        <th>{{ $t('Today Commission') }}</th>
+                        <th>{{ $t('Accumulated Commission') }}</th>
+                        <th>{{ $t('Date') }}</th>
+                        <th>{{ $t('Action') }}</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr v-for="u in referred_users.data" :key="u.id">
+                        <td>
+                            <button type="button" class="referral-table__email" @click="showDirectInvites(u)">
+                                {{ u.email }}
+                            </button>
+                        </td>
+                        <td>
+                            <span class="referral-badge referral-badge--gold">{{ getUserLevelLabel(u) }}</span>
+                        </td>
+                        <td>
+                            <span class="referral-badge">{{ u.invite_level_label ? u.invite_level_label : '-' }}</span>
+                        </td>
+                        <td>{{ u.direct_invite_count ? u.direct_invite_count : 0 }}</td>
+                        <td>{{ u.today_commission ? u.today_commission : '0.0000' }} USDT</td>
+                        <td>{{ u.accumulated_commission ? u.accumulated_commission : '0.0000' }} USDT</td>
+                        <td>{{ u.created_at }}</td>
+                        <td>
+                            <button type="button" class="referral-table__action" @click="showDirectInvites(u)">
+                                {{ $t('Subordinates') }}
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div v-if="referred_users.data.length === 0" class="referral-empty">
+                    {{ $t('No referred users') }}
+                </div>
+            </div>
+
+            <pagination :links="referred_users.links" />
+        </div>
+
+        <div class="referral-section">
+            <div class="referral-section__head">
+                <div>
+                    <h3>{{ $t('Commission Details') }}</h3>
+                    <p>{{ $t('Each commission credit record') }}</p>
+                </div>
+            </div>
+
+            <div class="referral-table-wrap">
+                <table class="referral-table">
+                    <thead>
+                    <tr>
+                        <th>{{ $t('Email') }}</th>
+                        <th>{{ $t('VIP Level') }}</th>
+                        <th>{{ $t('Type') }}</th>
+                        <th>{{ $t('Status') }}</th>
+                        <th>{{ $t('Amount') }}</th>
+                        <th>{{ $t('Date') }}</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr v-for="transaction in transactions.data" :key="transaction.id">
+                        <td>{{ transaction.email ? transaction.email : '-' }}</td>
+                        <td>
+                            <span class="referral-badge referral-badge--gold">
+                                {{ transaction.level_label ? transaction.level_label : 'lv0' }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.transaction_type ? transaction.transaction_type : '-' }}</td>
+                        <td>
+                            <span
+                                class="referral-badge"
+                                :class="transaction.is_credited ? 'referral-badge--green' : 'referral-badge--orange'"
+                            >
+                                {{ transaction.is_credited ? $t('Credited') : transaction.credit_status==='review' ? $t('待核对') : transaction.credit_status==='failed' ? $t('失败待重试') : $t('Pending Credit') }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.amount }} {{ transaction.currency }}<small style="display:block">{{ transaction.balance_domain==='virtual'?$t('模拟账户'):transaction.balance_domain==='real'?$t('真实账户'):$t('历史来源待核对') }}</small></td>
+                        <td>{{ transaction.created_at }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div v-if="transactions.data.length === 0" class="referral-empty">
+                    {{ $t('No commission records') }}
+                </div>
+            </div>
+
+            <pagination :links="transactions.meta.links" />
+        </div>
+    </div>
+</app-layout>

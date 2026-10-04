@@ -1,0 +1,144 @@
+/* Layout ownership: page gutters belong to the shell; modules own their internal spacing. */
+.dp-site {--dp-page-gutter:clamp(24px,3vw,48px);--dp-content-max:1440px}
+.dp-site.site-layout {padding-top:0!important}
+body .dp-site .header-section {position:sticky!important;top:0;flex-shrink:0;width:100%;height:auto!important}
+body .dp-site.site-layout main.main-section {padding:32px var(--dp-page-gutter) 48px!important}
+body .dp-site .main__container {width:100%;max-width:var(--dp-content-max);padding:0!important;margin:0 auto;min-width:0}
+body .dp-site .main__container>div {max-width:none;min-width:0}
+body .dp-site:has(.deepro-stocks,.wallet-assets-page,.dp-earn,.table-components,.markets-tabs,.copy-page) {--dp-content-max:1760px}
+body .dp-site .dp-footer__inner {width:100%;max-width:var(--dp-content-max);padding-inline:var(--dp-page-gutter)}
+/* Reading and single-task forms remain bounded even on a wide workstation. */
+body .dp-site .page-section-content {max-width:1000px;margin-inline:auto}
+body .dp-site .dp-profile {max-width:1280px;margin-inline:auto}
+body .dp-site .dp-deposit {max-width:1200px}
+body .dp-trading-layout.site-layout main.main-section {padding:16px 20px 24px!important}
+body .dp-trading-layout .main__container {max-width:none}
+body .dp-site .components-title {margin:0 0 24px}
+/* Search controls are a single themed surface, including their wrapper. */
+body .dp-site .deepro-stocks .umi-market-search {background:var(--ui-field);border:1px solid var(--ui-line);color:var(--ui-muted);border-radius:12px;min-height:48px;gap:10px;width:320px;padding:10px 14px}
+body .dp-site .deepro-stocks .umi-market-search:focus-within {outline:2px solid var(--ui-focus);outline-offset:2px}
+body .dp-site .deepro-stocks .umi-market-search input {background:transparent!important;color:var(--ui-text)!important;font-size:14px;min-height:24px;box-shadow:none;outline:none}
+body .dp-site .deepro-stocks .umi-market-search input::placeholder {color:var(--ui-muted);opacity:1}
+body .dp-site .deepro-stocks .umi-market-search svg {color:var(--ui-muted);flex-shrink:0}
+/* Stock directory: compact context followed by an independent aligned market table. */
+body .dp-site .deepro-stocks.umi-markets {padding:0!important;margin:0;background:transparent;border-radius:0;max-width:none}
+body .dp-site .deepro-stocks .umi-markets-heading {display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 24px}
+body .dp-site .deepro-stocks .umi-markets-heading h1 {font-size:32px;line-height:1.25;margin:8px 0 12px}
+body .dp-site .deepro-stocks .umi-markets-heading p {font-size:14px;line-height:1.6}
+body .dp-site .deepro-stocks .stock-intro-grid {display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 28px;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:14px;overflow:hidden}
+body .dp-site .deepro-stocks .stock-intro-grid>div {display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:4px 16px;padding:18px 24px!important;border:0;border-inline-end:1px solid var(--ui-divider);border-radius:0;min-width:0;background:transparent}
+body .dp-site .deepro-stocks .stock-intro-grid>div:last-child {border-inline-end:0}
+body .dp-site .deepro-stocks .stock-intro-grid span {font-size:13px}
+body .dp-site .deepro-stocks .stock-intro-grid b {font-size:18px;line-height:1.4;letter-spacing:0;overflow-wrap:anywhere}
+body .dp-site .deepro-stocks .stock-intro-grid small {grid-column:2;font-size:12px;line-height:1.5}
+body .dp-site .deepro-stocks .deepro-stock-tabs {display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin:0;padding:0 20px;background:var(--ui-surface);border:1px solid var(--ui-line);border-bottom:0;border-radius:14px 14px 0 0;white-space:normal;overflow:visible}
+body .dp-site .deepro-stocks .deepro-stock-tabs button {min-height:52px;padding:12px 0;line-height:1.4;font-size:14px;white-space:normal}
+body .dp-site .deepro-stocks .deepro-data-badge {margin-inline-start:auto;font-size:12px;white-space:normal}
+body .dp-site .deepro-stocks .stock-table-head {grid-template-columns:minmax(0,2.2fr) minmax(100px,1fr) minmax(100px,1fr) minmax(120px,.9fr);gap:16px;padding:16px 24px 16px 64px;font-size:13px;line-height:1.5;background:var(--ui-field);border:1px solid var(--ui-line);border-bottom:1px solid var(--ui-divider)}
+body .dp-site .deepro-stocks .stock-token-row {display:flex;gap:8px;min-height:80px;padding:14px 24px 14px 16px!important;background:var(--ui-surface);border:1px solid var(--ui-line);border-top:0;border-bottom-color:var(--ui-divider)}
+body .dp-site .deepro-stocks .stock-token-row:hover {background:var(--ui-field)}
+body .dp-site .deepro-stocks .stock-token-row:has(+.stock-disclosure),body .dp-site .deepro-stocks .stock-token-row:has(+.umi-empty) {border-radius:0 0 14px 14px;border-bottom-color:var(--ui-line)}
+body .dp-site .deepro-stocks .stock-token-link {display:grid;grid-template-columns:minmax(0,2.2fr) minmax(100px,1fr) minmax(100px,1fr) minmax(120px,.9fr);align-items:center;gap:16px;min-width:0}
+body .dp-site .deepro-stocks .deepro-stock-identity {min-width:0;gap:12px}
+body .dp-site .deepro-stocks .deepro-stock-identity b {font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+body .dp-site .deepro-stocks .deepro-stock-identity small {font-size:12px;line-height:1.5}
+body .dp-site .deepro-stocks .stock-token-link>strong,body .dp-site .deepro-stocks .stock-token-link>b {font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+body .dp-site .deepro-stocks .stock-session {font-size:13px;line-height:1.5;gap:10px}
+body .dp-site .deepro-stocks .umi-favorite {width:40px;min-width:40px;min-height:44px;justify-content:center;padding:6px}
+body .dp-site .deepro-stocks .stock-disclosure {max-width:1100px;margin:20px 0 0;font-size:13px;line-height:1.8}
+body .dp-site .deepro-stocks .umi-empty {background:var(--ui-surface);border:1px solid var(--ui-line);border-top:0;border-radius:0 0 14px 14px;padding:32px 16px}
+@media(min-width:768px) and (max-width:1199px) {
+ body .dp-site .deepro-stocks .stock-intro-grid>div {display:flex;flex-direction:column;gap:6px;padding:16px!important}
+ body .dp-site .deepro-stocks .stock-table-head,body .dp-site .deepro-stocks .stock-token-link {grid-template-columns:minmax(0,1.6fr) 110px 100px 110px}
+}
+@media(max-width:767px) {
+ .dp-site {--dp-page-gutter:16px}
+ body .dp-site.site-layout main.main-section {padding:24px 16px 32px!important}
+ body .dp-site .main__container,body .dp-site .main__container:has(.dp-home) {width:100%;padding:0!important;margin:0;max-width:none}
+ body .dp-site .main__container>.mobile-body {padding:0!important;margin:0;width:100%}
+ body .dp-trading-layout.site-layout main.main-section {padding:12px 10px 24px!important}
+ body .dp-site .deepro-stocks .umi-markets-heading {display:flex;flex-direction:column;align-items:stretch;gap:16px;margin-bottom:20px}
+ body .dp-site .deepro-stocks .umi-markets-heading h1 {font-size:26px;margin:6px 0 10px}
+ body .dp-site .deepro-stocks .umi-markets-heading p {font-size:13px}
+ body .dp-site .deepro-stocks .umi-market-search {width:100%;margin:0;min-height:48px}
+ body .dp-site .deepro-stocks .umi-market-search input {font-size:16px}
+ body .dp-site .deepro-stocks .stock-intro-grid {grid-template-columns:1fr 1fr;gap:0;margin-bottom:20px}
+ body .dp-site .deepro-stocks .stock-intro-grid>div {display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px!important;min-width:0}
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child {grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;border-inline-end:0;border-bottom:1px solid var(--ui-divider)}
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child small {grid-column:2}
+ body .dp-site .deepro-stocks .stock-intro-grid span {font-size:12px}
+ body .dp-site .deepro-stocks .stock-intro-grid b {font-size:15px;margin:0}
+ body .dp-site .deepro-stocks .stock-intro-grid small {font-size:11px}
+ body .dp-site .deepro-stocks .deepro-stock-tabs {padding:0 12px;gap:16px}
+ body .dp-site .deepro-stocks .deepro-stock-tabs button {font-size:13px;min-height:48px}
+ body .dp-site .deepro-stocks .deepro-data-badge {display:none}
+ body .dp-site .deepro-stocks .stock-table-head {grid-template-columns:minmax(0,1.3fr) minmax(66px,.85fr) minmax(58px,.75fr);gap:8px;padding:12px 12px 12px 36px;font-size:11px}
+ body .dp-site .deepro-stocks .stock-table-head>span:last-child,body .dp-site .deepro-stocks .stock-session {display:none}
+ body .dp-site .deepro-stocks .stock-token-row {gap:4px;padding:12px 12px 12px 8px!important;min-height:76px}
+ body .dp-site .deepro-stocks .stock-token-link {grid-template-columns:minmax(0,1.3fr) minmax(66px,.85fr) minmax(58px,.75fr);gap:8px}
+ body .dp-site .deepro-stocks .umi-favorite {width:24px;min-width:24px;min-height:44px;padding:0}
+ body .dp-site .deepro-stocks .deepro-stock-identity {gap:6px;align-items:center}
+ body .dp-site .deepro-stocks .deepro-stock-identity>.currency-avatar {width:26px;height:26px;min-width:26px}
+ body .dp-site .deepro-stocks .deepro-stock-identity>div {min-width:0}
+ body .dp-site .deepro-stocks .deepro-stock-identity b {font-size:13px;line-height:1.35}
+ body .dp-site .deepro-stocks .deepro-stock-identity small {font-size:11px;overflow-wrap:anywhere}
+ body .dp-site .deepro-stocks .deepro-stock-identity small i {display:none}
+ body .dp-site .deepro-stocks .stock-token-link>strong,body .dp-site .deepro-stocks .stock-token-link>b {font-size:13px;overflow-wrap:anywhere}
+ body .dp-site .deepro-stocks .stock-disclosure {font-size:12px}
+ body .dp-site .table-components {padding:12px}
+}
+
+/* Legacy promotional surfaces also follow the selected theme. */
+body.dark .dp-site .dp-umi-hero {background:radial-gradient(at 94% 10%,#243748,transparent 47%),radial-gradient(at 85% 94%,#183e29,transparent 45%),var(--ui-umi-soft);border:1px solid var(--ui-umi-line)}
+body .dp-site .cex-home__app-download-simple-btn {background:var(--ui-surface);border:1px solid var(--ui-line);color:var(--ui-text)}
+body .dp-site .cex-home__app-download-simple-btn:hover {background:var(--ui-field)}
+body .dp-site .cex-home__app-download-simple-btn span {color:inherit}
+
+body .dp-site .deepro-stocks .stock-table-head button {line-height:1.5;white-space:normal;min-width:0}
+@media(max-width:767px) {
+ body .dp-site .deepro-stocks .stock-table-head {grid-template-columns:minmax(0,1.2fr) minmax(78px,1fr) minmax(84px,1fr);padding-inline-start:36px;gap:6px}
+ body .dp-site .deepro-stocks .stock-token-link {grid-template-columns:minmax(0,1.2fr) minmax(78px,1fr) minmax(84px,1fr);gap:6px}
+ body .dp-site .deepro-stocks .stock-table-head button {font-size:11px}
+}
+/* Legacy heading margins must not collapse out of the page shell. */
+body .dp-site .components-title :is(h1,h2,h3) {margin:0!important;line-height:1.35}
+body .dp-site .main__container {display:flow-root}
+/* Admin asset management shares the operations shell, without a second gutter. */
+body .admin-layout .dp-admin-content .stock-admin {max-width:none;padding:0}
+body .admin-layout .stock-admin .stock-onboard input {max-width:none}
+@media(min-width:1200px) {
+ body .admin-layout .stock-admin .stock-onboard {grid-template-columns:repeat(2,minmax(0,1fr));align-items:end;gap:18px 24px}
+ body .admin-layout .stock-admin .stock-onboard :is(h2,p) {grid-column:1/-1}
+ body .admin-layout .stock-admin .stock-onboard button {justify-self:start}
+}
+
+/* Long locales retain full desktop navigation without displacing account controls. */
+@media(min-width:1400px) and (max-width:1599px) {
+ body .dp-site .header-logo {margin-inline-end:24px}
+ body .dp-site .header-section .gxhead-navlist {gap:16px}
+ body .dp-site .header-section .gxhead-link {font-size:16px!important}
+}
+body .dp-site :is(.copy-shell,.copy-detail-shell) {width:100%;max-width:none}
+body .dp-site :is(.copy-page,.copy-detail-page) {padding:0}
+body .dp-site .dp-footer__inner {max-width:calc(var(--dp-content-max) + var(--dp-page-gutter) * 2)}
+body .dp-site .copy-balance {width:100%}
+body .dp-site .copy-portfolio {margin-top:24px}
+@media(max-width:767px) {
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child b {font-size:15px}
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child small {display:none}
+ body .dp-site .copy-balance .copy-balance-stats {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ body .dp-site .copy-balance-stat {padding:10px 8px;min-width:0}
+ body .dp-site .copy-balance-stat span {font-size:11px;min-height:32px;overflow-wrap:anywhere}
+ body .dp-site .copy-balance-stat strong {font-size:13px;white-space:normal;overflow-wrap:anywhere}
+}
+/* Documents use a reading column and content height, not a viewport-sized blank card. */
+body .dp-site .page-section.table-components {max-width:1120px;margin-inline:auto;padding:32px}
+body .dp-site .page-section-content {min-height:0}
+body .dp-site .page-section-content .prose {margin-block:0;font-size:15px;line-height:1.85}
+@media(max-width:767px) {body .dp-site .page-section.table-components {padding:20px 16px}}
+/* Retire the old 985px first-card span inside the tablet three-column summary. */
+@media(min-width:768px) and (max-width:1199px) {
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child {grid-column:auto;display:flex;grid-template-columns:none;align-items:flex-start;gap:6px}
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child small {grid-column:auto}
+ body .dp-site .deepro-stocks .stock-intro-grid>div:first-child b {font-size:18px}
+}

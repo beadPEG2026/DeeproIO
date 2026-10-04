@@ -1,0 +1,92 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="transfer_commissions"></admin-reports-tab>
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        {{ $t("转账佣金") }}
+    </h1>
+    <div class="mb-6 flex flex-wrap items-center justify-between">
+        <div class="flex items-center flex-1 mr-4">
+            <search-filter :filter="false" v-model="form.search" class="w-full max-w-md mr-4 focus:outline-none" @reset="reset"></search-filter>
+            <div class="period-block hidden md:block min-w-md">
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                />
+            </div>
+        </div>
+        <button @click="exportCsv" class="btn-blue inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none mt-4 md:mt-0">
+            {{ $t ? $t('导出') : $t("导出") }}
+        </button>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("币种") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("方向") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("转账金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("比例 (%)") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("佣金金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("到账金额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+            </tr>
+            <tr v-for="c in commissions.data" :key="c.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.id }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.user.email }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.direction }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.amount }} {{ c.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.percent }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.commission_amount }} {{ c.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.credited_amount }} {{ c.currency.symbol }}
+                    </span>
+                </td>
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ c.created_at }}
+                    </span>
+                </td>
+            </tr>
+            <tr v-if="commissions.data.length === 0">
+                <td class="border-t px-3 py-2" colspan="100">{{ $t("未找到佣金记录。") }}</td>
+            </tr>
+        </table>
+    </div>
+    <pagination :links="commissions.links" />
+</app-layout>

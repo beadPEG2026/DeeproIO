@@ -1,0 +1,37 @@
+
+/** header btn start */
+.header-btn {
+    display: none;
+    position: relative;
+    z-index: 6;
+    cursor: pointer;
+
+    &:hover {
+        span {
+            background-color: var(--yellow-color);
+        }
+    }
+
+    span {
+        display: block;
+        width: 25px;
+        height: 2px;
+        border-radius: 5px;
+        margin: 0.50rem 0;
+        background-color: var(--menu-btn-color);
+    }
+}
+/** header btn end */
+
+
+
+
+/** header btn media screen start */
+@media screen and (max-width: 1000px) {
+
+    .header-btn {
+        display: block;
+    }
+
+}
+/** header btn media screen end */

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {resolveEstimateMarket} from '../../resources/js/Functions/OrderEstimate.mjs';
+const now=Date.now(),m={base_currency:'AAPLon',quote_currency:'USDT',last:'0',high:'0',low:'0',change:'0',volume:'0'};
+const quote={symbol:'AAPLon',currency:'USD',price:'335.23',high:'337',low:'333',change:'-0.3',receivedAt:new Date(now).toISOString()};
+const r=resolveEstimateMarket(m,quote,now);
+assert.equal(r.last,'335.23');assert.equal(r.high,'337');assert.equal(r.low,'333');assert.equal(r.change,'-0.30');assert.equal(r.referenceQuote,true);assert.equal(r.approximateUsd,true);assert.equal(r.volume,'0');assert.equal(m.last,'0');
+for(const q of [null,{...quote,symbol:'TSLAon'},{...quote,currency:'EUR'},{...quote,unavailable:true},{...quote,receivedAt:new Date(now-121000).toISOString()},{...quote,receivedAt:new Date(now+6000).toISOString()}]) assert.equal(resolveEstimateMarket(m,q,now).last,null);
+const native=resolveEstimateMarket({...m,last:'334',high:'338',low:'332',change:'-1'},quote,now);assert.equal(native.last,'334');assert.equal(native.referenceQuote,false);assert.equal(native.change,'-1');
+const umi=resolveEstimateMarket({...m,base_currency:'UMI'},null,now);for(const k of ['last','high','low','change'])assert.equal(umi[k],null);
+console.log('Market statistics: reference identity, freshness, units, native priority, UMI empty state and immutability passed');

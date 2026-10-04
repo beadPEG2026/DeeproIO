@@ -1,0 +1,449 @@
+<app-layout>
+    <h1 class="mb-8 font-bold text-3xl">
+        <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.markets')">{{ $t("市场") }}</Link>
+        - {{ subTitle }}
+    </h1>
+    <trashed-message v-if="isEdit && market.deleted_at" class="mb-6" @restore="restore">
+        {{ $t("该市场已被删除。") }}
+    </trashed-message>
+    <div class="bg-white rounded shadow w-full lg:w-1/2">
+        <form @submit.prevent="submit">
+            <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mb-2 pb-4 font-medium">{{ $t("基本信息") }}</div>
+                </div>
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("基础货币：") }}</label>
+                    <t-rich-select
+                        :options="currencies"
+                        v-model="form.base_currency_id"
+                        placeholder="选择货币"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.base_currency_id" class="form-error text-red-400">{{ errors.base_currency_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("计价货币：") }}</label>
+                    <t-rich-select
+                        v-model="form.quote_currency_id"
+                        :options="currencies"
+                        placeholder="选择货币"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.quote_currency_id" class="form-error text-red-400">{{ errors.quote_currency_id }}</div>
+                </div>
+
+                <text-input v-model="form.name" :error="errors.name" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;名称&quot;)" />
+
+                <text-input v-model="form.last" :error="errors.last" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;市场价格&quot;)" />
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("交易规则") }}</div>
+                </div>
+
+                <text-input v-model="form.base_precision" :error="errors.base_precision" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;基础货币精度&quot;)" />
+                <text-input v-model="form.quote_precision" :error="errors.quote_precision" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;计价货币精度&quot;)" />
+
+                <text-input v-model="form.min_trade_size" :error="errors.min_trade_size" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小交易数量&quot;)" />
+                <text-input v-model="form.max_trade_size" :error="errors.max_trade_size" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大交易数量&quot;)" />
+
+                <text-input v-model="form.min_trade_value" :error="errors.min_trade_value" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小订单金额&quot;)" />
+                <text-input v-model="form.max_trade_value" :error="errors.max_trade_value" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大订单金额&quot;)" />
+
+                <text-input v-model="form.min_market_buy_amount" :error="errors.min_market_buy_amount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小市价买入金额（计价货币）&quot;)" />
+
+                <text-input v-model="form.base_ticker_size" :error="errors.base_ticker_size" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小数量变动&quot;)" />
+                <text-input v-model="form.quote_ticker_size" :error="errors.quote_ticker_size" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小价格变动&quot;)" />
+
+                <text-input v-model="form.discount" :error="errors.discount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;卖盘价差（% 0:100）&quot;)" />
+
+                <text-input v-model="form.discount_bid" :error="errors.discount_bid" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;买盘价差（% 0:100）&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("图表类型：") }}</label>
+                    <t-rich-select
+                        :options="[{'id': 'internal', 'name': '内部'},{'id': 'liquidity', 'name': '来自流动性提供商'},{'id': 'custom', 'name': '外部自定义市场'}]"
+                        v-model="form.is_tradingview"
+                        placeholder="选择类型"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.base_currency_id" class="form-error text-red-400">{{ errors.base_currency_id }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("外部图表数据") }}</div>
+                    <p class="text-sm text-gray-500 mt-2">{{ $t("启用后，将从外部交易所（Binance、MEXC、Bybit）获取K线数据，而不是内部数据。数据会自动缓存。") }}</p>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("使用外部图表数据") }}</label>
+                    <t-toggle v-model="form.switch_chart" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2" v-if="form.switch_chart">
+                    <label class="form-label d-block">{{ $t("图表数据来源：") }}</label>
+                    <t-rich-select
+                        :options="chartSourceOptions"
+                        v-model="form.chart_source"
+                        placeholder="选择交易所"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template
+                            slot="label"
+                            slot-scope="{ className, option, query }"
+                        >
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.chart_source" class="form-error text-red-400">{{ errors.chart_source }}</div>
+                </div>
+
+                <text-input v-if="form.switch_chart" v-model="form.chart_symbol" :error="errors.chart_symbol" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;外部交易对符号（例如 BTCUSDT）&quot;)" :placeholder="$t(&quot;留空则自动识别&quot;)" />
+
+                <text-input v-if="form.is_tradingview == 'custom'" v-model="form.custom_market_path" :error="errors.custom_market_path" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;自定义市场名称&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label d-block">{{ $t("默认图表周期：") }}</label>
+                    <t-rich-select
+                        :options="chartResolutionOptions"
+                        v-model="form.chart_default_resolution"
+                        placeholder="选择周期"
+                        value-attribute="id"
+                        text-attribute="name"
+                    >
+                        <template slot="label" slot-scope="{ className, option, query }">
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <span>{{ option.text }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </t-rich-select>
+                    <div v-if="errors.chart_default_resolution" class="form-error text-red-400">{{ errors.chart_default_resolution }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <text-input id="market-bs-percent" v-model="form.bs_percent" :error="bsError || errors.bs" inputmode="decimal" :label="'BS (%)'" placeholder="30" aria-describedby="market-bs-percent-hint" />
+                    <p id="market-bs-percent-hint" class="text-sm text-gray-500 mt-2">30% → bs = 0.3</p>
+                    <loading-button v-if="isEdit" id="market-bs-save" type="button" :loading="savingBs || sending" class="btn-indigo mt-3" @click.native="saveBs">{{ $t('Save') }} BS</loading-button>
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("市场状态") }}</div>
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("市场可见性") }}</label>
+                    <t-toggle v-model="form.status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许市场交易") }}</label>
+                    <t-toggle v-model="form.trade_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许市场买单") }}</label>
+                    <t-toggle v-model="form.buy_order_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许市场卖单") }}</label>
+                    <t-toggle v-model="form.sell_order_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("允许市场撤单") }}</label>
+                    <t-toggle v-model="form.cancel_order_status" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否有期货？") }}</label>
+                    <t-toggle v-model="form.has_futures" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否有期权？") }}</label>
+                    <t-toggle v-model="form.has_options" />
+                </div>
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <button v-if="isEdit && !market.deleted_at" class="focus:outline-none text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">{{ $t("删除市场") }}</button>
+                </div>
+                 
+                <text-input v-model="form.options_min_amount" :error="errors.options_min_amount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最小期权持仓数量&quot;)" />
+                <text-input v-model="form.options_max_amount" :error="errors.options_max_amount" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;最大期权持仓数量&quot;)" />
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 Meme？") }}</label>
+                    <t-toggle v-model="form.is_meme" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 Layer 1？") }}</label>
+                    <t-toggle v-model="form.is_layer_one" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 Layer 2？") }}</label>
+                    <t-toggle v-model="form.is_layer_two" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为创新区？") }}</label>
+                    <t-toggle v-model="form.is_innovation" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 AI？") }}</label>
+                    <t-toggle v-model="form.is_ai" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 DeFi？") }}</label>
+                    <t-toggle v-model="form.is_defi" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 GameFi？") }}</label>
+                    <t-toggle v-model="form.is_gamefi" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 PoW？") }}</label>
+                    <t-toggle v-model="form.is_pow" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为粉丝代币？") }}</label>
+                    <t-toggle v-model="form.is_fan_tokens" />
+                </div>
+
+                <div class="pr-6 pb-8 w-full lg:w-1/2">
+                    <label class="form-label block mr-2 mb-3">{{ $t("是否为 NFT？") }}</label>
+                    <t-toggle v-model="form.is_nft" />
+                </div>
+
+
+                <div class="pr-6 pb-8 w-full">
+                    <div class="font-weight-bold text-xl border-b mt-5 mb-2 pb-4 font-medium">{{ $t("自定义流动性") }}</div>
+                </div>
+                <text-input v-model="form.sc_custom_liquidity_start_time" :error="errors.sc_custom_liquidity_start_time" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;上次插针开始时间&quot;)" />
+                <text-input v-model="form.sc_custom_liquidity_stop_time" :error="errors.sc_custom_liquidity_stop_time" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;上次插针结束时间&quot;)" />
+                <text-input v-model="form.sc_price_floor" :error="errors.sc_price_floor" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;上次插针最低价格&quot;)" />
+                <text-input v-model="form.sc_price_ceiling" :error="errors.sc_price_ceiling" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;上次插针最搞价格&quot;)" />
+                <text-input v-model="form.sc_bot_trend_direction" :error="errors.sc_bot_trend_direction" class="pr-6 pb-8 w-full lg:w-1/2" :label="$t(&quot;上次插针方向&quot;)" />
+                <div class="pr-6 pb-8 w-full">
+                    <label class="form-label block mr-2 mb-3">{{ $t("启用自定义流动性？") }}</label>
+                    <t-toggle v-model="form.custom_liquidity_t" />
+                </div>
+
+                <template v-if="form.custom_liquidity_t">
+                    <div class="pr-6 pb-8 w-full lg:w-1/2">
+                        <label class="form-label">
+                            {{ $t("价格百分比（正数直接是增加1就是当前价格增加1%,负数是减-1就是当前价格减1%,输入0是正常的市场价格）:") }}
+                        </label>
+
+                        <div class="flex items-center mt-1">
+                            <input
+                                v-model="form.bot_price_floor"
+                                type="number"
+                                step="any"
+                                class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm block w-full"
+                                :class="{ error: errors.bot_price_floor || klinePriceError }"
+                                placeholder="例如：1"
+                                @keydown.enter.prevent="submitKlinePriceAdjustment"
+                            >
+
+                            <button
+                                type="button"
+                                class="ml-3 py-2 px-4 bg-indigo-500 text-sm rounded text-gray-100 hover:bg-indigo-600 focus:outline-none whitespace-nowrap"
+                                @click="submitKlinePriceAdjustment"
+                            >
+                                {{ $t("提交") }}
+                            </button>
+                        </div>
+
+                        <div v-if="errors.bot_price_floor" class="form-error text-red-400">{{ errors.bot_price_floor }}</div>
+                        <div v-if="klinePriceError" class="form-error text-red-400">{{ klinePriceError }}</div>
+                        <div v-if="klinePricePendingCount > 0" class="text-xs text-gray-500 mt-2">
+                            {{ $t("提交中") }} {{ klinePricePendingCount }} {{ $t("条") }}
+                        </div>
+                        <div v-else-if="klinePriceSavedAt" class="text-xs text-green-600 mt-2">
+                            {{ $t("已提交") }}
+                        </div>
+                    </div>
+                </template>
+
+                <div v-if="isEdit" class="pr-6 pb-8 w-full">
+                    <div class="border border-gray-200 rounded bg-white overflow-hidden">
+                        <div class="px-5 py-4 flex items-center justify-between border-b border-gray-100">
+                            <div>
+                                <div class="font-weight-bold text-lg font-medium">{{ $t("K线修改记录") }}</div>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    {{ $t("只显示当前交易对最新 15 条 K 线插针记录，可多选删除指定时间段修改。") }}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-500 mr-4">{{ normalizedKlineChanges.length }} {{ $t("条") }}</span>
+
+                                <button
+                                    type="button"
+                                    class="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    @click="toggleKlineChanges"
+                                >
+                                    {{ klineChangesOpen ? $t("收起") : $t("展开") }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-show="klineChangesOpen">
+                            <div class="px-5 py-3 flex items-center justify-between bg-gray-50 border-b border-gray-100">
+                                <label class="flex items-center text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        class="mr-2"
+                                        :checked="isAllKlineChangesSelected"
+                                        :disabled="!hasKlineChanges"
+                                        @change="toggleAllKlineChangesSelection"
+                                    >
+                                    {{ $t("全选") }}
+                                </label>
+
+                                <div class="flex items-center">
+                                    <button
+                                        type="button"
+                                        class="text-sm text-red-500 hover:text-red-700 mr-5 disabled:opacity-50"
+                                        :disabled="selectedKlineChangeCount <= 0 || deletingKlineChanges"
+                                        @click="deleteSelectedKlineChanges"
+                                    >
+                                        {{ $t("删除选中") }}<span v-if="selectedKlineChangeCount > 0">（{{ selectedKlineChangeCount }}）</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
+                                        :disabled="!hasKlineChanges || deletingKlineChanges"
+                                        @click="clearKlineChanges"
+                                    >
+                                        {{ $t("清空全部") }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead>
+                                        <tr class="bg-gray-900 text-white text-sm">
+                                            <th class="px-4 py-3 w-12"></th>
+                                            <th class="px-4 py-3">{{ $t("市场") }}</th>
+                                            <th class="px-4 py-3">{{ $t("插针时间") }}</th>
+                                            <th class="px-4 py-3">{{ $t("调整方向") }}</th>
+                                            <th class="px-4 py-3">{{ $t("基准价格") }}</th>
+                                            <th class="px-4 py-3">{{ $t("价格变化") }}</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-if="!hasKlineChanges">
+                                            <td colspan="6" class="px-4 py-6 text-gray-500 text-sm">
+                                                {{ $t("暂无 K 线修改记录。") }}
+                                            </td>
+                                        </tr>
+
+                                        <tr
+                                            v-for="change in normalizedKlineChanges"
+                                            :key="change.id"
+                                            class="border-b border-gray-100 hover:bg-gray-50"
+                                        >
+                                            <td class="px-4 py-3">
+                                                <input
+                                                    type="checkbox"
+                                                    :checked="selectedKlineChangeIds.indexOf(String(change.id)) >= 0"
+                                                    @change="toggleKlineChangeSelection(change)"
+                                                >
+                                            </td>
+
+                                            <td class="px-4 py-3 font-semibold text-gray-900">
+                                                {{ change.market_name || market.name }}
+                                            </td>
+
+                                            <td class="px-4 py-3 text-gray-700">
+                                                {{ change.start_time || '-' }}
+                                            </td>
+
+                                            <td class="px-4 py-3 font-semibold" :class="klineDirectionClass(change)">
+                                                {{ getKlineDirectionText(change) }}
+                                            </td>
+
+                                            <td class="px-4 py-3 text-gray-700">
+                                                {{ getKlineBasePrice(change) }}
+                                            </td>
+
+                                            <td class="px-4 py-3 font-semibold" :class="klinePriceChangeClass(change)">
+                                                {{ formatSignedKlineNumber(getKlinePriceChange(change)) }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-8 py-4 bg-gray-100 border-t border-gray-200 flex items-center">
+               
+
+                <loading-button :loading="sending || savingBs" class="btn-indigo ml-auto" type="submit">
+                    <svg v-show="sending" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ actionButtonTitle }}
+                </loading-button>
+            </div>
+        </form>
+    </div>
+</app-layout>

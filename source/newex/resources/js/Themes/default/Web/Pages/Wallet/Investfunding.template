@@ -1,0 +1,160 @@
+<app-layout class="dp-account-page">
+
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('lc Account') }}</h2>
+</div>
+<!-- components title end -->
+
+<!-- tabs components start -->
+<div class="tabs-components tabs">
+    <!-- tabs right start -->
+    <div class="tabs-right">
+        <div class="tabs-search tabs-balance cursor-pointer" v-tooltip.right-end="{ content: $t('The estimated balance is calculated by converting the total assets of your wallets into USD and BTC.'), classes: 'toolTip' }" >
+            <h3>{{ $t('Estimated Balance') }} <font-awesome-icon icon="info-circle" class="ml-1 cursor-pointer focus:outline-none" /></h3>
+
+            <div v-if="displayTotalBalance">
+                <p>
+                    {{ displayTotalBalance.totatUsdBalance }} {{ $t('USD')}}
+                </p>
+
+                <small>{{ $t('≈')}} {{ displayTotalBalance.totalBtcBalance }} {{ $t('BTC')}}</small>
+            </div>
+            <div v-else>
+                <p>
+                    0.00 {{ $t('USD')}}
+                </p>
+
+                <small>{{ $t('≈')}} 0.00000000 {{ $t('BTC')}}</small>
+            </div>
+        </div>
+    </div>
+    <!-- tabs right end -->
+
+</div>
+<!-- tabs components end -->
+<account-actions />
+<!-- tabs components start -->
+<div class="tabs-components tabs">
+    <!-- tabs left start -->
+    <div class="tabs-left">
+        <div class="tabs-nav">
+            <div @click="activeType = 'coin'" class="tabs-nav__item" :class="{'tabs-nav__active': activeType === 'coin'}">
+                <h4>{{ $t('Crypto') }}</h4>
+            </div>
+            <div @click="activeType = 'fiat'" class="tabs-nav__item" :class="{'tabs-nav__active': activeType === 'fiat'}">
+                <h4>{{ $t('Fiat') }}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- tabs left end -->
+    <!-- tabs right start -->
+    <div class="tabs-right">
+        <div class="tabs-search">
+            <input v-model="filter.search" type="text" :placeholder="$t('Search Asset')">
+            <button class="tabs-search__icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="tabs-search__color" x="2" y="2" width="17" height="17" rx="8.5"/>
+                    <line class="tabs-search__color" x1="16.2428" y1="17.5356" x2="20.5356" y2="21.8285"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- tabs right end -->
+
+</div>
+<!-- tabs components end -->
+
+
+<!-- table components start -->
+<div class="table-components">
+
+    <!-- tables start -->
+    <table class="tables mob-table-wallets">
+
+        <!-- thead start -->
+        <thead class="table-sort">
+            <tr>
+                <th>
+                    <div @click="setFilter('symbol')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Currency') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="symbol">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th>
+                    <div @click="setFilter('balance_in_lc_usd')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Available') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="balance_in_lc">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <!-- thead end -->
+
+</thead>
+
+<tbody class="table-list">
+    <tr v-for="wallet in wallets" :key="wallet.id">
+        <td>
+            <div class="table-list__subtitle">{{ $t('Currency') }}</div>
+            <div class="table-list__value">
+                <div class="table-list__image"><img :src="wallet.logo"></div>
+                <div class="table-list__title">
+                    <span class="table-list__title-big">{{ wallet.symbol }}</span>
+                    <span class="table-list__title-small">{{ wallet.currency }}</span>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="table-list__subtitle">{{ $t('Available') }}</div>
+            <div class="table-list__value table-list__value-v2">
+                <div class="table-list__text">{{ wallet.display_balance_in_lc }}</div>
+                <div class="table-list__text table-list__text-smaller">≈ {{ wallet.display_balance_in_lc_usd }}$</div>
+            </div>
+        </td>
+       
+    </tr>
+</tbody>
+        <!-- tbody end -->
+
+        <!-- tfood start -->
+        <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="wallets.length == 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                            </svg>
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No wallets found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+        <!-- tfood end -->
+
+    </table>
+    <!-- tables end -->
+
+</div>
+<!-- table components end -->
+
+
+</app-layout>

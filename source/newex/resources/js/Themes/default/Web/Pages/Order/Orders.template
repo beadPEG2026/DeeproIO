@@ -1,0 +1,160 @@
+<app-layout class="dp-orders-page">
+    <Head>
+        <title>{{ $t('My Orders')}}</title>
+        <meta name="description" content="">
+    </Head>
+
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('Orders') }}</h2>
+</div>
+<!-- components title end -->
+
+
+<!-- tabs components start -->
+<div class="tabs">
+
+    <!-- tabs left start -->
+    <div class="tabs-left">
+        <div class="tabs-nav">
+            <Link :href="route('orders')" as="div" class="tabs-nav__item tabs-nav__active"><h4>{{ $t('Open Orders') }}</h4></Link>
+            <Link :href="route('reports.order-history')" as="div" class="tabs-nav__item"><h4>{{ $t('Orders History') }}</h4></Link>
+        </div>
+    </div>
+    <!-- tabs left end -->
+
+</div>
+<!-- tabs components end -->
+
+
+
+<!-- table components start -->
+<div class="table-components mob-table-orders">
+    <!-- tables start -->
+    <table class="tables">
+
+        <!-- thead start -->
+        <thead class="table-sort no-cursor">
+            <tr>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('ID') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Market') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Type') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Price') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Date') }}</span>
+                    </div>
+                </th>
+                <th>
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Actions') }}</span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <!-- thead end -->
+
+
+        <!-- tbody start -->
+        <tbody class="table-list">
+            <tr v-for="order in openOrders" :key="order.id">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('ID') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ order.id }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Market') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ order.market }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Type') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <div class="components-label" :class="{'label-green': order.side == 'buy', 'label-red': order.side == 'sell'}">
+                                {{ order.side }} {{ order.type == "stop_limit" ? 'stop limit' : order.type }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Price') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ order.price }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Date') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            {{ order.created_at }}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Actions') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">
+                            <button @click="cancelOrder(order)"  class="btn-warning">{{ $t("Cancel") }}</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <!-- tbody end -->
+
+        <!-- tfood start -->
+        <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="orders.data.length == 0" class="table-result__notfound">
+                            <span class="table-result__notfound-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="13.5" x2="7.5" y2="13.5"/>
+                                    <line class="table-result__notfound-color" x1="15.5" y1="10.5" x2="7.5" y2="10.5"/>
+                                    <line class="table-result__notfound-color" x1="11.5" y1="7.5" x2="7.5" y2="7.5"/>
+                                    <rect class="table-result__notfound-color color-yellow" x="14.8335" y="14.8335" width="7.08333" height="7.08333" rx="3.54167"/>
+                                    <line class="table-result__notfound-color color-yellow" x1="21.1803" y1="21.3066" x2="22.5565" y2="22.6829"/>
+                                </svg>
+                            </span>
+                        <span class="table-result__notfound-text">{{ $t('No orders found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+        <!-- tfood end -->
+
+    </table>
+    <!-- tables end -->
+</div>
+<!-- table components end -->
+
+
+</app-layout>

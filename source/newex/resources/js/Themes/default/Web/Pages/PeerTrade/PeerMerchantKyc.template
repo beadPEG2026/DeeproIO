@@ -1,0 +1,168 @@
+<app-layout>
+    <Head>
+        <title>{{ $t('Merchant KYC') }}</title>
+        <meta name="description" content="">
+    </Head>
+
+    <div class="form-container form-merchant-container">
+        <section v-if="$page.props.user.merchant_verified" class="user-status">
+            <div class="user-status__row">
+                <div class="user-status__item">
+                    <font-awesome-icon class="text-4xl text-green-500 mb-5 user-status__icon" icon="check"></font-awesome-icon>
+                    <h2 class="user-status__title">{{ $t('Your account is marked as a Merchant') }}</h2>
+                    <p class="mb-8 leading-relaxed">{{ $t('Now you can create P2P Ads as a merchant.') }}</p>
+                </div>
+            </div>
+        </section>
+
+        <section v-else-if="pendingDocument" class="user-status">
+            <div class="user-status__row">
+                <div class="user-status__item">
+                    <font-awesome-icon class="animate-bounce text-4xl text-yellow-500 mb-5 user-status__icon" icon="clock"></font-awesome-icon>
+                    <h2 class="user-status__title">{{ $t('Your Merchant KYC request is being reviewed') }}</h2>
+                    <p class="mb-8 leading-relaxed">{{ $t('Once we verify your identity, the system will adjust your status in P2P section.') }}</p>
+                </div>
+            </div>
+        </section>
+
+        <section v-else-if="rejectedDocument" class="user-status">
+            <div class="user-status__row">
+                <div class="user-status__item">
+                    <font-awesome-icon class="text-4xl text-red-500 mb-5 user-status__icon" icon="exclamation"></font-awesome-icon>
+                    <h2 class="user-status__title">{{ $t('Your Merchant KYC request was rejected.') }}</h2>
+                    <p class="mb-8 leading-relaxed">{{ $t('Reason:') }} <strong>{{ rejectedDocument.rejected_reason }}</strong>.</p>
+                    <p class="mt-5">{{ $t('Please submit your documents again.') }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- form components start -->
+        <div v-if="!$page.props.user.merchant_verified && !pendingDocument" class="components-filter components-filter__form form-border">
+
+            <div v-if="!rejectedDocument" class="user-status__title"><h2>{{ $t('Become A P2P Merchant') }}</h2></div>
+
+            <div class="mb-10">
+                {{ $t('Proof of Address is required to help verify your account. You will be asked to upload a document matching the provided address to complete account set-up.')}}
+            </div>
+            <form @submit.prevent="submit">
+
+                        <div v-if="country" class="components-filter__row form-row">
+                            <text-user-input disabled readonly v-model="country" class="components-filter__item form-disabled" :label="$t(&quot;Country&quot;)" />
+                        </div>
+                        <div class="components-filter__row form-row">
+                            <text-user-input v-model="form.address" :error="errors.address" class="components-filter__item" :label="$t(&quot;Residential Address&quot;)" />
+                        </div>
+                        <div class="components-filter__row form-row">
+                            <text-user-input v-model="form.postal_code" :error="errors.postal_code" class="components-filter__item" :label="$t(&quot;Postal Code&quot;)" />
+                        </div>
+                        <div class="components-filter__row form-row">
+                            <text-user-input v-model="form.city" :error="errors.city" class="components-filter__item" :label="$t(&quot;City&quot;)" />
+                        </div>
+                        <div class="components-filter__row form-row">
+                            <text-user-input v-model="form.state" :error="errors.state" class="components-filter__item" :label="$t(&quot;State&quot;)" />
+                        </div>
+
+                        <div class="form-components__block mb-10">
+                            <div class="form-components__block-item block-title">
+                                <h3>{{ $t('Choose your document type:') }}</h3>
+                            </div>
+                            <div class="form-components__item flex flex-col flex-col-list">
+                                <div class="input-radio">
+                                    <t-radio id="bank_statement" name="document" v-model="form.document_type" value="bank_statement"/>
+                                    <label for="bank_statement">{{ $t('Bank statement') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="mortgage_statement" name="document" v-model="form.document_type" value="mortgage_statement" />
+                                    <label for="mortgage_statement">{{ $t('Mortgage statement') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="utility_bill" name="document" v-model="form.document_type" value="utility_bill" />
+                                    <label for="utility_bill">{{ $t("Utility bill e.g., electricity, water, gas, sewerage") }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="internet_service" name="document" v-model="form.document_type" value="internet_service" />
+                                    <label for="internet_service">{{ $t('Internet service bill') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="telephone_bill" name="document" v-model="form.document_type" value="telephone_bill" />
+                                    <label for="telephone_bill">{{ $t('Landline telephone bill (mobile bills are not acceptable)') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="tax" name="document" v-model="form.document_type" value="tax" />
+                                    <label for="tax">{{ $t('Letters from tax / government authority') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="building_statement" name="document" v-model="form.document_type" value="building_statement" />
+                                    <label for="building_statement">{{ $t('Building management statements') }}</label>
+                                </div>
+                                <div class="input-radio">
+                                    <t-radio id="body_corporate_statement" name="document" v-model="form.document_type" value="body_corporate_statement" />
+                                    <label for="body_corporate_statement">{{ $t('Body corporate statement') }}</label>
+                                </div>
+                            </div>
+                            <div class="mb-10 form-components__block-item block-list">
+
+                                <div class="block-list__item-title">{{ $t('The document must meet specific requirements in order to be accepted for verification:') }}</div>
+                                <ul>
+                                    <li class="mb-2">{{ $t('- Please upload a full page document. Cropped images or screenshots will be rejected.') }}</li>
+                                    <li class="mb-2">{{ $t('- Document must contain: Your Name, Your Address, Issue Date, Issuing Authority.') }}</li>
+                                    <li>{{ $t('- Please ensure document submitted is real. Failure to provide us with real and accurate document may result in a temporary or permanent block on your account.') }}</li>
+                                </ul>
+
+                                <div class="mt-10 block-list__item-title">{{ $t('Document:') }}</div>
+
+                                <div id="file-uploader-form" class="file-uploader-form-kyc">
+                                    <VueFileAgent
+                                        class="profile-pic-upload-block"
+                                        ref="fileUploadForm"
+                                        :multiple="false"
+                                        :deletable="false"
+                                        :meta="false"
+                                        :compact="true"
+                                        :maxFiles="1"
+                                        :accept="'image/*,.pdf'"
+                                        :helpText="'Drag an image file here'"
+                                        :errorText="{
+                                            type: 'Please select an image',
+                                            }"
+                                        v-model="documentPhoto"
+                                        @select="onSelect($event)"
+                                        @upload="onUpload($event)"
+                                    >
+                                        <template v-slot:before-outer>
+                                        </template >
+                                        <template v-slot:after-outer>
+                                            <div :title="$t(&quot;after-outer&quot;)">
+                                                <div class="drop-help-text">
+                                                    <p class="text-success">{{ $t('Drop the file!') }}</p>
+                                                </div>
+                                                <button type="button" class="flex justify-between items-center py-2 border-radius-xl px-4 bg-red-500 text-sm rounded text-gray-100 cursor-pointer hover:bg-red-600 hover:text-gray-100 focus:outline-none" :class="[uploaded ? 'btn-danger' : 'btn-secondary']" v-if="documentPhoto" @click="removePic()">{{ $t('Remove') }}</button>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </template >
+                                    </VueFileAgent>
+                                </div>
+                                <div class="text-red-600 mb-3" v-if="errors.file_id">
+                                    {{ errors.file_id }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-10 clear-both form-components__block">
+                            <div class="form-components__block-item block-button">
+                                <button type="submit" class="form-components__block-button" :class="{ 'opacity-75': sending }">
+                                    <span>
+                                        <svg v-show="sending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        {{ $t('Submit') }}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+            </form>
+        </div>
+        <!-- form components end -->
+    </div>
+</app-layout>

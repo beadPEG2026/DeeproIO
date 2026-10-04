@@ -1,0 +1,213 @@
+<app-layout>
+    <Head>
+        <meta name="description" content="">
+        <title>{{ $t("Spot Markets") }}</title>
+    </Head>
+
+<!-- components title start -->
+<div class="components-title">
+    <h2>{{ $t('Markets') }}</h2>
+</div>
+<!-- components title end -->
+
+<!-- tabs components start -->
+<div class="tabs-components tabs markets-tab">
+
+    <!-- tabs left start -->
+    <div class="tabs-left">
+        <div class="tabs-nav">
+            <div @click="setSort(false)" class="tabs-nav__item" :class="{'tabs-nav__active': !filter.sortBy}">
+                <h4>{{ $t('Spot') }}</h4>
+            </div>
+            <div @click="setSort('favorites')" class="tabs-nav__item" :class="{'tabs-nav__active': filter.sortBy == 'favorites'}"><h4>{{ $t('Favorites') }}</h4></div>
+        </div>
+    </div>
+    <!-- tabs left end -->
+
+    <!-- tabs right start -->
+    <div class="tabs-right">
+        <div class="tabs-search">
+            <input v-model="filter.search" type="text" :placeholder="$t('Search Coin Name')">
+            <button class="tabs-search__icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="tabs-search__color" x="2" y="2" width="17" height="17" rx="8.5"/>
+                    <line class="tabs-search__color" x1="16.2428" y1="17.5356" x2="20.5356" y2="21.8285"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- tabs right end -->
+
+</div>
+<!-- tabs components end -->
+
+
+<!-- table components start -->
+<div class="table-components markets-tab">
+
+    <!-- tables start -->
+    <table class="tables mob-table-markets">
+
+        <!-- thead start -->
+        <thead class="table-sort">
+            <tr>
+                <th>
+                    <div @click="setFilter('name')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Pair') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="name">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th>
+                    <div @click="setFilter('last')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Last Price') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="last">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th>
+                    <div @click="setFilter('change')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('24 Change') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="change">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th class="mob-hide-alt">
+                    <div @click="setFilter('high')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('24 High') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="high">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th class="mob-hide-alt">
+                    <div @click="setFilter('low')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('24 Low') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="low">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th class="mob-hide-alt">
+                    <div @click="setFilter('volume')" class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Volume') }}</span>
+                        <span class="table-sort__icon">
+                            <icon-filter
+                                :filter="filter"
+                                field="volume">
+                            </icon-filter>
+                        </span>
+                    </div>
+                </th>
+                <th class="mob-hide-alt">
+                    <div class="table-sort__value">
+                        <span class="table-sort__title">{{ $t('Actions') }}</span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <!-- thead end -->
+
+        <!-- tbody start -->
+        <tbody class="table-list">
+            <tr @click="setMarket(market, filter.sortBy == 'futures')" v-for="market in markets" :key="market.id" class="table-list__cursor">
+                <td>
+                    <div class="table-list__subtitle">{{ $t('Pair') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__title title-icon">
+                            <div class="title-icon__icon mob-hide-alt" @click.stop="favoriteToggle(market)">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path :class="{'title-icon__icon-active': market.favorite}" d="M11.5793 1.65498C11.7761 1.3486 12.2239 1.3486 12.4207 1.65498L15.6448 6.67456C15.7125 6.77997 15.8173 6.85613 15.9385 6.88795L21.7087 8.40311C22.0609 8.49559 22.1993 8.92148 21.9687 9.20332L18.1911 13.8207C18.1118 13.9177 18.0717 14.0409 18.0789 14.166L18.421 20.122C18.4419 20.4856 18.0796 20.7488 17.7403 20.6166L12.1815 18.4507C12.0648 18.4052 11.9352 18.4052 11.8185 18.4507L6.2597 20.6166C5.92041 20.7488 5.55812 20.4856 5.579 20.122L5.92109 14.166C5.92827 14.0409 5.88824 13.9177 5.8089 13.8207L2.0313 9.20332C1.80072 8.92148 1.93911 8.49559 2.2913 8.40311L8.0615 6.88795C8.18268 6.85613 8.2875 6.77997 8.35521 6.67456L11.5793 1.65498Z" class="title-icon__icon-color"/>
+                                </svg>
+                            </div>
+                            <div class="table-list__image">
+                                <currency-avatar :symbol="market.base_currency" :src="market.base_currency_logo" />
+                            </div>
+                            <div class="title-icon__name">
+                                {{ filterName(market.base_currency) }} <span class="quote-symbol">{{ filterName(market.quote_currency) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('Last Price') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ marketDisplayPrice(market.last) }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('24 Change') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text"  :class="{'color-buy' : market.change > 0, 'color-sell' : market.change < 0}">{{ marketDisplayChange(market.change) }}</div>
+                    </div>
+                </td>
+                <td class="mob-hide-alt">
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('24 High') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ marketDisplayPrice(market.high) }}</div>
+                    </div>
+                </td>
+                <td class="mob-hide-alt">
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('24 Low') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ marketDisplayPrice(market.low) }}</div>
+                    </div>
+                </td>
+                <td class="mob-hide-alt">
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('Volume') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__text">{{ market.volume }}</div>
+                    </div>
+                </td>
+                <td class="mob-hide-alt">
+                    <div class="table-list__subtitle mob-hide-alt">{{ $t('Actions') }}</div>
+                    <div class="table-list__value">
+                        <div class="table-list__link">
+                            <a href="#!">{{ $t('Trade') }}</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <!-- tbody end -->
+
+        <!-- tfood start -->
+        <tfoot class="table-result">
+            <tr>
+                <td colspan="100">
+                    <div v-if="markets.length == 0" class="table-result__notfound">
+                        <span class="table-result__notfound-icon">
+                            <img src="/images/doc.png" />
+                        </span>
+                        <span class="table-result__notfound-text">{{ $t('No markets found.') }}</span>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+        <!-- tfood end -->
+
+    </table>
+    <!-- tables end -->
+
+</div>
+<!-- table components end -->
+    <market-channel></market-channel>
+</app-layout>

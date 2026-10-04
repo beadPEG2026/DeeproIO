@@ -1,0 +1,26 @@
+{
+    "assets": [
+        {
+            "id": "DJTB",
+            "symbol": "DJTB",
+            "ticker": "DJT",
+            "name": "Trump Media & Technology Group",
+            "issuer": "BTech Holdings Limited",
+            "chain": "BSC",
+            "chainId": 56,
+            "contract": "0xf2ec508422174ee564de98187db9359d318afb6b",
+            "decimals": 18,
+            "assetType": "stock",
+            "currency": "USDT",
+            "region": "US",
+            "color": "#243a65",
+            "mark": "DJT",
+            "listingTemplate": "binance-bstocks-v1",
+            "marketSource": "binance-spot",
+            "exchangeSymbol": "DJTBUSDT",
+            "issuerUrl": "https://www.binance.com/en/support/announcement/detail/653dce6a74234b999d7a189c0fa49a80",
+            "explorerUrl": "https://bscscan.com/token/0xf2ec508422174ee564de98187db9359d318afb6b",
+            "identityVerifiedAt": "2026-09-24"
+        }
+    ]
+}

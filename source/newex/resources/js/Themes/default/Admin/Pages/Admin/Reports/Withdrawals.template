@@ -1,0 +1,587 @@
+<app-layout>
+    <admin-reports-tab :referrer="filters.referrer" section="withdrawals"></admin-reports-tab>
+
+    <h1 class="mt-10 mb-8 font-bold text-3xl">
+        <Link
+            class="text-indigo-400 hover:text-indigo-600"
+            :href="route('admin.users.edit', filters.referrer)"
+            v-if="filters.referrer"
+        >
+            {{ $t("返回 -") }}
+        </Link>
+        {{ $t("提现记录") }}
+    </h1>
+
+    <div class="mb-6">
+        <div
+            style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+                gap: 12px;
+                align-items: end;
+            "
+        >
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("搜索") }}</label>
+                <input
+                    v-model="form.search"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户/哈希/地址"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("类型") }}</label>
+                <themed-select v-model="form.type" class="w-full form-select rounded text-sm" style="height: 40px;">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="coin">{{ $t("币种") }}</option>
+                    <option value="fiat">{{ $t("法币") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("状态") }}</label>
+                <themed-select v-model="form.status" class="w-full form-select rounded text-sm" style="height: 40px;">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option value="waiting_approval">{{ $t("待处理") }}</option>
+                    <option value="confirmed_system">{{ $t("系统已确认") }}</option>
+                    <option value="waiting_provider_approval">{{ $t("等待服务商审核") }}</option>
+                    <option value="confirmed_provider">{{ $t("服务商已确认") }}</option>
+                    <option value="rejected">{{ $t("已拒绝") }}</option>
+                    <option value="failed">{{ $t("失败") }}</option>
+                </themed-select>
+            </div>
+
+            <div style="width: 180px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("网络") }}</label>
+                <themed-select network v-model="form.network_id" class="w-full form-select rounded text-sm" style="height: 40px;">
+                    <option :value="null">{{ $t("全部") }}</option>
+                    <option v-for="item in networks" :key="item.id" :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </themed-select>
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("用户ID") }}</label>
+                <input
+                    v-model="form.user_id"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="用户ID"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("交易哈希") }}</label>
+                <input
+                    v-model="form.txn"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="交易哈希"
+                />
+            </div>
+
+            <div style="width: 220px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("钱包地址") }}</label>
+                <input
+                    v-model="form.address"
+                    type="text"
+                    class="w-full form-input rounded text-sm"
+                    style="height: 40px;"
+                    placeholder="钱包地址"
+                />
+            </div>
+
+            <div style="width: 240px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("时间") }}</label>
+                <t-datepicker
+                    :monthsPerView="2"
+                    v-model="form.period"
+                    :range="true"
+                    :timepicker="false"
+                    dateFormat="Y-m-d"
+                    userFormat="Y-m-d"
+                    :weekStart="1"
+                    placeholder="选择时间"
+                />
+            </div>
+
+            <div style="width: 160px;">
+                <label class="block text-gray-700 text-sm mb-1">{{ $t("每页显示") }}</label>
+                <themed-select v-model="form.per_page" class="w-full form-select rounded text-sm" style="height: 40px;">
+                    <option :value="10">{{ $t("10条") }}</option>
+                    <option :value="50">{{ $t("50条") }}</option>
+                    <option :value="100">{{ $t("100条") }}</option>
+                    <option :value="500">{{ $t("500条") }}</option>
+                </themed-select>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="reset()" class="h-10 px-4">
+                    {{ $t("重置") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="exportExcel()" class="h-10 px-4">
+                    {{ $t("导出") }}
+                </t-button-green>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1 opacity-0">{{ $t("按钮") }}</label>
+                <t-button-green @click="refresh()" class="h-10 px-4">
+                    {{ $t("刷新状态") }}
+                </t-button-green>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full whitespace-no-wrap">
+            <tr class="text-left font-bold">
+                <th class="px-3 pt-6 pb-4">{{ $t("日期") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("状态") }}</th>
+                <th class="px-3 pt-6 pb-4">ID</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("交易哈希") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("金额") }}</th>
+                <th class="px-6 pt-6 pb-4">{{ $t("手续费") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("地址") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("备注") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("网络") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("用户ID") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("组长") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("推荐人") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("系统钱包余额") }}</th>
+                <th class="px-3 pt-6 pb-4">{{ $t("操作") }}</th>
+            </tr>
+
+            <tr
+                v-for="withdrawal in withdrawals.data"
+                :key="withdrawal.id"
+                class="hover:bg-gray-100 focus-within:bg-gray-100"
+            >
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center text-sm">
+                        {{ formatDate(withdrawalPassedAt(withdrawal)) }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center focus:text-indigo-500">
+                        <badge v-if="withdrawal.status == 'waiting_approval'" class="mr-2" type="orange">
+                            {{ $t("待处理") }}
+                        </badge>
+
+                        <badge v-if="withdrawal.status == 'confirmed_system'" class="mr-2" type="orange">
+                            {{ $t("系统已确认") }}
+                        </badge>
+
+                        <badge v-if="withdrawal.status == 'waiting_provider_approval'" class="mr-2" type="orange">
+                            {{ $t("等待服务商审核") }}
+                        </badge>
+
+                        <badge v-if="withdrawal.status == 'confirmed_provider'" class="mr-2" type="green">
+                            {{ $t("服务商已确认") }}
+                        </badge>
+
+                        <badge v-if="withdrawal.status == 'rejected'" class="mr-2" type="red">
+                            {{ $t("已拒绝") }}
+                            <t-dropdown variant="tooltip" toggle-on-hover>
+                                <span slot="trigger" class="text-white">
+                                    <font-awesome-icon icon="info-circle" class="ml-1" />
+                                </span>
+                                <template>
+                                    <div class="p-5 text-red-500" v-html="withdrawal.rejected_reason"></div>
+                                </template>
+                            </t-dropdown>
+                        </badge>
+
+                        <badge v-if="withdrawal.status == 'failed'" class="mr-2" type="red">
+                            {{ $t("失败") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="withdrawal.source_id == 'system'">
+                            <badge class="mr-2" type="red">
+                                {{ $t("冷钱包") }}
+                            </badge>
+                        </template>
+
+                        <template v-else>
+                            <a class="text-indigo-500" target="_blank" :href="withdrawal.txn_link">
+                                {{ format_string(withdrawal.withdrawal_id, 10) }}
+                            </a>
+
+                            <font-awesome-icon
+                                v-if="withdrawal.withdrawal_id"
+                                class="text-gray-600 ml-2 cursor-pointer"
+                                icon="copy"
+                                @click="doCopy(withdrawal.withdrawal_id)"
+                            />
+                        </template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span v-if="withdrawal.txn && withdrawal.txn_link" class="px-6 py-4 flex items-center">
+                        <a class="text-indigo-500" target="_blank" :href="withdrawal.txn_link">
+                            {{ format_string(withdrawal.txn, 10) }}
+                        </a>
+
+                        <font-awesome-icon
+                            v-if="withdrawal.txn"
+                            class="text-gray-600 ml-2 cursor-pointer"
+                            icon="copy"
+                            @click="doCopy(withdrawal.txn)"
+                        />
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withdrawal.amount }} {{ withdrawal.currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withdrawal.fee }} {{ withdrawal.currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-3 py-2 flex items-center">
+                        {{ format_string(withdrawal.address, 10) }}
+
+                        <font-awesome-icon
+                            v-if="withdrawal.address"
+                            class="ml-2 cursor-pointer"
+                            icon="copy"
+                            @click="doCopy(withdrawal.address)"
+                        />
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-3 py-2 flex items-center">
+                        {{ format_string(withdrawal.payment_id, 5) }}
+
+                        <font-awesome-icon
+                            v-if="withdrawal.payment_id"
+                            class="ml-2 cursor-pointer"
+                            icon="copy"
+                            @click="doCopy(withdrawal.payment_id)"
+                        />
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withdrawal.network.name }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <span>
+                            {{ withdrawal.user.email }}<br> {{ withdrawal.user.id }}
+                        </span>
+
+                        <badge v-if="isVirtualWithdrawal(withdrawal)" class="ml-2" type="red">
+                            {{ $t("虚拟账户") }}
+                        </badge>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        <template v-if="withdrawal.leader_display_name">
+                            <badge class="mr-2" type="green">
+                                {{ withdrawal.leader_display_name }}
+                            </badge>
+                        </template>
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <div class="px-3 py-2 flex flex-col">
+                        <span>{{ getReferrerDisplay(withdrawal) }}</span>
+                        <button
+                            v-if="getReferrerChain(withdrawal).length"
+                            type="button"
+                            class="text-indigo-500 text-sm mt-1 text-left"
+                            @click="showReferrerChain(withdrawal)"
+                        >
+                            {{ $t("查看所有上级") }}
+                        </button>
+                    </div>
+                </td>
+
+                <td class="border-t">
+                    <span class="px-3 py-2 flex items-center">
+                        {{ withdrawal.wallet_balance }} {{ withdrawal.currency.symbol }}
+                    </span>
+                </td>
+
+                <td class="border-t">
+                    <span
+                        v-if="withdrawal.status == 'waiting_approval'"
+                        class="px-3 py-2 flex items-center focus:text-indigo-500"
+                    >
+                        <template v-if="isSuperAdmin && withdrawal.network_id == 17 && !isVirtualWithdrawal(withdrawal)">
+                            <t-button-green
+                                v-if="withdrawal.extra_status == 'inscribed'"
+                                @click="approve(withdrawal)"
+                                class="mr-2"
+                            >
+                                {{ $t("签名") }}
+                            </t-button-green>
+
+                            <t-button-gray
+                                v-else
+                                @click="$toast.error('刻录结束后才可以签名该交易。')"
+                                class="mr-2"
+                            >
+                                {{ $t("刻录中") }}
+                            </t-button-gray>
+                        </template>
+
+                        <template v-else-if="isSuperAdmin">
+                            <t-button-green @click="approve(withdrawal)" class="mr-2">
+                                {{ $t("通过") }}
+                            </t-button-green>
+                        </template>
+
+                        <t-button-red v-if="isSuperAdmin" @click="reject(withdrawal)">
+                            {{ $t("拒绝") }}
+                        </t-button-red>
+                    </span>
+                </td>
+            </tr>
+
+            <tr v-if="withdrawals.data.length === 0">
+                <td class="border-t px-6 py-2" colspan="100">
+                    {{ $t("未找到提现记录。") }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-6 bg-white rounded shadow p-5">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">
+                    {{ $t("提现统计") }}
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ $t("当前显示列表统计，不包含虚拟账户，已按待处理、已通过、已拒绝失败分开计算。") }}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded bg-yellow-50 p-5">
+                <div class="text-sm font-bold text-yellow-700 mb-4">
+                    {{ $t("待处理提现") }}
+                </div>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("人数") }}</span>
+                        <strong class="text-yellow-700">{{ pendingWithdrawalUserCount }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("金额") }}</span>
+                        <strong class="text-yellow-700">{{ formatAmount(pendingWithdrawalAmount) }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("手续费") }}</span>
+                        <strong class="text-yellow-700">{{ formatAmount(pendingWithdrawalFeeAmount) }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded bg-green-50 p-5">
+                <div class="text-sm font-bold text-green-700 mb-4">
+                    {{ $t("已通过提现") }}
+                </div>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("人数") }}</span>
+                        <strong class="text-green-700">{{ approvedWithdrawalUserCount }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("金额") }}</span>
+                        <strong class="text-green-700">{{ formatAmount(approvedWithdrawalAmount) }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("手续费") }}</span>
+                        <strong class="text-green-700">{{ formatAmount(approvedWithdrawalFeeAmount) }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded bg-red-50 p-5">
+                <div class="text-sm font-bold text-red-700 mb-4">
+                    {{ $t("已拒绝 / 失败提现") }}
+                </div>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("人数") }}</span>
+                        <strong class="text-red-700">{{ rejectedWithdrawalUserCount }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("金额") }}</span>
+                        <strong class="text-red-700">{{ formatAmount(rejectedWithdrawalAmount) }}</strong>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ $t("手续费") }}</span>
+                        <strong class="text-red-700">{{ formatAmount(rejectedWithdrawalFeeAmount) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="text-sm text-gray-600">
+            {{ $t("当前每页显示：") }}
+            <themed-select v-model="form.per_page" class="form-select rounded h-9 text-sm mx-2">
+                <option :value="10">{{ $t("10条") }}</option>
+                <option :value="50">{{ $t("50条") }}</option>
+                <option :value="100">{{ $t("100条") }}</option>
+                <option :value="500">{{ $t("500条") }}</option>
+            </themed-select>
+        </div>
+
+        <pagination :links="withdrawals.links" />
+    </div>
+
+    <jet-dialog-modal :show="showReasonModal" @close="closeReasonModal">
+        <template #title>
+            {{ $t("拒绝原因") }}
+        </template>
+
+        <template #content>
+            <div v-html="rejectedReason"></div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="closeReasonModal">
+                {{ $t("关闭") }}
+            </jet-secondary-button>
+        </template>
+    </jet-dialog-modal>
+
+    <jet-confirmation-modal :show="withdrawalBeingReviewed">
+        <template #title>
+            {{ $t("确认弹窗") }}
+        </template>
+
+        <template #content>
+            <div v-if="selectedAction == 'approve'">
+                {{ $t("你确定要") }}{{ selectedAction == 'approve' ? $t("通过") : selectedAction }}{{ $t("这笔提现申请吗？") }}
+            </div>
+
+            <div v-if="selectedAction == 'approve'" class="mt-10">
+                <label class="form-label mt-5 mr-2 d-inline-block" for="manual_withdraw_checkbox">
+                    {{ $t("手动提现吗？") }}
+                </label>
+
+                <t-checkbox
+                    id="manual_withdraw_checkbox"
+                    name="manualWithdraw"
+                    v-model="manualWithdraw"
+                    :value="true"
+                />
+
+                <t-textarea
+                    placeholder="输入交易哈希"
+                    v-if="manualWithdraw"
+                    v-model="manualWithdrawTxn"
+                    class="mt-5 w-full"
+                ></t-textarea>
+            </div>
+
+            <div v-if="selectedAction == 'reject'" class="flex flex-wrap">
+                {{ $t("确定要拒绝这笔提现申请吗？") }}
+            </div>
+        </template>
+
+        <template #footer>
+            <jet-secondary-button @click.native="withdrawalBeingReviewed = null">
+                {{ $t("取消") }}
+            </jet-secondary-button>
+
+            <jet-danger-button class="ml-2" @click.native="confirmAction">
+                <svg
+                    v-if="sending"
+                    class="animate-spin -ml-1 mr-3 h-2 w-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+
+                <span>
+                    {{ selectedAction == 'approve' ? $t("通过") : selectedAction == 'reject' ? $t("拒绝") : selectedAction }}
+                </span>
+            </jet-danger-button>
+        </template>
+    </jet-confirmation-modal>
+
+    <div
+        v-if="selectedReferrerChain !== null"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+    >
+        <div class="bg-white rounded shadow-lg w-full max-w-lg mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="font-bold text-lg">{{ selectedReferrerTitle }}</h3>
+                <button type="button" class="text-gray-500 hover:text-gray-800" @click="closeReferrerChain">×</button>
+            </div>
+
+            <div class="p-6">
+                <div v-if="!selectedReferrerChain.length" class="text-gray-500">
+                    {{ $t("没有上级推荐人。") }}
+                </div>
+
+                <div v-for="item in selectedReferrerChain" :key="item.level + '-' + item.id" class="border rounded p-3 mb-3">
+                    <div class="font-semibold text-gray-800">
+                        {{ $t("第") }} {{ item.level }} {{ $t("级：") }}{{ referrerPrimaryName(item) }}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("ID：") }}{{ item.id }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("邀请码：") }}{{ item.referral_code || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1 break-all">{{ $t("账号：") }}{{ item.account || '-' }}</div>
+                    <div class="text-sm text-gray-600 mt-1">{{ $t("姓名：") }}{{ item.name || '-' }}</div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t text-right">
+                <button type="button" class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200" @click="closeReferrerChain">
+                    {{ $t("关闭") }}
+                </button>
+            </div>
+        </div>
+    </div>
+</app-layout>

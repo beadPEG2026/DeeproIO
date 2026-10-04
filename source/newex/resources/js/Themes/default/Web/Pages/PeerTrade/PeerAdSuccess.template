@@ -1,0 +1,14 @@
+<app-layout>
+
+    <section class="user-status">
+        <div class="user-status__row">
+            <div class="user-status__item">
+                <font-awesome-icon class="animate-bounce text-4xl text-green-500 mb-5 user-status__icon" icon="check"></font-awesome-icon>
+                <h2 class="user-status__title">{{ $t('Your ad has been stored successfully') }}</h2>
+                <nav-button-link :href="route('p2p.my-ads')">
+                    <span>{{ $t('Open My Ads') }}</span>
+                </nav-button-link>
+            </div>
+        </div>
+    </section>
+</app-layout>
