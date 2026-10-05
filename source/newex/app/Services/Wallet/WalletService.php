@@ -119,13 +119,13 @@ class WalletService {
         }
     }
 
-    public function getWallets($user_id = false) {
+    public function getWallets($user_id = false, bool $fresh = false) {
 
         // If user not defined then take from current user
         if(!$user_id)
             $user_id = auth()->user()->id;
 
-        return $this->walletRepository->getWallets($user_id);
+        return $this->walletRepository->getWallets($user_id, $fresh);
     }
 
     public function getUsdtWallets($user_id = false) {

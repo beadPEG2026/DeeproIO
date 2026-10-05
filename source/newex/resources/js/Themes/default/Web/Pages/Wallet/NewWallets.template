@@ -10,15 +10,15 @@
   </nav>
   <section class="dp-assets-total">
    <div class="dp-assets-total__label">{{$t('Estimated Assets')}}<button type="button" :aria-label="walletCopy(balanceHidden ? 'Show balance' : 'Hide balance')" :aria-pressed="balanceHidden" @click="balanceHidden=!balanceHidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path v-if="balanceHidden" d="m3 3 18 18"/></svg></button></div>
-   <div class="dp-assets-total__value"><strong>{{balanceHidden ? '••••••' : !walletBalanceReady ? '—' : displayAmount(totalBalanceUSD)}}</strong><span>{{selectedDisplayCurrency.symbol}}</span></div>
+   <div class="dp-assets-total__value"><strong>{{balanceHidden ? '••••••' : !walletBalanceVisible ? '—' : displayAmount(totalBalanceUSD)}}</strong><span>{{selectedDisplayCurrency.symbol}}</span></div>
    <small>≈ {{balanceHidden ? '••••••' : totalBalanceBTC===null ? '—' : formatBtc(totalBalanceBTC)}} BTC</small>
   </section>
-  <p v-if="!walletBalanceReady" class="dp-wallet-state" role="status">{{$t(walletBalanceStatus==='loading'?'Loading balance…':walletBalanceStatus==='error'?'Balance could not be refreshed. Please retry.':'Refresh balance before continuing.')}} <button type="button" :disabled="walletBalanceStatus==='loading'" @click="refreshWalletBalances">{{$t('Retry')}}</button></p>
+  <p v-if="!walletBalanceVisible" class="dp-wallet-state" role="status">{{$t(walletBalanceStatus==='loading'?'Loading balance…':walletBalanceStatus==='error'?'Balance could not be refreshed. Please retry.':'Refresh balance before continuing.')}} <button type="button" :disabled="walletBalanceStatus==='loading'" @click="refreshWalletBalances">{{$t('Retry')}}</button></p>
   <account-actions/>
   <div class="dp-assets-accounts">
-   <button v-for="card in accountCards" :key="card.key" type="button" @click="openAccount(card)"><span>{{card.title}}</span><b>{{balanceHidden ? '••••' : !walletBalanceReady ? '—' : displayAmount(card.value)}}</b><small>{{selectedDisplayCurrency.symbol}} <i aria-hidden="true">›</i></small></button>
+   <button v-for="card in accountCards" :key="card.key" type="button" @click="openAccount(card)"><span>{{card.title}}</span><b>{{balanceHidden ? '••••' : !walletBalanceVisible ? '—' : displayAmount(card.value)}}</b><small>{{selectedDisplayCurrency.symbol}} <i aria-hidden="true">›</i></small></button>
   </div>
-  <div class="dp-assets-frozen"><span>{{$t('Frozen balance')}}</span><strong>{{balanceHidden?'••••':!walletBalanceReady?'—':displayAmount(frozenBalanceUSD)}} {{selectedDisplayCurrency.symbol}}</strong></div>
+  <div class="dp-assets-frozen"><span>{{$t('Frozen balance')}}</span><strong>{{balanceHidden?'••••':!walletBalanceVisible?'—':displayAmount(frozenBalanceUSD)}} {{selectedDisplayCurrency.symbol}}</strong></div>
   <section class="dp-assets-holdings">
    <header><h2>{{$t('My assets')}}</h2><button type="button" :aria-label="$t('Search Asset')" :aria-expanded="searchOpen" @click="searchOpen=!searchOpen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button></header>
    <div v-if="searchOpen" class="dp-assets-filter"><input v-model="search" type="search" :placeholder="$t('Search Asset')" :aria-label="$t('Search Asset')"><label><input v-model="hideSmallAssets" type="checkbox">{{$t('Hide small balances')}}</label></div>
@@ -26,7 +26,7 @@
     <div class="dp-assets-row__balance"><div class="dp-assets-row__identity"><currency-avatar :symbol="asset.symbol" :src="asset.icon || ''"/><span><b>{{asset.symbol}}</b><small>{{asset.name}}</small></span></div><div class="dp-assets-row__value"><strong>{{balanceHidden ? '••••••' : formatAmount(asset.totalAmount)}}</strong><small>≈ {{balanceHidden ? '••••' : displayAmount(asset.totalUsd)}} {{selectedDisplayCurrency.symbol}}</small></div></div>
     <div class="dp-assets-row__actions"><button type="button" @click="depositAsset(asset)">{{$t('Deposit')}}</button><button type="button" @click="tradeAsset(asset)">{{$t('Trade')}}</button></div>
    </article>
-   <p v-if="walletBalanceReady && !hasAssets" class="dp-assets-empty">{{$t('No assets found')}}</p>
+   <p v-if="walletBalanceVisible && !hasAssets" class="dp-assets-empty">{{$t('No assets found')}}</p>
   </section>
   <div v-if="message" class="dp-assets-toast" role="status">{{message}}</div>
  </div>

@@ -68,7 +68,7 @@
             clearInterval( this.timeInterval )
         },
         created() {
-
+            this.setUser();
             window.addEventListener('resize', this.mq)
 
             this.currentTime = this.serverTime();
@@ -104,9 +104,8 @@
               try { this.showWelcome = !sessionStorage.getItem('deepro-welcome-seen'); } catch (_) { this.showWelcome = false; }
           }
           this.mq();
-          this.setUser();
         },
-        watch: { '$page.url'() { this.menuToggled = false; this.navOpen = ''; this.showingUserProfileDropdown = false; const panel = new URLSearchParams(this.$page.url.split('?')[1] || '').get('panel'); if (['about','discover','profile'].includes(panel)) this.hub = panel; } },
+        watch: { '$page.props.user.id'() { this.setUser(); }, '$page.url'() { this.menuToggled = false; this.navOpen = ''; this.showingUserProfileDropdown = false; const panel = new URLSearchParams(this.$page.url.split('?')[1] || '').get('panel'); if (['about','discover','profile'].includes(panel)) this.hub = panel; } },
         methods: {
             leaveNav(event) { const menu=event.currentTarget; if(event.type==='focusout'){ if(!menu.contains(event.relatedTarget))this.navOpen=''; return; } if(!menu.contains(document.activeElement))this.navOpen=''; },
             closeNav(event) { this.navOpen=''; event.currentTarget.querySelector('button')?.focus(); },
@@ -118,7 +117,7 @@
                 }
             },
             setUser() {
-                if(this.$page && this.$page.props.user && !this.$store.getters.getUser) {
+                if(String(this.$page?.props.user?.id || '') !== String(this.$store.getters.getUser?.id || '')) {
                     this.$store.dispatch('setUser', {user: this.$page.props.user});
                 }
             },

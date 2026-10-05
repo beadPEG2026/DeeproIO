@@ -38,6 +38,23 @@ final class WalletBalanceExperienceTest extends TestCase
         self::assertSame('other-old',$cache->rememberWallets($id+1000,fn()=>'other-old'));
         self::assertSame('other-old',$cache->rememberWallets($id+1000,fn()=>'other-new'));
     }
+    public function test_overview_embeds_fresh_owner_balances_without_waiting_for_another_request():void {
+        $request=Request::create('/wallets','GET');
+        $request->headers->set('X-Inertia','true');
+        $request->setUserResolver(fn()=>$this->user);app()->instance('request',$request);
+        $repository=app(\App\Repositories\Wallet\WalletRepository::class);
+        $repository->getWallets($this->user->id); // prime the normal read cache
+        DB::table('wallets')->where('id',$this->wallet->id)->update(['balance_in_wallet'=>'7.12345678']);
+        $controller=app(\App\Http\Controllers\Web\Client\WalletController::class);
+        foreach (['index','newWallets'] as $method) {
+            $data=$controller->$method()->toResponse($request)->getData(true)['props']['walletSnapshot'];
+            self::assertSame($this->user->id,$data['owner_id']);
+            $usdt=collect($data['wallets'])->firstWhere('symbol','USDT');
+            self::assertSame(0,bccomp($usdt['balance_in_wallet'],'7.12345678',18));
+            self::assertSame(0,bccomp($usdt['balance_in_trade'],'19.88672781',18));
+        }
+        self::assertFalse($request->boolean('fresh')); // shared request is not mutated
+    }
     public function test_account_balance_api_rejects_translated_enum_instead_of_reporting_zero():void {
         $id=$this->wallet->currency_id;
         $this->getJson('/api/v1/wallets/balance?currency='.$id.'&type=trade')->assertOk()->assertJsonPath('success',true);

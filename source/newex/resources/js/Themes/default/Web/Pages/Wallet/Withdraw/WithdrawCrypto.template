@@ -3,7 +3,7 @@
  <form id="withdraw-flow-form" @submit.prevent="advanceWithdrawal" novalidate>
   <template v-if="flowStep===0">
    <p v-if="scannedRecipientDraft" class="wallet-flow__note" role="status">{{$t('Only the address was imported. Check the asset and select the network. Enter the amount and Memo yourself.')}}</p>
-   <div class="wallet-flow__field"><label for="withdraw-asset">{{$t('Asset')}}</label><asset-picker input-id="withdraw-asset" :assets="currencies" v-model="activeAsset.symbol" @change="changeAsset"/></div>
+
    <nav v-if="canShowInternalWithdraw" class="wallet-flow__type" :aria-label="$t('Withdrawal Type')"><button v-for="type in withdrawTypeOptions" :key="type.value" type="button" :aria-pressed="form.withdraw_type===type.value" @click="form.withdraw_type=type.value;changeWithdrawType()">{{type.text}}</button></nav>
    <p v-if="!currency.withdraw_status" class="wallet-flow__error" role="status">{{$t('Withdrawal Suspended')}}</p>
    <template v-else>
@@ -19,7 +19,7 @@
      <p v-if="activeNetwork" class="wallet-flow__hint">{{$t('Enter the recipient address on the selected network. Do not use your Deepro deposit address.')}}</p>
      <details v-if="networkStates.some(n=>!n.available)" class="wallet-flow__availability"><summary>{{$t('Network availability')}}</summary><network-status :networks="networkStates"/></details>
     </template>
-    <template v-else><div class="wallet-flow__field"><label for="recipient-uid">{{walletCopy('Recipient UID')}}</label><input id="recipient-uid" v-model.trim="form.internal_uid" maxlength="20" inputmode="numeric" autocomplete="off" :placeholder="walletCopy('Enter the recipient UID')"/><p class="wallet-flow__hint">{{walletCopy('Ask the recipient to copy their UID from Profile.')}}</p></div><p class="wallet-flow__note">{{$t('Internal withdrawals are completed instantly and do not require blockchain confirmation.')}}</p></template>
+    <template v-else><div class="wallet-flow__field"><label for="recipient-uid">{{walletCopy('Recipient UID')}}</label><input id="recipient-uid" v-model.trim="form.internal_uid" maxlength="20" inputmode="numeric" autocomplete="off" :placeholder="walletCopy('Enter the recipient UID')"/></div></template>
    </template>
    <p v-if="addressError" role="alert" class="wallet-flow__error">{{addressError}}</p>
    <div class="wallet-flow__field"><label for="withdraw-amount">{{$t('Withdrawal amount')}}</label><div class="wallet-flow__amount"><input id="withdraw-amount" v-model="form.amount" maxlength="40" inputmode="decimal" autocomplete="off" placeholder="0" :aria-invalid="!!amountError" @keydown.enter.prevent="advanceWithdrawal"/><span>{{currency.symbol}}</span><button type="button" :disabled="!balanceReady" @click="setMaxAmount">{{$t('MAX')}}</button></div></div>

@@ -32,7 +32,7 @@ const actions = {
             user: user
         });
         commit(SET_USER_CHANNEL, {
-            channel: 'private-user-' + user.id
+            channel: user ? 'private-user-' + user.id : null
         });
     },
 };

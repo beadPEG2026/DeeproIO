@@ -9,6 +9,7 @@ import TableFilter from "@/Mixins/Filter/TableFilter";
 import IconFilter from "@/Components/Table/IconFilter";
 
 export default Template({
+    walletOverview: true,
     components: {
         AccountActions,
         AppLayout,
@@ -28,20 +29,12 @@ export default Template({
     mixins: [TableFilter,DisplayPreferences,WalletRefresh],
 
     beforeDestroy () {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('resize', this.onResize, { passive: true })
-        }
 
         clearInterval(this.fetchBalanceInterval)
     },
 
     mounted() {
         this.setFilter('balance_in_trade_usd', 'desc', true);
-
-
-
-        this.onResize();
-        window.addEventListener('resize', this.onResize, { passive: true })
 
         this.fetchTotalBalance();
 
@@ -70,7 +63,7 @@ export default Template({
         },
 
         displayTotalBalance() {
-            if (!this.walletBalanceReady) return null;
+            if (!this.walletBalanceVisible) return null;
             if (this.useVirtualAssets) {
                 return this.virtualTradingTotalBalance;
             }
@@ -95,7 +88,7 @@ export default Template({
         },
 
         wallets() {
-            if (!this.walletBalanceReady) return [];
+            if (!this.walletBalanceVisible) return [];
             const direction = this.filter.filterDirection == 'desc' ? 'desc' : 'asc';
 
             let wallets = _.map(this.rawWallets, (wallet) => {
@@ -206,14 +199,6 @@ export default Template({
 
         canWithdraw(wallet) {
             return wallet && [true, 1, '1', 'true'].includes(wallet.withdraw_status);
-        },
-
-        onResize () {
-            if (window.innerWidth < 986) {
-                this.$inertia.visit(this.route('wallets.trading.lite'));
-            } else {
-                // this.$inertia.visit(this.route('market', window.globalMarket.name));
-            }
         },
 
         fetchTotalBalance() {

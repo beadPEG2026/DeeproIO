@@ -17,6 +17,10 @@ export function addBalance(left, right, precision=18) {
 export function walletBalanceReady(status, updatedAt, now=Date.now()) {
  return status==='ready' && updatedAt>0 && now>=updatedAt && now-updatedAt<60000;
 }
+// A recent snapshot can remain visible while refreshing, but cannot authorize a payment.
+export function walletBalanceVisible(status, updatedAt, now=Date.now()) {
+ return ['ready','loading'].includes(status) && walletBalanceReady('ready',updatedAt,now);
+}
 
 export function percentageBalance(value, percent, precision=18) {
  const text=balanceDecimal(value)||'0', [whole,fraction='']=text.split('.');

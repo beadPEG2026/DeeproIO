@@ -9,6 +9,7 @@ import TableFilter from "@/Mixins/Filter/TableFilter";
 import IconFilter from "@/Components/Table/IconFilter";
 
 export default Template({
+    walletOverview: true,
     components: {
         AccountActions,
         AppLayout,
@@ -19,7 +20,6 @@ export default Template({
 
     data() {
         return {
-            fetchBalanceInterval: null,
             totalBalance: null,
             activeType: 'coin',
         }
@@ -28,26 +28,12 @@ export default Template({
     mixins: [TableFilter,DisplayPreferences,WalletRefresh],
 
     beforeDestroy() {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('resize', this.onResize, { passive: true })
-        }
 
-        clearInterval(this.fetchBalanceInterval)
     },
 
     mounted() {
         this.setFilter('balance_in_wallet_usd', 'desc', true);
 
-
-
-        this.onResize();
-        window.addEventListener('resize', this.onResize, { passive: true })
-
-        this.fetchTotalBalance();
-
-        this.fetchBalanceInterval = setInterval(() => {
-            this.fetchTotalBalance();
-        }, 10000);
     },
 
     computed: {
@@ -58,12 +44,8 @@ export default Template({
         },
 
         displayTotalBalance() {
-            if (!this.walletBalanceReady) return null;
-            if (!_.isEmpty(this.rawWallets)) {
-                return this.fundingTotalBalance;
-            }
-
-            return this.totalBalance;
+            if (!this.walletBalanceVisible) return null;
+            return this.fundingTotalBalance;
         },
 
         fundingTotalBalance() {
@@ -81,7 +63,7 @@ export default Template({
         },
 
         wallets() {
-            if (!this.walletBalanceReady) return [];
+            if (!this.walletBalanceVisible) return [];
             const direction = this.filter.filterDirection == 'desc' ? 'desc' : 'asc';
 
             let wallets = _.map(this.rawWallets, (wallet) => {
@@ -192,24 +174,6 @@ export default Template({
 
         canWithdraw(wallet) {
             return wallet && [true, 1, '1', 'true'].includes(wallet.withdraw_status);
-        },
-
-        onResize() {
-            if (window.innerWidth < 986) {
-                this.$inertia.visit(this.route('wallets.lite'));
-            } else {
-                // keep current desktop page
-            }
-        },
-
-        fetchTotalBalance() {
-            axios.get(this.route('currencies.api.rates-balance'), {
-                params: {
-                    wallet: 'wallet'
-                }
-            }).then((response) => {
-                this.totalBalance = response.data;
-            })
         },
 
         toNumber(value) {

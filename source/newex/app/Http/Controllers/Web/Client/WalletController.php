@@ -42,9 +42,24 @@ class WalletController extends Controller
         $this->currencyService = $currencyService;
     }
 
+    /** Initial overview and its balances travel in one authenticated response. */
+    private function balanceSnapshot(): ?array
+    {
+        try {
+            return [
+                'owner_id' => (int) auth()->id(),
+                'wallets' => app(\App\Http\Controllers\Api\v1\WalletController::class)
+                    ->index(request(), true)->resolve(request()),
+            ];
+        } catch (\Throwable $e) {
+            // Keep navigation usable; the client retries the dedicated balance endpoint.
+            return null;
+        }
+    }
+
     public function index()
     {
-        return Inertia::render('Wallet/Wallets');
+        return Inertia::render('Wallet/Wallets', ['walletSnapshot' => fn () => $this->balanceSnapshot()]);
     }
 
     public function indexLite()
@@ -57,7 +72,7 @@ class WalletController extends Controller
      */
     public function newWallets()
     {
-        return Inertia::render('Wallet/NewWallets');
+        return Inertia::render('Wallet/NewWallets', ['walletSnapshot' => fn () => $this->balanceSnapshot()]);
     }
 
 public function autoInvest()

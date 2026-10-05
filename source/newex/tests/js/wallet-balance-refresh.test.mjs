@@ -15,6 +15,7 @@ function load(path,stubs={}){
  const exports={};vm.runInNewContext(code,{exports,Date,URLSearchParams,axios:stubs.axios,require(name){
   if(name.startsWith('{Template}'))return {__esModule:true,default:v=>v};
   if(name==='vue')return {__esModule:true,default:{set:(rows,index,row)=>rows[index]=row}};
+  if(name==='@/Store/Mutations/User')return {SET_USER:'SET_USER'};
   if(name==='vuex')return {mapGetters:()=>({})};
   if(name==='@/Store/Mutations/Wallet')return Object.fromEntries(['WALLET_LIST','WALLET_UPDATE'].map(v=>[v,v]));
   if(name==='@/Functions/WalletBalance.mjs')return balance;
@@ -100,4 +101,31 @@ test('virtual account source enums remain raw in translated trading screens',()=
 test('a newer shared balance response is fresh even when another component clock is older',()=>{
  const c=load('Mixins/WalletRefresh.js');const x={walletClock:1,walletBalanceStatus:'ready',$store:{getters:{getWalletBalanceUpdatedAt:Date.now()}}};
  assert.equal(c.computed.walletBalanceReady.call(x),true);
+});
+
+
+test('overview requests coalesce, recent snapshots survive navigation, payment entry still refreshes',async()=>{
+ const d=defer();let calls=0;
+ const m=load('Store/Modules/wallets.js',{axios:{get:()=>{calls++;return d.promise;}}}),state={...m.state,items:[]},commit=(k,p)=>m.mutations[k](state,p),ctx={state,commit};
+ const input={route:'/wallets',ownerId:147,reuseRecent:true};
+ const a=m.actions.fetchWallets(ctx,input),b=m.actions.fetchWallets(ctx,input);assert.equal(a,b);assert.equal(calls,1);
+ d.resolve({data:{data:[{symbol:'USDT',balance_in_wallet:'19.88672781'}]}});await a;
+ await m.actions.fetchWallets(ctx,input);assert.equal(calls,1);
+ const pay=m.actions.fetchWallets(ctx,{...input,reuseRecent:false});assert.equal(calls,2);assert.equal(state.balanceStatus,'loading');
+ assert.equal(balance.walletBalanceReady(state.balanceStatus,state.balanceUpdatedAt),false);
+ assert.equal(balance.walletBalanceVisible(state.balanceStatus,state.balanceUpdatedAt),true);await pay;
+ state.balanceUpdatedAt=Date.now()-16000;await m.actions.fetchWallets(ctx,input);assert.equal(calls,3);
+ assert.equal(balance.walletBalanceVisible('error',Date.now()),false);
+ assert.equal(balance.walletBalanceVisible('loading',Date.now()-60001),false);
+});
+test('page snapshot is owner bound, accepts actual zero, and cannot overwrite a live request',async()=>{
+ const d=defer(),m=load('Store/Modules/wallets.js',{axios:{get:()=>d.promise}}),state={...m.state,items:[]},commit=(k,p)=>m.mutations[k](state,p);
+ commit('walletBalanceOwner',147);
+ commit('walletBalanceSnapshot',{owner_id:148,wallets:[{symbol:'USDT',balance_in_wallet:'99'}]});assert.equal(state.items.length,0);
+ commit('walletBalanceSnapshot',{owner_id:147,wallets:[{symbol:'USDT',balance_in_wallet:'0'}]});assert.equal(state.balanceStatus,'ready');assert.equal(state.items[0].balance_in_wallet,'0');
+ const request=m.actions.fetchWallets({state,commit},'/wallets');
+ commit('walletBalanceSnapshot',{owner_id:147,wallets:[{symbol:'USDT',balance_in_wallet:'99'}]});assert.equal(state.items[0].balance_in_wallet,'0');
+ commit('SET_USER',{user:{id:148}});assert.equal(state.items.length,0);assert.equal(state.balanceUpdatedAt,0);
+ d.resolve({data:{data:[{symbol:'USDT',balance_in_wallet:'5'}]}});assert.equal(await request,false);assert.equal(state.items.length,0);
+ commit('SET_USER',{user:null});assert.equal(state.balanceOwner,null);
 });

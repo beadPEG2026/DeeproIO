@@ -129,7 +129,7 @@ const App = createInertiaApp({
     },
 });
 
-warmNavigation();
+App.then(() => warmNavigation());
 
 // Global Inertia error handler - shows toast instead of modal error page
 router.on('exception', (event) => {

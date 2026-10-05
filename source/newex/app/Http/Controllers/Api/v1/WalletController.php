@@ -165,9 +165,9 @@ class WalletController extends Controller
      *
      * @return WalletCollection
      */
-    public function index(Request $request)
+    public function index(Request $request, bool $fresh = false)
     {
-        $wallets = $this->walletService->getWallets();
+        $wallets = $this->walletService->getWallets(false, $fresh);
         $userId = (int) $request->user()->id;
         $isFuturesContext = $request->get('context') === 'futures';
         $isVirtualUser = $this->isWalletOwnerVirtual($userId);

@@ -388,11 +388,13 @@
     /** sell end */
 
     .form-disabled {
-        &:hover{
+        background-color: var(--rows-color);
+        border-radius: 8px;
+        box-shadow: none;
+        &:hover {
             border: 1px solid var(--rows-color);
             box-shadow: none;
         }
-        background-color: var(--border-line-color);
     }
 
     // TP/SL Section

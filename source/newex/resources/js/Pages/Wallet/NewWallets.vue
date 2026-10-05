@@ -8,6 +8,7 @@ import CurrencyAvatar from '@/Components/CurrencyAvatar.vue'
 import {walletUiCopy} from '@/Functions/WalletUiCopy.mjs';
 
 export default Template({
+    walletOverview: true,
     mixins:[DisplayPreferences,WalletRefresh],
     components: {
         AccountActions,

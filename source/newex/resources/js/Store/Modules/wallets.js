@@ -6,12 +6,27 @@ import {
 } from "@/Store/Mutations/Wallet";
 
 import Vue from "vue";
+import {SET_USER} from '@/Store/Mutations/User';
+import {walletBalanceReady} from '@/Functions/WalletBalance.mjs';
+
+// Promises stay outside reactive state and are scoped to this store instance.
+const pendingBalances = new WeakMap();
+function selectOwner(state, owner) {
+    owner = owner == null ? null : String(owner);
+    if (state.balanceOwner === owner) return;
+    state.balanceOwner = owner;
+    state.items = [];
+    state.balanceStatus = 'idle';
+    state.balanceUpdatedAt = 0;
+    state.balanceRequest++;
+}
 
 const state = {
     items: [],
     balanceStatus: 'idle',
     balanceUpdatedAt: 0,
     balanceRequest: 0,
+    balanceOwner: null,
     deposits: [],
     withdrawals: [],
     fiatDeposits: [],
@@ -44,6 +59,15 @@ const getters = {
 };
 
 const mutations = {
+    [SET_USER](state, {user}) { selectOwner(state, user?.id); },
+    walletBalanceOwner(state, owner) { selectOwner(state, owner); },
+    walletBalanceSnapshot(state, snapshot) {
+        if (!snapshot || String(snapshot.owner_id) !== state.balanceOwner
+            || state.balanceStatus !== 'idle' || !Array.isArray(snapshot.wallets)) return;
+        state.items = snapshot.wallets;
+        state.balanceStatus = 'ready';
+        state.balanceUpdatedAt = Date.now();
+    },
     walletBalanceRequest(state, {id, status, updatedAt}) {
         if (id < state.balanceRequest) return;
         state.balanceRequest = id;
@@ -93,10 +117,19 @@ const mutations = {
 
 const actions = {
 
-    fetchWallets({ state, commit }, route) {
+    fetchWallets({ state, commit, rootGetters }, input) {
+        const options = typeof input === 'string' ? {route: input} : input;
+        const owner = options.ownerId ?? rootGetters?.getUser?.id ?? state.balanceOwner;
+        commit('walletBalanceOwner', owner);
+        if (options.reuseRecent) {
+            const pending = pendingBalances.get(state);
+            if (pending?.id === state.balanceRequest) return pending.promise;
+            if (walletBalanceReady(state.balanceStatus, state.balanceUpdatedAt)
+                && Date.now() - state.balanceUpdatedAt < 15000) return Promise.resolve(true);
+        }
         const id = state.balanceRequest + 1;
         commit('walletBalanceRequest', {id, status: 'loading'});
-        return axios.get(route, {params: {fresh: 1}, timeout: 15000}).then(response => {
+        const promise = axios.get(options.route, {params: {fresh: 1}, timeout: 15000}).then(response => {
             if (id !== state.balanceRequest) return false;
             if (!Array.isArray(response.data.data)) throw new Error('Invalid wallet response');
             commit(WALLET_LIST, {wallets: response.data.data});
@@ -105,7 +138,11 @@ const actions = {
         }).catch(() => {
             if (id === state.balanceRequest) commit('walletBalanceRequest', {id, status: 'error'});
             return false;
+        }).finally(() => {
+            if (pendingBalances.get(state)?.id === id) pendingBalances.delete(state);
         });
+        pendingBalances.set(state, {id, promise});
+        return promise;
     },
     fetchDeposits({ state, commit }, route) {
         axios.get(route).then(response => {

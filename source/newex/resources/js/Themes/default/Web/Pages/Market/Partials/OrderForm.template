@@ -39,7 +39,7 @@
                     :class="{ 'module-orderform__active' : orderType == 'market' }"
                     class="module-orderform__title-item"
                 >
-                    {{ $t('Market') }}
+                    {{ $t('市价') }}
                 </div>
 
                 <div
@@ -90,7 +90,7 @@
                                 @keyup="(e) => clearInput(e, 'buy','price')"
                                 @paste.prevent
                                 @drop.prevent
-                                :placeholder="$t('Market')"
+                                :placeholder="$t('市价')"
                                 :disabled="true"
                                 type="text" inputmode="decimal"
                             >
@@ -227,7 +227,7 @@
                                 @keyup="(e) => clearInput(e, 'ask','price')"
                                 @paste.prevent
                                 @drop.prevent
-                                :placeholder="$t('Market')"
+                                :placeholder="$t('市价')"
                                 :disabled="true"
                                 type="text" inputmode="decimal"
                             >

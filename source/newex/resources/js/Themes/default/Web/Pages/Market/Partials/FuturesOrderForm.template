@@ -46,7 +46,7 @@
                 <vue-slider v-model="leverage" :tooltip-formatter="leverageSlider.formatter" :marks="leverageSlider.marks" :min="1" :max="leverageSlider.max" :adsorb="false" :hide-label="true" :tooltip-placement="'top'"></vue-slider>
             </div>
             <div class="module-orderform__title" :class="{'futures-tabs': true}">
-                <div @click="setOrderType('market')" :class="{ 'module-orderform__active' : orderType == 'market' }" class="module-orderform__title-item">{{ $t('Market') }}</div>
+                <div @click="setOrderType('market')" :class="{ 'module-orderform__active' : orderType == 'market' }" class="module-orderform__title-item">{{ $t('市价') }}</div>
                 <div @click="setOrderType('limit')" :class="{ 'module-orderform__active' : orderType == 'limit' }" class="module-orderform__title-item">{{ $t('Limit') }}</div>
             </div>
         </div>
@@ -77,7 +77,7 @@
 
                         <div v-if="orderType == 'market'" class="module-orderform__buy-forms__item" :class="{'form-disabled': true}">
                             <label class="module-orderform__buy-forms__item-left">{{ $t('Price') }}</label>
-                            <input @keyup="(e) => clearInput(e, 'buy','price')"  @paste.prevent @drop.prevent :placeholder="$t('Market')" :disabled="true" type="text">
+                            <input @keyup="(e) => clearInput(e, 'buy','price')"  @paste.prevent @drop.prevent :placeholder="$t('市价')" :disabled="true" type="text">
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency}}</label>
                         </div>
                         <div v-else class="module-orderform__buy-forms__item" :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'price'}">
@@ -166,7 +166,7 @@
                     <div class="module-orderform__sell-forms">
                         <div v-if="orderType == 'market'" class="module-orderform__sell-forms__item" :class="{'form-disabled': true}">
                             <label class="module-orderform__sell-forms__item-left">{{ $t('Price') }}</label>
-                            <input @keyup="(e) => clearInput(e, 'ask','price')" @paste.prevent @drop.prevent :placeholder="$t('Market')" :disabled="true" type="text">
+                            <input @keyup="(e) => clearInput(e, 'ask','price')" @paste.prevent @drop.prevent :placeholder="$t('市价')" :disabled="true" type="text">
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency}}</label>
                         </div>
                         <div v-else class="module-orderform__sell-forms__item" :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'price'}">

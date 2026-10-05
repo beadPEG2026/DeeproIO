@@ -26,7 +26,7 @@
         <div class="module-head">
 
             <div class="module-orderform__title">
-                <div @click="setOrderType('market')" :class="{ 'module-orderform__active' : orderType == 'market' }" class="module-orderform__title-item">{{ $t('Market') }}</div>
+                <div @click="setOrderType('market')" :class="{ 'module-orderform__active' : orderType == 'market' }" class="module-orderform__title-item">{{ $t('市价') }}</div>
                 <div @click="setOrderType('limit')" :class="{ 'module-orderform__active' : orderType == 'limit' }" class="module-orderform__title-item">{{ $t('Limit') }}</div>
             </div>
         </div>
@@ -59,7 +59,7 @@
 
                         <div class="module-orderform__buy-forms__item" :class="{'form-disabled': orderType == 'market', 'module-orderform__buy-forms__invalid': buyErrorField == 'price'}">
                             <label class="module-orderform__buy-forms__item-left">{{ $t('Price') }}</label>
-                            <input @keyup="(e) => clearInput(e, 'buy','price')" @paste.prevent @drop.prevent :placeholder="orderType == 'market' ? $t('Market'): ''" :disabled="orderType == 'market'" v-model="bid.price" type="text">
+                            <input @keyup="(e) => clearInput(e, 'buy','price')" @paste.prevent @drop.prevent :placeholder="orderType == 'market' ? $t('市价'): ''" :disabled="orderType == 'market'" v-model="bid.price" type="text">
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency}}</label>
                         </div>
 
@@ -149,7 +149,7 @@
                     <div class="module-orderform__sell-forms">
                         <div class="module-orderform__sell-forms__item" :class="{'form-disabled': orderType == 'market', 'module-orderform__sell-forms__invalid': sellErrorField == 'price'}">
                             <label class="module-orderform__sell-forms__item-left">{{ $t('Price') }}</label>
-                            <input @keyup="(e) => clearInput(e, 'ask','price')" @paste.prevent @drop.prevent :placeholder="orderType == 'market' ? $t('Market'): ''" :disabled="orderType == 'market'" v-model="ask.price" type="text">
+                            <input @keyup="(e) => clearInput(e, 'ask','price')" @paste.prevent @drop.prevent :placeholder="orderType == 'market' ? $t('市价'): ''" :disabled="orderType == 'market'" v-model="ask.price" type="text">
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency}}</label>
                         </div>
 

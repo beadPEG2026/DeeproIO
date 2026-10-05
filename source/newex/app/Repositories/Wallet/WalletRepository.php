@@ -26,11 +26,11 @@ use Setting;
 
 class WalletRepository implements WalletRepositoryInterface
 {
-    public function getWallets($user_id)
+    public function getWallets($user_id, bool $fresh = false)
     {
         $userId = (int) $user_id;
 
-        return app(ReadModelCacheService::class)->rememberWallets($userId, function () use ($userId) {
+        $resolve = function () use ($userId) {
             $wallet = Wallet::query();
 
             $wallet->with(['address']);
@@ -44,7 +44,9 @@ class WalletRepository implements WalletRepositoryInterface
             $wallet->where('user_id', $userId);
 
             return $wallet->get();
-        });
+        };
+
+        return $fresh ? $resolve() : app(ReadModelCacheService::class)->rememberWallets($userId, $resolve);
     }
 
     public function getUsdtWallets($user_id)
