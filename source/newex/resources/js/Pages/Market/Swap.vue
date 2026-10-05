@@ -1,6 +1,5 @@
 <script>
 import {requestIntent, completeIntent, spotIntent} from '@/Functions/RequestIntent.mjs';
-import { legacyText } from '@/Functions/LegacyTranslation';
 
 import Template from '{Template}/Web/Pages/Market/Swap.template'
 import AppLayout from '@/Layouts/AppLayout'
@@ -526,7 +525,7 @@ export default Template({
                      */
                     account_type: this.balanceSource === 'virtual' ? 'virtual' : 'real',
                     use_virtual_wallet: this.balanceSource === 'virtual',
-                    virtual_balance_source: this.balanceSource === 'virtual' ? legacyText("trade") : null,
+                    virtual_balance_source: this.balanceSource === 'virtual' ? 'trade' : null,
                     balance_context: 'trade',
                 };
 

@@ -472,7 +472,7 @@ export default Template({
                 return null;
             }
 
-            return this.toNumber(wallet.balance_in_virtual_trade) > 0 ? legacyText("trade") : null;
+            return this.toNumber(wallet.balance_in_virtual_trade) > 0 ? 'trade' : null;
         },
 
         getAvailableFuturesBalance(wallet) {

@@ -20,27 +20,27 @@ class Wallet extends JsonResource
         /*
          * 真实账户余额
          */
-        $realWallet = $this->formatAmount4($this->balance_in_wallet ?? 0);
-        $realTrade = $this->formatAmount4($this->balance_in_trade ?? 0);
-        $realOrder = $this->formatAmount4($this->balance_in_order ?? 0);
-        $realWithdraw = $this->formatAmount4($this->balance_in_withdraw ?? 0);
-        $realLc = $this->formatAmount4($this->balance_in_lc ?? 0);
+        $realWallet = $this->formatAmount($this->balance_in_wallet ?? 0);
+        $realTrade = $this->formatAmount($this->balance_in_trade ?? 0);
+        $realOrder = $this->formatAmount($this->balance_in_order ?? 0);
+        $realWithdraw = $this->formatAmount($this->balance_in_withdraw ?? 0);
+        $realLc = $this->formatAmount($this->balance_in_lc ?? 0);
 
         /*
          * 虚拟账户余额
          */
-        $virtualWallet = $this->formatAmount4($this->balance_in_virtual_wallet ?? 0);
-        $virtualTrade = $this->formatAmount4($this->balance_in_virtual_trade ?? 0);
-        $virtualOrder = $this->formatAmount4($this->balance_in_virtual_order ?? 0);
-        $virtualWithdraw = $this->formatAmount4($this->balance_in_virtual_withdraw ?? 0);
+        $virtualWallet = $this->formatAmount($this->balance_in_virtual_wallet ?? 0);
+        $virtualTrade = $this->formatAmount($this->balance_in_virtual_trade ?? 0);
+        $virtualOrder = $this->formatAmount($this->balance_in_virtual_order ?? 0);
+        $virtualWithdraw = $this->formatAmount($this->balance_in_virtual_withdraw ?? 0);
         $virtualAvailableForWithdraw = $virtualWallet;
 
         /*
          * 真实 + 虚拟合计
          */
-        $totalWallet = $this->formatAmount4(math_sum($realWallet, $virtualWallet));
-        $totalTrade = $this->formatAmount4(math_sum($realTrade, $virtualTrade));
-        $totalOrder = $this->formatAmount4(math_sum($realOrder, $virtualOrder));
+        $totalWallet = $this->formatAmount(math_sum($realWallet, $virtualWallet));
+        $totalTrade = $this->formatAmount(math_sum($realTrade, $virtualTrade));
+        $totalOrder = $this->formatAmount(math_sum($realOrder, $virtualOrder));
 
         /*
          * USD 估值
@@ -71,6 +71,7 @@ class Wallet extends JsonResource
         $usdTotalOrder = $toUsd($totalOrder);
 
         return [
+            'currency_id' => $this->currency_id,
             'currency' => $this->currency->name,
             'symbol' => $this->currency->symbol,
             'logo' => url($this->currency->logo_path),
@@ -186,7 +187,7 @@ class Wallet extends JsonResource
         ];
     }
 
-    private function formatAmount4($value)
+    private function formatAmount($value)
     {
         if ($value === null || $value === '') {
             $value = 0;
@@ -200,7 +201,7 @@ class Wallet extends JsonResource
             $value = 0;
         }
 
-        return math_formatter((string) $value, 4, false, true);
+        return math_formatter((string) $value, 18, false, true);
     }
 
     private function positiveOrZero($value)

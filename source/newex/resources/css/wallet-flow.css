@@ -21,3 +21,21 @@
 @media(max-width:767px){.wallet-flow--deposit .wallet-flow__content{padding-top:22px}}
 /* Keep the final amount/fee rows reachable above sticky actions and mobile navigation. */
 @media(max-width:767px){.wallet-flow--withdraw .wallet-flow__content{padding-bottom:calc(80px + var(--dp-mobile-nav-height,64px) + env(safe-area-inset-bottom,0px))}}
+
+/* Funding context and mobile keyboard use the visible viewport, not the layout viewport. */
+.wallet-flow__funding{margin:10px 0;padding:10px 12px;border-radius:10px;background:var(--ui-surface-soft,#f4f6f5);font-size:12px}
+.wallet-flow__funding>div{display:flex;justify-content:space-between;gap:12px}.wallet-flow__funding strong{font-variant-numeric:tabular-nums}
+.wallet-flow__funding>button{display:block;min-height:44px;color:var(--ui-accent-text);font-weight:600}
+.wallet-flow__hint button{font-weight:600;text-decoration:underline;min-height:32px}.wallet-flow button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:767px){
+ .wallet-flow--withdraw .wallet-flow__content{padding:12px 16px calc(88px + env(safe-area-inset-bottom,0px))}
+ .wallet-flow--withdraw .wallet-flow__field{margin-bottom:10px}
+ .wallet-flow--withdraw .wallet-flow__field>label{margin-bottom:4px}
+ .wallet-flow--withdraw .wallet-flow__field input,.wallet-flow--withdraw .wallet-flow__field textarea{font-size:16px;scroll-margin-block:80px}
+ .wallet-flow--withdraw .wallet-flow__recipient textarea{min-height:58px}
+ .wallet-flow--withdraw .wallet-flow__summary{margin:8px 0}
+ .wallet-flow--withdraw .wallet-flow__actions{bottom:var(--dp-mobile-nav-height,64px);padding:10px 16px;background:var(--ui-surface,#fff)}
+ .dp-keyboard-open .wallet-flow{min-height:0}
+ .dp-keyboard-open .wallet-flow__actions{position:static;padding-bottom:12px}
+ .dp-keyboard-open .wallet-flow__content{padding-bottom:12px}
+}

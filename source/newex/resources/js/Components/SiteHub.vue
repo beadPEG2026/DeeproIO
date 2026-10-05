@@ -10,7 +10,7 @@
                         <Link :href="accountLink"><strong>{{ $page.props.user ? ($page.props.user.name || $page.props.user.email) : t('登录 / 注册','Sign in / Register') }}</strong></Link>
                         <div v-if="$page.props.user" class="dp-hub-uid"><small>UID {{ accountUid }}</small><button type="button" class="dp-hub-copy-icon" :disabled="accountUid === '—'" :aria-label="t('复制 UID','Copy UID')" @click="copyUid"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4V3H3v9h1"/></svg></button></div>
                         <small v-else>{{ t('开启你的数字资产生活','Your digital asset journey starts here') }}</small>
-                        <button v-if="internalRecipientCode" ref="recipientCodeLink" type="button" class="dp-hub-recipient-link" @click="openRecipientCode">{{ t('内部收款码','Internal recipient code') }} <b aria-hidden="true">›</b></button>
+                        <button v-if="internalRecipientCode" ref="recipientCodeLink" type="button" class="dp-hub-recipient-link" @click="openRecipientCode">{{ t('收款 UID','Recipient UID') }} <b aria-hidden="true">›</b></button>
                     </div>
                     <Link :href="accountLink" class="dp-hub-account__arrow" aria-hidden="true" tabindex="-1">›</Link>
                 </div>
@@ -38,9 +38,9 @@
             </template>
             <template v-else-if="section === 'recipient-code'">
                 <section class="dp-hub-recipient-code">
-                    <p>{{ t('将此码提供给付款人，用于 Deepro 内部转账。此码不是 UMI 邀请码。','Share this code with the sender for a Deepro internal transfer. This is not a UMI invitation code.') }}</p>
+                    <p>{{ t('将此 UID 提供给付款人，用于 Deepro 站内转账。','Share your UID with the sender for a Deepro internal transfer.') }}</p>
                     <code>{{ internalRecipientCode || '—' }}</code>
-                    <button ref="recipientCopy" type="button" :disabled="!internalRecipientCode" @click="copyRecipientCode">{{ t('复制内部收款码','Copy internal recipient code') }}</button>
+                    <button ref="recipientCopy" type="button" :disabled="!internalRecipientCode" @click="copyRecipientCode">{{ t('复制收款 UID','Copy recipient UID') }}</button>
                 </section>
             </template>
             <template v-else>
@@ -67,10 +67,10 @@ import './site-hub-refinement.css';
 export default {
     mixins:[DisplayPreferences],components:{ActionIcon,ThemeMode,LanguageSwitcher,BottomMenu,DiscoveryPanel,BrandCaption},props:{initial:{type:String,default:'profile'}},data(){return {section:this.initial,message:'',manualCopy:'',clearingCache:false}},
     computed:{
-        title(){return this.section==='preference-currency'?this.t('显示币种','Display currency'):this.section==='preference-colors'?this.t('涨跌颜色','Market colors'):this.section==='recipient-code'?this.t('内部收款码','Internal recipient code'):this.section==='about'?this.t('关于 Deepro','About Deepro'):this.section==='discover'?this.t('发现','Discover'):this.section==='preferences'?this.t('偏好设置','Preferences'):this.t('个人中心','Account')},
+        title(){return this.section==='preference-currency'?this.t('显示币种','Display currency'):this.section==='preference-colors'?this.t('涨跌颜色','Market colors'):this.section==='recipient-code'?this.t('收款 UID','Recipient UID'):this.section==='about'?this.t('关于 Deepro','About Deepro'):this.section==='discover'?this.t('发现','Discover'):this.section==='preferences'?this.t('偏好设置','Preferences'):this.t('个人中心','Account')},
         accountLink(){return this.$page.props.user ? this.route('profile.show') : this.route('login')},
         accountUid(){return formatAccountUid(this.$page.props.user?.id)},
-        internalRecipientCode(){return String(this.$page.props.user?.referral_code || '')},
+        internalRecipientCode(){return this.accountUid === '—' ? '' : this.accountUid},
         preferenceKind(){return this.section==='preference-currency'?'currency':this.section==='preference-colors'?'colors':null},
         marketColorOptions(){return [{value:'green-up',label:this.t('绿涨红跌','Green up / red down')},{value:'red-up',label:this.t('红涨绿跌','Red up / green down')}]},
         marketColorsLabel(){return this.marketColorOptions.find(option=>option.value===this.displayPreferences.colors)?.label},
@@ -110,7 +110,7 @@ export default {
     methods:{
         async copyValue(value,success){if(!value || value==='—')return;try{await copyText(value,this.$refs.dialog);this.manualCopy='';this.toast(success)}catch(_){this.manualCopy=String(value);this.toast(this.t('请长按复制','Press and hold to copy'))}},
         copyUid(){return this.copyValue(this.accountUid,this.t('UID 已复制','UID copied'))},
-        copyRecipientCode(){return this.copyValue(this.internalRecipientCode,this.t('内部收款码已复制','Internal recipient code copied'))},
+        copyRecipientCode(){return this.copyValue(this.internalRecipientCode,this.t('收款 UID已复制','Recipient UID copied'))},
         openRecipientCode(){this.message='';this.section='recipient-code';this.$nextTick(()=>this.$refs.recipientCopy?.focus())},
         openPreference(kind){if(!['currency','colors'].includes(kind))return;this.message='';this.section='preference-'+kind;this.$nextTick(()=>this.$refs.preferenceChoices?.querySelector('[aria-pressed="true"]')?.focus())},
         choosePreference(value){const kind=this.preferenceKind;if(!kind || !this.preferenceOptions.some(option=>option.value===value))return;if(!this.saveDisplayPreferences({...this.displayPreferences,[kind]:value})){this.toast(this.t('保存失败，原设置已保留。请允许浏览器存储后重试。','Unable to save. Your previous setting is unchanged. Please allow browser storage and retry.'));return}this.back()},

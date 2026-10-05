@@ -36,7 +36,7 @@ export default {
   beforeDestroy() {clearTimeout(this.timer); clearTimeout(this.commandTimer); window.removeEventListener('message', this.message); this.media.removeEventListener('change', this.resize);},
   methods: {
     resize(event) {this.compact=event.matches;},
-    arm() {clearTimeout(this.timer); this.controls=false; this.toolsOpen=false; this.details=!this.compact; this.pending=false; clearTimeout(this.commandTimer); this.ready=false; this.failed=false; this.started=performance.now(); this.timer=setTimeout(() => {if (!this.ready) this.failed=true;}, 15000);},
+    arm() {clearTimeout(this.timer); this.controls=false; this.toolsOpen=false; this.details=!this.compact; this.pending=false; clearTimeout(this.commandTimer); this.ready=false; this.failed=false; this.started=performance.now(); this.timer=setTimeout(() => {if (!this.ready) this.failed=true;}, this.hongKong ? 35000 : 15000);},
     retry() {this.arm(); this.attempt++;},
     onLoad() {if (new URL(this.src, location.origin).origin !== location.origin) this.complete();},
     complete() {if (this.ready) return; this.ready=true; this.failed=false; clearTimeout(this.timer); window.dispatchEvent(new CustomEvent('deepro:chart-ready', {detail: {durationMs: Math.round(performance.now()-this.started)}}));},

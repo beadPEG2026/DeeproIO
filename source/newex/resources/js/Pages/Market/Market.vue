@@ -160,11 +160,10 @@ export default Template({
         this.startKlineChangeWatcher();
         const request = new URLSearchParams(window.location.search);
         const requestedSide = request.get('side');
-        if (!this.futures && ['buy', 'sell'].includes(requestedSide)) this.openTicket(requestedSide);
+        if (['buy', 'sell'].includes(requestedSide)) this.openTicket(requestedSide);
     },
     methods: {
         openTicket(side) {
-            if (this.sessionBlocked) return;
             this.mobileFirstTab = 'trade';
             this.$nextTick(() => {
                 const form = this.$refs.tradeForm;
@@ -205,6 +204,7 @@ export default Template({
             this.viewportWidth = window.innerWidth;
             this.queueTicketVisibility();
             if (this.viewportWidth >= 768) { this.iframeHeight = '480'; return; }
+            if (!this.futures) { this.iframeHeight = String(this.viewportWidth < 360 ? 220 : 260); return; }
             const chart=this.$el.querySelector('.dp-workbench__chart');
             const top=chart ? chart.getBoundingClientRect().top + window.scrollY : 220;
             const viewport=window.visualViewport?.height || window.innerHeight;

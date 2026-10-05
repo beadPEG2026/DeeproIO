@@ -5,7 +5,7 @@ use App\Services\Market\DisplayExchangeRates;
 use Illuminate\Support\Facades\Cache;
 final class DisplayExchangeRatesTest extends TestCase
 {
-    protected function setUp():void{parent::setUp();config(['cache.default'=>'array']);Cache::forget('display.fx.history.v1');}
+    protected function setUp():void{parent::setUp();config(['cache.default'=>'array']);Cache::flush();\Illuminate\Support\Facades\Http::preventStrayRequests();}
     public function test_all_currency_options_survive_an_outage_without_defaulting_to_one():void
     {
         $o=app(DisplayExchangeRates::class)->options();$this->assertSame(['USDT','USD','CNY','JPY','HKD','EUR'],array_column($o,'symbol'));$this->assertSame(1,$o[0]['rate']);$this->assertNull($o[2]['rate']);
@@ -24,5 +24,22 @@ final class DisplayExchangeRatesTest extends TestCase
         $f=app(DisplayExchangeRates::class);$x='<Envelope><Cube><Cube time="2026-09-29"><Cube currency="USD" rate="1.1"/><Cube currency="HKD" rate="8.58"/><Cube currency="CNY" rate="7.7"/><Cube currency="JPY" rate="165"/></Cube></Cube></Envelope>';
         $this->assertSame(8.58,$f->parseEcb($x)['2026-09-29']['HKD']);
         $this->expectException(\RuntimeException::class);$f->parseEcb('<!DOCTYPE x [<!ENTITY x SYSTEM "file:///etc/passwd">]>'.$x);
+    }
+    public function test_verified_history_survives_live_expiry_but_never_extrapolates_missing_days():void
+    {
+        $f=app(DisplayExchangeRates::class);$day=strtotime('2026-09-29 UTC');
+        Cache::forever('display.fx.archive.v1',['ecb'=>['2026-09-28'=>['USD'=>1,'HKD'=>8]],'usdt'=>['2026-09-28'=>1],'received_at'=>time()-200000]);
+        \Illuminate\Support\Facades\Http::fake(['*'=>\Illuminate\Support\Facades\Http::response('',503)]);
+        $h=['s'=>'ok','t'=>[$day],'o'=>[8],'h'=>[8],'l'=>[8],'c'=>[8],'v'=>[200]];
+        self::assertSame([1.0],$f->convertHongKongHistory($h)['c']);self::assertNull($f->options()[2]['rate']);
+        $h['t']=[$day+10*86400];$this->expectException(\RuntimeException::class);$f->convertHongKongHistory($h);
+    }
+    public function test_cold_chart_recovers_validated_rates_and_keeps_an_archive():void
+    {
+        $day=gmdate('Y-m-d',time()-86400);$stamp=strtotime($day.' UTC');
+        $xml='<Envelope><Cube><Cube time="'.$day.'"><Cube currency="USD" rate="1"/><Cube currency="HKD" rate="8"/><Cube currency="CNY" rate="7"/><Cube currency="JPY" rate="150"/></Cube></Cube></Envelope>';
+        \Illuminate\Support\Facades\Http::fake(['www.ecb.europa.eu/*'=>\Illuminate\Support\Facades\Http::response($xml),'api.kraken.com/*'=>\Illuminate\Support\Facades\Http::response(['error'=>[],'result'=>['USDTZUSD'=>[[$stamp,1,1,1,1,1,1,1]]]])]);
+        $f=app(DisplayExchangeRates::class);$h=['s'=>'ok','t'=>[$stamp+86400],'o'=>[8],'h'=>[8],'l'=>[8],'c'=>[8],'v'=>[2]];
+        self::assertSame([1.0],$f->convertHongKongHistory($h)['c']);self::assertNotNull(Cache::get('display.fx.archive.v1'));self::assertNotNull($f->snapshot());
     }
 }

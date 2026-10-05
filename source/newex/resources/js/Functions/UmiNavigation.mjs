@@ -1,4 +1,4 @@
-const tabs = new Set(['home','join','mine','income','team','transfer','withdraw','progress','points','records','history','burn']);
+const tabs = new Set(['home','join','mine','income','team','transfer','withdraw','progress','points','stocks','records','history','burn']);
 export function umiReturnPath(url) {
     const parsed = new URL(url, 'https://deepro.invalid');
     if (parsed.searchParams.get('from') !== 'umi') return null;

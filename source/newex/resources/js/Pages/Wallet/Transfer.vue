@@ -1,6 +1,7 @@
 <script>
+import WalletRefresh from '@/Mixins/WalletRefresh';
+import {transferContext} from '@/Functions/WalletHandoff.mjs';
 import {requestIntent, completeIntent} from '@/Functions/RequestIntent.mjs';
-import { legacyText } from '@/Functions/LegacyTranslation';
 
 import Template from '{Template}/Web/Pages/Wallet/Transfer.template'
 import AppLayout from '@/Layouts/AppLayout'
@@ -9,6 +10,7 @@ import { math_percentage } from '@/Functions/Math'
 import WalletOverview from '@/Components/WalletOverview.vue'
 
 export default Template({
+    mixins: [WalletRefresh],
     components: {
         AppLayout,
         TextUserInputBadge,
@@ -47,11 +49,17 @@ export default Template({
                 virtual_balance_source: null,
             },
             error: null,
-            balance: '0.00',
+            balance: null,
+            balanceEpoch: 0,
+            balanceStatus: 'idle',
+            balanceAccountType: 'real',
+            returnWithdrawalSymbol: '',
         }
     },
 
     computed: {
+        balanceReady() { return this.walletBalanceReady && this.balanceStatus==='ready' && this.balance!==null; },
+        balanceStateText() { return this.$t(!this.form.currency_id?'Please select an asset':this.processing_balance || this.walletBalanceStatus==='loading'?'Loading balance…':this.balanceStatus==='error' || this.walletBalanceStatus==='error'?'Balance could not be refreshed. Please retry.':'Refresh balance before continuing.'); },
         rawWallets() {
             return this.$store && this.$store.getters
                 ? (this.$store.getters.getWallets || [])
@@ -138,7 +146,7 @@ export default Template({
 
         balanceType() {
             if (this.form.from_account === 'trade') {
-                return legacyText("trade");
+                return 'trade';
             }
 
             return 'account';
@@ -178,7 +186,7 @@ export default Template({
 
                 return (
                     walletCurrencyId === currencyId ||
-                    walletId === currencyId ||
+
                     (currencySymbol && walletSymbol === currencySymbol) ||
                     (currencySymbol && walletCurrencyName === currencySymbol)
                 );
@@ -237,7 +245,7 @@ export default Template({
         },
 
         shouldUseVirtualTransfer() {
-            return this.compareDecimalStrings(this.realAvailableBalance, '0') <= 0 && !!this.virtualSourceField;
+            return this.balanceAccountType === 'virtual';
         },
 
         virtualAvailableBalance() {
@@ -413,19 +421,20 @@ export default Template({
     },
 
     mounted() {
-        const walletsPromise = _.isEmpty(this.rawWallets)
-            ? this.$store.dispatch('fetchWallets', this.route('wallets.index'))
-            : Promise.resolve();
-
+        const context=transferContext(window.location.search,this.currencies);
+        if(context.currency)this.form.currency_id=context.currency;
+        this.form.from_account=context.from;
+        this.form.to_account=context.from==='trade'?'funding':'trade';
+        if(context.withdraw)this.returnWithdrawalSymbol=this.currentCurrencySymbol;
         this.normalizeTransferAccounts();
         this.syncDirectionFromAccounts();
-
-        walletsPromise.finally(() => {
-            this.loadBalance();
-        });
+        this.loadBalance();
     },
+    beforeDestroy() { this.balanceEpoch++; },
 
     methods: {
+        returnToWithdrawal() { if(!this.processing && this.returnWithdrawalSymbol)this.$inertia.visit(this.route('wallets.withdraw.crypto',{symbol:this.returnWithdrawalSymbol,from_transfer:1})); },
+        async retryBalance() { await this.refreshWalletBalances();return this.loadBalance(); },
         toNumber(value) {
             if (value === null || value === undefined || value === '') {
                 return 0;
@@ -540,18 +549,18 @@ export default Template({
             }
 
             if (!validAccounts.includes(this.form.to_account)) {
-                this.form.to_account = this.form.from_account === 'funding' ? legacyText("trade") : 'funding';
+                this.form.to_account = this.form.from_account === 'funding' ? 'trade' : 'funding';
             }
 
             if (this.form.from_account === this.form.to_account) {
-                this.form.to_account = this.form.from_account === 'funding' ? legacyText("trade") : 'funding';
+                this.form.to_account = this.form.from_account === 'funding' ? 'trade' : 'funding';
             }
         },
 
         syncVirtualTransferFields() {
             this.form.use_virtual_wallet = this.shouldUseVirtualTransfer;
             this.form.account_type = this.shouldUseVirtualTransfer ? 'virtual' : 'real';
-            this.form.virtual_balance_source = this.shouldUseVirtualTransfer ? this.virtualSourceField : null;
+            this.form.virtual_balance_source = this.shouldUseVirtualTransfer ? (this.form.from_account==='trade'?'balance_in_virtual_trade':'balance_in_virtual_wallet') : null;
         },
 
         onCurrencyChange() {
@@ -618,48 +627,27 @@ export default Template({
         },
 
         loadBalance() {
-            if (!this.form.currency_id || !this.form.from_account) {
-                this.balance = '0.00';
-                return;
-            }
-
-            this.syncVirtualTransferFields();
-
-            if (this.processing_balance) {
-                return;
-            }
-
-            this.processing_balance = true;
-
-            axios.get(this.route('wallets.api.getBalance'), {
-                params: {
-                    currency: this.form.currency_id,
-                    type: this.balanceType,
-                }
-            }).then((res) => {
-                this.processing_balance = false;
-
-                if (res.data && res.data.success) {
-                    const realBalance = this.normalizeDecimalString(res.data.balance);
-                    const virtualBalance = this.normalizeDecimalString(res.data.virtual_balance);
-
-                    this.balance = this.formatTransferAmount(
-                        this.compareDecimalStrings(realBalance, '0') > 0 ? realBalance : virtualBalance,
-                        4
-                    );
-                }
-            }).catch(() => {
-                this.processing_balance = false;
-            });
+            const epoch=++this.balanceEpoch;
+            this.balance=null;this.balanceStatus='idle';this.processing_balance=false;
+            if (!this.form.currency_id || !this.form.from_account) return Promise.resolve(false);
+            this.processing_balance=true;this.balanceStatus='loading';
+            return axios.get(this.route('wallets.api.getBalance'), {
+                params:{currency:this.form.currency_id,type:this.balanceType},timeout:15000
+            }).then(res=>{
+                if(epoch!==this.balanceEpoch)return false;
+                if(!res.data?.success || !/^\d+(?:\.\d+)?$/.test(String(res.data.balance)))throw new Error('Invalid balance');
+                const real=this.normalizeDecimalString(res.data.balance);
+                const virtual=this.normalizeDecimalString(res.data.virtual_balance);
+                const user=this.currentUser || {};
+                const virtualUser=[true,1,'1'].includes(user.is_xn)||[true,1,'1'].includes(user.is_xm);
+                this.balanceAccountType=virtualUser && this.compareDecimalStrings(real,'0')<=0 && this.compareDecimalStrings(virtual,'0')>0?'virtual':'real';
+                this.balance=this.balanceAccountType==='virtual'?virtual:real;
+                this.balanceStatus='ready';this.syncVirtualTransferFields();return true;
+            }).catch(()=>{if(epoch===this.balanceEpoch)this.balanceStatus='error';return false;})
+              .finally(()=>{if(epoch===this.balanceEpoch)this.processing_balance=false;});
         },
-
-        injectBalance() {
-            this.form.amount = this.balance;
-        },
-
-        setMaxAmount() {
-            this.form.amount = this.balance === 0 ? 0 : this.balance;
-        },
+        injectBalance() { this.setMaxAmount(); },
+        setMaxAmount() { if(this.balanceReady)this.form.amount=this.balance; },
 
         handleInput($event) {
             const keyCode = $event.keyCode ? $event.keyCode : $event.which;
@@ -699,6 +687,7 @@ export default Template({
         },
 
         submitTransfer() {
+            if(!this.balanceReady || this.processing)return;
             if (!this.$page.props.user && !(this.$page.props.auth && this.$page.props.auth.user)) {
                 return;
             }
@@ -737,16 +726,14 @@ export default Template({
                 return;
             }
 
-            const availableForSubmit = this.compareDecimalStrings(this.transferAvailableBalance, '0') > 0
-                ? this.transferAvailableBalance
-                : this.normalizeDecimalString(this.balance);
+            const availableForSubmit = this.balance;
 
             if (this.compareDecimalStrings(this.form.amount, availableForSubmit) > 0) {
                 this.$toast.error(this.$t('Insufficient balance'));
                 return;
             }
 
-            const shouldShowCommissionModal = this.form.direction === 'to_funding' && this.commissionPercent > 0;
+            const shouldShowCommissionModal = true;
 
             if (shouldShowCommissionModal) {
                 this.showCommissionModal = true;
@@ -757,7 +744,7 @@ export default Template({
         },
 
         _performTransfer() {
-            if(this.processing)return;
+            if(this.processing || !this.balanceReady || this.compareDecimalStrings(this.form.amount,this.balance)>0)return;
             this.processing = true;
             this.syncVirtualTransferFields();
 
@@ -771,8 +758,9 @@ export default Template({
                     this.form.amount = null;
 
                     this.$store.dispatch('fetchWallets', this.route('wallets.index'))
-                        .finally(() => {
-                            this.loadBalance();
+                        .then(() => {
+                            if(this.returnWithdrawalSymbol)this.returnToWithdrawal();
+                            else this.loadBalance();
                         });
                 })
                 .catch((error) => {

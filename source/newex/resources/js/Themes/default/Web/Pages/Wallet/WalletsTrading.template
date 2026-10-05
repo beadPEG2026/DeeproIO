@@ -8,6 +8,7 @@
     </h2>
 </div>
 <!-- components title end -->
+<p v-if="!walletBalanceReady" class="dp-wallet-state" role="status">{{$t(walletBalanceStatus==='loading'?'Loading balance…':walletBalanceStatus==='error'?'Balance could not be refreshed. Please retry.':'Refresh balance before continuing.')}} <button :disabled="walletBalanceStatus==='loading'" @click="refreshWalletBalances">{{$t('Retry')}}</button></p>
 
 <!-- tabs components start -->
 <div class="tabs-components tabs">
@@ -216,7 +217,7 @@
         <tfoot class="table-result">
             <tr>
                 <td colspan="100">
-                    <div v-if="wallets.length == 0" class="table-result__notfound">
+                    <div v-if="walletBalanceReady && wallets.length == 0" class="table-result__notfound">
                         <span class="table-result__notfound-icon">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path class="table-result__notfound-color" d="M21 13V11C21 7.73081 21 6.09621 20.3272 4.86413C19.8219 3.93873 19.0613 3.17807 18.1359 2.67277C16.9038 2 15.2692 2 12 2V2C8.73081 2 7.09621 2 5.86413 2.67277C4.93873 3.17807 4.17807 3.93873 3.67277 4.86413C3 6.09621 3 7.73081 3 11V12.5C3 16.2433 3 18.1149 3.87311 19.4735C4.29935 20.1368 4.86322 20.7006 5.52648 21.1269C6.88505 22 8.7567 22 12.5 22V22H13" stroke="#222628"/>

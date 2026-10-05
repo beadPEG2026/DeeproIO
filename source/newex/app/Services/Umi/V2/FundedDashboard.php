@@ -38,6 +38,8 @@ final class FundedDashboard
             'member' => $member, 'burn' => $burn, 'historical_activation' => $historical];
         if (!$member) { return $base; }
         $id = (int) $member->id;
+        $member->invite_code = Schema::hasTable('umi_v2_invite_aliases')
+            ? DB::table('umi_v2_invite_aliases')->where('member_id',$id)->whereRaw('length(code) = 6')->orderBy('created_at')->value('code') : null;
         $cycles = DB::table('umi_v2_cycles as c')
             ->join('umi_v2_live_intents as i', 'i.cycle_id', '=', 'c.id')
             ->where('c.member_id', $id)->orderByDesc('c.id')
@@ -120,6 +122,10 @@ final class FundedDashboard
                 ->where('p.member_id', $id)->orderByDesc('p.id')->limit(30)
                 ->select('p.*', 't.eligible_at', 't.unlock_at', 't.status as term_status',
                     't.confirmed_at', 't.tradable_at')->get(),
+            'locked_points' => DB::table('umi_v2_stock_point_entries as p')
+                ->join('umi_v2_live_point_terms as t','t.point_entry_id','=','p.id')
+                ->where('p.member_id',$id)->where('t.status','locked')->orderBy('t.unlock_at')->limit(30)
+                ->select('p.id','p.delta_points','t.confirmed_at','t.unlock_at')->get(),
             'pending_points' => (string) DB::table('umi_v2_stock_point_entries as p')
                 ->join('umi_v2_live_point_terms as t', 't.point_entry_id', '=', 'p.id')
                 ->where('p.member_id', $id)->where('t.status', 'points_only')->sum('p.delta_points'),

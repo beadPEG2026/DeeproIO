@@ -133,7 +133,7 @@ final class MemberEnrollment
         $memberCode = $business?->code;
         if (!$memberCode || DB::table('umi_v2_members')->where('member_code', $memberCode)->exists()) {
             do { $memberCode = 'U' . strtoupper(Str::random(12)); }
-            while (DB::table('umi_v2_members')->where('member_code', $memberCode)->exists());
+            while (ShortInviteCode::taken($memberCode));
         }
         $identity = $legacy ? 'legacy:' . $legacy->legacy_id
             : ($business ? 'business:' . $business->id : null);

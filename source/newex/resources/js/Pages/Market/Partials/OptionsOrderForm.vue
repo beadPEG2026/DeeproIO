@@ -1,7 +1,6 @@
 <script>
 import {requestIntent, completeIntent} from '@/Functions/RequestIntent.mjs';
 import {displayDecimal, optionsLimitsReady} from '@/Functions/UserDisplay.mjs';
-import { legacyText } from '@/Functions/LegacyTranslation';
 
 import Template from '{Template}/Web/Pages/Market/Partials/OptionsOrderForm.template'
 import TextInput from "@/Jetstream/TextInput";
@@ -264,7 +263,7 @@ export default Template({
                 return null;
             }
 
-            return this.toNumber(wallet.balance_in_virtual_trade) > 0 ? legacyText("trade") : null;
+            return this.toNumber(wallet.balance_in_virtual_trade) > 0 ? 'trade' : null;
         },
 
         getAvailableOptionsBalance(wallet) {

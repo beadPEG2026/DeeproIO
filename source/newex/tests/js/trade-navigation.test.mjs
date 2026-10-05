@@ -40,7 +40,7 @@ test('shortcut visibility measures usable viewport and ignores the shortcut itse
 });
 test('default trade layout keeps shortcuts reachable until enough of the actual form is visible',()=>{
  const h=harness();assert.equal(h.ctx.mobileFirstTab,'trade');assert.equal(h.ctx.ticketInView,false);
- assert.match(template,/'dp-ticket-active':!futures && mobileFirstTab==='trade' && ticketInView/);
+ assert.doesNotMatch(template,/dp-ticket-active|v-if="sessionBlocked"/);
  h.ctx.queueTicketVisibility();h.ctx.queueTicketVisibility();assert.equal(h.frames.length,1);h.frames.shift()();assert.equal(h.ctx.ticketInView,false);
  h.ticket.getBoundingClientRect=()=>rect(105,550);h.ctx.queueTicketVisibility();h.frames.shift()();assert.equal(h.ctx.ticketInView,true);
  h.ticket.getBoundingClientRect=()=>rect(-600,550);h.ctx.queueTicketVisibility();h.frames.shift()();assert.equal(h.ctx.ticketInView,false);
@@ -56,8 +56,8 @@ test('both buy and sell enter the actual form below the current header without s
  const h=harness({headerBottom:121,reduced:true});h.ctx.openTicket('buy');
  const scroll=h.calls.find(c=>c[0]==='scroll')[1];assert.equal(scroll.top,635);assert.equal(scroll.behavior,'auto');
 });
-test('market session gate still prevents quick buy and sell navigation and side changes',()=>{
- for(const side of ['buy','sell']){const h=harness({blocked:true});h.ctx.openTicket(side);assert.deepEqual(h.calls,[]);assert.equal(h.ctx.$refs.tradeForm.openForm,true)}
+test('closed market shortcuts still navigate without placing an order',()=>{
+ for(const side of ['buy','sell']){const h=harness({blocked:true});h.ctx.openTicket(side);assert.deepEqual(h.calls.filter(c=>c[0]==='side'),[['side',side]]);assert.equal(h.ctx.$refs.tradeForm.openForm,false)}
 });
 test('mobile trade tab navigates while preserving order side; other panels do not force a scroll',()=>{
  const h=harness();h.ctx.setFirstTab('trade');assert.equal(h.calls.filter(c=>c[0]==='scroll').length,1);assert.equal(h.calls.some(c=>c[0]==='side'),false);

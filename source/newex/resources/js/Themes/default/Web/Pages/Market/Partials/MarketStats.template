@@ -18,10 +18,10 @@
         <div v-if="futures && hasMetric(fundingRate)"><dt>{{ $t('Funding Rate') }}</dt><dd>{{ fundingRateDisplay }}</dd></div>
         <div v-if="futures && nextFundingTime"><dt>{{ $t('Next Funding') }}</dt><dd>{{ timeRemaining }}</dd></div>
     </dl>
-    <div v-if="categories.length || market.base_currency_website || market.base_currency_twitter || market.base_currency_discord" class="dp-quote__tags">
+    <details v-if="categories.length || market.base_currency_website || market.base_currency_twitter || market.base_currency_discord" class="dp-quote__tags"><summary>{{$t('Asset information')}}</summary>
         <span v-for="label in categories" :key="label">{{ $t(label) }}</span>
         <a v-if="safeLink(market.base_currency_website)" :href="market.base_currency_website" target="_blank" rel="noopener noreferrer">{{ $t('Website') }} ↗</a>
         <a v-if="safeLink(market.base_currency_twitter)" :href="market.base_currency_twitter" target="_blank" rel="noopener noreferrer">X ↗</a>
         <a v-if="safeLink(market.base_currency_discord)" :href="market.base_currency_discord" target="_blank" rel="noopener noreferrer">Discord ↗</a>
-    </div>
+    </details>
 </div>

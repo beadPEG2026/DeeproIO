@@ -175,16 +175,6 @@
         <!-- APP Download Section -->
 <section class="cex-home__app-download-simple" v-if="hasAppDownloadLinks">
     <div class="cex-home__app-download-simple-inner">
-        <div class="cex-home__app-download-simple-copy">
-            <h2>
-                {{ $t('Secure access, assets protected') }}
-            </h2>
-
-            <p>
-                {{ $t('Use the mobile app to follow live market movements, manage your wallet, access spot and futures trading, and keep your account protected with security tools designed for digital asset users.') }}
-            </p>
-        </div>
-
         <div class="cex-home__app-download-simple-actions">
             <div
                 class="cex-home__app-download-simple-item"

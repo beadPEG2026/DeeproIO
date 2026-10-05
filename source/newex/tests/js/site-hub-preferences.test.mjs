@@ -39,12 +39,12 @@ test('UID is a display-only padded string without truncation or precision loss',
     for(const input of [null,undefined,0,'0',-1,'-1','1.2','1e3',Number.MAX_SAFE_INTEGER+1,{},''])assert.equal(formatAccountUid(input),'—');
 });
 
-test('account UID copy and internal recipient copy retain their separate original identities',async()=>{
+test('account and recipient copy use UID without changing the separate referral identity',async()=>{
     const copied=[],user={id:148,referral_code:'DP-Original-Code'};
     const {instance,focused}=hub({user,clipboard:async value=>copied.push(value)});
     assert.equal(instance.accountUid,'000148');await instance.copyUid();
     instance.openRecipientCode();assert.equal(instance.section,'recipient-code');assert.equal(focused.at(-1),'recipient-copy');
-    await instance.copyRecipientCode();assert.deepEqual(copied,['000148','DP-Original-Code']);
+    await instance.copyRecipientCode();assert.deepEqual(copied,['000148','000148']);
     instance.back();assert.equal(instance.section,'profile');assert.equal(focused.at(-1),'recipient-link');
     assert.deepEqual(user,{id:148,referral_code:'DP-Original-Code'});
 });

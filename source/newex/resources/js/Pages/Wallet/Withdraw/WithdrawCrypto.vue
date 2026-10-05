@@ -1,5 +1,8 @@
 <script>
 import {requestIntent, completeIntent} from '@/Functions/RequestIntent.mjs';
+import WalletRefresh from '@/Mixins/WalletRefresh';
+import {balanceDecimal, addBalance} from '@/Functions/WalletBalance.mjs';
+import {saveWithdrawalDraft, takeWithdrawalDraft} from '@/Functions/WalletHandoff.mjs';
 import WalletFlow from '@/Components/WalletFlow.vue';
 import CameraQrScanner from '@/Components/CameraQrScanner.vue';
 import {networkDisplayName} from '@/Functions/NetworkIdentity.mjs';
@@ -38,6 +41,7 @@ const defaultForm = {
 };
 
 export default Template({
+    mixins: [WalletRefresh],
     components: {
         WalletFlow, CurrencyAvatar, CameraQrScanner,
         AssetPicker,
@@ -77,6 +81,12 @@ export default Template({
     },
 
     mounted() {
+        try {
+            if(new URLSearchParams(window.location.search).get('from_transfer')==='1') {
+                const draft=takeWithdrawalDraft(this.currentUser.id,this.currency.symbol);
+                if(draft){Object.assign(this.form,draft);this.activeNetwork=draft.network;}
+            }
+        } catch (_) { /* Browser storage may be unavailable; fresh input remains usable. */ }
         this.restoreScannedRecipient();
         if (!this.scannedRecipientDraft && this.canShowInternalWithdraw && new URLSearchParams(window.location.search).get('type') === 'internal') this.form.withdraw_type = 'internal';
         if (!this.canShowInternalWithdraw) {
@@ -88,9 +98,7 @@ export default Template({
             this.loadNetworks();
         }
 
-        if (_.isEmpty(this.wallets)) {
-            this.$store.dispatch('fetchWallets', this.route('wallets.index'));
-        }
+
 
 
     },
@@ -127,6 +135,9 @@ export default Template({
     },
 
     computed: {
+        balanceReady() { return this.walletBalanceReady && !!this.wallet; },
+        tradeAvailableBalance() { return balanceDecimal(this.wallet?.balance_in_trade,8) || '0'; },
+        balanceStateText() { return this.$t(this.walletBalanceStatus==='loading'?'Loading balance…':this.walletBalanceStatus==='error'?'Balance could not be refreshed. Please retry.':'Refresh balance before continuing.'); },
         selectedNetworkName() { return this.getSelectedNetwork()?.text || ''; },
         feeLabel() { return this.isInternalWithdraw ? '0 '+this.currency.symbol : this.withdrawFee.displayFee+(this.withdrawFee.type==='floating'?'%':' '+this.currency.symbol); },
         displayReceived() { return Number(this.calculatedFee)>0 ? this.calculatedFee : '0'; },
@@ -192,11 +203,10 @@ export default Template({
         },
 
         availableBalance() {
-            const balance = this.isVirtualAccount && !this.isInternalWithdraw
-                ? this.realAvailableBalance + this.virtualAvailableBalance
-                : this.realAvailableBalance;
-
-            return math_formatter(balance, 8);
+            const real=balanceDecimal(this.wallet?.balance_in_wallet) || '0';
+            return this.isVirtualAccount && !this.isInternalWithdraw
+                ? addBalance(real, this.wallet?.balance_in_virtual_wallet || '0', 8)
+                : balanceDecimal(real, 8);
         },
 
         userVipLevel() {
@@ -280,6 +290,10 @@ export default Template({
     },
 
     methods: {
+        goToFundingTransfer() {
+            try {saveWithdrawalDraft(this.currentUser.id,this.currency.symbol,{...this.form,network:this.activeNetwork});}catch(_){}
+            this.$inertia.visit(this.route('wallets.transfer',{symbol:this.currency.symbol,from:'trade',return:'withdraw'}));
+        },
         walletCopy(key) { return walletUiCopy(this,key); },
         restoreScannedRecipient() {
             const url=new URL(window.location.href),token=url.searchParams.get('recipient_scan');
@@ -317,7 +331,7 @@ export default Template({
             this.addressError='';
             if (!this.canShowWithdrawForm) {this.addressError=this.$t('Please select network');return false;}
             if (this.isInternalWithdraw) {
-                if (!String(this.form.internal_uid || '').trim() || String(this.form.internal_uid).length > 100) this.addressError=this.walletCopy('Enter the recipient’s internal receiving code');
+                if (!/^0*[1-9][0-9]{0,17}$/.test(String(this.form.internal_uid || '').trim()) || String(this.form.internal_uid).length > 20) this.addressError=this.walletCopy('Enter the recipient UID');
             } else {
                 try {this.checkScannedNetwork(this.getActiveNetworkId());this.form.address=recipientAddress(this.form.address,this.getActiveNetworkId());}
                 catch(e) {this.addressError=this.recipientError(e);}
@@ -327,6 +341,7 @@ export default Template({
             return true;
         },
         validateAmount() {
+            if (!this.balanceReady) {this.amountError=this.$t('Refresh balance before continuing.');return false;}
             const error=withdrawalAmountError({amount:this.form.amount,balance:this.availableBalance,minimum:this.currency.min_withdraw,maximum:this.currency.max_withdraw,received:this.calculatedFee,dailyAvailable:this.limit.status ? this.limit.available : null});
             this.amountError=error ? this.$t(error) : '';
             if (error) this.flowStep=0;
@@ -371,6 +386,7 @@ export default Template({
             if(this.networkRequest) this.networkRequest.cancel();
             const request=axios.CancelToken.source();this.networkRequest=request;
             this.networksLoading=true; this.networkError='';
+            const restoreNetwork=this.activeNetwork;
             this.networks=[];this.networkStates=[];this.activeNetwork=null;this.form.network=null;
             axios.get(this.route('wallets.api.deposit.networks'), {
                 params:{symbol:this.activeAsset.symbol,purpose:'withdraw',include_unavailable:1},timeout:20000,cancelToken:request.token
@@ -379,7 +395,8 @@ export default Template({
                 if(!Array.isArray(response.data.networks)) throw new Error('Invalid network response');
                 this.networkStates=response.data.networks.map(n=>({...n,name:networkDisplayName(n.id,n.name)}));
                 this.networks=this.normalizeNetworks(Object.fromEntries(this.networkStates.filter(n=>n.available).map(n=>[n.id,n.name])));
-                if(!this.isInternalWithdraw && !this.scannedRecipientDraft && this.networks.length===1){this.activeNetwork=this.networks[0].value;this.changeNetwork();}
+                if(!this.isInternalWithdraw && !this.scannedRecipientDraft && restoreNetwork && this.networks.some(n=>Number(n.value)===Number(restoreNetwork))){this.activeNetwork=Number(restoreNetwork);this.changeNetwork();}
+                else if(!this.isInternalWithdraw && !this.scannedRecipientDraft && this.networks.length===1){this.activeNetwork=this.networks[0].value;this.changeNetwork();}
             }).catch(error=>{
                 if(request===this.networkRequest && !axios.isCancel(error)) this.networkError=this.$t('Unable to load networks. Please try again.');
             }).finally(()=>{if(request===this.networkRequest)this.networksLoading=false;});
@@ -664,10 +681,11 @@ export default Template({
                 }
 
                 if (!this.form.internal_uid) {
-                    return this.$toast.error(this.walletCopy('Enter the recipient’s internal receiving code'));
+                    return this.$toast.error(this.walletCopy('Enter the recipient UID'));
                 }
 
                 payload.internal_transfer = true;
+                payload.recipient_type = 'uid';
                 payload.network = null;
                 payload.address = null;
                 payload.payment_id = null;
@@ -769,6 +787,7 @@ export default Template({
         },
 
         setMaxAmount() {
+            if (!this.balanceReady) return;
             this.form.amount = this.availableBalance;
         }
     },

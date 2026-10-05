@@ -1,4 +1,5 @@
 <script>
+import WalletRefresh from '@/Mixins/WalletRefresh';
 import DisplayPreferences from '@/Mixins/DisplayPreferences';
 import Template from '{Template}/Web/Pages/Wallet/Wallets.template'
 import AppLayout from '@/Layouts/AppLayout'
@@ -24,7 +25,7 @@ export default Template({
         }
     },
 
-    mixins: [TableFilter,DisplayPreferences],
+    mixins: [TableFilter,DisplayPreferences,WalletRefresh],
 
     beforeDestroy() {
         if (typeof window !== 'undefined') {
@@ -37,9 +38,7 @@ export default Template({
     mounted() {
         this.setFilter('balance_in_wallet_usd', 'desc', true);
 
-        if (_.isEmpty(this.rawWallets)) {
-            this.$store.dispatch('fetchWallets', this.route('wallets.index'));
-        }
+
 
         this.onResize();
         window.addEventListener('resize', this.onResize, { passive: true })
@@ -59,6 +58,7 @@ export default Template({
         },
 
         displayTotalBalance() {
+            if (!this.walletBalanceReady) return null;
             if (!_.isEmpty(this.rawWallets)) {
                 return this.fundingTotalBalance;
             }
@@ -81,6 +81,7 @@ export default Template({
         },
 
         wallets() {
+            if (!this.walletBalanceReady) return [];
             const direction = this.filter.filterDirection == 'desc' ? 'desc' : 'asc';
 
             let wallets = _.map(this.rawWallets, (wallet) => {

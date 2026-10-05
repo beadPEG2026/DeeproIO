@@ -1493,6 +1493,16 @@ final class UmiV2FundedFlowTest extends TestCase
         finally { \Carbon\Carbon::setTestNow($previous);\Carbon\CarbonImmutable::setTestNow($immutable); }
     }
 
+    public function test_short_invite_alias_is_six_char_unique_and_preserves_old_sponsor_links(): void
+    {
+        $parent=$this->rootMember(1,'short-parent');$service=app(\App\Services\Umi\V2\ShortInviteCode::class);
+        $code=$service->forMember($parent->id);self::assertMatchesRegularExpression('/^[A-HJ-NP-Z2-9]{6}$/D',$code);self::assertMatchesRegularExpression('/[A-Z]/',$code);self::assertMatchesRegularExpression('/[2-9]/',$code);
+        self::assertSame($code,$service->forMember($parent->id));self::assertSame($parent->member_code,DB::table('umi_v2_members')->where('id',$parent->id)->value('member_code'));
+        $a=app(MemberEnrollment::class)->enroll(2,$code,'short-new-child');$b=app(MemberEnrollment::class)->enroll(3,$parent->member_code,'old-new-child');
+        foreach([$a,$b] as $child)self::assertSame($parent->id,(int)DB::table('umi_v2_sponsor_edges')->where('child_member_id',$child->id)->value('parent_member_id'));
+        self::assertNotSame($code,$service->forMember($a->id));self::assertSame(2,DB::table('umi_v2_sponsor_edges')->where('parent_member_id',$parent->id)->count());
+    }
+
     private function rootMember(int $userId, string $key): object
     {
         $existing = DB::table('umi_v2_members')->where('user_id', $userId)->first();

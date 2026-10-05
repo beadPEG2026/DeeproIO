@@ -24,9 +24,13 @@ final class UmiV2Controller extends Controller
             'legacy_section' => 'nullable|in:overview,burn,team-income,usdt,team-usdt,team,treasury,bao,vip',
             'page' => 'nullable|integer|min:1|max:100000',
             'history_entries_page' => 'nullable|integer|min:1|max:100000',
-            'tab' => 'nullable|in:history,home,join,income,team,transfer,withdraw,progress,burn,points,mine,records',
+            'tab' => 'nullable|in:history,home,join,income,team,transfer,withdraw,progress,burn,points,stocks,mine,records',
         ]);
         $userId = (int) $request->user()->id;
+        if (Schema::hasTable('umi_v2_invite_aliases')) {
+            $memberId = \Illuminate\Support\Facades\DB::table('umi_v2_members')->where('user_id',$userId)->value('id');
+            if ($memberId) app(\App\Services\Umi\V2\ShortInviteCode::class)->forMember((int)$memberId);
+        }
         if ($request->boolean('state_only')) return response()->json(['state'=>app(FundedDashboard::class)->member($userId)])->header('Cache-Control','private, no-store');
         $legacy = Schema::hasTable('umi_legacy_accounts')
             ? LegacyAccount::where('user_id', $userId)->first() : null;

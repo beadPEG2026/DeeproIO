@@ -44,7 +44,7 @@ function component({clipboard=()=>Promise.resolve(newAddress),networkRequest,net
  vm.runInNewContext(qrCode,{...sandbox,exports:qrExports});
  vm.runInNewContext(code,sandbox);
  const options=exports.default,state=options.data();
- Object.assign(state,{$t:key=>key,$nextTick:fn=>fn(),$toast:{success(){}},route:name=>name,currency:{symbol:'USDT',withdraw_status:true,has_payment_id:false},canShowInternalWithdraw:true,activeNetwork:3,recipientNetwork:3,activeAsset:{symbol:'USDT'},wallet:{},availableBalance:'100',calculatedFee:'9',limit:{status:false}});
+ Object.assign(state,{$t:key=>key,$nextTick:fn=>fn(),$toast:{success(){}},route:name=>name,currency:{symbol:'USDT',withdraw_status:true,has_payment_id:false},canShowInternalWithdraw:true,activeNetwork:3,recipientNetwork:3,activeAsset:{symbol:'USDT'},wallet:{},balanceReady:true,availableBalance:'100',calculatedFee:'9',limit:{status:false}});
  for(const [name,method] of Object.entries(options.methods))state[name]=method.bind(state);
  for(const name of ['isInternalWithdraw','canShowExternalForm','canShowWithdrawForm'])Object.defineProperty(state,name,{get:options.computed[name].bind(state)});
  state.form.address=oldAddress;
@@ -223,10 +223,10 @@ test('scan without a network explains the prerequisite and focuses its selector'
  assert.equal(state.cameraOpen,false);assert.equal(state.addressError,'请先选择网络，再扫描收款地址。');assert.deepEqual(focused,['withdraw-network']);
 });
 
-test('internal receiving code copy is distinct from UID and UMI invitation rules',()=>{
+test('internal recipient uses UID and rejects legacy invitation text',()=>{
  const {state}=component();state.form.withdraw_type='internal';state.form.internal_uid='';state.$i18n={locale:'zh-cn'};
- assert.equal(state.validateRecipient(),false);assert.equal(state.addressError,'请输入收款人的内部收款码');
- state.form.internal_uid='DPABC123';assert.equal(state.validateRecipient(),true);assert.equal(state.form.internal_uid,'DPABC123');
+ assert.equal(state.validateRecipient(),false);assert.equal(state.addressError,'请输入收款人 UID');
+ state.form.internal_uid='DPABC123';assert.equal(state.validateRecipient(),false);state.form.internal_uid='000147';assert.equal(state.validateRecipient(),true);assert.equal(state.form.internal_uid,'000147');
  assert.match(state.walletCopy('Ask the recipient to copy their internal receiving code from Profile → Internal receiving code. This is not their UID or UMI invitation code.'),/个人中心 → 内部收款码/);
 });
 

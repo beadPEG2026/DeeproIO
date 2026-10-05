@@ -1144,5 +1144,19 @@
   "UMI 充值筹备中，开放后可从现货账户划入。": "UMI deposits are being prepared. Transfers from your spot account will be available when opened.",
   "UMI 提取已暂停": "UMI withdrawals are paused",
   "UMI 提取筹备中": "UMI withdrawals are being prepared",
-  "更新中": "Updating"
+  "更新中": "Updating",
+  "理财": "Wealth",
+  "社区": "Community",
+  "股票收益": "Stock income",
+  "待确权积分": "Pending points",
+  "确权规则": "Vesting rules",
+  "积分明细": "Point history",
+  "获取时间": "Received at",
+  "锁定股票": "Locked units",
+  "可交易股票": "Available units",
+  "已划转": "Transferred",
+  "我的社区": "My community",
+  "返回 Deepro": "Return to Deepro",
+  "充值已暂停": "Deposits paused",
+  "充值筹备中": "Deposits preparing"
 }

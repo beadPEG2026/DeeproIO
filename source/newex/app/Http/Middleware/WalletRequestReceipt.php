@@ -25,7 +25,9 @@ final class WalletRequestReceipt
             $old = DB::table('wallet_request_receipts')->where($identity)->first();
             if ($old) {
                 if (!hash_equals($old->payload_hash, $hash)) return response()->json(['message'=>'Request key was already used for a different operation'],409);
-                return response($old->response, $old->http_status)->header('Content-Type','application/json')->header('Idempotency-Replayed','true');
+                // Keep the JSON response type so API middleware does not encode the receipt again.
+                return \Illuminate\Http\JsonResponse::fromJsonString($old->response, (int) $old->http_status)
+                    ->header('Idempotency-Replayed', 'true');
             }
             app(\App\Services\Deposit\DepositRisk::class)->assertClear((int)$user->id);
             $response = $next($request);

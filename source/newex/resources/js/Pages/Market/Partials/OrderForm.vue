@@ -1,8 +1,9 @@
 <script>
+import {percentageBalance} from '@/Functions/WalletBalance.mjs';
+import {stepDecimal,saveTradeDraft,takeTradeDraft} from '@/Functions/TradeFormDraft.mjs';
 import {spotOrderPayload} from "@/Functions/SpotOrderPayload.mjs";
 import {requestIntent, completeIntent, spotIntent} from '@/Functions/RequestIntent.mjs';
 import MarketSession from "@/Mixins/Market/MarketSession";
-import { legacyText } from '@/Functions/LegacyTranslation';
 
 import Template from '{Template}/Web/Pages/Market/Partials/OrderForm.template'
 import TextInput from "@/Jetstream/TextInput";
@@ -31,6 +32,7 @@ export default Template({
 
     data() {
         return {
+            fundingMenu: false,
             openForm: false,
             leverage: 25,
             balance: 0,
@@ -150,6 +152,10 @@ export default Template({
 
         this.bid.price = this.market.last ?? '';
         this.ask.price = this.market.last ?? '';
+        try {
+            const draft=takeTradeDraft(this.$page.props.user?.id,this.market.name);
+            if(draft){this.activeTab=draft.activeTab;this.orderType=draft.orderType;this.lastBuyInput=draft.lastBuyInput;this.lastSellInput=draft.lastSellInput;Object.assign(this.bid,draft.bid);Object.assign(this.ask,draft.ask);}
+        }catch(_){}
     },
 
     beforeDestroy() {
@@ -250,6 +256,19 @@ export default Template({
     },
 
     methods: {
+        stepField(side,field,direction) {
+            if(field==='price' && this.orderType==='market')return;
+            const form=side==='buy'?this.bid:this.ask;
+            if(field==='quantity'){if(side==='buy')this.lastBuyInput='quantity';else this.lastSellInput='quantity';}
+            form[field]=stepDecimal(form[field],field==='price'?this.market.quote_precision:this.market.base_precision,direction);
+        },
+        openFunding(kind) {
+            this.fundingMenu=false;
+            try {saveTradeDraft(this.$page.props.user?.id,this.market.name,this);}catch(_){}
+            const symbol=this.activeTab==='buy'?this.market.quote_currency:this.market.base_currency;
+            const params={symbol,trade_return:this.market.name,side:this.activeTab};
+            this.$inertia.visit(kind==='deposit'?this.route('wallets.deposit.crypto',params):this.route('wallets.transfer',{...params,from:'funding'}));
+        },
         fetchWallets() {
             if(!this.$page.props.user) return;
             this.$store.dispatch('fetchWallets', this.route('wallets.index'));
@@ -295,7 +314,7 @@ export default Template({
         getVirtualBalanceSource(wallet) {
             if(!wallet) return null;
 
-            return this.getVirtualTradeBalance(wallet) > 0 ? legacyText("trade") : null;
+            return this.getVirtualTradeBalance(wallet) > 0 ? 'trade' : null;
         },
 
         shouldUseVirtualTradeBalance(wallet) {
@@ -692,14 +711,6 @@ export default Template({
         getOrderSliderPercentage(percentage) {
             let value = this.normalizeSliderPercentage(percentage);
 
-            /*
-             * 滑块拉满时界面显示 100%，但实际下单数量只按 99.99% 计算，
-             * 避免手续费、精度、盘口波动导致余额刚好用满后提示余额不足。
-             */
-            if(value >= 100) {
-                return 99.99;
-            }
-
             return value;
         },
 
@@ -711,11 +722,9 @@ export default Template({
             }
 
             let orderPercentage = this.getOrderSliderPercentage(percentage);
-            let balance = this.getEffectiveTradeBalance(this.quoteWallet);
-            let amountWithPercentage = math_percentage(balance, orderPercentage);
 
             this.lastBuyInput = 'quote';
-            this.bid.quoteQuantity = math_formatter(amountWithPercentage, this.market.quote_precision);
+            this.bid.quoteQuantity = percentageBalance(this.useVirtualQuoteBalance ? this.quoteWallet?.balance_in_virtual_trade : this.quoteWallet?.balance_in_trade, orderPercentage, this.market.quote_precision);
             this.syncBuyQuantityFromQuote();
         },
 
@@ -727,10 +736,9 @@ export default Template({
             }
 
             let orderPercentage = this.getOrderSliderPercentage(percentage);
-            let balance = this.getEffectiveTradeBalance(this.baseWallet);
 
             this.lastSellInput = 'quantity';
-            this.ask.quantity = math_formatter(math_percentage(balance, orderPercentage), this.market.base_precision);
+            this.ask.quantity = percentageBalance(this.useVirtualBaseBalance ? this.baseWallet?.balance_in_virtual_trade : this.baseWallet?.balance_in_trade, orderPercentage, this.market.base_precision);
             this.syncSellQuoteFromQuantity();
         },
 
@@ -841,6 +849,12 @@ export default Template({
     },
 
     watch: {
+        'market.name'() {
+            this.fundingMenu=false;this.buySlider.value=0;this.sellSlider.value=0;
+            this.bid={...this.bid,price:this.market.last || '',quantity:0,quoteQuantity:0,trigger_price:0};
+            this.ask={...this.ask,price:this.market.last || '',quantity:0,quoteQuantity:0,trigger_price:0};
+            this.buyErrorField=false;this.sellErrorField=false;this.errors=null;
+        },
         estimatePrice() {
             if (this.isStockEstimate && this.estimatePrice > 0) {
                 if (Number(this.bid.price) <= 0) this.bid.price = this.decimal_format(this.estimatePrice,this.market.quote_precision);
@@ -978,7 +992,6 @@ export default Template({
                 this.syncSellQuantityFromQuote();
             }
 
-            let balance = this.getEffectiveTradeBalance(this.baseWallet);
             let needBaseAmount = parseFloat(this.ask.quantity || 0);
 
             if(needBaseAmount > parseFloat(balance || 0)) {
@@ -1007,7 +1020,6 @@ export default Template({
                 this.syncSellQuoteFromQuantity();
             }
 
-            let balance = this.getEffectiveTradeBalance(this.baseWallet);
 
             if(parseFloat(this.ask.quantity || 0) > parseFloat(balance || 0)) {
                 this.sellErrorField = "quantity";

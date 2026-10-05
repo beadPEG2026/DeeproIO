@@ -29,6 +29,7 @@
 
     <div class="button-clear"></div>
 
+    <div class="dp-ticket-funding"><span>{{$t('Available Balance')}} <b>{{activeTab==='buy'?quoteTradeBalance:baseTradeBalance}}</b> {{activeTab==='buy'?market.quote_currency:market.base_currency}}</span><button type="button" class="dp-ticket-add" :aria-label="$t('Add funds')" :aria-expanded="fundingMenu" @click="fundingMenu=!fundingMenu">＋</button><div v-if="fundingMenu" class="dp-ticket-funding-menu"><button type="button" @click="openFunding('deposit')">{{$t('Deposit')}}</button><button type="button" @click="openFunding('transfer')">{{$t('Transfer')}}</button></div></div>
     <div class="module-container">
         <!-- module head start -->
         <div class="module-head">
@@ -91,7 +92,7 @@
                                 @drop.prevent
                                 :placeholder="$t('Market')"
                                 :disabled="true"
-                                type="text"
+                                type="text" inputmode="decimal"
                             >
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
@@ -102,13 +103,13 @@
                             :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'price'}"
                         >
                             <label class="module-orderform__buy-forms__item-left">{{ $t('Price') }}</label>
-                            <input
+                            <div class="dp-ticket-stepper"><button type="button" @click="stepField('buy','price',-1)" :aria-label="$t('Decrease')">−</button><input
                                 @keyup="(e) => clearInput(e, 'buy','price')"
                                 @paste.prevent
                                 @drop.prevent
                                 v-model="bid.price"
-                                type="text"
-                            >
+                                type="text" inputmode="decimal"
+                            ><button type="button" @click="stepField('buy','price',1)" :aria-label="$t('Increase')">＋</button></div>
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
 
@@ -123,7 +124,7 @@
                                 @paste.prevent
                                 @drop.prevent
                                 v-model="bid.quoteQuantity"
-                                type="text"
+                                type="text" inputmode="decimal"
                             >
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
@@ -134,15 +135,15 @@
                             :class="{'module-orderform__buy-forms__invalid': buyErrorField == 'quantity'}"
                         >
                             <label class="module-orderform__buy-forms__item-left" style="white-space: nowrap;">{{ orderType === 'market' ? $t('Estimated quantity') : $t('Quantity') }}</label>
-                            <input
+                            <div class="dp-ticket-stepper"><button type="button" @click="stepField('buy','quantity',-1)" :aria-label="$t('Decrease')">−</button><input
                                 @keyup="(e) => clearInput(e, 'buy','quantity')"
                                 @paste.prevent
                                 @drop.prevent
                                 :value="isStockEstimate && orderType === 'market' && !estimatePrice ? '' : bid.quantity"
                                 :placeholder="isStockEstimate && orderType === 'market' && !estimatePrice ? '暂无法估算' : ''"
                                 @input="bid.quantity = $event.target.value"
-                                type="text"
-                            >
+                                type="text" inputmode="decimal"
+                            ><button type="button" @click="stepField('buy','quantity',1)" :aria-label="$t('Increase')">＋</button></div>
                             <label class="module-orderform__buy-forms__item-right">{{ market.base_currency }}</label>
                         </div>
 
@@ -157,26 +158,12 @@
                                 @paste.prevent
                                 @drop.prevent
                                 v-model="bid.trigger_price"
-                                type="text"
+                                type="text" inputmode="decimal"
                             >
                             <label class="module-orderform__buy-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
 
-                        <vue-slider
-                            @input="changeBuySlider"
-                            @change="changeBuySlider"
-                            @dragging="changeBuySlider"
-                            v-model="buySlider.value"
-                            :min="buySlider.min"
-                            :max="buySlider.max"
-                            :interval="buySlider.interval"
-                            :disabled="buySlider.disabled"
-                            :tooltip-formatter="formatSliderTooltip"
-                            :adsorb="false"
-                            :included="true"
-                            :hide-label="true"
-                            :tooltip-placement="'top'"
-                        ></vue-slider>
+                        <div class="dp-ticket-ratios" :aria-label="$t('Amount')"><button v-for="ratio in [25,50,75,100]" :key="ratio" type="button" :aria-pressed="buySlider.value===ratio" @click="changeBuySlider(ratio)">{{ratio}}%</button></div>
 
                         <div class="mb-2" v-if="balanceBuyError">
                             <span class="text-sm color-sell info-badge-error">{{ $t('Insufficient balance') }}</span>
@@ -242,7 +229,7 @@
                                 @drop.prevent
                                 :placeholder="$t('Market')"
                                 :disabled="true"
-                                type="text"
+                                type="text" inputmode="decimal"
                             >
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
@@ -253,13 +240,13 @@
                             :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'price'}"
                         >
                             <label class="module-orderform__sell-forms__item-left">{{ $t('Price') }}</label>
-                            <input
+                            <div class="dp-ticket-stepper"><button type="button" @click="stepField('sell','price',-1)" :aria-label="$t('Decrease')">−</button><input
                                 @keyup="(e) => clearInput(e, 'ask','price')"
                                 @paste.prevent
                                 @drop.prevent
                                 v-model="ask.price"
-                                type="text"
-                            >
+                                type="text" inputmode="decimal"
+                            ><button type="button" @click="stepField('sell','price',1)" :aria-label="$t('Increase')">＋</button></div>
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
 
@@ -273,7 +260,7 @@
                                 @keyup="(e) => clearInput(e, 'ask','quoteQuantity')"
                                 @paste.prevent
                                 @drop.prevent
-                                type="text"
+                                type="text" inputmode="decimal"
                                 v-model="ask.quoteQuantity"
                             >
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
@@ -285,13 +272,13 @@
                             :class="{'module-orderform__sell-forms__invalid': sellErrorField == 'quantity'}"
                         >
                             <label class="module-orderform__sell-forms__item-left">{{ $t('Quantity') }}</label>
-                            <input
+                            <div class="dp-ticket-stepper"><button type="button" @click="stepField('sell','quantity',-1)" :aria-label="$t('Decrease')">−</button><input
                                 @keyup="(e) => clearInput(e, 'ask','quantity')"
                                 @paste.prevent
                                 @drop.prevent
-                                type="text"
+                                type="text" inputmode="decimal"
                                 v-model="ask.quantity"
-                            >
+                            ><button type="button" @click="stepField('sell','quantity',1)" :aria-label="$t('Increase')">＋</button></div>
                             <label class="module-orderform__sell-forms__item-right">{{ market.base_currency }}</label>
                         </div>
 
@@ -304,27 +291,13 @@
                             <input
                                 @keyup="(e) => clearInput(e, 'ask','trigger_price')"
                                 @drop.prevent
-                                type="text"
+                                type="text" inputmode="decimal"
                                 v-model="ask.trigger_price"
                             >
                             <label class="module-orderform__sell-forms__item-right">{{ market.quote_currency }}</label>
                         </div>
 
-                        <vue-slider
-                            @input="changeSellSlider"
-                            @change="changeSellSlider"
-                            @dragging="changeSellSlider"
-                            v-model="sellSlider.value"
-                            :min="sellSlider.min"
-                            :max="sellSlider.max"
-                            :interval="sellSlider.interval"
-                            :disabled="sellSlider.disabled"
-                            :tooltip-formatter="formatSliderTooltip"
-                            :adsorb="false"
-                            :included="true"
-                            :hide-label="true"
-                            :tooltip-placement="'top'"
-                        ></vue-slider>
+                        <div class="dp-ticket-ratios" :aria-label="$t('Amount')"><button v-for="ratio in [25,50,75,100]" :key="ratio" type="button" :aria-pressed="sellSlider.value===ratio" @click="changeSellSlider(ratio)">{{ratio}}%</button></div>
 
                         <div class="mb-2" v-if="balanceSellError">
                             <span class="text-sm color-sell info-badge-error">{{ $t('Insufficient balance') }}</span>

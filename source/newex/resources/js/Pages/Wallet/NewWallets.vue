@@ -1,4 +1,5 @@
 <script>
+import WalletRefresh from '@/Mixins/WalletRefresh';
 import DisplayPreferences from '@/Mixins/DisplayPreferences';
 import Template from '{Template}/Web/Pages/Wallet/NewWallets.template'
 import AppLayout from '@/Layouts/AppLayout'
@@ -7,7 +8,7 @@ import CurrencyAvatar from '@/Components/CurrencyAvatar.vue'
 import {walletUiCopy} from '@/Functions/WalletUiCopy.mjs';
 
 export default Template({
-    mixins:[DisplayPreferences],
+    mixins:[DisplayPreferences,WalletRefresh],
     components: {
         AccountActions,
         CurrencyAvatar,
@@ -16,13 +17,7 @@ export default Template({
 
     mounted() {
         if (!this.$store.getters.getMarkets?.length) this.$store.dispatch('fetchMarkets',this.route('markets.api.ticker'));
-        try {
-            const wallets = this.$store.getters.getWallets;
 
-            if (!wallets || !wallets.length) {
-                this.$store.dispatch('fetchWallets', this.route('wallets.index'));
-            }
-        } catch (e) {}
     },
 
     data() {
@@ -39,6 +34,8 @@ export default Template({
     beforeDestroy() { clearTimeout(this.messageTimer); },
 
     computed: {
+        fundingAvailableUSD() {return this.wallets.reduce((sum,w)=>sum+this.getWalletUsd(w,this.useVirtualAssets?'balance_in_virtual_wallet':'balance_in_wallet',this.useVirtualAssets?'balance_in_virtual_wallet_usd':'balance_in_wallet_usd'),0);},
+        frozenBalanceUSD() {const prefix=this.useVirtualAssets?'balance_in_virtual_':'balance_in_';return this.wallets.reduce((sum,w)=>sum+this.getWalletUsd(w,prefix+'order',prefix+'order_usd')+this.getWalletUsd(w,prefix+'withdraw',prefix+'withdraw_usd'),0);},
         wallets() {
             return (this.$store && this.$store.getters && this.$store.getters.getWallets)
                 ? this.$store.getters.getWallets
@@ -131,15 +128,15 @@ export default Template({
             return [
                 {
                     key: 'funding',
-                    title: this.translate('Funding Account'),
+                    title: this.translate('Funding available'),
                     subtitle: this.translate('Available for deposits, withdrawals and transfers.'),
-                    value: this.fundingBalanceUSD,
+                    value: this.fundingAvailableUSD,
                     routeType: 'route',
                     routeName: 'wallets',
                 },
                 {
                     key: 'trading',
-                    title: this.translate('Trading Account'),
+                    title: this.translate('Trading available'),
                     subtitle: this.translate('Used for spot, futures and order margin.'),
                     value: this.tradingBalanceUSD,
                     routeType: 'route',

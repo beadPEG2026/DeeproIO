@@ -1517,7 +1517,7 @@ public function withdraw(WithdrawRequest $request)
 
     /**
      * 內部提現：
-     * internal_uid 實際是對方 users.referral_code。
+     * recipient_type=uid 使用账户 UID；旧客户端继续使用原收款码。
      */
     if ($request->boolean('internal_transfer') || $request->get('withdraw_type') === 'internal') {
         if (!$this->canUseInternalWithdraw($user)) {
@@ -1688,30 +1688,9 @@ protected function internalWithdraw(WithdrawRequest $request)
     $amount = $request->get('amount');
     $symbol = strtoupper(trim((string) $request->get('symbol')));
 
-    /**
-     * 不能转给自己
-     */
-    if (
-        (string) ($sender->referral_code ?? '') === $recipientReferralCode ||
-        (string) ($sender->id ?? '') === $recipientReferralCode
-    ) {
-        return response()->json([
-            'message' => __('You cannot withdraw to yourself')
-        ], 422);
-    }
-
-    /**
-     * internal_uid 是 users.referral_code
-     */
-    $recipient = \App\Models\User\User::query()
-        ->where('referral_code', $recipientReferralCode)
-        ->first();
-
-    if (!$recipient) {
-        return response()->json([
-            'message' => __('Recipient user not found')
-        ], 422);
-    }
+    $recipient = app(\App\Services\Wallet\InternalTransferRecipient::class)->resolve(
+        $sender,$recipientReferralCode,(string)$request->input('recipient_type','legacy_code'));
+    $recipientReferralCode = (string)$recipient->referral_code;
 
     $currency = \Illuminate\Support\Facades\DB::table('currencies')
         ->where('symbol', $symbol)
@@ -1814,7 +1793,7 @@ protected function internalWithdraw(WithdrawRequest $request)
             'network_id' => 0,
             'amount' => $amount,
             'fee' => 0,
-            'address' => 'UID:' . $recipientReferralCode,
+            'address' => 'UID:' . \App\Services\Wallet\InternalTransferRecipient::uid((int)$recipient->id),
             'payment_id' => null,
             'user_id' => $sender->id,
             'confirms' => 0,
@@ -1843,7 +1822,7 @@ protected function internalWithdraw(WithdrawRequest $request)
             'amount' => $amount,
             'network_fee' => 0,
             'system_fee' => 0,
-            'address' => 'UID:' . ($sender->referral_code ?? $sender->id),
+            'address' => 'UID:' . \App\Services\Wallet\InternalTransferRecipient::uid((int)$sender->id),
             'payment_id' => null,
             'user_id' => $recipient->id,
             'confirms' => 0,
@@ -1876,7 +1855,7 @@ protected function internalWithdraw(WithdrawRequest $request)
                 'amount' => $amount,
                 'fee' => 0,
                 'recipient_user_id' => $recipient->id,
-                'recipient_referral_code' => $recipientReferralCode,
+                'recipient_uid' => \App\Services\Wallet\InternalTransferRecipient::uid((int)$recipient->id),
                 'txn' => $txn,
             ],
         ]);
@@ -3027,6 +3006,9 @@ private function buildWalletBalancesPayload($wallet): array
         }
 
         $type = request()->get('type', 'account');
+        if (!in_array($type, ['account', 'trade', 'lc', 'order'], true)) {
+            return response()->json(['success' => false, 'message' => __('Invalid account type')], 422);
+        }
         $balances = $this->buildWalletBalancesPayload($wallet);
 
         if ($type === 'account') {

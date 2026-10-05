@@ -33,6 +33,7 @@ class WithdrawRequest extends FormRequest
         return [
             'withdraw_type' => ['bail', 'nullable', 'in:external,internal'],
             'internal_transfer' => ['bail', 'nullable'],
+            'recipient_type' => ['bail','nullable','in:uid,legacy_code'],
 
             'symbol' => ['bail', 'required', new WalletSymbolRule()],
 
@@ -60,7 +61,7 @@ class WithdrawRequest extends FormRequest
                 : ['bail', ($currency?->has_payment_id ? 'required' : 'nullable'), 'integer', 'min:0', 'max:4294967295'],
 
             /**
-             * internal_uid 实际是 users.referral_code，例如：27GLNAGW0UIDZ2X
+             * recipient_type=uid 使用账户 UID；缺省保留旧客户端收款码语义。
              */
             'internal_uid' => $isInternal
                 ? ['bail', 'required', 'string', 'max:100']

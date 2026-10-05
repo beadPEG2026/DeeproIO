@@ -2,7 +2,6 @@
 import {spotOrderPayload} from "@/Functions/SpotOrderPayload.mjs";
 import {requestIntent, completeIntent, spotIntent} from '@/Functions/RequestIntent.mjs';
 import MarketSession from "@/Mixins/Market/MarketSession";
-import { legacyText } from '@/Functions/LegacyTranslation';
 
 import Template from '{Template}/Web/Pages/MarketLite/Partials/OrderForm.template'
 import TextInput from "@/Jetstream/TextInput";
@@ -240,7 +239,7 @@ export default Template({
         getVirtualBalanceSource(wallet) {
             if(!wallet) return null;
 
-            return this.getVirtualTradeBalance(wallet) > 0 ? legacyText("trade") : null;
+            return this.getVirtualTradeBalance(wallet) > 0 ? 'trade' : null;
         },
         shouldUseVirtualTradeBalance(wallet) {
             return this.getVirtualBalance(wallet) > 0;

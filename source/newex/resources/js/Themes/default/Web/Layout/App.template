@@ -603,7 +603,7 @@
 
         <div class="main__container">
             <div :class="{'max-w-screen-2xl mx-auto': true, 'mobile-body': isMobile}">
-                <umi-return-link v-if="!umiSection"/><slot></slot>
+                <trade-funding-return/><umi-return-link v-if="!umiSection"/><slot></slot>
             </div>
         </div>
 

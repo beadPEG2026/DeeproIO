@@ -10,13 +10,19 @@ final class DisplayExchangeRates
     public const CODES=['USDT','USD','CNY','JPY','HKD','EUR'];
     public function refresh(): void
     {
-        $response=Http::connectTimeout(3)->timeout(20)->get('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml');
+        $response=Http::connectTimeout(3)->timeout(8)->get('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml');
         if (!$response->successful() || strlen($response->body())>15000000) throw new \RuntimeException('display_fx_source_unavailable');
         $rates=$this->parseEcb($response->body());
-        $usdt=Http::connectTimeout(3)->timeout(8)->get('https://api.kraken.com/0/public/OHLC',['pair'=>'USDTUSD','interval'=>1440]);
+        $usdt=Http::connectTimeout(3)->timeout(5)->get('https://api.kraken.com/0/public/OHLC',['pair'=>'USDTUSD','interval'=>1440]);
         if (!$usdt->successful()) throw new \RuntimeException('display_usdt_source_unavailable');
         $daily=$this->parseUsdt($usdt->json()??[]);
-        Cache::put('display.fx.history.v1',['ecb'=>$rates,'usdt'=>$daily,'received_at'=>time()],172800);
+        // Closed daily observations remain useful after a live-cache expiry.
+        $archive=Cache::get('display.fx.archive.v1',[]);
+        $snapshot=['ecb'=>array_replace($archive['ecb']??[],$rates),
+            'usdt'=>array_replace($archive['usdt']??[],$daily),'received_at'=>time()];
+        ksort($snapshot['ecb']);ksort($snapshot['usdt']);
+        Cache::forever('display.fx.archive.v1',$snapshot);
+        Cache::put('display.fx.history.v1',$snapshot,172800);
     }
     public function parseEcb(string $xml): array
     {
@@ -55,6 +61,31 @@ final class DisplayExchangeRates
         $r=Cache::get('display.fx.history.v1');
         return is_array($r) && ($r['received_at']??0)<=time()+5 && time()-($r['received_at']??0)<172800 ? $r : null;
     }
+    public function historySnapshot(): ?array
+    {
+        $snapshot=$this->snapshot();
+        if ($snapshot && time()-$snapshot['received_at']<3600) return $snapshot;
+        // Also recover when the scheduler has not populated a cold cache. One
+        // bounded source attempt per minute, shared across every HK symbol.
+        $lock=Cache::lock('display.fx.refresh',20);
+        if ($lock->get()) {
+            try {
+                if (Cache::add('display.fx.refresh-attempt',true,60)) $this->refresh();
+            } catch (\Throwable $e) {
+                // Use only previously verified daily observations, with the
+                // existing per-bar age limit. Never substitute live spot FX.
+            } finally { $lock->release(); }
+        }
+        $available=$this->snapshot() ?? Cache::get('display.fx.archive.v1');
+        if (!$available && Cache::has('display.fx.refresh-attempt')) {
+            // A simultaneous cold chart can wait for the single in-flight
+            // refresh instead of failing merely because another symbol won.
+            try {$lock->block(15);$available=$this->snapshot() ?? Cache::get('display.fx.archive.v1');}
+            catch (\Illuminate\Contracts\Cache\LockTimeoutException $e) { /* Remains unavailable. */ }
+            finally {$lock->release();}
+        }
+        return $available;
+    }
     public function options(): array
     {
         $snapshot=$this->snapshot();$rates=null;$date=null;
@@ -79,7 +110,7 @@ final class DisplayExchangeRates
     }
     public function convertHongKongHistory(array $history,string $ratio='1'): array
     {
-        $snapshot=$this->snapshot();
+        $snapshot=$this->historySnapshot();
         if (!$snapshot) throw new \RuntimeException('hk_historical_fx_unavailable');
         $out=$history;foreach(['t','o','h','l','c','v'] as $key)$out[$key]=[];
         foreach($history['t'] as $i=>$time) {

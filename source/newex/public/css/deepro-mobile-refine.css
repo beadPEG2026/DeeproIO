@@ -109,7 +109,7 @@ body.dark .dp-banner-card{background:#393626;color:#fff4d5}body.dark .dp-banner-
  .dp-site .dp-home-wealth .cex-home__staking-btn{margin-top:auto!important}
 }
 @media(max-width:767px){
- .dp-ticket-active .dp-trade-dock{display:none!important}
+
  .dp-site.dp-kyc-page .form-container{margin:16px 0!important;padding:20px!important;width:100%;max-width:100%}
  .dp-site.dp-kyc-page .form-components__title h2{font-size:24px!important}
  .dp-site.dp-kyc-page .form-components__block{margin-bottom:20px}

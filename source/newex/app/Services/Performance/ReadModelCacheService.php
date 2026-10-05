@@ -9,6 +9,10 @@ class ReadModelCacheService
 {
     public function rememberWallets(int $userId, Closure $resolver)
     {
+        // Explicit funding actions must not use a previously cached balance.
+        if (request()->boolean('fresh') && (int) auth()->id() === $userId) {
+            return $resolver();
+        }
         return $this->rememberVersioned(
             'wallets',
             $userId,

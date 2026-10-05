@@ -9,6 +9,7 @@
     </div>
 
     <wallet-overview :page="'transfer'" />
+    <button v-if="returnWithdrawalSymbol" type="button" class="dp-transfer-return" :disabled="processing" @click="returnToWithdrawal">‹ {{$t('Return to withdrawal')}}</button>
 
     <div id="transfer-container" class="table-components">
         <div class="flex components-filter__item swap-inner rounded-lg flex flex-col mt-10 md:mt-0 relative">
@@ -18,7 +19,7 @@
                     <div class="transfer-account-col">
                         <label class="form-label">{{ $t('From Account') }}</label>
                         <themed-select
-                            v-model="form.from_account"
+                            v-model="form.from_account" :disabled="processing"
                             @change="onFromAccountChange"
                             class="transfer-select"
                         >
@@ -37,7 +38,7 @@
                         <button
                             type="button"
                             class="transfer-switch-btn"
-                            @click="switchAccounts"
+                            @click="switchAccounts" :disabled="processing"
                             :title="$t('Switch accounts')"
                         >
                             <svg viewBox="0 0 24 24" fill="none">
@@ -52,7 +53,7 @@
                     <div class="transfer-account-col">
                         <label class="form-label">{{ $t('To Account') }}</label>
                         <themed-select
-                            v-model="form.to_account"
+                            v-model="form.to_account" :disabled="processing"
                             @change="onToAccountChange"
                             class="transfer-select"
                         >
@@ -76,7 +77,7 @@
             <div class="pb-6 w-full transfer-coin-select-wrap">
                 <div class="transfer-coin-select-inner">
                     <t-rich-user-select
-                        v-model="form.currency_id"
+                        v-model="form.currency_id" :disabled="processing"
                         :options="currencyOptions"
                         v-on:change="onCurrencyChange"
                         :placeholder="$t('Select')"
@@ -118,7 +119,7 @@
                         @keypress.native="(e) => handleInput(e)"
                         @paste.prevent
                         @drop.prevent
-                        v-model="form.amount"
+                        v-model="form.amount" :disabled="processing || !balanceReady"
                         :label="$t('Amount')"
                     />
                 </div>
@@ -129,7 +130,7 @@
                     <span class="text-gray-500 mr-1">{{ $t('Available Balance') }}:</span>
 
                     <span
-                        v-if="!processing_balance"
+                        v-if="balanceReady"
                         @click="injectBalance"
                         class="swap-wallet-balance"
                     >
@@ -137,12 +138,13 @@
                     </span>
 
                     <span
-                        v-if="!processing_balance && form.currency_id && currencies[form.currency_id]"
+                        v-if="balanceReady && form.currency_id && currencies[form.currency_id]"
                         class="ml-1"
                     >
                         {{ currencies[form.currency_id].name }}
                     </span>
 
+                    <span v-if="!balanceReady" role="status">{{balanceStateText}} <button v-if="form.currency_id" type="button" :disabled="processing_balance || walletBalanceStatus==='loading'" @click="retryBalance">{{$t('Retry')}}</button></span>
                     <svg
                         v-show="processing_balance"
                         class="animate-spin ml-2 mr-2 h-4 w-4 inline"
@@ -168,6 +170,7 @@
                     <div class="form-components__block-item block-button">
                         <button
                             @click="submitTransfer"
+                            :disabled="processing || !balanceReady || !form.amount"
                             :class="{ 'disabled': !$page.props.user && !($page.props.auth && $page.props.auth.user) }"
                             class="form-components__block-button"
                         >
@@ -206,12 +209,12 @@
         >
             <div class="px-6 py-5 border-b border-white border-opacity-10">
                 <h3 class="text-lg font-semibold text-white">
-                    {{ $t('Transfer fee confirmation') }}
+                    {{ $t('Transfer confirmation') }}
                 </h3>
             </div>
 
             <div class="px-6 py-5 text-sm leading-7 text-gray-300">
-                <p class="mb-3">
+                <p v-if="commissionPercent>0" class="mb-3">
                     {{ $t('A transfer fee will be applied to this transfer.') }}
                 </p>
 

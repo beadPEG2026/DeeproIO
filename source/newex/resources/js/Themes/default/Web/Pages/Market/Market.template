@@ -1,4 +1,4 @@
-<app-layout class="dp-trading-layout" :class="{'dp-ticket-active':!futures && mobileFirstTab==='trade' && ticketInView}">
+<app-layout class="dp-trading-layout">
     <Head><title>{{ market.data.name }} {{ $t('Market') }} {{ $t("· Deepro") }}</title></Head>
     <trade-category-nav :market="market.data" :futures="futures" />
     <div class="dp-workbench" :class="{'dp-spot-workbench':!futures}" :data-panel="mobileFirstTab">
@@ -87,8 +87,7 @@
         <market-channel /><orderbook-channel :market="market.data" /><binance-socket :market="market.data" />
     </div>
     <div class="dp-trade-dock">
-        <button v-if="sessionBlocked" type="button" disabled style="width:100%;background:var(--ui-highlight);color:var(--ui-muted);cursor:not-allowed">{{ $t(sessionLabel) }}</button>
-        <template v-else><button type="button" class="dp-trade-dock__buy" @click="openTicket('buy')">{{ $t('Buy') }} {{ market.data.base_currency }}</button><button type="button" class="dp-trade-dock__sell" @click="openTicket('sell')">{{ $t('Sell') }} {{ market.data.base_currency }}</button></template>
+        <template><button type="button" class="dp-trade-dock__buy" @click="openTicket('buy')">{{ $t('Buy') }} {{ market.data.base_currency }}</button><button type="button" class="dp-trade-dock__sell" @click="openTicket('sell')">{{ $t('Sell') }} {{ market.data.base_currency }}</button></template>
     </div>
     <div v-if="showRiskModal" class="risk-modal" @click.self="showRiskModal = false" @keydown.esc="showRiskModal=false">
         <section ref="riskDialog" class="risk-dialog" role="dialog" aria-modal="true" :aria-label="$t('Risk Notice')">

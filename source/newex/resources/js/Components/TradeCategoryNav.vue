@@ -4,12 +4,15 @@
   <button v-for="item in items" :key="item.key" type="button" :class="{'is-active':item.key===(futures?'futures':'spot')}" :aria-current="item.key===(futures?'futures':'spot')?'page':null" @click="choose(item.key)">{{ item.label }}</button>
   <button class="dp-trade-categories__more" type="button" :aria-label="$t('More trading pages')" :aria-expanded="menuOpen" @click="menuOpen=!menuOpen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
  </nav>
- <div v-if="menuOpen" class="dp-trade-categories__menu"><a :href="route('markets')">{{ $t('Crypto') }}</a><a :href="route('stocks')">{{ $t('Stocks') }}</a></div>
+ <div v-if="menuOpen" class="dp-trade-categories__menu"><button type="button" @click="openHub('profile')">{{ $t('Profile') }}</button><theme-mode/><language-switcher/><a :href="route('markets')">{{ $t('Crypto') }}</a><a :href="route('stocks')">{{ $t('Stocks') }}</a></div>
  <div v-if="message" class="dp-trade-categories__toast" role="status" aria-live="polite">{{ message }}</div>
 </div>
 </template>
 <script>
+import ThemeMode from '@/Components/ThemeMode';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 export default {
+ components:{ThemeMode,LanguageSwitcher},
  props:{market:{type:Object,required:true},futures:Boolean},
  data:()=>({menuOpen:false,message:'',messageTimer:null}),
  computed:{items(){return [
@@ -20,6 +23,7 @@ export default {
   {key:'bots',label:this.$t('Trading bots')}]}},
  beforeDestroy(){clearTimeout(this.messageTimer)},
  methods:{
+  openHub(panel){this.menuOpen=false;window.dispatchEvent(new CustomEvent('deepro:hub',{detail:panel}))},
   choose(key){this.menuOpen=false;if(key==='spot')return this.$inertia.visit(this.route('market',this.market.name));if(key==='futures'&&[true,1,'1'].includes(this.market.has_futures))return this.$inertia.visit(this.route('futures-market',this.market.name));this.unavailable()},
   unavailable(){this.menuOpen=false;this.message=this.$t('This feature is not available yet');clearTimeout(this.messageTimer);this.messageTimer=setTimeout(()=>{this.message=''},2600)}
  }

@@ -9,6 +9,9 @@ import Vue from "vue";
 
 const state = {
     items: [],
+    balanceStatus: 'idle',
+    balanceUpdatedAt: 0,
+    balanceRequest: 0,
     deposits: [],
     withdrawals: [],
     fiatDeposits: [],
@@ -16,6 +19,8 @@ const state = {
 };
 
 const getters = {
+    getWalletBalanceStatus: state => state.balanceStatus,
+    getWalletBalanceUpdatedAt: state => state.balanceUpdatedAt,
     getWallets: (state) => {
         return state.items;
     },
@@ -39,12 +44,24 @@ const getters = {
 };
 
 const mutations = {
+    walletBalanceRequest(state, {id, status, updatedAt}) {
+        if (id < state.balanceRequest) return;
+        state.balanceRequest = id;
+        state.balanceStatus = status;
+        if (updatedAt) state.balanceUpdatedAt = updatedAt;
+    },
     [WALLET_LIST](state, {wallets}) {
         state.items = wallets;
     },
     [WALLET_UPDATE](state, {wallet}) {
         const index = state.items.findIndex(item => item.symbol === wallet.symbol)
-        Vue.set(state.items, index, wallet);
+        if (index < 0) state.items.push(wallet);
+        else Vue.set(state.items, index, wallet);
+        // A push arriving during a snapshot makes that older snapshot unsafe.
+        if (state.balanceStatus === 'loading') {
+            state.balanceRequest++;
+            state.balanceStatus = 'stale';
+        }
     },
     [DEPOSIT_LIST](state, {deposits}) {
         state.deposits = deposits;
@@ -77,11 +94,18 @@ const mutations = {
 const actions = {
 
     fetchWallets({ state, commit }, route) {
-        axios.get(route).then(response => {
-            commit(WALLET_LIST, {
-                wallets: response.data.data
-            });
-        })
+        const id = state.balanceRequest + 1;
+        commit('walletBalanceRequest', {id, status: 'loading'});
+        return axios.get(route, {params: {fresh: 1}, timeout: 15000}).then(response => {
+            if (id !== state.balanceRequest) return false;
+            if (!Array.isArray(response.data.data)) throw new Error('Invalid wallet response');
+            commit(WALLET_LIST, {wallets: response.data.data});
+            commit('walletBalanceRequest', {id, status: 'ready', updatedAt: Date.now()});
+            return true;
+        }).catch(() => {
+            if (id === state.balanceRequest) commit('walletBalanceRequest', {id, status: 'error'});
+            return false;
+        });
     },
     fetchDeposits({ state, commit }, route) {
         axios.get(route).then(response => {

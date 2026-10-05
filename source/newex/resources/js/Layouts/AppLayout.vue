@@ -1,5 +1,7 @@
 <script>
+    import {watchKeyboard} from '@/Functions/KeyboardViewport.mjs';
     import Template from '{Template}/Web/Layout/App.template'
+    import TradeFundingReturn from '@/Components/TradeFundingReturn.vue';
     import UmiReturnLink from '@/Components/UmiReturnLink.vue';
     import Socket from "@/Jetstream/Socket";
     import ThemeMode from "@/Components/ThemeMode";
@@ -18,7 +20,7 @@
     export default Template({
         props: { walletFlow: {type:Boolean, default:false}, umiSection: {type:Boolean, default:false} },
         components: {
-            HomeHeader, SiteHub, WelcomeSplash, BrandCaption, UmiReturnLink,
+            HomeHeader, SiteHub, WelcomeSplash, BrandCaption, UmiReturnLink, TradeFundingReturn,
             Socket,
             ThemeMode,
             LanguageSwitcher,
@@ -58,6 +60,7 @@
             }
         },
         beforeDestroy: function(){
+            this.stopKeyboard?.();
 
             window.removeEventListener('resize', this.mq)
             window.removeEventListener('deepro:hub', this.openHub)
@@ -76,6 +79,7 @@
         },
         data() {
             return {
+                stopKeyboard: null,
                 hub: '',
                 navOpen: '',
                 showWelcome: false,
@@ -92,6 +96,7 @@
             }
         },
         mounted() {
+          this.stopKeyboard=watchKeyboard(this.$el);
           window.addEventListener('deepro:hub', this.openHub);
           const panel = new URLSearchParams(window.location.search).get('panel');
           if (['about','discover','profile'].includes(panel)) this.hub = panel;
